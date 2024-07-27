@@ -1,0 +1,4 @@
+repository "Microscope@zukunft01@cloud.cn"
+  path "/"
+    br "/main"
+    co "/main"
