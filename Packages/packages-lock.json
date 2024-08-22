@@ -226,7 +226,7 @@
       "url": "https://packages.unity.cn"
     },
     "com.unity.xr.interaction.toolkit": {
-      "version": "2.5.2",
+      "version": "2.5.4",
       "depth": 0,
       "source": "registry",
       "dependencies": {
