@@ -2,25 +2,30 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Rendering;
-public class ASCameraRenderer
+public partial class ASCameraRenderer
 {
     ScriptableRenderContext context;
     Camera camera;
     const string bufferName = "Render Camera";
     CullingResults cullingResults;
+   
     CommandBuffer cmd = new CommandBuffer
     {
         name = bufferName
     };//using cmd to do more commands
     static ShaderTagId unlitShaderTag = new ShaderTagId("SRPDefaultUnlit");
+    
     public void Render(ScriptableRenderContext context,Camera camera)//The core Render Function
     {
         this.camera = camera;
         this.context = context;
+        PrepareForSceneWindow();//To Render UI in Scene View
         if (!Cull())
             return;
         Setup();
         DrawGeometry();
+        DrawUnsupportedShaders();
+        DrawGizmos();
         Submit();
     }
     void Setup()
@@ -67,4 +72,5 @@ public class ASCameraRenderer
         }
         return false;
     }
+    
 }
