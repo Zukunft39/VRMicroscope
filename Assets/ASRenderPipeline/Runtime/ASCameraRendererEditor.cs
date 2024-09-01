@@ -8,7 +8,9 @@ public partial class ASCameraRenderer
     partial void DrawGizmos();
     partial void DrawUnsupportedShaders();
     partial void PrepareForSceneWindow();
+    partial void PrepareBuffer();
 #if UNITY_EDITOR
+    string SampleName { get; set; }
     static ShaderTagId[] legacyShaderTagIds = {
         new ShaderTagId("Always"),
         new ShaderTagId("ForwardBase"),
@@ -52,5 +54,11 @@ public partial class ASCameraRenderer
             ScriptableRenderContext.EmitWorldGeometryForSceneView(camera);
         }
     }
+    partial void PrepareBuffer()
+    {
+        cmd.name = SampleName =  camera.name;
+    }
+#else
+    const string SampleName = bufferName;
 #endif
 }

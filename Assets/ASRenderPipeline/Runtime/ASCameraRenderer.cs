@@ -19,6 +19,7 @@ public partial class ASCameraRenderer
     {
         this.camera = camera;
         this.context = context;
+        PrepareBuffer();//In edit mode Prepare for Different Cameras different buffer names
         PrepareForSceneWindow();//To Render UI in Scene View
         if (!Cull())
             return;
@@ -30,9 +31,11 @@ public partial class ASCameraRenderer
     }
     void Setup()
     {
+        CameraClearFlags flags = camera.clearFlags;
         context.SetupCameraProperties(camera);
-        cmd.ClearRenderTarget(true, true, Color.clear);
-        cmd.BeginSample(bufferName);
+        cmd.ClearRenderTarget(flags<=CameraClearFlags.Depth, flags <= CameraClearFlags.Color, flags == CameraClearFlags.Color ?
+                camera.backgroundColor.linear : Color.clear);
+        cmd.BeginSample(SampleName);
         ExecuteCommandBuffer();
         
     }
@@ -54,7 +57,7 @@ public partial class ASCameraRenderer
     }
     void Submit()
     {
-        cmd.EndSample(bufferName);
+        cmd.EndSample(SampleName);
         ExecuteCommandBuffer();
         context.Submit();
     }
