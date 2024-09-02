@@ -15,7 +15,7 @@ public partial class ASCameraRenderer
     };//using cmd to do more commands
     static ShaderTagId unlitShaderTag = new ShaderTagId("SRPDefaultUnlit");
     
-    public void Render(ScriptableRenderContext context,Camera camera)//The core Render Function
+    public void Render(ScriptableRenderContext context,Camera camera,bool useDynamicBatching,bool useGPUInstancing)//The core Render Function
     {
         this.camera = camera;
         this.context = context;
@@ -24,7 +24,7 @@ public partial class ASCameraRenderer
         if (!Cull())
             return;
         Setup();
-        DrawGeometry();
+        DrawGeometry(useDynamicBatching,useGPUInstancing);
         DrawUnsupportedShaders();
         DrawGizmos();
         Submit();
@@ -39,14 +39,17 @@ public partial class ASCameraRenderer
         ExecuteCommandBuffer();
         
     }
-    void DrawGeometry()
+    void DrawGeometry(bool useDynamicBatching,bool useGPUInstancing)
     {
         context.DrawSkybox(camera);
 
         var sortingSettings = new SortingSettings(camera) { 
             criteria = SortingCriteria.CommonOpaque
         };
-        var drawingSettings = new DrawingSettings(unlitShaderTag,sortingSettings);
+        var drawingSettings = new DrawingSettings(unlitShaderTag, sortingSettings) { 
+            enableDynamicBatching = useDynamicBatching,
+            enableInstancing = useGPUInstancing
+        };
         var filteringSettings = new FilteringSettings(RenderQueueRange.opaque);
         context.DrawRenderers(cullingResults, ref drawingSettings, ref filteringSettings);//Seperate the Transparent and Opaque Render
         

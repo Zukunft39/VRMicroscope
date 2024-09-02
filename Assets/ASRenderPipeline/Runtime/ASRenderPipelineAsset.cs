@@ -5,8 +5,14 @@ using UnityEngine.Rendering;
 [CreateAssetMenu(menuName ="Rendering/ASRenderPipeline")]
 public class ASRenderPipelineAsset : RenderPipelineAsset
 {
+    [SerializeField]
+    bool useDynamicBatching = false;
+    [SerializeField]
+    bool useGPUInstancing = false;
+    [SerializeField]
+    bool useSRPBatching = false;
     protected override RenderPipeline CreatePipeline()
     {
-        return new ASRenderPipeline();
+        return new ASRenderPipeline(useDynamicBatching,useGPUInstancing,useSRPBatching);
     }
 }
