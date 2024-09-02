@@ -5,6 +5,12 @@ using UnityEngine.Rendering;
 public class ASRenderPipeline : RenderPipeline
 {
     ASCameraRenderer renderer = new ASCameraRenderer();
+
+    public ASRenderPipeline()
+    {
+        GraphicsSettings.useScriptableRenderPipelineBatching = true;
+    }
+
     protected override void Render(ScriptableRenderContext context, Camera[] cameras)
     {
         for (int i = 0; i < cameras.Length; i++)
