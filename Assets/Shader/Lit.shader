@@ -1,4 +1,4 @@
-Shader "ASRP/Unlit" {
+Shader "ASRP/Lit" {
 
 	Properties{
 		_BaseMap("Texture", 2D) = "white" {}
@@ -13,15 +13,18 @@ Shader "ASRP/Unlit" {
 	SubShader{
 
 			Pass {
+				Tags {
+					"LightMode" = "ASRPLit"
+				}
 			Blend [_SrcBlend] [_DstBlend]
 		    ZWrite [_ZWrite]
 			HLSLPROGRAM
 			#pragma target 3.5
 			#pragma shader_feature _CLIPPING
 			#pragma multi_compile_instancing
-			#pragma vertex UnlitPassVertex
-			#pragma fragment UnlitPassFragment
-			#include "UnlitPass.hlsl"
+			#pragma vertex LitPassVertex
+			#pragma fragment LitPassFragment
+			#include "LitPass.hlsl"
 			ENDHLSL
 			}
 	}

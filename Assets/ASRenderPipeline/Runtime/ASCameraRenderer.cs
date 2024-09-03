@@ -8,13 +8,14 @@ public partial class ASCameraRenderer
     Camera camera;
     const string bufferName = "Render Camera";
     CullingResults cullingResults;
-   
+    ASLighting lighting = new ASLighting();
     CommandBuffer cmd = new CommandBuffer
     {
         name = bufferName
     };//using cmd to do more commands
     static ShaderTagId unlitShaderTag = new ShaderTagId("SRPDefaultUnlit");
-    
+    static ShaderTagId litShaderTag = new ShaderTagId("ASRPLit");
+
     public void Render(ScriptableRenderContext context,Camera camera,bool useDynamicBatching,bool useGPUInstancing)//The core Render Function
     {
         this.camera = camera;
@@ -24,6 +25,7 @@ public partial class ASCameraRenderer
         if (!Cull())
             return;
         Setup();
+        lighting.Setup(context,cullingResults);
         DrawGeometry(useDynamicBatching,useGPUInstancing);
         DrawUnsupportedShaders();
         DrawGizmos();
@@ -50,6 +52,7 @@ public partial class ASCameraRenderer
             enableDynamicBatching = useDynamicBatching,
             enableInstancing = useGPUInstancing
         };
+        drawingSettings.SetShaderPassName(1, litShaderTag);
         var filteringSettings = new FilteringSettings(RenderQueueRange.opaque);
         context.DrawRenderers(cullingResults, ref drawingSettings, ref filteringSettings);//Seperate the Transparent and Opaque Render
         
