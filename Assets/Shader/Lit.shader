@@ -1,4 +1,5 @@
 Shader "ASRP/Lit" {
+	
 
 	Properties{
 		_BaseMap("Texture", 2D) = "white" {}
@@ -32,4 +33,5 @@ Shader "ASRP/Lit" {
 			ENDHLSL
 			}
 	}
+			CustomEditor "ASShaderGUI"
 }

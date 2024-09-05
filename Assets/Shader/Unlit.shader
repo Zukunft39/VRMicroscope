@@ -25,4 +25,5 @@ Shader "ASRP/Unlit" {
 			ENDHLSL
 			}
 	}
+			CustomEditor "ASShaderGUI"
 }
