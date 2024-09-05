@@ -11,6 +11,7 @@ public class ASRenderPipeline : RenderPipeline
         this.useDynamicBatching = useDynamicBatching;
         this.useGPUInstancing = useGPUInstancing;
         GraphicsSettings.useScriptableRenderPipelineBatching = useSRPBatching;
+        GraphicsSettings.lightsUseLinearIntensity = true;
     }
 
     protected override void Render(ScriptableRenderContext context, Camera[] cameras)
