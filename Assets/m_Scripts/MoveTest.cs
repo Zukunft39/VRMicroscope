@@ -188,7 +188,6 @@ namespace UnityEngine.XR.Interaction.Toolkit.Samples.StarterAssets
             
             return base.ComputeDesiredMove(input);
         }
-        public Vector2 targetPos;
         // protected override Vector2 ReadInput(){
         //     var leftHandValue = leftHandMoveAction.action?.ReadValue<Vector2>() ?? Vector2.zero;
         //     var rightHandValue = rightHandMoveAction.action?.ReadValue<Vector2>() ?? Vector2.zero;
