@@ -193,6 +193,16 @@ namespace UnityEngine.XR.Interaction.Toolkit.Samples.StarterAssets
         //     var rightHandValue = rightHandMoveAction.action?.ReadValue<Vector2>() ?? Vector2.zero;
         //     return targetPos!=Vector2.zero?targetPos:leftHandValue + rightHandValue;
         // }
+        public ProgressControl progressControl;
+        protected override Vector2 ReadInput()
+        {
+            if(!progressControl.isAutoMoving){
+                return base.ReadInput();
+            }
+            else{
+                return Vector2.zero;
+            }
+        }
         public Vector2 read(){
             return ReadInput();
         }
