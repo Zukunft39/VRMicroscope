@@ -1,10 +1,10 @@
 #ifndef ASRP_LIT_PASS_INCLUDED
 #define ASRP_LIT_PASS_INCLUDED
-#include "../ASRenderPipeline/ShaderLibrary/Common.hlsl"
-#include "../ASRenderPipeline/ShaderLibrary/Surface.hlsl"
-#include "../ASRenderPipeline/ShaderLibrary/Light.hlsl"
-#include "../ASRenderPipeline/ShaderLibrary/BRDF.hlsl"
-#include "../ASRenderPipeline/ShaderLibrary/Lighting.hlsl"
+#include "Common.hlsl"
+#include "Surface.hlsl"
+#include "Light.hlsl"
+#include "BRDF.hlsl"
+#include "Lighting.hlsl"
 
 TEXTURE2D(_BaseMap);
 SAMPLER(sampler_BaseMap);

@@ -1,6 +1,6 @@
 #ifndef CUSTOM_UNLIT_PASS_INCLUDED
 #define CUSTOM_UNLIT_PASS_INCLUDED
-#include "../ASRenderPipeline/ShaderLibrary/Common.hlsl"
+#include "Common.hlsl"
 TEXTURE2D(_BaseMap);
 SAMPLER(sampler_BaseMap);
 UNITY_INSTANCING_BUFFER_START(UnityPerMaterial)

@@ -8,6 +8,7 @@ public class ASLighting
 	const string bufferName = "Lighting";
 	const int maxDirLightCount = 4;
 	CullingResults cullingResults;
+	ASShadow shadows = new ASShadow();
 	CommandBuffer buffer = new CommandBuffer
 	{
 		name = bufferName
@@ -19,11 +20,13 @@ public class ASLighting
 	static Vector4[]
 		dirLightColors = new Vector4[maxDirLightCount],
 		dirLightDirections = new Vector4[maxDirLightCount];
-	public void Setup(ScriptableRenderContext context,CullingResults cullingResults)
+	public void Setup(ScriptableRenderContext context,CullingResults cullingResults,ASShadowSettings shadowSettings)
 	{
 		this.cullingResults = cullingResults;
 		buffer.BeginSample(bufferName);
+		shadows.Setup(context, cullingResults, shadowSettings);
 		SetupLights();
+		shadows.Render();
 		buffer.EndSample(bufferName);
 		context.ExecuteCommandBuffer(buffer);
 		buffer.Clear();
@@ -32,7 +35,7 @@ public class ASLighting
 	void SetupDirectionalLight(int index, ref VisibleLight visibleLight) {
 		dirLightColors[index] = visibleLight.finalColor;
 		dirLightDirections[index] = -visibleLight.localToWorldMatrix.GetColumn(2);
-
+		shadows.ReserveDirectionalShadows(visibleLight.light, index);
 	}
 	void SetupLights()
 	{

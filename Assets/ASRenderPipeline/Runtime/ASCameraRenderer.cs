@@ -16,16 +16,16 @@ public partial class ASCameraRenderer
     static ShaderTagId unlitShaderTag = new ShaderTagId("SRPDefaultUnlit");
     static ShaderTagId litShaderTag = new ShaderTagId("ASRPLit");
 
-    public void Render(ScriptableRenderContext context,Camera camera,bool useDynamicBatching,bool useGPUInstancing)//The core Render Function
+    public void Render(ScriptableRenderContext context,Camera camera,bool useDynamicBatching,bool useGPUInstancing,ASShadowSettings shadowSettings)//The core Render Function
     {
         this.camera = camera;
         this.context = context;
         PrepareBuffer();//In edit mode Prepare for Different Cameras different buffer names
         PrepareForSceneWindow();//To Render UI in Scene View
-        if (!Cull())
+        if (!Cull(shadowSettings.maxDistance))
             return;
         Setup();
-        lighting.Setup(context,cullingResults);
+        lighting.Setup(context,cullingResults,shadowSettings);
         DrawGeometry(useDynamicBatching,useGPUInstancing);
         DrawUnsupportedShaders();
         DrawGizmos();
@@ -72,10 +72,11 @@ public partial class ASCameraRenderer
         context.ExecuteCommandBuffer(cmd);
         cmd.Clear();
     }
-    bool Cull()
+    bool Cull(float maxShadowDistance)
     {
         if (camera.TryGetCullingParameters(out ScriptableCullingParameters cullingParameters))
         {
+            cullingParameters.shadowDistance = Mathf.Min(maxShadowDistance, camera.farClipPlane);
             cullingResults = context.Cull(ref cullingParameters);//To Avoid More Memory Allocation using ref
             return true;
         }
