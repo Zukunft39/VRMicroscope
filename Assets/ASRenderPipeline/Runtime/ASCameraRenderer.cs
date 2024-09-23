@@ -24,11 +24,16 @@ public partial class ASCameraRenderer
         PrepareForSceneWindow();//To Render UI in Scene View
         if (!Cull(shadowSettings.maxDistance))
             return;
-        Setup();
+       
         lighting.Setup(context,cullingResults,shadowSettings);
+        cmd.BeginSample(SampleName);
+        ExecuteCommandBuffer();
+        Setup();
+        cmd.EndSample(SampleName);
         DrawGeometry(useDynamicBatching,useGPUInstancing);
-        DrawUnsupportedShaders();
-        DrawGizmos();
+        DrawUnsupportedShaders();//only in edit mode
+        DrawGizmos();//only in edit mode
+        lighting.Cleanup();
         Submit();
     }
     void Setup()

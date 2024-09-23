@@ -31,7 +31,10 @@ public class ASLighting
 		context.ExecuteCommandBuffer(buffer);
 		buffer.Clear();
 	}
-
+	public void Cleanup()
+	{
+		shadows.Cleanup();
+	}
 	void SetupDirectionalLight(int index, ref VisibleLight visibleLight) {
 		dirLightColors[index] = visibleLight.finalColor;
 		dirLightDirections[index] = -visibleLight.localToWorldMatrix.GetColumn(2);
