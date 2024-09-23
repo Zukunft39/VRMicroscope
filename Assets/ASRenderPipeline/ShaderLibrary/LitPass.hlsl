@@ -2,9 +2,11 @@
 #define ASRP_LIT_PASS_INCLUDED
 #include "Common.hlsl"
 #include "Surface.hlsl"
+#include "Shadows.hlsl"
 #include "Light.hlsl"
 #include "BRDF.hlsl"
 #include "Lighting.hlsl"
+
 
 TEXTURE2D(_BaseMap);
 SAMPLER(sampler_BaseMap);
@@ -51,6 +53,7 @@ float4 LitPassFragment(Varyings input) : SV_TARGET{
 #endif
 	
 	Surface surface;
+	surface.position = input.positionWS;
 	surface.normal = normalize(input.normalWS);
 	surface.color = base.rgb;
 	surface.alpha = base.a;
