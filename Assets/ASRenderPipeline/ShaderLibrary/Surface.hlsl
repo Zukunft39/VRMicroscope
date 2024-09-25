@@ -10,6 +10,7 @@ struct Surface {
 	float smoothness;
 	float3 viewDirection;
 	float depth;
+	float dither;
 };
 
 #endif

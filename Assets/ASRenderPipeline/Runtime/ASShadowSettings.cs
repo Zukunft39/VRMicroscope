@@ -6,6 +6,14 @@ public enum MapSize
     _256 = 256, _512 = 512, _1024 = 1024,
     _2048 = 2048, _4096 = 4096, _8192 = 8192
 }
+public enum PCFFilterMode
+{
+    PCF2x2, PCF3x3, PCF5x5, PCF7x7
+}
+public enum CascadeBlendMode
+{
+    Hard, Soft, Dither
+}
 [System.Serializable]
 public class ASShadowSettings
 {
@@ -26,7 +34,8 @@ public class ASShadowSettings
         public float cascadeRatio1, cascadeRatio2, cascadeRatio3;
         public Vector3 CascadeRatios =>
             new Vector3(cascadeRatio1,cascadeRatio2,cascadeRatio3);
-
+        public PCFFilterMode filter;
+        public CascadeBlendMode cascadeBlend;
     }
 
     public Directional directional = new Directional
@@ -36,7 +45,8 @@ public class ASShadowSettings
         cascadeFade = 0.1f,
         cascadeRatio1 = 0.1f,
         cascadeRatio2 = 0.25f,
-        cascadeRatio3 = 0.5f
+        cascadeRatio3 = 0.5f,
+        filter = PCFFilterMode.PCF2x2,
     };
     
 
