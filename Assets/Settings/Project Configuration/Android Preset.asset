@@ -20,7 +20,7 @@ MonoBehaviour:
   renderingLayerMask: 0
   overrideMat: {fileID: 2100000, guid: 6658eb1912124f94b9e8ea1c0daaa68c, type: 2}
   overrideMaterialPassIndex: 00000000
-  renderPassEvent: 150
+  renderPassEvent: 250
   depth: 1
   depthWrite: 0
   compare: 2
@@ -74,7 +74,7 @@ MonoBehaviour:
   m_ShadowTransparentReceive: 1
   m_RenderingMode: 0
   m_DepthPrimingMode: 0
-  m_CopyDepthMode: 0
+  m_CopyDepthMode: 2
   m_AccurateGbufferNormals: 0
   m_ClusteredRendering: 0
   m_TileSize: 32
@@ -94,7 +94,7 @@ MonoBehaviour:
   m_Active: 0
   settings:
     passTag: RenderObjects
-    Event: 250
+    Event: 350
     filterSettings:
       RenderQueueType: 0
       LayerMask:
