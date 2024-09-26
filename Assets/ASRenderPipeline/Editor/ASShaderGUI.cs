@@ -10,6 +10,22 @@ public class ASShaderGUI : ShaderGUI
 	Object[] materials;
 	MaterialProperty[] properties;
 	bool showPresets;
+	enum ShadowMode
+	{
+		On, Clip, Dither, Off
+	}
+
+	ShadowMode Shadows
+	{
+		set
+		{
+			if (SetProperty("_Shadows", (float)value))
+			{
+				SetKeyword("_SHADOWS_CLIP", value == ShadowMode.Clip);
+				SetKeyword("_SHADOWS_DITHER", value == ShadowMode.Dither);
+			}
+		}
+	}
 	bool Clipping
 	{
 		set => SetProperty("_Clipping", "_CLIPPING", value);
@@ -62,9 +78,13 @@ public class ASShaderGUI : ShaderGUI
 			TransparentPreset();
 		}
 	}
-	void SetProperty(string name, float value)
+	bool SetProperty(string name, float value)
 	{
-		FindProperty(name, properties).floatValue = value;
+		if (FindProperty(name, properties) != null)
+			FindProperty(name, properties).floatValue = value;
+		else
+			return false;
+		return true;
 	}
 	void SetProperty(string name, string keyword, bool value)
 	{
