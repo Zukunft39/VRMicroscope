@@ -56,8 +56,11 @@ public partial class ASCameraRenderer
         var drawingSettings = new DrawingSettings(unlitShaderTag, sortingSettings) { 
             enableDynamicBatching = useDynamicBatching,
             enableInstancing = useGPUInstancing,
-            perObjectData = PerObjectData.Lightmaps
-        };
+            perObjectData = PerObjectData.Lightmaps | PerObjectData.LightProbe |
+                PerObjectData.LightProbeProxyVolume
+        };//we got 3 kinds of GI method:For Static Objects,we use Lightmaps,For Dynamic Objects,we use the rest of 2 methods
+        //For small Objects,we use the LightProbe.Just Simply Place the LightProbe Group in the scene
+        //But for big Dynamic Objects, we used the LightProbeProxyVolume(we need to add a same name component to the object)
         drawingSettings.SetShaderPassName(1, litShaderTag);
         var filteringSettings = new FilteringSettings(RenderQueueRange.opaque);
         context.DrawRenderers(cullingResults, ref drawingSettings, ref filteringSettings);//Seperate the Transparent and Opaque Render

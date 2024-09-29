@@ -11,7 +11,10 @@ Shader "ASRP/Unlit" {
 	}
 
 	SubShader{
-
+		HLSLINCLUDE
+		#include "Common.hlsl"
+		#include "UnlitInput.hlsl"
+		ENDHLSL
 			Pass {
 			Blend [_SrcBlend] [_DstBlend]
 		    ZWrite [_ZWrite]

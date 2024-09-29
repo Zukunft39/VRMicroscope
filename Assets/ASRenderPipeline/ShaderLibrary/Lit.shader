@@ -17,7 +17,10 @@ Shader "ASRP/Lit" {
 	}
 
 	SubShader{
-
+		HLSLINCLUDE
+		#include "Common.hlsl"
+		#include "LitInput.hlsl"
+		ENDHLSL
 			Pass {
 				Tags {
 					"LightMode" = "ASRPLit"
@@ -25,17 +28,17 @@ Shader "ASRP/Lit" {
 			Blend [_SrcBlend] [_DstBlend]
 		    ZWrite [_ZWrite]
 			HLSLPROGRAM
-			#pragma target 3.5
-			#pragma shader_feature _ _SHADOWS_CLIP _SHADOWS_DITHER
-			#pragma shader_feature _RECEIVE_SHADOWS
-			#pragma shader_feature _PREMULTIPLY_ALPHA
-			#pragma multi_compile _ _DIRECTIONAL_PCF3 _DIRECTIONAL_PCF5 _DIRECTIONAL_PCF7
-			#pragma multi_compile _ _CASCADE_BLEND_SOFT _CASCADE_BLEND_DITHER
-			#pragma multi_compile _ LIGHTMAP_ON
-			#pragma multi_compile_instancing
-			#pragma vertex LitPassVertex
-			#pragma fragment LitPassFragment
-			#include "LitPass.hlsl"
+				#pragma target 3.5
+				#pragma shader_feature _ _SHADOWS_CLIP _SHADOWS_DITHER
+				#pragma shader_feature _RECEIVE_SHADOWS
+				#pragma shader_feature _PREMULTIPLY_ALPHA
+				#pragma multi_compile _ _DIRECTIONAL_PCF3 _DIRECTIONAL_PCF5 _DIRECTIONAL_PCF7
+				#pragma multi_compile _ _CASCADE_BLEND_SOFT _CASCADE_BLEND_DITHER
+				#pragma multi_compile _ LIGHTMAP_ON
+				#pragma multi_compile_instancing
+				#pragma vertex LitPassVertex
+				#pragma fragment LitPassFragment
+				#include "LitPass.hlsl"
 			ENDHLSL
 			}
 			Pass {
@@ -43,16 +46,30 @@ Shader "ASRP/Lit" {
 					"LightMode" = "ShadowCaster"
 				}
 
-			ColorMask 0
+				ColorMask 0
 
-			HLSLPROGRAM
-			#pragma target 3.5
-			#pragma shader_feature _CLIPPING
-			#pragma multi_compile_instancing
-			#pragma vertex ShadowCasterPassVertex
-			#pragma fragment ShadowCasterPassFragment
-			#include "ShadowCasterPass.hlsl"
-			ENDHLSL
+				HLSLPROGRAM
+				#pragma target 3.5
+				#pragma shader_feature _CLIPPING
+				#pragma multi_compile_instancing
+				#pragma vertex ShadowCasterPassVertex
+				#pragma fragment ShadowCasterPassFragment
+				#include "ShadowCasterPass.hlsl"
+				ENDHLSL
+			}
+			Pass {
+				Tags {
+					"LightMode" = "Meta"
+				}
+
+				Cull Off
+
+				HLSLPROGRAM
+				#pragma target 3.5
+				#pragma vertex MetaPassVertex
+				#pragma fragment MetaPassFragment
+				#include "MetaPass.hlsl"
+				ENDHLSL
 			}
 	}
 			CustomEditor "ASShaderGUI"
