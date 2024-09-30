@@ -52,13 +52,29 @@ public class ASShadow
 		"_CASCADE_BLEND_SOFT",
 		"_CASCADE_BLEND_DITHER"
 	};
-
+	static string[] shadowMaskKeywords = {
+		"_SHADOW_MASK_DISTANCE"
+	};
+	bool useShadowMask;
 	public Vector3 ReserveDirectionalShadows(Light light, int visibleLightIndex) //figure out which directional light get shadow
 	{
 		if (ShadowedDirectionalLightCount < maxShadowedDirectionalLightCount &&
-			light.shadows != LightShadows.None && light.shadowStrength > 0f &&
-			cullingResults.GetShadowCasterBounds(visibleLightIndex, out Bounds b)) //1.Directional light within the max count index 2.light Shadow settings 3.cannot be culled
+			light.shadows != LightShadows.None && light.shadowStrength > 0f) //1.Directional light within the max count index 2.light Shadow settings 3.cannot be culled
 		{
+			LightBakingOutput lightBaking = light.bakingOutput;
+			if (
+				lightBaking.lightmapBakeType == LightmapBakeType.Mixed &&
+				lightBaking.mixedLightingMode == MixedLightingMode.Shadowmask
+			)
+			{
+				useShadowMask = true;
+			}
+			if (!cullingResults.GetShadowCasterBounds(
+				visibleLightIndex, out Bounds b
+			))
+			{
+				return new Vector3(-light.shadowStrength, 0f, 0f);
+			}
 			ShadowedDirectionalLights[ShadowedDirectionalLightCount] =
 				new ShadowedDirectionalLight
 				{
@@ -80,7 +96,7 @@ public class ASShadow
 		this.cullingResults = cullingResults;
 		this.settings = settings;
 		ShadowedDirectionalLightCount = 0;
-
+		useShadowMask = false;
 	}
 	public void Render()
 	{
@@ -95,6 +111,10 @@ public class ASShadow
 				32, FilterMode.Bilinear, RenderTextureFormat.Shadowmap
 			);//just attach a simple 1x1 texture to avoid shader varients when shadows are not needed
 		}
+		buffer.BeginSample(bufferName);
+		SetKeywords(shadowMaskKeywords, useShadowMask ? 0 : -1);
+		buffer.EndSample(bufferName);
+		ExecuteBuffer();
 	}
 
 	void RenderDirectionalShadows() 

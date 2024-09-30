@@ -57,7 +57,8 @@ public partial class ASCameraRenderer
             enableDynamicBatching = useDynamicBatching,
             enableInstancing = useGPUInstancing,
             perObjectData = PerObjectData.Lightmaps | PerObjectData.LightProbe |
-                PerObjectData.LightProbeProxyVolume
+                 PerObjectData.OcclusionProbe | PerObjectData.ShadowMask | PerObjectData.LightProbeProxyVolume |
+                PerObjectData.OcclusionProbeProxyVolume
         };//we got 3 kinds of GI method:For Static Objects,we use Lightmaps,For Dynamic Objects,we use the rest of 2 methods
         //For small Objects,we use the LightProbe.Just Simply Place the LightProbe Group in the scene
         //But for big Dynamic Objects, we used the LightProbeProxyVolume(we need to add a same name component to the object)
