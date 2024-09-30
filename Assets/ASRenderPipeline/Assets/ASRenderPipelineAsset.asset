@@ -16,7 +16,7 @@ MonoBehaviour:
   useGPUInstancing: 1
   useSRPBatching: 0
   shadows:
-    maxDistance: 104.5
+    maxDistance: 44.1
     distanceFade: 1
     directional:
       atlasSize: 8192
