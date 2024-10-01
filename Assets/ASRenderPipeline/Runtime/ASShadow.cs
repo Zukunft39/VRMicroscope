@@ -53,14 +53,16 @@ public class ASShadow
 		"_CASCADE_BLEND_DITHER"
 	};
 	static string[] shadowMaskKeywords = {
+		"_SHADOW_MASK_ALWAYS",
 		"_SHADOW_MASK_DISTANCE"
 	};
 	bool useShadowMask;
-	public Vector3 ReserveDirectionalShadows(Light light, int visibleLightIndex) //figure out which directional light get shadow
+	public Vector4 ReserveDirectionalShadows(Light light, int visibleLightIndex) //figure out which directional light get shadow
 	{
 		if (ShadowedDirectionalLightCount < maxShadowedDirectionalLightCount &&
 			light.shadows != LightShadows.None && light.shadowStrength > 0f) //1.Directional light within the max count index 2.light Shadow settings 3.cannot be culled
 		{
+			float maskChannel = -1;
 			LightBakingOutput lightBaking = light.bakingOutput;
 			if (
 				lightBaking.lightmapBakeType == LightmapBakeType.Mixed &&
@@ -68,12 +70,13 @@ public class ASShadow
 			)
 			{
 				useShadowMask = true;
+				maskChannel = lightBaking.occlusionMaskChannel;
 			}
 			if (!cullingResults.GetShadowCasterBounds(
 				visibleLightIndex, out Bounds b
 			))
 			{
-				return new Vector3(-light.shadowStrength, 0f, 0f);
+				return new Vector4(-light.shadowStrength, 0f, 0f, maskChannel);
 			}
 			ShadowedDirectionalLights[ShadowedDirectionalLightCount] =
 				new ShadowedDirectionalLight
@@ -81,11 +84,13 @@ public class ASShadow
 					visibleLightIndex = visibleLightIndex,
 					slopeScaleBias = light.shadowBias
 				};
-			return new Vector3(
-				light.shadowStrength, settings.directional.cascadeCount * ShadowedDirectionalLightCount++, light.shadowNormalBias
+			return new Vector4(
+				light.shadowStrength,
+				settings.directional.cascadeCount * ShadowedDirectionalLightCount++,
+				light.shadowNormalBias, maskChannel
 			);
 		}
-		return Vector3.zero;
+		return new Vector4(0f, 0f, 0f, -1f);
 	}
 	public void Setup(
 		ScriptableRenderContext context, CullingResults cullingResults,
@@ -112,7 +117,7 @@ public class ASShadow
 			);//just attach a simple 1x1 texture to avoid shader varients when shadows are not needed
 		}
 		buffer.BeginSample(bufferName);
-		SetKeywords(shadowMaskKeywords, useShadowMask ? 0 : -1);
+		SetKeywords(shadowMaskKeywords, useShadowMask ? QualitySettings.shadowmaskMode == ShadowmaskMode.Shadowmask ? 0 : 1 : -1);
 		buffer.EndSample(bufferName);
 		ExecuteBuffer();
 	}

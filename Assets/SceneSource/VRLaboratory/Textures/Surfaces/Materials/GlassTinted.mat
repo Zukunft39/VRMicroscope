@@ -10,6 +10,7 @@ Material:
   m_Name: GlassTinted
   m_Shader: {fileID: 4800000, guid: 9f066dcd6ca36f84d8f65ca139c60114, type: 3}
   m_ValidKeywords:
+  - _PREMULTIPLY_ALPHA
   - _RECEIVE_SHADOWS
   m_InvalidKeywords:
   - _ALPHAMODULATE_ON
@@ -20,7 +21,7 @@ Material:
   m_LightmapFlags: 0
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 1
-  m_CustomRenderQueue: -1
+  m_CustomRenderQueue: 3000
   stringTagMap: {}
   disabledShaderPasses:
   - ALWAYS
@@ -87,7 +88,7 @@ Material:
     - _DistortionEnabled: 0
     - _DistortionStrength: 1
     - _DistortionStrengthScaled: 0
-    - _DstBlend: 0
+    - _DstBlend: 10
     - _EmissionEnabled: 0
     - _FlipbookBlending: 0
     - _FlipbookMode: 0
@@ -99,7 +100,7 @@ Material:
     - _Mode: 6
     - _OcclusionStrength: 1
     - _Parallax: 0.02
-    - _PremulAlpha: 0
+    - _PremulAlpha: 1
     - _QueueOffset: 0
     - _ReceiveShadows: 1
     - _Shadows: 0
@@ -109,7 +110,7 @@ Material:
     - _SoftParticlesFarFadeDistance: 6.48
     - _SoftParticlesNearFadeDistance: 0
     - _SpecularHighlights: 1
-    - _SrcBlend: 2
+    - _SrcBlend: 1
     - _Surface: 1
     - _UVSec: 0
     - _ZWrite: 0

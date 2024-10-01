@@ -10,6 +10,7 @@ Material:
   m_Name: PlasticBottleGlass
   m_Shader: {fileID: 4800000, guid: 9f066dcd6ca36f84d8f65ca139c60114, type: 3}
   m_ValidKeywords:
+  - _PREMULTIPLY_ALPHA
   - _RECEIVE_SHADOWS
   m_InvalidKeywords:
   - _ALPHAPREMULTIPLY_ON
@@ -19,7 +20,7 @@ Material:
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
-  m_CustomRenderQueue: -1
+  m_CustomRenderQueue: 3000
   stringTagMap: {}
   disabledShaderPasses:
   - DepthOnly
@@ -114,7 +115,7 @@ Material:
     - _Mode: 3
     - _OcclusionStrength: 0.5
     - _Parallax: 0.02
-    - _PremulAlpha: 0
+    - _PremulAlpha: 1
     - _QueueOffset: 0
     - _ReceiveShadows: 1
     - _Shadows: 0
