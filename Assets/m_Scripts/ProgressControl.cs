@@ -17,12 +17,14 @@ public struct Chapter{
     //对话
     [SerializeField]
     public UnityEvent OnExit;
-    public bool isOver;
 }
 public class ProgressControl : TInstance<ProgressControl>
 {
+    public static bool isFreeView=false;
     public GameObject origin;
     public bool isAutoMoving;
+    public bool isCurrentChapterOver;
+    public static Chapter currentChapter;
     Progress progress;
     public Vector3 velocity;
     public CinemachineVirtualCamera CurrentCinema;
@@ -36,14 +38,24 @@ public class ProgressControl : TInstance<ProgressControl>
     }
     async UniTask Progress(){
         if (origin != null){
-            CurrentCinema=progress.chapters[0].Position;
+            // CurrentCinema=progress.chapters[0].Position;
             foreach (var c in progress.chapters){
-                cinemachineBrain.transform.GetComponent<TrackedPoseDriver>().enabled=c.isFreeView;
+                isCurrentChapterOver=false;
+                currentChapter=c;
+                Debug.Log("1");
                 await TranslateTo(CurrentCinema,c.Position,c.isCutToNext);
+                Debug.Log("2");
+                if(c.isFreeView)ChangeViewToFree();
+                else ChangeViewToPreset();
+
                 c.OnEnter?.Invoke(c);
                 //对话
                 c.OnExit?.Invoke();
-                await UniTask.WaitUntil(()=>c.isOver);
+                Debug.Log("3");
+                await UniTask.WaitUntil(()=>isCurrentChapterOver);
+                Debug.Log("4");
+                await UniTask.WaitUntil(()=>!isFreeView);
+                Debug.Log("5");
             }
         }
     }
@@ -64,5 +76,17 @@ public class ProgressControl : TInstance<ProgressControl>
         else{
 
         }
+    }
+    public void ChangeViewToFree(){
+        Debug.Log("切换至自由视角");
+        cinemachineBrain.enabled=false;
+        cinemachineBrain.GetComponent<TrackedPoseDriver>().enabled=true;
+        isFreeView=true;
+    }
+    public void ChangeViewToPreset(){
+        Debug.Log("切换至预设视角");
+        cinemachineBrain.enabled=true;
+        cinemachineBrain.GetComponent<TrackedPoseDriver>().enabled=false;
+        isFreeView=false;
     }
 }

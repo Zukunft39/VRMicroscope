@@ -96791,7 +96791,6 @@ MonoBehaviour:
     OnExit:
       m_PersistentCalls:
         m_Calls: []
-    isOver: 1
   - OnEnter:
       m_PersistentCalls:
         m_Calls: []
@@ -96801,7 +96800,6 @@ MonoBehaviour:
     OnExit:
       m_PersistentCalls:
         m_Calls: []
-    isOver: 1
   - OnEnter:
       m_PersistentCalls:
         m_Calls: []
@@ -96811,7 +96809,6 @@ MonoBehaviour:
     OnExit:
       m_PersistentCalls:
         m_Calls: []
-    isOver: 1
   - OnEnter:
       m_PersistentCalls:
         m_Calls: []
@@ -96821,7 +96818,6 @@ MonoBehaviour:
     OnExit:
       m_PersistentCalls:
         m_Calls: []
-    isOver: 1
   - OnEnter:
       m_PersistentCalls:
         m_Calls:
@@ -96843,7 +96839,6 @@ MonoBehaviour:
     OnExit:
       m_PersistentCalls:
         m_Calls: []
-    isOver: 0
 --- !u!114 &1532657627
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -96858,6 +96853,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   origin: {fileID: 7313654228818734187}
   isAutoMoving: 0
+  isCurrentChapterOver: 0
   velocity: {x: 0, y: 0, z: 0}
   CurrentCinema: {fileID: 0}
   cinemachineBrain: {fileID: 9014170785400826615}
@@ -136525,7 +136521,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f9ac216f0eb04754b1d938aac6380b31, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_ManipulationInteractionGroup: {fileID: 0}
+  m_ManipulationInteractionGroup: {fileID: 2429146837669592126}
   m_DirectInteractor: {fileID: 0}
   m_RayInteractor: {fileID: 0}
   m_TeleportInteractor: {fileID: 0}
@@ -137122,7 +137118,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f9ac216f0eb04754b1d938aac6380b31, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_ManipulationInteractionGroup: {fileID: 0}
+  m_ManipulationInteractionGroup: {fileID: 8074195217693284668}
   m_DirectInteractor: {fileID: 0}
   m_RayInteractor: {fileID: 0}
   m_TeleportInteractor: {fileID: 0}
