@@ -5,17 +5,19 @@ using System.Threading.Tasks;
 using Cinemachine;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.InputSystem.XR;
 [Serializable]
 public struct Chapter{
     [SerializeField]
-    public Action OnEnter;
+    public UnityEvent<Chapter> OnEnter;
     public CinemachineVirtualCamera Position;
     public bool isCutToNext;
     public bool isFreeView;
     //对话
     [SerializeField]
-    public Action OnExit;
+    public UnityEvent OnExit;
+    public bool isOver;
 }
 public class ProgressControl : TInstance<ProgressControl>
 {
@@ -38,9 +40,10 @@ public class ProgressControl : TInstance<ProgressControl>
             foreach (var c in progress.chapters){
                 cinemachineBrain.transform.GetComponent<TrackedPoseDriver>().enabled=c.isFreeView;
                 await TranslateTo(CurrentCinema,c.Position,c.isCutToNext);
-                c.OnEnter?.Invoke();
+                c.OnEnter?.Invoke(c);
                 //对话
                 c.OnExit?.Invoke();
+                await UniTask.WaitUntil(()=>c.isOver);
             }
         }
     }

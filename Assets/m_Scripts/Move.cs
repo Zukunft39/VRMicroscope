@@ -31,7 +31,6 @@ public class Move : TInstance<Move>
     }
     private void FixedUpdate() {
         if(progressControl.isAutoMoving){
-            Debug.Log(cinema.GetComponent<CinemachineBrain>().OutputCamera.transform.position);
             transform.position=cinema.GetComponent<CinemachineBrain>().OutputCamera.transform.position;
             GetComponent<CharacterController>().Move(Vector3.zero);
         }
