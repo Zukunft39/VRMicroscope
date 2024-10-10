@@ -36980,6 +36980,23 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 5415144538854867733, guid: f9689c43243fdcb4d9567547857414cb, type: 3}
   m_PrefabInstance: {fileID: 1701752386}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &598748257 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 598748257, guid: 030390fb4e1e99348899d0b149ccce70, type: 3}
+  m_PrefabInstance: {fileID: 198792820387186740}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &598748259
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 598748257}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f69483c59a50ccd4f8776de16366456a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1001 &599331979
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -70095,7 +70112,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1108139900}
   m_LocalRotation: {x: -0, y: -0.7071068, z: -0, w: 0.7071068}
-  m_LocalPosition: {x: -3.8470001, y: 0.977, z: -1.3740001}
+  m_LocalPosition: {x: -3.7378, y: 0.9721, z: -1.3692}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -96789,19 +96806,7 @@ MonoBehaviour:
   chapters:
   - OnEnter:
       m_PersistentCalls:
-        m_Calls:
-        - m_Target: {fileID: 1532657629}
-          m_TargetAssemblyTypeName: ProgressEvents, Assembly-CSharp
-          m_MethodName: OperatePC
-          m_Mode: 0
-          m_Arguments:
-            m_ObjectArgument: {fileID: 0}
-            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-            m_IntArgument: 0
-            m_FloatArgument: 0
-            m_StringArgument: 
-            m_BoolArgument: 0
-          m_CallState: 2
+        m_Calls: []
     Position: {fileID: 697536110}
     isCutToNext: 0
     isFreeView: 0

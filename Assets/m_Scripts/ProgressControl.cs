@@ -8,7 +8,7 @@ using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.InputSystem.XR;
 [Serializable]
-public struct Chapter{
+public class Chapter{
     [SerializeField]
     public UnityEvent<Chapter> OnEnter;
     public CinemachineVirtualCamera Position;
@@ -52,7 +52,7 @@ public class ProgressControl : TInstance<ProgressControl>
                 //对话
                 c.OnExit?.Invoke();
                 Debug.Log("3");
-                await UniTask.WaitUntil(()=>isCurrentChapterOver);
+                await UniTask.WaitUntil(()=>c.isFreeView);
                 Debug.Log("4");
                 await UniTask.WaitUntil(()=>!isFreeView);
                 Debug.Log("5");
