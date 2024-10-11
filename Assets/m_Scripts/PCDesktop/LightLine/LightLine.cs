@@ -17,23 +17,19 @@ public class LightLine : MonoBehaviour
         _lineRenderer.SetPosition(1, endPoint);
     }
     /// <summary>
-    /// 反射生成线
+    /// 反射生成线,起点加方向，有反射、动画
     /// </summary>
     /// <param name="direction"></param>
     /// <param name="startPoint"></param>
     /// <param name="segments">光线段数，为反射次数加一</param>
     /// <param name="color"></param>
-    public void Initialize(Vector3 direction, Vector3 startPoint,int segments, Color color)
+    public void Initialize( Vector3 startPoint,Vector3 direction,Color color,int segments)
     {
         try
         {
             List<Vector3> points = new List<Vector3>(){startPoint};
             
             ReflectAndGetPoint(points, startPoint, direction, segments, 1);
-            foreach (var VARIABLE in points)
-           {
-               Debug.Log(VARIABLE.ToString());
-           }
             _lineRenderer.startColor=color;
             _lineRenderer.positionCount = points.Count;
             
@@ -48,6 +44,13 @@ public class LightLine : MonoBehaviour
             throw;
         }
     }
+    /// <summary>
+    /// 起点终点动画
+    /// </summary>
+    /// <param name="startPoint"></param>
+    /// <param name="endPoint"></param>
+    /// <param name="color"></param>
+    /// <param name="duration"></param>
     public void InitializeDotween(Vector3 startPoint, Vector3 endPoint,Color color,float duration)
     {
         _lineRenderer.startColor=color;
@@ -56,20 +59,16 @@ public class LightLine : MonoBehaviour
         _lineRenderer.SetPosition(1, endPoint);
     }
     /// <summary>
-    /// 反射生成线
+    /// 反射生成线，动画
     /// </summary>
     /// <param name="direction"></param>
     /// <param name="startPoint"></param>
     /// <param name="segments">光线段数，为反射次数加一</param>
     /// <param name="color"></param>
-    public void InitializeDotween(Vector3 direction, Vector3 startPoint,int segments, Color color,float duration)
+    public void InitializeDotween(Vector3 startPoint,Vector3 direction,  Color color,int segments,float duration)
     {
         List<Vector3> points = new List<Vector3>(){startPoint};
         ReflectAndGetPoint(points, startPoint, direction, segments, 1);
-        foreach (var v in points)
-        {
-            Debug.Log(v.ToString());
-        }
         _lineRenderer.startColor=color;
         _lineRenderer.positionCount = 2;
         _lineRenderer.SetPosition(0, startPoint);
@@ -129,14 +128,14 @@ public class LightLine : MonoBehaviour
         
     }
 
-    private bool ss = true;
-    private void Update()
-    {
-        if (ss)
-        {
-            InitializeDotween(new Vector3(1,0,0),transform.position,3,Color.blue,10f);
-            ss = false;
-        }
-       
-    }
+    // private bool ss = true;
+    // private void Update()
+    // {
+    //     if (ss)
+    //     {
+    //         InitializeDotween(new Vector3(1,0,0),transform.position,3,Color.blue,10f);
+    //         ss = false;
+    //     }
+    //    
+    // }
 }

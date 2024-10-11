@@ -4,21 +4,17 @@ using UnityEngine;
 
 public class TInstance<T> : MonoBehaviour where T :TInstance<T>
 {
-    public static T Instance
-    {
-        get 
-        { return instance; }
-    }
+    public static T Instance => _instance;
 
-    private static T instance;
+    private static T _instance;
 
-    private void Awake()
+    protected void Awake()
     {
         if (Instance == null)
         {
-            instance = (T)this;
+            _instance = (T)this;
         }
         else
-        Destroy(gameObject);
+            Destroy(gameObject);
     }
 }

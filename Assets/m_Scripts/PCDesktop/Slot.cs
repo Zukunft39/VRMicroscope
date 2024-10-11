@@ -7,11 +7,11 @@ interface IExchangable
 public class Slot : MonoBehaviour
 {
     [SerializeField]
-    private GameObject childInSlot;
+    private BaseItem childInSlot;
 
     private bool _isSoltSolid;
 
-    public GameObject ChildInSlot
+    public BaseItem ChildInSlot
     {
         get =>childInSlot;
         set
@@ -35,7 +35,7 @@ public class Slot : MonoBehaviour
         return Vector3.Distance(transform.position, target.transform.position) < distance;
     }
 
-    public bool PlaceGameObjectInSlot(GameObject target, Vector3 position)
+    public bool PlaceGameObjectInSlot(BaseItem target, Vector3 position)
     {
         if(_isSoltSolid) return false;
         else if (childInSlot != null)
@@ -48,12 +48,12 @@ public class Slot : MonoBehaviour
         }
     }
 
-    private bool FillSlot(GameObject target, Vector3 position)
+    private bool FillSlot(BaseItem target, Vector3 position)
     {
         ChildInSlot = target;
         return true;
     }
-    private bool ExchangeGameObjectInSlot(GameObject target,Vector3 resetPosition)
+    private bool ExchangeGameObjectInSlot(BaseItem target,Vector3 resetPosition)
     {
         childInSlot.GetComponent<IExchangable>().ResetPosition(resetPosition);
         ChildInSlot = null;
