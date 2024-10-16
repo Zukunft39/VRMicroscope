@@ -11,12 +11,12 @@ public class LightLineMgrEditor : Editor
         LightLineMgr myScript = (LightLineMgr)target;
         if (GUILayout.Button("发射光线（直接显示）"))
         {
-            LightLineMgr.DrawLine(myScript.start,myScript.direction,Color.cyan,10,myScript.num,3);
+            LightLineMgr.DrawLineWithAnim(myScript.start,myScript.direction,Color.white,myScript.num,10,0,3);
         }
 
         if (GUILayout.Button("发射光线（动画显示）"))
         {
-            LightLineMgr.DrawLineWithAnim(myScript.start,myScript.direction,Color.cyan,myScript.num,10,10f,3);
+            LightLineMgr.DrawLineWithAnim(myScript.start,myScript.direction,Color.white,myScript.num,10,myScript.duration,3);
         }
         if (GUILayout.Button("清除当前光线"))
         {

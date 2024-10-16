@@ -1,6 +1,6 @@
-using System;
-using System.Collections.Generic;
+using System.Linq;
 using DG.Tweening;
+using Unity.Mathematics;
 using UnityEngine;
 [RequireComponent(typeof(LineRenderer))]
 public class LightLine : MonoBehaviour
@@ -8,42 +8,37 @@ public class LightLine : MonoBehaviour
     private LineRenderer _lineRenderer;
 
     private void Awake()=>_lineRenderer = GetComponent<LineRenderer>();
-
-    public void Initialize(Vector3 startPoint, Vector3 endPoint,Color color)
+    public class BinaryTreeNode<T>
     {
-        _lineRenderer.startColor=color;
-        _lineRenderer.positionCount = 2;
-        _lineRenderer.SetPosition(0, startPoint);
-        _lineRenderer.SetPosition(1, endPoint);
-    }
+        public T Data;
+        public BinaryTreeNode<T> Left;
+        public BinaryTreeNode<T> Right;
+        public Color ReflectColor;
+        public Color TransmitColor;
+        public BinaryTreeNode(T data)
+        {
+            Data = data;
+            Left = null;
+            Right = null;
+            ReflectColor=Color.white;
+            TransmitColor=Color.black;
+        }
+    }   
     /// <summary>
-    /// 反射生成线,起点加方向，有反射、动画
-    /// </summary>
-    /// <param name="direction"></param>
-    /// <param name="startPoint"></param>
-    /// <param name="segments">光线段数，为反射次数加一</param>
-    /// <param name="color"></param>
-    public void Initialize( Vector3 startPoint,Vector3 direction,Color color,int segments)
-    {
-        try
-        {
-            List<Vector3> points = new List<Vector3>(){startPoint};
-            
-            ReflectAndGetPoint(points, startPoint, direction, segments, 1);
-            _lineRenderer.startColor=color;
-            _lineRenderer.positionCount = points.Count;
-            
-            for (int i = 0; i < _lineRenderer.positionCount; i++)
-            {
-                _lineRenderer.SetPosition(i, points[i]);
-            }
-        }
-        catch (Exception e)
-        {
-            Console.WriteLine("2222222222222");
-            throw;
-        }
-    }
+     /// 反射生成线，动画
+     /// </summary>
+     /// <param name="direction"></param>
+     /// <param name="startPoint"></param>
+     /// <param name="segments">光线段数，为反射次数加一</param>
+     /// <param name="color">入射光颜色</param>
+     /// <param name="duration">总时间</param>
+    public void InitializeDotween(Vector3 startPoint,Vector3 direction,  Color color,int segments,float duration)
+     {
+         BinaryTreeNode<Vector3> lightPoint = new BinaryTreeNode<Vector3>(startPoint);
+         lightPoint.ReflectColor=color;
+         ReflectAndGetPoint(lightPoint, direction, segments,1, color,false,default(RaycastHit));
+         RenderLineWithDotween(lightPoint,segments,duration);
+     }
     /// <summary>
     /// 起点终点动画
     /// </summary>
@@ -51,81 +46,140 @@ public class LightLine : MonoBehaviour
     /// <param name="endPoint"></param>
     /// <param name="color"></param>
     /// <param name="duration"></param>
-    public void InitializeDotween(Vector3 startPoint, Vector3 endPoint,Color color,float duration)
+    /// <param name="callback">结束后回调</param>
+    private void InitializeDotween(Vector3 startPoint, Vector3 endPoint,Color color,float duration,TweenCallback callback)
     {
         _lineRenderer.startColor=color;
         _lineRenderer.positionCount = 2;
         _lineRenderer.SetPosition(0, startPoint);
-        _lineRenderer.SetPosition(1, endPoint);
+
+        DOTween.To(() => 0, x =>
+        {
+            Vector3 targetPos = (endPoint- startPoint).normalized * x +startPoint;
+            _lineRenderer.SetPosition(1, targetPos);
+        }, (endPoint- startPoint).magnitude, duration).SetEase(Ease.Linear).onComplete+=callback;
+    }
+    private void RenderLineWithDotween(BinaryTreeNode<Vector3> node,int segments ,float duration)
+    {
+         PlayDotween(node,duration/segments);
+    }
+    private void PlayDotween(BinaryTreeNode<Vector3> node,float durationPerLine)
+    {
+        GameObject obj;
+        LineRenderer lineRenderer;
+        if (node.Left != null)
+        {
+            obj = Instantiate(gameObject, transform.position, quaternion.identity, transform);
+            lineRenderer=obj.GetComponent<LineRenderer>();
+            lineRenderer.material.color=node.ReflectColor;
+            GameObject backup = obj;
+            lineRenderer.GetComponent<LightLine>().InitializeDotween(node.Data,node.Left.Data,node.ReflectColor,durationPerLine,()=>
+            {
+               backup.GetComponent<LightLine>().PlayDotween(node.Left, durationPerLine);
+            });
+        }
+
+        if (node.Right != null)
+        {
+            obj = Instantiate(gameObject, transform.position, quaternion.identity, transform);
+            lineRenderer=obj.GetComponent<LineRenderer>();
+            lineRenderer.material.color=node.TransmitColor;
+            lineRenderer.GetComponent<LightLine>().InitializeDotween(node.Data,node.Right.Data,node.TransmitColor,durationPerLine,()=>
+            {
+                obj.GetComponent<LightLine>().PlayDotween(node.Right, durationPerLine);
+            });
+        }
     }
     /// <summary>
-    /// 反射生成线，动画
+    /// 每次调用是以某节点开始找下一个点
     /// </summary>
-    /// <param name="direction"></param>
-    /// <param name="startPoint"></param>
-    /// <param name="segments">光线段数，为反射次数加一</param>
-    /// <param name="color"></param>
-    public void InitializeDotween(Vector3 startPoint,Vector3 direction,  Color color,int segments,float duration)
+    /// <param name="node">本节点</param>
+    /// <param name="direction">下一个方向</param>
+    /// <param name="segments">总段数</param>
+    /// <param name="currentSegment">下一条线的段索引</param>
+    /// <param name="inColor">上一条的光颜色</param>
+    /// <param name="isTransmit">下一条线是不是透光</param>
+    private void ReflectAndGetPoint(BinaryTreeNode<Vector3> node, Vector3 direction,int segments,int currentSegment,Color inColor,bool isTransmit,RaycastHit lastHit)
     {
-        List<Vector3> points = new List<Vector3>(){startPoint};
-        ReflectAndGetPoint(points, startPoint, direction, segments, 1);
-        _lineRenderer.startColor=color;
-        _lineRenderer.positionCount = 2;
-        _lineRenderer.SetPosition(0, startPoint);
-        Sequence sequence = DOTween.Sequence();
-        for (int i = 1; i < points.Count; ++i)
-        {
-            Vector3 start = points[i - 1];
-            Vector3 end = points[i];
-            int select = i;
-            sequence.Append(DOTween.To(() => 0, x =>
-            {
-                Vector3 targetPos = (end - start).normalized * x + start;
-                if (_lineRenderer.positionCount <= select)
-                    _lineRenderer.positionCount += 1;
-                _lineRenderer.SetPosition(select, targetPos);
-                Console.WriteLine(targetPos.ToString());
-            }, (end - start).magnitude, duration/segments).SetEase(Ease.Linear));
-        }
-
-        foreach (var v in points)
-        {
-            Console.WriteLine(v.ToString());
-        }
-        sequence.SetAutoKill(false);
-        sequence.Play();
-    }
-    private void ReflectAndGetPoint(List<Vector3> result,Vector3 point, Vector3 direction,int segments,int currentSegment)
-    {
-        try
-        {
-            RaycastHit hit;
-            if (currentSegment < segments)
-            {
-                if (Physics.Raycast(point, direction, out hit))
-                {
-                    Debug.Log(currentSegment+"reflection");
-                    result.Add(hit.point);
-                    Vector3 nextDirection = direction - 2 * Vector3.Dot(direction , hit.normal) * hit.normal;
-                    ReflectAndGetPoint(result, hit.point, nextDirection, segments, currentSegment + 1);
-                }
-
-                
-            }
-            else if (currentSegment == segments)
-            {
-                if (Physics.Raycast(point, direction, out hit))
-                {
-                    result.Add(hit.point);
-                }
-            }
-        }
-        catch (Exception e)
-        {
-            Console.WriteLine("1111111111");
-            throw;
-        }
+        RaycastHit[] hits = Physics.RaycastAll(node.Data, direction, 1000f).OrderBy(h => h.distance).ToArray();
+        if (hits.Length == 0||currentSegment == segments) return;
         
+        RaycastHit hit = hits[isTransmit ? 1 : 0];
+
+        Vector3 nextDirection = direction - 2 * Vector3.Dot(direction , hit.normal) * hit.normal;
+        
+        if (!isTransmit)
+        {
+            node.Left = new BinaryTreeNode<Vector3>(hit.point);
+        }
+        else
+        {
+            node.Right=new BinaryTreeNode<Vector3>(hit.point); 
+        }
+        node.ReflectColor = lastHit.collider? CalculateReflectedColor(inColor, lastHit.transform.GetComponent<BaseItem>().itemColor):inColor;
+        node.TransmitColor = lastHit.collider? CalculateTransmittedColor(inColor, lastHit.transform.GetComponent<BaseItem>().itemColor):inColor;
+        
+        switch (hit.collider.gameObject.tag)
+        {
+            case "Edge":
+                if (node.TransmitColor == Color.black && isTransmit)node.Right = null;
+                if(node.ReflectColor==Color.black&&!isTransmit) node.Left = null;
+                return;
+            case "DichroicMirror"://二色镜
+                if (isTransmit)
+                {
+                    if(node.ReflectColor!=Color.black)ReflectAndGetPoint(node.Right,nextDirection,segments,currentSegment+1,node.TransmitColor, false,hit);
+                    if(node.ReflectColor!=Color.black) ReflectAndGetPoint(node.Right,direction,segments,currentSegment+1,node.TransmitColor, true,hit);
+                }
+                else
+                {
+                    if(node.ReflectColor!=Color.black)ReflectAndGetPoint(node.Left,nextDirection,segments,currentSegment+1,node.ReflectColor, false,hit);
+                    if(node.ReflectColor!=Color.black) ReflectAndGetPoint(node.Left,direction,segments,currentSegment+1,node.ReflectColor, true,hit);
+                }
+                return;
+            case "Filter":
+                if (isTransmit)
+                {
+                    if(node.TransmitColor!=Color.black) ReflectAndGetPoint(node.Right,direction,segments,currentSegment+1,node.TransmitColor, true,hit);
+                }
+                else
+                {
+                    if(node.ReflectColor!=Color.black) ReflectAndGetPoint(node.Left,nextDirection,segments,currentSegment+1,node.ReflectColor, true,hit);
+                }
+                return;
+            default:
+                if (!isTransmit)
+                {
+                    if(node.ReflectColor!=Color.black)ReflectAndGetPoint(node.Left,nextDirection,segments,currentSegment+1,node.ReflectColor, false,hit);
+                }
+                else
+                {
+                    if(node.TransmitColor!=Color.black) ReflectAndGetPoint(node.Right,direction,segments,currentSegment+1,node.TransmitColor, true,hit);
+                }
+                return;
+        }
+    }
+    private Color CalculateTransmittedColor(Color lightc, Color filterc)
+    {
+        // 如果入射光中包含滤光片允许的波长
+        float transmittedR = lightc.r * filterc.r; // 透过的部分
+        float transmittedG = lightc.g * filterc.g;
+        float transmittedB = lightc.b * filterc.b;
+        
+        return new Color(transmittedR, transmittedG, transmittedB);
+    }
+    private Color CalculateReflectedColor(Color lightc, Color transmittedc)
+    {
+        float reflectedR = lightc.r - transmittedc.r;
+        float reflectedG = lightc.g - transmittedc.g;
+        float reflectedB = lightc.b - transmittedc.b;
+
+        // 确保反射的 RGB 值不小于 0
+        reflectedR = Mathf.Max(reflectedR, 0);
+        reflectedG = Mathf.Max(reflectedG, 0);
+        reflectedB = Mathf.Max(reflectedB, 0);
+
+        return new Color(reflectedR, reflectedG, reflectedB);
     }
 
     // private bool ss = true;
