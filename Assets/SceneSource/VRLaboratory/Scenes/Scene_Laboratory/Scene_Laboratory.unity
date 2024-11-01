@@ -25240,6 +25240,7 @@ GameObject:
   m_Component:
   - component: {fileID: 393209877}
   - component: {fileID: 393209876}
+  - component: {fileID: 393209878}
   m_Layer: 0
   m_Name: Directional Light
   m_TagString: Untagged
@@ -25324,6 +25325,26 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 6
   m_LocalEulerAnglesHint: {x: 50, y: -30, z: 0}
+--- !u!114 &393209878
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 393209875}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 474bcb49853aa07438625e644c072ee6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Version: 1
+  m_UsePipelineSettings: 1
+  m_AdditionalLightsShadowResolutionTier: 2
+  m_LightLayerMask: 1
+  m_CustomShadowLayers: 0
+  m_ShadowLayerMask: 1
+  m_LightCookieSize: {x: 1, y: 1}
+  m_LightCookieOffset: {x: 0, y: 0}
 --- !u!1001 &396300843
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -135776,6 +135797,67 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8063056433752487239}
   m_Mesh: {fileID: 10207, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!1001 &2811447956554545680
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 2811447956231523169, guid: b063b44afb8f2ec4e92f010d8266b23a, type: 3}
+      propertyPath: m_Name
+      value: HueInverse
+      objectReference: {fileID: 0}
+    - target: {fileID: 2811447956231523169, guid: b063b44afb8f2ec4e92f010d8266b23a, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2811447956231523171, guid: b063b44afb8f2ec4e92f010d8266b23a, type: 3}
+      propertyPath: m_RootOrder
+      value: 7
+      objectReference: {fileID: 0}
+    - target: {fileID: 2811447956231523171, guid: b063b44afb8f2ec4e92f010d8266b23a, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2811447956231523171, guid: b063b44afb8f2ec4e92f010d8266b23a, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2811447956231523171, guid: b063b44afb8f2ec4e92f010d8266b23a, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2811447956231523171, guid: b063b44afb8f2ec4e92f010d8266b23a, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2811447956231523171, guid: b063b44afb8f2ec4e92f010d8266b23a, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2811447956231523171, guid: b063b44afb8f2ec4e92f010d8266b23a, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2811447956231523171, guid: b063b44afb8f2ec4e92f010d8266b23a, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2811447956231523171, guid: b063b44afb8f2ec4e92f010d8266b23a, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2811447956231523171, guid: b063b44afb8f2ec4e92f010d8266b23a, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2811447956231523171, guid: b063b44afb8f2ec4e92f010d8266b23a, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: b063b44afb8f2ec4e92f010d8266b23a, type: 3}
 --- !u!1 &2819856893878733068
 GameObject:
   m_ObjectHideFlags: 0
@@ -137936,7 +138018,7 @@ MonoBehaviour:
     m_Bits: 1
   m_VolumeTrigger: {fileID: 0}
   m_VolumeFrameworkUpdateModeOption: 2
-  m_RenderPostProcessing: 0
+  m_RenderPostProcessing: 1
   m_Antialiasing: 0
   m_AntialiasingQuality: 2
   m_StopNaN: 0
