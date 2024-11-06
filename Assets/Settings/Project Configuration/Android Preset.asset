@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fc81fec6606c95049befe87af19f578f, type: 3}
   m_Name: CustomRenderPassFeature
   m_EditorClassIdentifier: 
-  m_Active: 1
+  m_Active: 0
   queue: 2000
   layer:
     serializedVersion: 2
@@ -41,9 +41,10 @@ MonoBehaviour:
   m_RendererFeatures:
   - {fileID: -1713787483485249718}
   - {fileID: 6022767481209970731}
-  m_RendererFeatureMap: 4adf59225d6737e82b604b3a1d2b9553
+  - {fileID: 4331376924187917619}
+  m_RendererFeatureMap: 4adf59225d6737e82b604b3a1d2b9553337d8b2a5d241c3c
   m_UseNativeRenderPass: 0
-  postProcessData: {fileID: 0}
+  postProcessData: {fileID: 11400000, guid: 41439944d30ece34e96484bdb6645b55, type: 2}
   xrSystemData: {fileID: 11400000, guid: 60e1133243b97e347b653163a8c01b64, type: 2}
   shaders:
     blitPS: {fileID: 4800000, guid: c17132b1f77d20942aa75f8429c0f8bc, type: 3}
@@ -79,6 +80,22 @@ MonoBehaviour:
   m_ClusteredRendering: 0
   m_TileSize: 32
   m_IntermediateTextureMode: 0
+--- !u!114 &4331376924187917619
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1c53fd68b53e7e34b8ba5ba702cd285a, type: 3}
+  m_Name: HueinverseFeature
+  m_EditorClassIdentifier: 
+  m_Active: 1
+  settings:
+    renderPassEvent: 600
+    hueInverseMaterial: {fileID: 2100000, guid: a5460f4373a11a64f96d17671d8cdd8c, type: 2}
 --- !u!114 &6022767481209970731
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -102,7 +119,7 @@ MonoBehaviour:
         m_Bits: 1
       PassNames:
       - UniversalForward
-    overrideMaterial: {fileID: 2100000, guid: 6658eb1912124f94b9e8ea1c0daaa68c, type: 2}
+    overrideMaterial: {fileID: 2100000, guid: a5460f4373a11a64f96d17671d8cdd8c, type: 2}
     overrideMaterialPassIndex: 0
     overrideDepthState: 1
     depthCompareFunction: 4
