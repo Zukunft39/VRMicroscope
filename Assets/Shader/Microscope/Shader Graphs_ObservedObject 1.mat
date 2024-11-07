@@ -52,8 +52,8 @@ Material:
     m_Ints: []
     m_Floats:
     - _BlurStrengh: 11.77
-    - _CurrentDepth: 14.2
-    - _DepthSmooth: 14.5
+    - _CurrentDepth: 12.1
+    - _DepthSmooth: 2.47
     - _QueueControl: 0
     - _QueueOffset: 0
     m_Colors:
