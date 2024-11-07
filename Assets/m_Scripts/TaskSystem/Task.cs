@@ -28,16 +28,15 @@ public class Task
         taskCompleteJudger = judger;
         isAutoTriggerNextTask = autoTriggerNextTask;
         
-        taskCompleteJudger.Initialize(
-            taskConditions.ConvertAll(input => input as ITaskCondition)
-            ); 
-        
-        taskCompleteJudger.OnTaskJudgedCompleted += CompleteTask;
 
         foreach (var condition in taskConditions)
         {
             condition.Initialize();
         }
+        
+        taskCompleteJudger.Initialize(
+            taskConditions.ConvertAll(input => input as ITaskCondition)
+        ); 
     }
 
     private void CompleteTask()

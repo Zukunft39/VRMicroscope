@@ -1,11 +1,11 @@
 ﻿using UnityEngine;
 using System;
+using UnityEngine.Events;
 
-[CreateAssetMenu(fileName = "New Task Condition", menuName = "Task System/Task Condition")]
-public abstract class BaseTaskCondition : ScriptableObject, ITaskCondition
+public abstract class BaseTaskCondition : ScriptableObject , ITaskCondition
 {
     public bool IsSatisfied { get; protected set; }
-    public event Action OnConditionMet;
+    public event UnityAction OnConditionMet;
 
     protected void ConditionMet()
     {
@@ -16,5 +16,9 @@ public abstract class BaseTaskCondition : ScriptableObject, ITaskCondition
         }
     }
 
-    public abstract void Initialize();
+    public virtual void Initialize()
+    {
+        OnConditionMet = null;
+        IsSatisfied = false;
+    }
 }

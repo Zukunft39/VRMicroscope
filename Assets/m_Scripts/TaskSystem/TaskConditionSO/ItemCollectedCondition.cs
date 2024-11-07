@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-[CreateAssetMenu(fileName = "ItemCollectedCondition", menuName = "Tasks/Conditions/ItemCollected")]
+[CreateAssetMenu(fileName = "NewItemCollectedTaskCondition", menuName = "Task System/Task Condition/Item Collected Condition")]
 public class ItemCollectedCondition : BaseTaskCondition
 {
     public string itemId;
@@ -10,6 +10,7 @@ public class ItemCollectedCondition : BaseTaskCondition
 
     public override void Initialize()
     {
+        base.Initialize();
         GameEvents.OnItemCollected += HandleItemCollected;
     }
 

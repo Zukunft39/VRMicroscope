@@ -1,0 +1,22 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 44990453545f494fad2c68d1a87aae65, type: 3}
+  m_Name: AndTaskDebug
+  m_EditorClassIdentifier: 
+  taskConditions:
+  - {fileID: 11400000, guid: 93ee6c35b5c7bbd4291a1ce91b4e7a78, type: 2}
+  - {fileID: 11400000, guid: 4c1e69fc82edfbd4ca7505392233032d, type: 2}
+  - {fileID: 11400000, guid: bba01861528c1de4480623271bf22feb, type: 2}
+  judgerType: 0
+  taskName: AndTask0
+  taskDescription: You need to click all of the buttons
+  isAutoTriggerNextTask: 1

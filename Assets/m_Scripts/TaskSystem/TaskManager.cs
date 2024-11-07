@@ -1,34 +1,52 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 
-public class TaskManager : MonoBehaviour
+public class TaskManager : TInstance<TaskManager>
 {
-    public TaskSO[] taskSOs;
-    
     private List<Task> taskQueue = new ();
     private int currentTaskIndex = -1;
     public bool allowManualTrigger = true;
-    
-    private void LoadTasks()
+
+    private void Reset()
     {
-        foreach (var taskSO in taskSOs)
+        taskQueue.Clear();
+        currentTaskIndex = -1;
+    }
+    
+    private void LoadTasks(TaskSO[] taskSoList)
+    {
+        foreach (var taskSO in taskSoList)
         {
             Task task =taskSO.CreateTask();
             taskQueue.Add(task);
         }
     }
     
-    private void Awake()
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="taskSoList"></param>
+    /// <param name="isForcedStart">Set this to true when you want to flush current task queue</param>
+    public void StartTaskQueue(TaskSO[] taskSoList,bool isForcedStart = false)
     {
-        LoadTasks();
-    }
-    
-    public void StartTaskQueue()
-    {
+        if( taskQueue.Count > 0)
+        {
+            if(!isForcedStart)
+            {
+                Debug.LogWarning("Task queue is already started!");
+                return;
+            }else
+            {
+                Reset();
+            }
+        }
+        
+        LoadTasks(taskSoList);
+        
         if(taskQueue.Count > 0)
         {
-            Task currentTask = TriggerNextTask();
-            Debug.Log("Task Started: " + currentTask.taskName);
+            TriggerNextTask();
         }
         else
         {
@@ -43,7 +61,7 @@ public class TaskManager : MonoBehaviour
             currentTaskIndex++;
             Task currentTask = taskQueue[currentTaskIndex];
             currentTask.OnTaskCompleted += HandleTaskCompletion;
-            Debug.Log("Task Started: " + currentTask.taskName);
+            Debug.Log("Task Started: " + currentTask.taskName + "\nDescription: " + currentTask.taskDescription);
             return currentTask;
         }
         else
@@ -79,10 +97,5 @@ public class TaskManager : MonoBehaviour
         {
             Debug.LogWarning("Cannot manually trigger the next task. Either auto-trigger is enabled or manual triggering is disabled.");
         }
-    }
-
-    private void Start()
-    {
-        
     }
 }

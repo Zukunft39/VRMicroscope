@@ -28,6 +28,7 @@ public class AndTaskCompleteJudger : ITaskCompleteJudger
                 return false;
             }
         }
+
         return true;
     }
 
@@ -37,10 +38,6 @@ public class AndTaskCompleteJudger : ITaskCompleteJudger
         if (IsTaskCompleted())
         {
             OnTaskJudgedCompleted?.Invoke();
-        }
-        else
-        {
-            Debug.Log("You have not completed all of the tasks yet.");
         }
     }
 }

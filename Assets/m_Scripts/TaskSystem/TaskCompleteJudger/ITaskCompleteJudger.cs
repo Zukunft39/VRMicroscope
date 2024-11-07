@@ -8,6 +8,5 @@ using System.Collections.Generic;
 public interface ITaskCompleteJudger
 {
     bool IsTaskCompleted();
-    event Action OnTaskJudgedCompleted;
     void Initialize(List<ITaskCondition> conditions);
 }

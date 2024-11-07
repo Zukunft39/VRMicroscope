@@ -1,0 +1,22 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 44990453545f494fad2c68d1a87aae65, type: 3}
+  m_Name: OrTaskDebug
+  m_EditorClassIdentifier: 
+  taskConditions:
+  - {fileID: 11400000, guid: 04e6249bd545d5b4a84a0404e69baf83, type: 2}
+  - {fileID: 11400000, guid: 19d4be742a81a024383af3b63ad63223, type: 2}
+  - {fileID: 11400000, guid: 5d49d77c4492460469982d6cecc4bd80, type: 2}
+  judgerType: 1
+  taskName: OrTask0
+  taskDescription: You need to click one of the buttons
+  isAutoTriggerNextTask: 1
