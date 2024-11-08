@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using DG.Tweening;
 using Unity.Mathematics;
@@ -71,7 +72,8 @@ public class LightLine : MonoBehaviour
         {
             obj = Instantiate(gameObject, transform.position, quaternion.identity, transform);
             lineRenderer=obj.GetComponent<LineRenderer>();
-            lineRenderer.material.color=node.ReflectColor;
+            lineRenderer.material.SetColor("_EmissionColor",new Color(node.ReflectColor.r,node.ReflectColor.g,node.ReflectColor.b,0.5f));
+            lineRenderer.startColor=new Color(lineRenderer.startColor.r,lineRenderer.startColor.g,lineRenderer.startColor.b,0.5f);
             GameObject backup = obj;
             lineRenderer.GetComponent<LightLine>().InitializeDotween(node.Data,node.Left.Data,node.ReflectColor,durationPerLine,()=>
             {
@@ -83,7 +85,9 @@ public class LightLine : MonoBehaviour
         {
             obj = Instantiate(gameObject, transform.position, quaternion.identity, transform);
             lineRenderer=obj.GetComponent<LineRenderer>();
-            lineRenderer.material.color=node.TransmitColor;
+            lineRenderer.material.SetColor("_EmissionColor",new Color(node.TransmitColor.r,node.TransmitColor.g,node.TransmitColor.b,0.5f));
+            lineRenderer.startColor = new Color(lineRenderer.startColor.r, lineRenderer.startColor.g,
+                lineRenderer.startColor.b, 0.5f);
             lineRenderer.GetComponent<LightLine>().InitializeDotween(node.Data,node.Right.Data,node.TransmitColor,durationPerLine,()=>
             {
                 obj.GetComponent<LightLine>().PlayDotween(node.Right, durationPerLine);
@@ -102,7 +106,7 @@ public class LightLine : MonoBehaviour
     private void ReflectAndGetPoint(BinaryTreeNode<Vector3> node, Vector3 direction,int segments,int currentSegment,Color inColor,bool isTransmit,RaycastHit lastHit)
     {
         RaycastHit[] hits = Physics.RaycastAll(node.Data, direction, 1000f).OrderBy(h => h.distance).ToArray();
-        if (hits.Length == 0||currentSegment == segments) return;
+        if (hits.Length == 0||hits.Length == 1||currentSegment == segments) return;
         
         RaycastHit hit = hits[isTransmit ? 1 : 0];
 
@@ -116,8 +120,19 @@ public class LightLine : MonoBehaviour
         {
             node.Right=new BinaryTreeNode<Vector3>(hit.point); 
         }
-        node.ReflectColor = lastHit.collider? CalculateReflectedColor(inColor, lastHit.transform.GetComponent<BaseItem>().itemColor):inColor;
-        node.TransmitColor = lastHit.collider? CalculateTransmittedColor(inColor, lastHit.transform.GetComponent<BaseItem>().itemColor):inColor;
+
+        try
+        {
+            node.ReflectColor = lastHit.collider? CalculateReflectedColor(inColor, lastHit.transform.GetComponent<BaseItem>().itemColor):inColor;
+            node.TransmitColor = lastHit.collider? CalculateTransmittedColor(inColor, lastHit.transform.GetComponent<BaseItem>().itemColor):inColor;
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            Debug.LogError(node.Data+" "+hit.transform.name);
+            throw;
+        }
+        
         
         switch (hit.collider.gameObject.tag)
         {

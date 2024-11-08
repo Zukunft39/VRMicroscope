@@ -12,6 +12,12 @@ public class LightLineMgrEditor : Editor
         if (GUILayout.Button("发射光线（直接显示）"))
         {
             LightLineMgr.DrawLineWithAnim(myScript.start,myScript.direction,Color.white,myScript.num,10,0,3);
+            for (int i = 1; i < 40; i++)
+            {
+                LightLineMgr.DrawLineWithAnim(myScript.start,myScript.direction+i*0.0012f*Vector3.forward,Color.white,myScript.num,10,0,3);
+                LightLineMgr.DrawLineWithAnim(myScript.start,myScript.direction-i*0.0012f*Vector3.forward,Color.white,myScript.num,10,0,3);
+            }
+            
         }
 
         if (GUILayout.Button("发射光线（动画显示）"))

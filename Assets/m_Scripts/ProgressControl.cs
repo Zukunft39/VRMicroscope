@@ -32,7 +32,7 @@ public class ProgressControl : TInstance<ProgressControl>
     private void Start() {
         origin.transform.position=new Vector3(progress.chapters[0].position.transform.position.x,origin.transform.position.y,progress.chapters[0].position.transform.position.z);
         origin.transform.GetChild(3).GetComponent<CharacterController>().Move(Vector2.zero);
-        isAutoMoving=true;
+        //isAutoMoving=true;
         _ = Progress();
     }
     async UniTask Progress(){
@@ -63,12 +63,12 @@ public class ProgressControl : TInstance<ProgressControl>
     }
     async UniTask TranslateTo(CinemachineVirtualCamera current,CinemachineVirtualCamera next,bool isCut){
         if(!isCut){
-            isAutoMoving=true;
+            //isAutoMoving=true;
             current?.gameObject.SetActive(false);
             next?.gameObject.SetActive(true);
             
             await UniTask.WaitForSeconds(cinemachineBrain.m_DefaultBlend.BlendTime);
-            isAutoMoving=false;
+            //isAutoMoving=false;
             CurrentCinema=next;
             return ;
         }
