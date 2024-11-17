@@ -1,22 +1,21 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using Cinemachine;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.InputSystem.XR;
+using UnityEngine.Serialization;
+
 [Serializable]
-public struct Chapter{
-    [SerializeField]
-    public UnityEvent<Chapter> OnEnter;
-    public CinemachineVirtualCamera Position;
+public class Chapter{
+    [FormerlySerializedAs("OnEnter")] [SerializeField]
+    public UnityEvent<Chapter> onEnter;
+    [FormerlySerializedAs("Position")] public CinemachineVirtualCamera position;
     public bool isCutToNext;
     public bool isFreeView;
     //对话
-    [SerializeField]
-    public UnityEvent OnExit;
+    [FormerlySerializedAs("OnExit")] [SerializeField]
+    public UnityEvent onExit;
 }
 public class ProgressControl : TInstance<ProgressControl>
 {
@@ -31,9 +30,9 @@ public class ProgressControl : TInstance<ProgressControl>
     public CinemachineBrain cinemachineBrain;
     private void Awake() =>progress=GetComponent<Progress>();
     private void Start() {
-        origin.transform.position=new Vector3(progress.chapters[0].Position.transform.position.x,origin.transform.position.y,progress.chapters[0].Position.transform.position.z);
+        origin.transform.position=new Vector3(progress.chapters[0].position.transform.position.x,origin.transform.position.y,progress.chapters[0].position.transform.position.z);
         origin.transform.GetChild(3).GetComponent<CharacterController>().Move(Vector2.zero);
-        isAutoMoving=true;
+        //isAutoMoving=true;
         _ = Progress();
     }
     async UniTask Progress(){
@@ -43,16 +42,16 @@ public class ProgressControl : TInstance<ProgressControl>
                 isCurrentChapterOver=false;
                 currentChapter=c;
                 Debug.Log("1");
-                await TranslateTo(CurrentCinema,c.Position,c.isCutToNext);
+                await TranslateTo(CurrentCinema,c.position,c.isCutToNext);
                 Debug.Log("2");
                 if(c.isFreeView)ChangeViewToFree();
                 else ChangeViewToPreset();
 
-                c.OnEnter?.Invoke(c);
+                c.onEnter?.Invoke(c);
                 //对话
-                c.OnExit?.Invoke();
+                c.onExit?.Invoke();
                 Debug.Log("3");
-                await UniTask.WaitUntil(()=>isCurrentChapterOver);
+                await UniTask.WaitUntil(()=>c.isFreeView);
                 Debug.Log("4");
                 await UniTask.WaitUntil(()=>!isFreeView);
                 Debug.Log("5");
@@ -64,12 +63,12 @@ public class ProgressControl : TInstance<ProgressControl>
     }
     async UniTask TranslateTo(CinemachineVirtualCamera current,CinemachineVirtualCamera next,bool isCut){
         if(!isCut){
-            isAutoMoving=true;
+            //isAutoMoving=true;
             current?.gameObject.SetActive(false);
             next?.gameObject.SetActive(true);
             
             await UniTask.WaitForSeconds(cinemachineBrain.m_DefaultBlend.BlendTime);
-            isAutoMoving=false;
+            //isAutoMoving=false;
             CurrentCinema=next;
             return ;
         }
