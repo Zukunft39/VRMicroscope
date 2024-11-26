@@ -123,8 +123,8 @@ public class LightLine : MonoBehaviour
 
         try
         {
-            node.ReflectColor = lastHit.collider? CalculateReflectedColor(inColor, lastHit.transform.GetComponent<BaseItem>().itemColor):inColor;
-            node.TransmitColor = lastHit.collider? CalculateTransmittedColor(inColor, lastHit.transform.GetComponent<BaseItem>().itemColor):inColor;
+            node.ReflectColor = lastHit.collider? CalculateReflectedColor(inColor, lastHit.transform.GetComponent<BaseItem>()?.itemColor??inColor):inColor;
+            node.TransmitColor = lastHit.collider? CalculateTransmittedColor(inColor, lastHit.transform.GetComponent<BaseItem>()?.itemColor??inColor):inColor;
         }
         catch (Exception e)
         {
