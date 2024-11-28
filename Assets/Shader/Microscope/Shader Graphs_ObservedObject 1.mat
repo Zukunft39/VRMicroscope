@@ -51,9 +51,11 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
-    - _BlurStrengh: 11.77
-    - _CurrentDepth: 12.1
-    - _DepthSmooth: 2.47
+    - _BlurStrengh: 7.54
+    - _CurrentDepth: 3.82
+    - _DepthSmooth: 2.05
+    - _LightnessGate: 0.901
+    - _LightnessSmooth: 0.477
     - _QueueControl: 0
     - _QueueOffset: 0
     m_Colors:
