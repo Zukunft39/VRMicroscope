@@ -134577,7 +134577,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   lightColor: {r: 1, g: 1, b: 1, a: 1}
-  lightIntensity: 20
+  lightIntensity: 13
   sampleCount: 100
   reflectionBounces: 3
   duration: 0
