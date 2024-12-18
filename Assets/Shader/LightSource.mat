@@ -7,7 +7,7 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: LightBeam
+  m_Name: LightSource
   m_Shader: {fileID: -6465566751694194690, guid: 3b6265d3e28804844a69db2a350988fa, type: 3}
   m_ValidKeywords: []
   m_InvalidKeywords: []
@@ -21,11 +21,11 @@ Material:
     serializedVersion: 3
     m_TexEnvs:
     - _MainTexture:
-        m_Texture: {fileID: 2800000, guid: 14e3854aea4a0c44184bea13c6e1e140, type: 3}
+        m_Texture: {fileID: 2800000, guid: 5962d1cd935c18146919880735a4ca83, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _Mask:
-        m_Texture: {fileID: 10307, guid: 0000000000000000f000000000000000, type: 0}
+        m_Texture: {fileID: 10300, guid: 0000000000000000f000000000000000, type: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - unity_Lightmaps:
@@ -42,18 +42,18 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
-    - _Dissolve: 0.29
-    - _Distortion: 0.112
-    - _NoisePower: 2.11
+    - _Dissolve: 0.253
+    - _Distortion: 0
+    - _NoisePower: 0.87
     - _NoiseScale: 38.95
     - _QueueControl: 0
     - _QueueOffset: 0
     m_Colors:
-    - _Color: {r: 6.4222345, g: 3.564172, b: 3.564172, a: 1}
-    - _MainSpeed: {r: -0.6, g: 0, b: 0, a: 0}
-    - _NoiseSpeed: {r: 0.19, g: 0, b: 0, a: 0}
+    - _Color: {r: 1.3150184, g: 2.7042456, b: 1.2330678, a: 1}
+    - _MainSpeed: {r: 0, g: 0, b: 0, a: 0}
+    - _NoiseSpeed: {r: 0.24, g: -0.2, b: 0, a: 0}
   m_BuildTextureStacks: []
---- !u!114 &7555773377930976466
+--- !u!114 &3106381044092295259
 MonoBehaviour:
   m_ObjectHideFlags: 11
   m_CorrespondingSourceObject: {fileID: 0}
