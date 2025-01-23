@@ -31,6 +31,7 @@ public class Microscope : MonoBehaviour
         SetLaserPositions();
         Light.SetActive(false);
         show.SetActive(false);
+        Cam.SetActive(false);
     }
     void Update()
     {
@@ -38,6 +39,7 @@ public class Microscope : MonoBehaviour
         {
             lineRenderer.enabled = !lineRenderer.enabled;
             Light.SetActive(!Light.activeSelf);
+            Cam.SetActive(!Cam.activeSelf);
         }
         if (MicroUI.setTrue && Input.GetKeyDown(KeyCode.E))
         {
