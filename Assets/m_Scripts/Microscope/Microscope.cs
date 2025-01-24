@@ -1,33 +1,34 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
 
 public class Microscope : MonoBehaviour
 {
-    public GameObject Line;
-    public GameObject Light;
+    public GameObject Line;    //å…‰çº¿ç‰©ä½“
+    public GameObject Light;  //ç¯å…‰
     public GameObject show;
-    public GameObject point1;
+    public GameObject point1; //ç›¸æœºç‚¹ä½åæ ‡
     public GameObject point2;
 
     private LineRenderer lineRenderer;
 
-    GameObject Object;
-    public GameObject Cam;
-    public int pointer;
-    GameObject player;
+    GameObject Object;  //ç©å®¶æ”¾çš„ç‰©ä½“
+    public GameObject Cam; 
+    public int pointer; 
+    GameObject player; 
 
-    public GameObject showCamera;
-    public GameObject lookCamera;
-    public GameObject screen;
+    public GameObject showCamera;  
+    public GameObject lookCamera;  
+    public GameObject screen;  
 
     int p = 0;
-    // Start ÔÚÓÎÏ·¿ªÊ¼Ê±µ÷ÓÃÒ»´Î
+    bool isNear;
+    // Start åœ¨æ¸¸æˆå¼€å§‹æ—¶è°ƒç”¨ä¸€æ¬¡
     void Start()
     {
         pointer = 0;
-        lineRenderer = Line.GetComponent<LineRenderer>(); // »ñÈ¡ LineRenderer ×é¼ş
+        lineRenderer = Line.GetComponent<LineRenderer>(); // è·å– LineRenderer ç»„ä»¶
         lineRenderer.enabled = false;
         SetLaserPositions();
         Light.SetActive(false);
@@ -37,14 +38,17 @@ public class Microscope : MonoBehaviour
     }
     void Update()
     {
-        if (MicroUI.setTrue && Input.GetKeyDown(KeyCode.Q))
+        //å…‰æºå¼€å…³
+        if (MicroUI.setTrue && Input.GetKeyDown(KeyCode.Q) && isNear)
         {
             lineRenderer.enabled = !lineRenderer.enabled;
             Light.SetActive(!Light.activeSelf);
             Cam.SetActive(!Cam.activeSelf);
             screen.SetActive(!screen.activeSelf);
         }
-        if (MicroUI.setTrue && Input.GetKeyDown(KeyCode.E))
+
+        //äº¤äº’
+        if (MicroUI.setTrue && Input.GetKeyDown(KeyCode.E) && isNear)
         {
             if (Object==null)
             {
@@ -72,7 +76,9 @@ public class Microscope : MonoBehaviour
                 }
             }
         }
-        if (MicroUI.setTrue && Input.GetKeyDown(KeyCode.R))
+
+        //å–ä¸‹ç‰©ä½“
+        if (MicroUI.setTrue && Input.GetKeyDown(KeyCode.R) && isNear)
         {
             if (Object != null)
             {
@@ -84,11 +90,11 @@ public class Microscope : MonoBehaviour
 
         if (showCamera.activeSelf)
         {
-            // Ä¿±êÎ»ÖÃºÍĞı×ª
+            // ç›®æ ‡ä½ç½®å’Œæ—‹è½¬
             Vector3 targetPosition;
             Quaternion targetRotation;
 
-            // ¸ù¾İpointerµÄÖµ¾ö¶¨Ä¿±êÎ»ÖÃºÍĞı×ª
+            // æ ¹æ®pointerçš„å€¼å†³å®šç›®æ ‡ä½ç½®å’Œæ—‹è½¬
             if (pointer == 1)
             {
                 targetPosition = point1.transform.position;
@@ -96,8 +102,8 @@ public class Microscope : MonoBehaviour
             }
             else
             {
-                targetPosition = point2.transform.position; // ¼ÙÉèÓĞpoint2×÷Îª±¸ÓÃÄ¿±êÎ»ÖÃ
-                targetRotation = point2.transform.rotation; // ¼ÙÉèpoint2Ò²ÓĞĞı×ª
+                targetPosition = point2.transform.position; // å‡è®¾æœ‰point2ä½œä¸ºå¤‡ç”¨ç›®æ ‡ä½ç½®
+                targetRotation = point2.transform.rotation; // å‡è®¾point2ä¹Ÿæœ‰æ—‹è½¬
                 if (p==0)
                 {
                     MicroBlack.ToBlack = true;
@@ -105,10 +111,10 @@ public class Microscope : MonoBehaviour
                 }
 
             }
-            // Ê¹ÓÃMoveTowardsÆ½»¬¹ı¶ÉÎ»ÖÃ
+            // ä½¿ç”¨MoveTowardså¹³æ»‘è¿‡æ¸¡ä½ç½®
             showCamera.transform.position = Vector3.MoveTowards(showCamera.transform.position, targetPosition, 10 * Time.deltaTime);
 
-            // Ê¹ÓÃRotateTowardsÆ½»¬¹ı¶ÉĞı×ª
+            // ä½¿ç”¨RotateTowardså¹³æ»‘è¿‡æ¸¡æ—‹è½¬
             showCamera.transform.rotation = Quaternion.RotateTowards(showCamera.transform.rotation, targetRotation, 120 * Time.deltaTime);
             if (Vector3.Distance(showCamera.transform.position,point2.transform.position)<0.1f)
             {
@@ -132,16 +138,16 @@ public class Microscope : MonoBehaviour
 
     void SetLaserPositions()
     {
-        // È·±£ Line ÖÁÉÙÓĞÁ½¸ö×ÓÎïÌå
+        // ç¡®ä¿ Line è‡³å°‘æœ‰ä¸¤ä¸ªå­ç‰©ä½“
         if (Line.transform.childCount >= 2)
         {
-            // »ñÈ¡µÚÒ»¸öºÍµÚ¶ş¸ö×ÓÎïÌåµÄÎ»ÖÃ
+            // è·å–ç¬¬ä¸€ä¸ªå’Œç¬¬äºŒä¸ªå­ç‰©ä½“çš„ä½ç½®
             Vector3 startPoint = Line.transform.GetChild(0).position;
             Vector3 endPoint = Line.transform.GetChild(1).position;
 
-            // ÉèÖÃ LineRenderer µÄÆğÊ¼µãºÍ½áÊøµã
-            lineRenderer.SetPosition(0, startPoint); // ÉèÖÃÆğÊ¼µã
-            lineRenderer.SetPosition(1, endPoint);   // ÉèÖÃ½áÊøµã
+            // è®¾ç½® LineRenderer çš„èµ·å§‹ç‚¹å’Œç»“æŸç‚¹
+            lineRenderer.SetPosition(0, startPoint); // è®¾ç½®èµ·å§‹ç‚¹
+            lineRenderer.SetPosition(1, endPoint);   // è®¾ç½®ç»“æŸç‚¹
         }
     }
 
@@ -154,11 +160,21 @@ public class Microscope : MonoBehaviour
         }
     }
 
+    void OnTriggerStay(Collider other)
+    {
+        if (other.CompareTag("Player"))
+        {
+            player = other.gameObject;
+            isNear = true;
+        }
+    }
+
     private void OnTriggerExit(Collider other)
     {
         if (other.CompareTag("Player"))
         {
             MicroUI.setTrue = false;
+            isNear = false;
         }
     }
 }

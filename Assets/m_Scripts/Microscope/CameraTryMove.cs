@@ -1,21 +1,21 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class CameraTryMove : MonoBehaviour
 {
-    public float moveSpeed = 5f;  // ÒÆ¶¯ËÙ¶È
-    public float rotationSpeed = 2f;  // Ğı×ªËÙ¶È
+    public float moveSpeed = 5f;  // ç§»åŠ¨é€Ÿåº¦
+    public float rotationSpeed = 2f;  // æ—‹è½¬é€Ÿåº¦
 
-    private float pitch = 0f;  // ´¹Ö±Ğı×ª½Ç¶È
-    private float yaw = 0f;  // Ë®Æ½Ğı×ª½Ç¶È
+    private float pitch = 0f;  // å‚ç›´æ—‹è½¬è§’åº¦
+    private float yaw = 0f;  // æ°´å¹³æ—‹è½¬è§’åº¦
 
 
     // Start is called before the first frame update
     void Start()
     {
-        Cursor.lockState = CursorLockMode.Locked;  // Ëø¶¨Êó±êµ½ÆÁÄ»ÖĞÑë
-        Cursor.visible = false;  // Òş²ØÊó±ê
+        Cursor.lockState = CursorLockMode.Locked;  // é”å®šé¼ æ ‡åˆ°å±å¹•ä¸­å¤®
+        Cursor.visible = false;  // éšè—é¼ æ ‡
     }
 
     // Update is called once per frame
@@ -25,34 +25,34 @@ public class CameraTryMove : MonoBehaviour
         RotateCamera();
     }
 
-    // ¿ØÖÆÏà»úµÄÒÆ¶¯
+    // æ§åˆ¶ç›¸æœºçš„ç§»åŠ¨
     void MoveCamera()
     {
-        float moveX = Input.GetAxis("Horizontal");  // »ñÈ¡Ë®Æ½ÖáµÄÊäÈë£¨A¡¢D »ò ×óÓÒ¼ıÍ·£©
-        float moveZ = Input.GetAxis("Vertical");    // »ñÈ¡´¹Ö±ÖáµÄÊäÈë£¨W¡¢S »ò ÉÏÏÂ¼ıÍ·£©
+        float moveX = Input.GetAxis("Horizontal");  // è·å–æ°´å¹³è½´çš„è¾“å…¥ï¼ˆAã€D æˆ– å·¦å³ç®­å¤´ï¼‰
+        float moveZ = Input.GetAxis("Vertical");    // è·å–å‚ç›´è½´çš„è¾“å…¥ï¼ˆWã€S æˆ– ä¸Šä¸‹ç®­å¤´ï¼‰
 
-        // ¸ù¾İÊäÈëÀ´¼ÆËãÏà»úµÄÒÆ¶¯·½Ïò
+        // æ ¹æ®è¾“å…¥æ¥è®¡ç®—ç›¸æœºçš„ç§»åŠ¨æ–¹å‘
         Vector3 moveDirection = (transform.right * moveX + transform.forward * moveZ).normalized;
 
-        // ÒÆ¶¯Ïà»ú
+        // ç§»åŠ¨ç›¸æœº
         transform.Translate(moveDirection * moveSpeed * Time.deltaTime, Space.World);
     }
 
-    // ¿ØÖÆÏà»úµÄĞı×ª
+    // æ§åˆ¶ç›¸æœºçš„æ—‹è½¬
     void RotateCamera()
     {
-        // »ñÈ¡Êó±êµÄÒÆ¶¯Á¿
-        float mouseX = Input.GetAxis("Mouse X");  // Ë®Æ½ÒÆ¶¯£¨×óÓÒ£©
-        float mouseY = Input.GetAxis("Mouse Y");  // ´¹Ö±ÒÆ¶¯£¨ÉÏÏÂ£©
+        // è·å–é¼ æ ‡çš„ç§»åŠ¨é‡
+        float mouseX = Input.GetAxis("Mouse X");  // æ°´å¹³ç§»åŠ¨ï¼ˆå·¦å³ï¼‰
+        float mouseY = Input.GetAxis("Mouse Y");  // å‚ç›´ç§»åŠ¨ï¼ˆä¸Šä¸‹ï¼‰
 
-        // µ÷ÕûĞı×ª½Ç¶È
-        yaw += mouseX * rotationSpeed;  // Ë®Æ½Ğı×ª
-        pitch -= mouseY * rotationSpeed;  // ´¹Ö±Ğı×ª
+        // è°ƒæ•´æ—‹è½¬è§’åº¦
+        yaw += mouseX * rotationSpeed;  // æ°´å¹³æ—‹è½¬
+        pitch -= mouseY * rotationSpeed;  // å‚ç›´æ—‹è½¬
 
-        // ÏŞÖÆ´¹Ö±Ğı×ªµÄ½Ç¶È£¨·ÀÖ¹³¬³öÉÏÏÂĞı×ª·¶Î§£©
+        // é™åˆ¶å‚ç›´æ—‹è½¬çš„è§’åº¦ï¼ˆé˜²æ­¢è¶…å‡ºä¸Šä¸‹æ—‹è½¬èŒƒå›´ï¼‰
         pitch = Mathf.Clamp(pitch, -90f, 90f);
 
-        // Ó¦ÓÃĞı×ª
+        // åº”ç”¨æ—‹è½¬
         transform.eulerAngles = new Vector3(pitch, yaw, 0f);
     }
 }
