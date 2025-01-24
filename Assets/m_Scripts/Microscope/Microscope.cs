@@ -20,6 +20,7 @@ public class Microscope : MonoBehaviour
 
     public GameObject showCamera;
     public GameObject lookCamera;
+    public GameObject screen;
 
     int p = 0;
     // Start 在游戏开始时调用一次
@@ -32,6 +33,7 @@ public class Microscope : MonoBehaviour
         Light.SetActive(false);
         show.SetActive(false);
         Cam.SetActive(false);
+        screen.SetActive(false);
     }
     void Update()
     {
@@ -40,6 +42,7 @@ public class Microscope : MonoBehaviour
             lineRenderer.enabled = !lineRenderer.enabled;
             Light.SetActive(!Light.activeSelf);
             Cam.SetActive(!Cam.activeSelf);
+            screen.SetActive(!screen.activeSelf);
         }
         if (MicroUI.setTrue && Input.GetKeyDown(KeyCode.E))
         {
