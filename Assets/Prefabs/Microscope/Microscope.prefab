@@ -1929,11 +1929,19 @@ MonoBehaviour:
   show: {fileID: 7331994196253851386}
   point1: {fileID: 7331994195629697932}
   point2: {fileID: 7331994195354431022}
+  knob1: {fileID: 932906575038297858}
   Cam: {fileID: 7331994194609933627}
   pointer: 0
   showCamera: {fileID: 7331994194272074732}
   lookCamera: {fileID: 7331994196144147987}
   screen: {fileID: 7331994194830993009}
+  widthChangeAmount: 0.05
+  minWidth: 0.01
+  maxWidth: 0.4
+  rotationChangeRatio: 10
+  minRotationZ: 45
+  maxRotationZ: 135
+  rotationAmount: 10
 --- !u!65 &7566346503316213473
 BoxCollider:
   m_ObjectHideFlags: 0

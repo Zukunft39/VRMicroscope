@@ -1,29 +1,53 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using Unity.VisualScripting;
+using Unity.XR.CoreUtils;
 using UnityEngine;
 
 public class Microscope : MonoBehaviour
 {
+    #region 物体和组件
     public GameObject Line;    //光线物体
     public GameObject Light;  //灯光
     public GameObject show;
     public GameObject point1; //相机点位坐标
     public GameObject point2;
-
-    private LineRenderer lineRenderer;
-
-    GameObject Object;  //玩家放的物体
-    public GameObject Cam; 
-    public int pointer; 
-    GameObject player; 
-
+    public GameObject knob1;
     public GameObject showCamera;  
     public GameObject lookCamera;  
-    public GameObject screen;  
+    public GameObject screen;
+    public GameObject microscopeCamera;
+    public GameObject glass4;
+    public List<int> glass4Rotation = new List<int>();
+    int[] glass4Size = { 10, 2, 1 };
+    int glass4Choice = 0;
+    GameObject Object;  //玩家放的物体
+    public GameObject Cam; 
+    GameObject player;
+    private LineRenderer lineRenderer;
+    #endregion
 
+    #region 数值和工具类变量
+    public int pointer; 
+    public float widthChangeAmount = 0.05f; // 每次滚动改变的宽度量
+    public float minWidth = 0.01f; // 最小宽度
+    public float maxWidth = 0.4f; // 最大宽度
+    public float rotationChangeRatio = 10f; // 每次宽度变化对应的旋转增量
+    public float minRotationZ = 45f; // z轴旋转的最小值
+    public float maxRotationZ = 135f;  // z轴旋转的最大值
     int p = 0;
     bool isNear;
+    public float rotationAmount = 10f; // 每次滚动旋转的角度
+
+    private bool isRotating = false;
+    private int targetGlass4Choice;
+    private Quaternion startRotation;
+    private Quaternion targetRotation;
+    private float rotationProgress;
+    private float sizeChangeSpeed = 2.0f;
+    private float rotationSpeed = 90.0f; // 每秒旋转90度
+    #endregion
+
     // Start 在游戏开始时调用一次
     void Start()
     {
@@ -50,9 +74,9 @@ public class Microscope : MonoBehaviour
         //交互
         if (MicroUI.setTrue && Input.GetKeyDown(KeyCode.E) && isNear)
         {
-            if (Object==null)
+            if (Object == null)
             {
-                if (player.transform.childCount>0)
+                if (player.transform.childCount > 0)
                 {
                     Object = player.transform.GetChild(0).gameObject;
                     Object.transform.SetParent(Cam.transform);
@@ -63,11 +87,11 @@ public class Microscope : MonoBehaviour
             }
             else
             {
-                if (pointer==0)
+                if (pointer == 0)
                 {
                     showCamera.SetActive(true);
-                    showCamera.transform.position=player.transform.position;
-                    showCamera.transform.rotation=player.transform.rotation;
+                    showCamera.transform.position = player.transform.position;
+                    showCamera.transform.rotation = player.transform.rotation;
                     pointer++;
                 }
                 else
@@ -83,8 +107,47 @@ public class Microscope : MonoBehaviour
             if (Object != null)
             {
                 Object.transform.SetParent(player.transform);
-                Object = null; 
+                Object = null;
                 show.SetActive(false);
+            }
+        }
+
+        // 修改原有的T键检测部分
+        if (MicroUI.setTrue && Input.GetKeyDown(KeyCode.T) && isNear && !isRotating)
+        {
+            // 确保数组长度一致并循环索引
+            int maxChoice = Mathf.Min(glass4Rotation.Count, glass4Size.Length);
+            targetGlass4Choice = (glass4Choice + 1) % maxChoice;
+
+            // 启动旋转过渡
+            StartCoroutine(SwitchObjectiveLens());
+            glass4Choice = targetGlass4Choice;
+        }
+
+        if (MicroUI.setTrue && isNear)
+        {
+            // 获取鼠标滚轮输入
+            float scrollInput = Input.GetAxis("Mouse ScrollWheel");
+
+            if (scrollInput != 0) // 如果滚动量不为零
+            {
+                // 根据滚轮方向调整激光的宽度
+                float newWidth = Mathf.Clamp(lineRenderer.startWidth + scrollInput * widthChangeAmount, minWidth, maxWidth);
+                lineRenderer.startWidth = newWidth;
+                lineRenderer.endWidth = newWidth;
+
+                // 计算与宽度变化相对应的旋转角度
+                float rotationAmount = scrollInput * rotationChangeRatio;
+                Vector3 currentRotation = knob1.transform.rotation.eulerAngles;
+
+                // 计算新的旋转角度
+                float newRotationZ = currentRotation.z + rotationAmount;
+
+                // 限制旋转角度在[minRotationZ, maxRotationZ]之间
+                newRotationZ = Mathf.Clamp(newRotationZ, minRotationZ, maxRotationZ);
+
+                // 设置旋转，只改变z轴，保持x和y不变
+                knob1.transform.rotation = Quaternion.Euler(currentRotation.x, currentRotation.y, newRotationZ);
             }
         }
 
@@ -120,8 +183,14 @@ public class Microscope : MonoBehaviour
             {
                 showCamera.SetActive(false);
                 lookCamera.SetActive(true);
+                //GameObject Object = microscopeCamera.transform.GetChild(0).gameObject;
+                //Vector3 currentPosition = Object.transform.localPosition;
+                //currentPosition.x = 0f;
+                //currentPosition.y = 0f;
+                //Object.transform.localPosition = currentPosition;
                 MicroUI.setTrue = false;
                 p = 0;
+                player.SetActive(false);
             }
         }
 
@@ -132,6 +201,7 @@ public class Microscope : MonoBehaviour
                 lookCamera.SetActive(false);
                 pointer = 0;
                 MicroUI.setTrue = true;
+                player.SetActive(true);
             }
         }
     }
@@ -176,5 +246,51 @@ public class Microscope : MonoBehaviour
             MicroUI.setTrue = false;
             isNear = false;
         }
+    }
+
+    // 新增协程处理平滑过渡
+    IEnumerator SwitchObjectiveLens()
+    {
+        isRotating = true;
+
+        // 记录初始值和目标值
+        float startSize = microscopeCamera.GetComponent<Camera>().orthographicSize;
+        float targetSize = glass4Size[targetGlass4Choice];
+        Quaternion startRot = glass4.transform.localRotation;
+        Quaternion targetRot = Quaternion.Euler(
+            glass4.transform.localEulerAngles.x,
+            glass4.transform.localEulerAngles.y,
+            glass4Rotation[targetGlass4Choice]
+        );
+
+        float duration = 0.5f; // 过渡总时长
+        float elapsed = 0f;
+
+        while (elapsed < duration)
+        {
+            elapsed += Time.deltaTime;
+            float t = elapsed / duration;
+
+            // 平滑旋转
+            glass4.transform.localRotation = Quaternion.Slerp(
+                startRot,
+                targetRot,
+                t
+            );
+
+            // 平滑改变相机尺寸
+            microscopeCamera.GetComponent<Camera>().orthographicSize = Mathf.Lerp(
+                startSize,
+                targetSize,
+                t
+            );
+
+            yield return null;
+        }
+
+        // 确保最终值准确
+        glass4.transform.localRotation = targetRot;
+        microscopeCamera.GetComponent<Camera>().orthographicSize = targetSize;
+        isRotating = false;
     }
 }
