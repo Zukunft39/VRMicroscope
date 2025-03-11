@@ -183,11 +183,6 @@ public class Microscope : MonoBehaviour
             {
                 showCamera.SetActive(false);
                 lookCamera.SetActive(true);
-                //GameObject Object = microscopeCamera.transform.GetChild(0).gameObject;
-                //Vector3 currentPosition = Object.transform.localPosition;
-                //currentPosition.x = 0f;
-                //currentPosition.y = 0f;
-                //Object.transform.localPosition = currentPosition;
                 MicroUI.setTrue = false;
                 p = 0;
                 player.SetActive(false);
@@ -202,6 +197,16 @@ public class Microscope : MonoBehaviour
                 pointer = 0;
                 MicroUI.setTrue = true;
                 player.SetActive(true);
+            }
+            if(Input.GetKeyDown(KeyCode.T))
+            {
+                // 确保数组长度一致并循环索引
+                int maxChoice = Mathf.Min(glass4Rotation.Count, glass4Size.Length);
+                targetGlass4Choice = (glass4Choice + 1) % maxChoice;
+
+                // 启动旋转过渡
+                StartCoroutine(SwitchObjectiveLens());
+                glass4Choice = targetGlass4Choice;
             }
         }
     }
