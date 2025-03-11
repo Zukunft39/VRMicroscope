@@ -1,25 +1,27 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class ScreenMove : MonoBehaviour
 {
-    public float moveSpeed = 5f; // ¿ØÖÆÒÆ¶¯ËÙ¶È
+    public float moveSpeed = 5f; // æ§åˆ¶ç§»åŠ¨é€Ÿåº¦
 
     void Update()
     {
-        GameObject Object=gameObject.transform.GetChild(0).gameObject;
-        if (Object!=null)
+        if (gameObject.transform.childCount>0)
         {
-            // »ñÈ¡Ë®Æ½·½Ïò (A ºÍ D »ò×óÓÒ¼ıÍ·)
-            float horizontal = Input.GetAxisRaw("Horizontal");
-            // »ñÈ¡´¹Ö±·½Ïò (W ºÍ S »òÉÏÏÂ¼ıÍ·)
-            float vertical = Input.GetAxisRaw("Vertical");
-            // ¼ÆËãÒÆ¶¯·½Ïò
-            Vector3 moveDirection = new Vector3(horizontal, vertical, 0f).normalized;
-            // ÒÆ¶¯ÎïÌå
-            Object.transform.Translate(moveDirection * moveSpeed * Time.deltaTime);
+            GameObject Object=gameObject.transform.GetChild(0).gameObject;
+            if (Object!=null)
+            {
+                // è·å–æ°´å¹³æ–¹å‘ (A å’Œ D æˆ–å·¦å³ç®­å¤´)
+                float horizontal = Input.GetAxisRaw("Horizontal");
+                // è·å–å‚ç›´æ–¹å‘ (W å’Œ S æˆ–ä¸Šä¸‹ç®­å¤´)
+                float vertical = Input.GetAxisRaw("Vertical");
+                // è®¡ç®—ç§»åŠ¨æ–¹å‘
+                Vector3 moveDirection = new Vector3(horizontal, vertical, 0f).normalized;
+                // ç§»åŠ¨ç‰©ä½“
+                Object.transform.Translate(moveDirection * moveSpeed * Time.deltaTime);
+            }
         }
-
     }
 }
