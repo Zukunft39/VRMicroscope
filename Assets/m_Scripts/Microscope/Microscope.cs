@@ -1,8 +1,10 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using Cinemachine;
 using Unity.VisualScripting;
 using Unity.XR.CoreUtils;
 using UnityEngine;
+using UnityEngine.InputSystem.XR;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
 public class Microscope : MonoBehaviour
@@ -61,7 +63,7 @@ public class Microscope : MonoBehaviour
     float currentFocal;           // 当前焦距值
     bool change;
     #endregion
-
+    
     // Start 在游戏开始时调用一次
     void Start()
     {
@@ -92,7 +94,7 @@ public class Microscope : MonoBehaviour
             Cam.SetActive(!Cam.activeSelf);
             screen.SetActive(!screen.activeSelf);
         }
-
+        
         //交互
         if (MicroUI.setTrue && Input.GetKeyDown(KeyCode.E) && isNear)
         {
@@ -254,7 +256,6 @@ public class Microscope : MonoBehaviour
             }
         }
     }
-
     // 焦距调整方法
     private void AdjustFocal(int direction)
     {
@@ -273,6 +274,8 @@ public class Microscope : MonoBehaviour
 
         // 更新景深参数
         currentFocal = newFocal;
+        print(newFocal);
+        print(depthOfField);
         if (depthOfField != null)
         {
             depthOfField.focusDistance.value = currentFocal;
