@@ -3,7 +3,8 @@ using System.Collections.Generic;
 using Unity.VisualScripting;
 using Unity.XR.CoreUtils;
 using UnityEngine;
-
+using UnityEngine.Rendering;
+using UnityEngine.Rendering.Universal;
 public class Microscope : MonoBehaviour
 {
     #region 物体和组件
@@ -19,12 +20,13 @@ public class Microscope : MonoBehaviour
     public GameObject microscopeCamera;
     public GameObject glass4;
     public List<int> glass4Rotation = new List<int>();
-    int[] glass4Size = { 10, 2, 1 };
+    int[] glass4Size = { 100 ,50, 10, 5 };
     int glass4Choice = 0;
     GameObject Object;  //玩家放的物体
     public GameObject Cam; 
     GameObject player;
     private LineRenderer lineRenderer;
+    public Material screenMaterial;
     #endregion
 
     #region 数值和工具类变量
@@ -48,6 +50,18 @@ public class Microscope : MonoBehaviour
     private float rotationSpeed = 90.0f; // 每秒旋转90度
     #endregion
 
+    #region 焦距调整相关变量
+    private Volume volume;                // 后处理Volume组件
+    private DepthOfField depthOfField;    // 景深效果组件
+    private bool isCoarseAdjust = true;   // 是否为粗调模式
+    float coarseStep = 2f;         // 粗调步长
+    float fineStep = 0.2f;           // 细调步长
+    float minFocal = 1f;           // 最小焦距
+    float maxFocal = 50f;         // 最大焦距
+    float currentFocal;           // 当前焦距值
+    bool change;
+    #endregion
+
     // Start 在游戏开始时调用一次
     void Start()
     {
@@ -59,6 +73,14 @@ public class Microscope : MonoBehaviour
         show.SetActive(false);
         Cam.SetActive(false);
         screen.SetActive(false);
+        change = false;
+        volume = lookCamera.GetComponent<Volume>();
+        if (volume != null && volume.profile.TryGet(out depthOfField))
+        {
+            currentFocal = depthOfField.focusDistance.value;
+        }
+        MeshRenderer meshRenderer=screen.GetComponent<MeshRenderer>();
+        meshRenderer.material = screenMaterial;
     }
     void Update()
     {
@@ -200,6 +222,10 @@ public class Microscope : MonoBehaviour
             }
             if(Input.GetKeyDown(KeyCode.T))
             {
+                if (depthOfField != null)
+                {
+                    depthOfField.focusDistance.value = 1;
+                }
                 // 确保数组长度一致并循环索引
                 int maxChoice = Mathf.Min(glass4Rotation.Count, glass4Size.Length);
                 targetGlass4Choice = (glass4Choice + 1) % maxChoice;
@@ -208,6 +234,48 @@ public class Microscope : MonoBehaviour
                 StartCoroutine(SwitchObjectiveLens());
                 glass4Choice = targetGlass4Choice;
             }
+
+            // 切换粗细调节模式
+            if (Input.GetKeyDown(KeyCode.M))
+            {
+                isCoarseAdjust = !isCoarseAdjust;
+            }
+
+            // 焦距减少（B键）
+            if (Input.GetKeyDown(KeyCode.B))
+            {
+                AdjustFocal(-1);
+            }
+
+            // 焦距增加（N键）
+            if (Input.GetKeyDown(KeyCode.N))
+            {
+                AdjustFocal(1);
+            }
+        }
+    }
+
+    // 焦距调整方法
+    private void AdjustFocal(int direction)
+    {
+        // 根据模式选择步长
+        float step = isCoarseAdjust ? coarseStep : fineStep;
+        if (change)
+        {
+            direction *= -1;
+        }
+        currentFocal = depthOfField.focusDistance.value;
+        float newFocal = currentFocal + direction * step;
+
+        // 循环边界处理
+        if (newFocal < minFocal) change = !change;
+        if (newFocal > maxFocal) change= !change;
+
+        // 更新景深参数
+        currentFocal = newFocal;
+        if (depthOfField != null)
+        {
+            depthOfField.focusDistance.value = currentFocal;
         }
     }
 
@@ -260,7 +328,7 @@ public class Microscope : MonoBehaviour
 
         // 记录初始值和目标值
         float startSize = microscopeCamera.GetComponent<Camera>().orthographicSize;
-        float targetSize = glass4Size[targetGlass4Choice];
+        float targetSize = glass4Size[targetGlass4Choice]/5;
         Quaternion startRot = glass4.transform.localRotation;
         Quaternion targetRot = Quaternion.Euler(
             glass4.transform.localEulerAngles.x,
