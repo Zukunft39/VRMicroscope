@@ -62,8 +62,13 @@ public class Microscope : MonoBehaviour
     float maxFocal = 50f;         // 最大焦距
     float currentFocal;           // 当前焦距值
     bool change;
+    int focalChangeSpeed = 1; // 速率
+    float focalChangeInterval = 0.1f; // 每次调整间隔
+    float lastAdjustmentTimeB = 0f;
+    float lastAdjustmentTimeN = 0f;
+
     #endregion
-    
+
     // Start 在游戏开始时调用一次
     void Start()
     {
@@ -244,15 +249,23 @@ public class Microscope : MonoBehaviour
             }
 
             // 焦距减少（B键）
-            if (Input.GetKeyDown(KeyCode.B))
+            if (Input.GetKey(KeyCode.B))
             {
-                AdjustFocal(-1);
+                if (Time.time - lastAdjustmentTimeB >= focalChangeInterval) // 控制调整速率
+                {
+                    AdjustFocal(-focalChangeSpeed);
+                    lastAdjustmentTimeB = Time.time;
+                }
             }
 
             // 焦距增加（N键）
-            if (Input.GetKeyDown(KeyCode.N))
+            if (Input.GetKey(KeyCode.N))
             {
-                AdjustFocal(1);
+                if (Time.time - lastAdjustmentTimeN >= focalChangeInterval) // 控制调整速率
+                {
+                    AdjustFocal(focalChangeSpeed);
+                    lastAdjustmentTimeN = Time.time;
+                }
             }
         }
     }
@@ -274,8 +287,8 @@ public class Microscope : MonoBehaviour
 
         // 更新景深参数
         currentFocal = newFocal;
-        print(newFocal);
-        print(depthOfField);
+        //print(newFocal);
+        //print(depthOfField);
         if (depthOfField != null)
         {
             depthOfField.focusDistance.value = currentFocal;
