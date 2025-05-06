@@ -107,11 +107,29 @@ public class Microscope : MonoBehaviour
             {
                 if (player.transform.childCount > 0)
                 {
-                    Object = player.transform.GetChild(0).gameObject;
-                    Object.transform.SetParent(Cam.transform);
-                    Object.transform.localPosition = Vector3.zero;
-                    Object.transform.localRotation = Quaternion.identity;
-                    show.SetActive(true);
+                    bool flag=false;
+                    int i;
+                    for (i = 0; i < player.transform.childCount; i++)
+                    {
+                        if (player.transform.GetChild(i).CompareTag("ObserveObjects"))
+                        {
+                            flag = true;
+                            break;
+                        }
+                    }
+                    if (flag)
+                    {
+                        Cam.SetActive(true);
+                        Object = player.transform.GetChild(i).gameObject;
+                        Object.transform.SetParent(Cam.transform);
+                        Object.transform.localPosition = Vector3.zero;
+                        Object.transform.localRotation = Quaternion.identity;
+                        show.SetActive(true);
+                    }
+                    else
+                    {
+                        Debug.Log("没有可释放物体");
+                    }
                 }
             }
             else
@@ -226,6 +244,7 @@ public class Microscope : MonoBehaviour
                 pointer = 0;
                 MicroUI.setTrue = true;
                 player.SetActive(true);
+                Cam.SetActive(false);
             }
             if(Input.GetKeyDown(KeyCode.T))
             {

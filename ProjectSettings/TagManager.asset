@@ -8,6 +8,7 @@ TagManager:
   - DichroicMirror
   - Filter
   - Edge
+  - ObserveObjects
   layers:
   - Default
   - TransparentFX
