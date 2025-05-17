@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using Cinemachine;
 using Unity.VisualScripting;
@@ -265,6 +265,8 @@ public class Microscope : MonoBehaviour
             if (Input.GetKeyDown(KeyCode.M))
             {
                 isCoarseAdjust = !isCoarseAdjust;
+                if (isCoarseAdjust) Debug.Log("切换为粗调");
+                else Debug.Log("切换为细调");
             }
 
             // 焦距减少（B键）
