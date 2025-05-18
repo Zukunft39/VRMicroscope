@@ -27,7 +27,7 @@ Material:
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
-  m_CustomRenderQueue: -1
+  m_CustomRenderQueue: 1994
   stringTagMap: {}
   disabledShaderPasses: []
   m_SavedProperties:
@@ -63,9 +63,9 @@ Material:
     - _LightnessSmooth: 0
     - _MinLight: 0.5
     - _QueueControl: 0
-    - _QueueOffset: 0
+    - _QueueOffset: -6
     - _VisionAreaRadius: 2.13
-    - _VisionAreaSmooth: 0.0716
+    - _VisionAreaSmooth: 0.1
     m_Colors:
     - _MainColor: {r: 1, g: 1, b: 1, a: 0.5921569}
   m_BuildTextureStacks: []

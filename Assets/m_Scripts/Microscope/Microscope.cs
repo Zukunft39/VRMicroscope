@@ -96,7 +96,6 @@ public class Microscope : MonoBehaviour
         {
             lineRenderer.enabled = !lineRenderer.enabled;
             Light.SetActive(!Light.activeSelf);
-            Cam.SetActive(!Cam.activeSelf);
             screen.SetActive(!screen.activeSelf);
         }
         
@@ -142,6 +141,7 @@ public class Microscope : MonoBehaviour
                 if (pointer == 0)
                 {
                     showCamera.SetActive(true);
+                    Cam.SetActive(true);
                     showCamera.transform.position = player.transform.position;
                     showCamera.transform.rotation = player.transform.rotation;
                     pointer++;
