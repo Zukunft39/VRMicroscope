@@ -222,7 +222,8 @@ public class Microscope : MonoBehaviour
 
             }
             // 使用MoveTowards平滑过渡位置
-            showCamera.transform.position = Vector3.MoveTowards(showCamera.transform.position, targetPosition, 10 * Time.deltaTime);
+            showCamera.transform.position = Vector3.MoveTowards(showCamera.transform.position, targetPosition, 
+                10 * Time.deltaTime*transform.lossyScale.x);
 
             // 使用RotateTowards平滑过渡旋转
             showCamera.transform.rotation = Quaternion.RotateTowards(showCamera.transform.rotation, targetRotation, 120 * Time.deltaTime);
