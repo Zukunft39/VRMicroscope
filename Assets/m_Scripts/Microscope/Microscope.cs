@@ -66,7 +66,7 @@ public class Microscope : MonoBehaviour
     float focalChangeInterval = 0.1f; // 每次调整间隔
     float lastAdjustmentTimeB = 0f;
     float lastAdjustmentTimeN = 0f;
-
+    Vector3 ObjectInitialScale= Vector3.zero;
     #endregion
 
     // Start 在游戏开始时调用一次
@@ -113,6 +113,7 @@ public class Microscope : MonoBehaviour
                     {
                         if (player.transform.GetChild(i).CompareTag("ObserveObjects"))
                         {
+                            ObjectInitialScale = player.transform.GetChild(i).gameObject.transform.localScale;
                             flag = true;
                             break;
                         }
@@ -124,6 +125,10 @@ public class Microscope : MonoBehaviour
                         Object.transform.SetParent(Cam.transform);
                         Object.transform.localPosition = Vector3.zero;
                         Object.transform.localRotation = Quaternion.identity;
+                        Object.transform.localScale = new 
+                            Vector3(ObjectInitialScale.x / gameObject.transform.localScale.x,
+                            ObjectInitialScale.y / gameObject.transform.localScale.x,
+                            ObjectInitialScale.z / gameObject.transform.localScale.x);
                         show.SetActive(true);
                     }
                     else
@@ -153,6 +158,10 @@ public class Microscope : MonoBehaviour
         {
             if (Object != null)
             {
+                Object.transform.localScale = new
+                Vector3(ObjectInitialScale.x ,
+                    ObjectInitialScale.y,
+                    ObjectInitialScale.z);
                 Object.transform.SetParent(player.transform);
                 Object = null;
                 show.SetActive(false);
@@ -212,8 +221,8 @@ public class Microscope : MonoBehaviour
             }
             else
             {
-                targetPosition = point2.transform.position; // 假设有point2作为备用目标位置
-                targetRotation = point2.transform.rotation; // 假设point2也有旋转
+                targetPosition = point2.transform.position;
+                targetRotation = point2.transform.rotation;
                 if (p==0)
                 {
                     MicroBlack.ToBlack = true;
@@ -227,7 +236,7 @@ public class Microscope : MonoBehaviour
 
             // 使用RotateTowards平滑过渡旋转
             showCamera.transform.rotation = Quaternion.RotateTowards(showCamera.transform.rotation, targetRotation, 120 * Time.deltaTime);
-            if (Vector3.Distance(showCamera.transform.position,point2.transform.position)<0.1f)
+            if (Vector3.Distance(showCamera.transform.position,point2.transform.position)<0.01f)
             {
                 showCamera.SetActive(false);
                 lookCamera.SetActive(true);
