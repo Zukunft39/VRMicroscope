@@ -1,5 +1,6 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using Cinemachine;
 using Unity.VisualScripting;
 using Unity.XR.CoreUtils;
@@ -7,6 +8,7 @@ using UnityEngine;
 using UnityEngine.InputSystem.XR;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
+using UnityEngine.UI;
 public class Microscope : MonoBehaviour
 {
     #region 物体和组件
@@ -16,23 +18,25 @@ public class Microscope : MonoBehaviour
     public GameObject point1; //相机点位坐标
     public GameObject point2;
     public GameObject knob1;
-    public GameObject showCamera;  
-    public GameObject lookCamera;  
+    public GameObject showCamera;
+    public GameObject lookCamera;
     public GameObject screen;
     public GameObject microscopeCamera;
     public GameObject glass4;
+    public Slider slider;
     public List<int> glass4Rotation = new List<int>();
-    int[] glass4Size = { 100 ,50, 10, 5 };
+    int[] glass4Size = { 5,10,50,100 };
+    int[] aperture = { 16,10,6,1 };
     int glass4Choice = 0;
     GameObject Object;  //玩家放的物体
-    public GameObject Cam; 
+    public GameObject Cam;
     GameObject player;
     private LineRenderer lineRenderer;
     public Material screenMaterial;
     #endregion
 
     #region 数值和工具类变量
-    public int pointer; 
+    public int pointer;
     public float widthChangeAmount = 0.05f; // 每次滚动改变的宽度量
     public float minWidth = 0.01f; // 最小宽度
     public float maxWidth = 0.4f; // 最大宽度
@@ -60,13 +64,14 @@ public class Microscope : MonoBehaviour
     float fineStep = 0.2f;           // 细调步长
     float minFocal = 1f;           // 最小焦距
     float maxFocal = 50f;         // 最大焦距
+    float distance;             //目镜和底座距离
     float currentFocal;           // 当前焦距值
     bool change;
     int focalChangeSpeed = 1; // 速率
     float focalChangeInterval = 0.1f; // 每次调整间隔
     float lastAdjustmentTimeB = 0f;
     float lastAdjustmentTimeN = 0f;
-    Vector3 ObjectInitialScale= Vector3.zero;
+    Vector3 ObjectInitialScale = Vector3.zero;
     #endregion
 
     // Start 在游戏开始时调用一次
@@ -80,13 +85,14 @@ public class Microscope : MonoBehaviour
         show.SetActive(false);
         Cam.SetActive(false);
         screen.SetActive(false);
+        StartCoroutine(SwitchObjectiveLens());
         change = false;
         volume = lookCamera.GetComponent<Volume>();
         if (volume != null && volume.profile.TryGet(out depthOfField))
         {
             currentFocal = depthOfField.focusDistance.value;
         }
-        MeshRenderer meshRenderer=screen.GetComponent<MeshRenderer>();
+        MeshRenderer meshRenderer = screen.GetComponent<MeshRenderer>();
         meshRenderer.material = screenMaterial;
     }
     void Update()
@@ -98,7 +104,7 @@ public class Microscope : MonoBehaviour
             Light.SetActive(!Light.activeSelf);
             screen.SetActive(!screen.activeSelf);
         }
-        
+
         //交互
         if (MicroUI.setTrue && Input.GetKeyDown(KeyCode.E) && isNear)
         {
@@ -106,7 +112,7 @@ public class Microscope : MonoBehaviour
             {
                 if (player.transform.childCount > 0)
                 {
-                    bool flag=false;
+                    bool flag = false;
                     int i;
                     for (i = 0; i < player.transform.childCount; i++)
                     {
@@ -124,7 +130,7 @@ public class Microscope : MonoBehaviour
                         Object.transform.SetParent(Cam.transform);
                         Object.transform.localPosition = Vector3.zero;
                         Object.transform.localRotation = Quaternion.identity;
-                        Object.transform.localScale = new 
+                        Object.transform.localScale = new
                             Vector3(ObjectInitialScale.x / gameObject.transform.localScale.x,
                             ObjectInitialScale.y / gameObject.transform.localScale.x,
                             ObjectInitialScale.z / gameObject.transform.localScale.x);
@@ -159,7 +165,7 @@ public class Microscope : MonoBehaviour
             if (Object != null)
             {
                 Object.transform.localScale = new
-                Vector3(ObjectInitialScale.x ,
+                Vector3(ObjectInitialScale.x,
                     ObjectInitialScale.y,
                     ObjectInitialScale.z);
                 Object.transform.SetParent(player.transform);
@@ -223,7 +229,7 @@ public class Microscope : MonoBehaviour
             {
                 targetPosition = point2.transform.position;
                 targetRotation = point2.transform.rotation;
-                if (p==0)
+                if (p == 0)
                 {
                     MicroBlack.ToBlack = true;
                     p++;
@@ -231,12 +237,12 @@ public class Microscope : MonoBehaviour
 
             }
             // 使用MoveTowards平滑过渡位置
-            showCamera.transform.position = Vector3.MoveTowards(showCamera.transform.position, targetPosition, 
-                10 * Time.deltaTime*transform.lossyScale.x);
+            showCamera.transform.position = Vector3.MoveTowards(showCamera.transform.position, targetPosition,
+                10 * Time.deltaTime * transform.lossyScale.x);
 
             // 使用RotateTowards平滑过渡旋转
             showCamera.transform.rotation = Quaternion.RotateTowards(showCamera.transform.rotation, targetRotation, 120 * Time.deltaTime);
-            if (Vector3.Distance(showCamera.transform.position,point2.transform.position)<0.01f)
+            if (Vector3.Distance(showCamera.transform.position, point2.transform.position) < 0.01f)
             {
                 showCamera.SetActive(false);
                 lookCamera.SetActive(true);
@@ -246,7 +252,7 @@ public class Microscope : MonoBehaviour
             }
         }
 
-        if(lookCamera.activeSelf)
+        if (lookCamera.activeSelf)
         {
             if (Input.GetKeyDown(KeyCode.E))
             {
@@ -256,7 +262,7 @@ public class Microscope : MonoBehaviour
                 player.SetActive(true);
                 Cam.SetActive(false);
             }
-            if(Input.GetKeyDown(KeyCode.T))
+            if (Input.GetKeyDown(KeyCode.T))
             {
                 if (depthOfField != null)
                 {
@@ -310,9 +316,12 @@ public class Microscope : MonoBehaviour
         currentFocal = depthOfField.focusDistance.value;
         float newFocal = currentFocal + direction * step;
 
+        distance += direction * step;
+        slider.value += direction * -0.02f;
+
         // 循环边界处理
         if (newFocal < minFocal) change = !change;
-        if (newFocal > maxFocal) change= !change;
+        if (newFocal > maxFocal) change = !change;
 
         // 更新景深参数
         currentFocal = newFocal;
@@ -344,7 +353,7 @@ public class Microscope : MonoBehaviour
         if (other.CompareTag("Player"))
         {
             player = other.gameObject;
-            MicroUI.setTrue=true;
+            MicroUI.setTrue = true;
         }
     }
 
@@ -366,14 +375,14 @@ public class Microscope : MonoBehaviour
         }
     }
 
-    // 新增协程处理平滑过渡
+    // 协程处理平滑过渡
     IEnumerator SwitchObjectiveLens()
     {
         isRotating = true;
 
         // 记录初始值和目标值
         float startSize = microscopeCamera.GetComponent<Camera>().orthographicSize;
-        float targetSize = glass4Size[targetGlass4Choice]/5;
+        float targetSize = glass4Size[glass4Size.Count()-targetGlass4Choice-1] / 5;
         Quaternion startRot = glass4.transform.localRotation;
         Quaternion targetRot = Quaternion.Euler(
             glass4.transform.localEulerAngles.x,
@@ -410,5 +419,15 @@ public class Microscope : MonoBehaviour
         glass4.transform.localRotation = targetRot;
         microscopeCamera.GetComponent<Camera>().orthographicSize = targetSize;
         isRotating = false;
+    }
+
+    public int GetScale()
+    {
+        return glass4Size[glass4Choice];
+    }
+
+    public float GetDistance()
+    {
+        return distance;
     }
 }
