@@ -9,11 +9,13 @@ using UnityEngine.InputSystem.XR;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
 using UnityEngine.UI;
+
 public class Microscope : MonoBehaviour
 {
     #region 物体和组件
-    public GameObject Line;    //光线物体
-    public GameObject Light;  //灯光
+
+    public GameObject Line; //光线物体
+    public GameObject Light; //灯光
     public GameObject show;
     public GameObject point1; //相机点位坐标
     public GameObject point2;
@@ -25,24 +27,26 @@ public class Microscope : MonoBehaviour
     public GameObject glass4;
     public Slider slider;
     public List<int> glass4Rotation = new List<int>();
-    int[] glass4Size = { 5,10,50,100 };
-    int[] aperture = { 16,10,6,1 };
+    int[] glass4Size = { 5, 10, 50, 100 };
+    int[] aperture = { 16, 10, 6, 1 };
     int glass4Choice = 0;
-    GameObject Object;  //玩家放的物体
+    GameObject Object; //玩家放的物体
     public GameObject Cam;
     GameObject player;
     private LineRenderer lineRenderer;
     public Material screenMaterial;
+
     #endregion
 
     #region 数值和工具类变量
+
     public int pointer;
     public float widthChangeAmount = 0.05f; // 每次滚动改变的宽度量
     public float minWidth = 0.01f; // 最小宽度
     public float maxWidth = 0.4f; // 最大宽度
     public float rotationChangeRatio = 10f; // 每次宽度变化对应的旋转增量
     public float minRotationZ = 45f; // z轴旋转的最小值
-    public float maxRotationZ = 135f;  // z轴旋转的最大值
+    public float maxRotationZ = 135f; // z轴旋转的最大值
     int p = 0;
     bool isNear;
     public float rotationAmount = 10f; // 每次滚动旋转的角度
@@ -54,24 +58,27 @@ public class Microscope : MonoBehaviour
     private float rotationProgress;
     private float sizeChangeSpeed = 2.0f;
     private float rotationSpeed = 90.0f; // 每秒旋转90度
+
     #endregion
 
     #region 焦距调整相关变量
-    private Volume volume;                // 后处理Volume组件
-    private DepthOfField depthOfField;    // 景深效果组件
-    private bool isCoarseAdjust = true;   // 是否为粗调模式
-    float coarseStep = 2f;         // 粗调步长
-    float fineStep = 0.2f;           // 细调步长
-    float minFocal = 1f;           // 最小焦距
-    float maxFocal = 50f;         // 最大焦距
-    float distance;             //目镜和底座距离
-    float currentFocal;           // 当前焦距值
+
+    private Volume volume; // 后处理Volume组件
+    private DepthOfField depthOfField; // 景深效果组件
+    private bool isCoarseAdjust = true; // 是否为粗调模式
+    float coarseStep = 2f; // 粗调步长
+    float fineStep = 0.2f; // 细调步长
+    float minFocal = 1f; // 最小焦距
+    float maxFocal = 50f; // 最大焦距
+    float distance; //目镜和底座距离
+    float currentFocal; // 当前焦距值
     bool change;
     int focalChangeSpeed = 1; // 速率
     float focalChangeInterval = 0.1f; // 每次调整间隔
     float lastAdjustmentTimeB = 0f;
     float lastAdjustmentTimeN = 0f;
     Vector3 ObjectInitialScale = Vector3.zero;
+
     #endregion
 
     // Start 在游戏开始时调用一次
@@ -92,21 +99,24 @@ public class Microscope : MonoBehaviour
         {
             currentFocal = depthOfField.focusDistance.value;
         }
+
         MeshRenderer meshRenderer = screen.GetComponent<MeshRenderer>();
         meshRenderer.material = screenMaterial;
     }
-    void Update()
+
+    public void LightSwitch()
     {
-        //光源开关
-        if (MicroUI.setTrue && Input.GetKeyDown(KeyCode.Q) && isNear)
+        if (MicroUI.setTrue && isNear)
         {
             lineRenderer.enabled = !lineRenderer.enabled;
             Light.SetActive(!Light.activeSelf);
             screen.SetActive(!screen.activeSelf);
         }
+    }
 
-        //交互
-        if (MicroUI.setTrue && Input.GetKeyDown(KeyCode.E) && isNear)
+    public void PutAndObserve()
+    {
+        if (MicroUI.setTrue && isNear)
         {
             if (Object == null)
             {
@@ -123,6 +133,7 @@ public class Microscope : MonoBehaviour
                             break;
                         }
                     }
+
                     if (flag)
                     {
                         Cam.SetActive(true);
@@ -132,8 +143,8 @@ public class Microscope : MonoBehaviour
                         Object.transform.localRotation = Quaternion.identity;
                         Object.transform.localScale = new
                             Vector3(ObjectInitialScale.x / gameObject.transform.localScale.x,
-                            ObjectInitialScale.y / gameObject.transform.localScale.x,
-                            ObjectInitialScale.z / gameObject.transform.localScale.x);
+                                ObjectInitialScale.y / gameObject.transform.localScale.x,
+                                ObjectInitialScale.z / gameObject.transform.localScale.x);
                         show.SetActive(true);
                     }
                     else
@@ -158,24 +169,28 @@ public class Microscope : MonoBehaviour
                 }
             }
         }
+    }
 
-        //取下物体
-        if (MicroUI.setTrue && Input.GetKeyDown(KeyCode.R) && isNear)
+    public void TakeOutobj()
+    {
+        if (MicroUI.setTrue && isNear)
         {
             if (Object != null)
             {
                 Object.transform.localScale = new
-                Vector3(ObjectInitialScale.x,
-                    ObjectInitialScale.y,
-                    ObjectInitialScale.z);
+                    Vector3(ObjectInitialScale.x,
+                        ObjectInitialScale.y,
+                        ObjectInitialScale.z);
                 Object.transform.SetParent(player.transform);
                 Object = null;
                 show.SetActive(false);
             }
         }
+    }
 
-        // 修改原有的T键检测部分
-        if (MicroUI.setTrue && Input.GetKeyDown(KeyCode.T) && isNear && !isRotating)
+    public void RotateGlass()
+    {
+        if (MicroUI.setTrue && isNear && !isRotating)
         {
             // 确保数组长度一致并循环索引
             int maxChoice = Mathf.Min(glass4Rotation.Count, glass4Size.Length);
@@ -185,12 +200,33 @@ public class Microscope : MonoBehaviour
             StartCoroutine(SwitchObjectiveLens());
             glass4Choice = targetGlass4Choice;
         }
+    }
 
+    public void RotateGlassOnObserving()
+    {
+        if(!lookCamera.activeSelf)return;
+        if (depthOfField != null)
+        {
+            depthOfField.focusDistance.value = 1;
+        }
+        // 确保数组长度一致并循环索引
+        int maxChoice = Mathf.Min(glass4Rotation.Count, glass4Size.Length);
+        targetGlass4Choice = (glass4Choice + 1) % maxChoice;
+
+        // 启动旋转过渡
+        StartCoroutine(SwitchObjectiveLens());
+        glass4Choice = targetGlass4Choice;
+    }
+
+    public void AdjustLight(float scrollInput)
+    {
         if (MicroUI.setTrue && isNear)
         {
-            // 获取鼠标滚轮输入
-            float scrollInput = Input.GetAxis("Mouse ScrollWheel");
-
+            if (scrollInput == 0)
+            {
+                // 获取鼠标滚轮输入
+                scrollInput = Input.GetAxis("Mouse ScrollWheel");
+            }
             if (scrollInput != 0) // 如果滚动量不为零
             {
                 // 根据滚轮方向调整激光的宽度
@@ -212,6 +248,61 @@ public class Microscope : MonoBehaviour
                 knob1.transform.rotation = Quaternion.Euler(currentRotation.x, currentRotation.y, newRotationZ);
             }
         }
+    }
+
+    public void QuitObserve()
+    {
+        lookCamera.SetActive(false);
+        pointer = 0;
+        MicroUI.setTrue = true;
+        player.SetActive(true);
+        Cam.SetActive(false);
+    }
+
+    public void SwitchModeOfChange()
+    {
+        if(!lookCamera.activeSelf)return;
+        isCoarseAdjust = !isCoarseAdjust;
+    }
+
+    public void ChangeFocal(float mode)
+    {
+        if(!lookCamera.activeSelf)return;
+        if (mode < 0)
+        {
+            if (Time.time - lastAdjustmentTimeB >= focalChangeInterval) // 控制调整速率
+            {
+                AdjustFocal(-focalChangeSpeed);
+                lastAdjustmentTimeB = Time.time;
+            }
+        }
+        else if(mode > 0)
+        {
+            if (Time.time - lastAdjustmentTimeN >= focalChangeInterval) // 控制调整速率
+            {
+                AdjustFocal(focalChangeSpeed);
+                lastAdjustmentTimeN = Time.time;
+            }
+        }
+    }
+    void Update()
+    {
+        //光源开关
+        if(Input.GetKeyDown(KeyCode.Q))LightSwitch();
+        
+        //交互
+        if (Input.GetKeyDown(KeyCode.E))
+        {
+            PutAndObserve();
+            if(lookCamera.activeSelf)QuitObserve();
+        }
+        //取下物体
+        if(Input.GetKeyDown(KeyCode.R))TakeOutobj();
+
+        // 修改原有的T键检测部分
+        if( Input.GetKeyDown(KeyCode.T))RotateGlass();
+        AdjustLight(0);
+       
 
         if (showCamera.activeSelf)
         {
@@ -251,58 +342,17 @@ public class Microscope : MonoBehaviour
                 player.SetActive(false);
             }
         }
+        
+        if (Input.GetKeyDown(KeyCode.T))RotateGlassOnObserving();
 
-        if (lookCamera.activeSelf)
-        {
-            if (Input.GetKeyDown(KeyCode.E))
-            {
-                lookCamera.SetActive(false);
-                pointer = 0;
-                MicroUI.setTrue = true;
-                player.SetActive(true);
-                Cam.SetActive(false);
-            }
-            if (Input.GetKeyDown(KeyCode.T))
-            {
-                if (depthOfField != null)
-                {
-                    depthOfField.focusDistance.value = 1;
-                }
-                // 确保数组长度一致并循环索引
-                int maxChoice = Mathf.Min(glass4Rotation.Count, glass4Size.Length);
-                targetGlass4Choice = (glass4Choice + 1) % maxChoice;
+        // 切换粗细调节模式
+        if (Input.GetKeyDown(KeyCode.M))SwitchModeOfChange();
 
-                // 启动旋转过渡
-                StartCoroutine(SwitchObjectiveLens());
-                glass4Choice = targetGlass4Choice;
-            }
+        // 焦距减少（B键）
+        if (Input.GetKey(KeyCode.B))ChangeFocal(-1);
 
-            // 切换粗细调节模式
-            if (Input.GetKeyDown(KeyCode.M))
-            {
-                isCoarseAdjust = !isCoarseAdjust;
-            }
-
-            // 焦距减少（B键）
-            if (Input.GetKey(KeyCode.B))
-            {
-                if (Time.time - lastAdjustmentTimeB >= focalChangeInterval) // 控制调整速率
-                {
-                    AdjustFocal(-focalChangeSpeed);
-                    lastAdjustmentTimeB = Time.time;
-                }
-            }
-
-            // 焦距增加（N键）
-            if (Input.GetKey(KeyCode.N))
-            {
-                if (Time.time - lastAdjustmentTimeN >= focalChangeInterval) // 控制调整速率
-                {
-                    AdjustFocal(focalChangeSpeed);
-                    lastAdjustmentTimeN = Time.time;
-                }
-            }
-        }
+        // 焦距增加（N键）
+        if (Input.GetKey(KeyCode.N))ChangeFocal(1);
     }
     // 焦距调整方法
     private void AdjustFocal(int direction)
@@ -353,6 +403,7 @@ public class Microscope : MonoBehaviour
         if (other.CompareTag("Player"))
         {
             player = other.gameObject;
+            player.transform.parent.GetComponent<InteractWithMicroscope>().EnableInteract(this);
             MicroUI.setTrue = true;
         }
     }
@@ -370,6 +421,7 @@ public class Microscope : MonoBehaviour
     {
         if (other.CompareTag("Player"))
         {
+            player.transform.parent.GetComponent<InteractWithMicroscope>().DisableInteract(this);
             MicroUI.setTrue = false;
             isNear = false;
         }

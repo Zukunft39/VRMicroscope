@@ -1,0 +1,6 @@
+x按下后禁止转向，此时右摇杆左右移动改焦距（观察时），上下调光（未观察时）（按键绑定为：x primary left，右摇杆 primary Axis）
+a换物镜（primary right）
+Y调节粗细模式（secondary left）
+b开关灯（secondary right）
+左前放东西/进观察模式（trigger left）
+右前取东西（trigger right）

@@ -2600,6 +2600,176 @@
                     "isPartOfComposite": false
                 }
             ]
+        },
+        {
+            "name": "InteractWithMicroscope",
+            "id": "0b804d7a-9314-4e36-bc42-8b6ae5c91c20",
+            "actions": [
+                {
+                    "name": "LightSwich",
+                    "type": "Button",
+                    "id": "10392d4c-f226-4770-a413-9c17a9908c64",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "PutAndObserve",
+                    "type": "Button",
+                    "id": "23bad408-c3a2-4e36-aa74-a076254c110f",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "TakeObj",
+                    "type": "Button",
+                    "id": "8d184300-4d4e-46d2-8104-90d1de8c1db1",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "ChangeFocusOrChangeLIght",
+                    "type": "Value",
+                    "id": "11936afc-fb94-4b3c-b90a-b9155b4b0979",
+                    "expectedControlType": "Vector2",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                },
+                {
+                    "name": "ChangeGlass",
+                    "type": "Button",
+                    "id": "eb3c62e5-8c89-4631-9b5a-d9dde932286c",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "ChangeMode",
+                    "type": "Button",
+                    "id": "46ac2705-7f50-4fa0-9267-14a6c2a4fe25",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Disableturn",
+                    "type": "Button",
+                    "id": "2b7dd16a-2aa3-4778-abcc-ffb7bf8955ee",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "6b48c949-a356-44b5-976e-23f6c8f83615",
+                    "path": "<XRController>{RightHand}/secondaryButton",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "LightSwich",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "c06ac702-c240-4a6f-b6f0-5bafbf30ab02",
+                    "path": "<XRController>{LeftHand}/triggerButton",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "PutAndObserve",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "dac41594-05c2-42c4-aed8-61dc5c88a345",
+                    "path": "<XRController>{RightHand}/triggerButton",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "TakeObj",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "One Modifier",
+                    "id": "f924e2b8-9d9a-4c92-9800-8761eb79721f",
+                    "path": "OneModifier",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "ChangeFocusOrChangeLIght",
+                    "isComposite": true,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "modifier",
+                    "id": "d4d3c7ca-ef5d-4dc3-a25a-11f0e2c43417",
+                    "path": "<XRController>{LeftHand}/primaryButton",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "ChangeFocusOrChangeLIght",
+                    "isComposite": false,
+                    "isPartOfComposite": true
+                },
+                {
+                    "name": "binding",
+                    "id": "ed1480ee-4868-46dc-8838-9be7e9aeef5f",
+                    "path": "<XRController>{RightHand}/primary2DAxis",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "ChangeFocusOrChangeLIght",
+                    "isComposite": false,
+                    "isPartOfComposite": true
+                },
+                {
+                    "name": "",
+                    "id": "25998f73-252b-48e1-b769-13730cfba8f8",
+                    "path": "<XRController>{RightHand}/primaryButton",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "ChangeGlass",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "d0c774f1-8c97-48ab-96d0-c23ef0607e97",
+                    "path": "<XRController>{LeftHand}/secondaryButton",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "ChangeMode",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "5aebcb35-1a7f-4f61-9862-7977b7d50209",
+                    "path": "<XRController>{LeftHand}/primaryButton",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Disableturn",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
         }
     ],
     "controlSchemes": [

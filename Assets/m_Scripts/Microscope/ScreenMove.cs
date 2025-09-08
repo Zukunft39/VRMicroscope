@@ -20,7 +20,7 @@ public class ScreenMove : MonoBehaviour
                 // 计算移动方向
                 Vector3 moveDirection = new Vector3(horizontal, vertical, 0f).normalized;
                 // 移动物体
-                Object.transform.Translate(moveDirection * moveSpeed * Time.deltaTime);
+                Object.transform.Translate(moveDirection * (moveSpeed * Time.deltaTime));
             }
         }
     }

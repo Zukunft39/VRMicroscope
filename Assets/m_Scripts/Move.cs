@@ -12,22 +12,19 @@ public class Move : TInstance<Move>
     public ProgressControl progressControl;
     InputAction inputAction;
     public MoveTest moveTest;
-    public XRRayInteractor[] interactors;//0左1右
+    public XRRayInteractor interactor;//右
     public float speed;
     public GameObject cinema;
     private Vector3 direction=Vector3.zero;
     public Vector3 targetPos=Vector2.zero;
 
+    private void autoMove(InputAction.CallbackContext  context)
+    {
+        interactor.endPointDistance=1000f;
+        targetPos=interactor.rayEndPoint;
+    }
     private void Start() {
-        inputActions.actionMaps[2].actions[0].started+=(Input)=>{
-            interactors[0].endPointDistance=1000f;
-            targetPos=interactors[0].rayEndPoint;
-            
-        };
-        inputActions.actionMaps[4].actions[2].started+=(Input)=>{
-            interactors[1].endPointDistance=1000f;
-            targetPos=interactors[1].rayEndPoint;
-        };
+        inputActions.actionMaps[5].actions[0].started+=autoMove;
     }
     private void FixedUpdate() {
         if(progressControl.isAutoMoving){
