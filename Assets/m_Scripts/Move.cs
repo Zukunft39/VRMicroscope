@@ -24,6 +24,7 @@ public class Move : TInstance<Move>
         targetPos=interactor.rayEndPoint;
     }
     private void Start() {
+        targetPos=transform.position;
         inputActions.actionMaps[5].actions[0].started+=autoMove;
     }
     private void FixedUpdate() {

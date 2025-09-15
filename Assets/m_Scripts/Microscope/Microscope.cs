@@ -403,7 +403,11 @@ public class Microscope : MonoBehaviour
         if (other.CompareTag("Player"))
         {
             player = other.gameObject;
-            player.transform.parent.GetComponent<InteractWithMicroscope>().EnableInteract(this);
+            InteractWithMicroscope temp=new();
+            if (player.transform.parent?.TryGetComponent<InteractWithMicroscope>(out temp)==true)
+            {
+                temp?.EnableInteract(this);
+            }
             MicroUI.setTrue = true;
         }
     }
@@ -421,7 +425,11 @@ public class Microscope : MonoBehaviour
     {
         if (other.CompareTag("Player"))
         {
-            player.transform.parent.GetComponent<InteractWithMicroscope>().DisableInteract(this);
+            InteractWithMicroscope temp=new();
+            if (player.transform.parent?.TryGetComponent<InteractWithMicroscope>(out temp)==true)
+            {
+                temp?.DisableInteract(this);
+            }
             MicroUI.setTrue = false;
             isNear = false;
         }
