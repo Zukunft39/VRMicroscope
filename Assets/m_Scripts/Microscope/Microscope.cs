@@ -315,6 +315,9 @@ public class Microscope : MonoBehaviour
             {
                 targetPosition = point1.transform.position;
                 targetRotation = point1.transform.rotation;
+                Camera camera = showCamera.GetComponent<Camera>();
+                Camera camera1 = player.GetComponent<Camera>();
+                camera.fieldOfView = camera1.fieldOfView;
             }
             else
             {
@@ -332,7 +335,7 @@ public class Microscope : MonoBehaviour
                 10 * Time.deltaTime * transform.lossyScale.x);
 
             // 使用RotateTowards平滑过渡旋转
-            showCamera.transform.rotation = Quaternion.RotateTowards(showCamera.transform.rotation, targetRotation, 120 * Time.deltaTime);
+            showCamera.transform.rotation = Quaternion.RotateTowards(showCamera.transform.rotation, targetRotation, 30 * Time.deltaTime);
             if (Vector3.Distance(showCamera.transform.position, point2.transform.position) < 0.01f)
             {
                 showCamera.SetActive(false);
