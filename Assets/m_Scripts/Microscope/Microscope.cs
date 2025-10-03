@@ -362,12 +362,21 @@ public class Microscope : MonoBehaviour
     {
         // 根据模式选择步长
         float step = isCoarseAdjust ? coarseStep : fineStep;
-        if (change)
-        {
-            direction *= -1;
-        }
+        // if (change)
+        // {
+        //     direction *= -1;
+        // }
+
         currentFocal = depthOfField.focusDistance.value;
         float newFocal = currentFocal + direction * step;
+        if (newFocal<1)
+        {
+            newFocal = 1;
+        }
+        if (newFocal>300)
+        {
+            newFocal = 300;
+        }
 
         distance += direction * step;
         slider.value += direction * -0.02f;
