@@ -362,14 +362,11 @@ public class Microscope : MonoBehaviour
     {
         // 根据模式选择步长
         float step = isCoarseAdjust ? coarseStep : fineStep;
-        // if (change)
-        // {
-        //     direction *= -1;
-        // }
 
         currentFocal = depthOfField.focusDistance.value;
         float newFocal = currentFocal + direction * step;
-        if (newFocal<1)
+        
+        if (newFocal < 1)
         {
             newFocal = 1;
         }
@@ -379,16 +376,19 @@ public class Microscope : MonoBehaviour
         }
 
         distance += direction * step;
-        slider.value += direction * -0.02f;
 
-        // 循环边界处理
-        if (newFocal < minFocal) change = !change;
-        if (newFocal > maxFocal) change = !change;
-
+        if (isCoarseAdjust)
+        {
+            slider.value += direction * -0.02f;
+        }
+        else
+        {
+            slider.value += direction * -0.02f * 0.05f;
+        }
+        
         // 更新景深参数
         currentFocal = newFocal;
-        //print(newFocal);
-        //print(depthOfField);
+
         if (depthOfField != null)
         {
             depthOfField.focusDistance.value = currentFocal;
