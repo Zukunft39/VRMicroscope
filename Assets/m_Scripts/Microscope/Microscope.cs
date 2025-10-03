@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Cinemachine;
+using Unity.Mathematics;
 using Unity.VisualScripting;
 using Unity.XR.CoreUtils;
 using UnityEngine;
@@ -29,6 +30,11 @@ public class Microscope : MonoBehaviour
     public List<int> glass4Rotation = new List<int>();
     int[] glass4Size = { 5, 10, 50, 100 };
     int[] aperture = { 16, 10, 6, 1 };
+
+    float[] values = { 0.8f, 0.65f, 0.53f, 0.34f};  //slider的value对应焦距
+
+    float[] values1 = { 0.2f, 0.15f, 0.1f, 0.06f};  //物体显示区间，显微镜可以看见物体，在区间内focal length生效
+
     int glass4Choice = 0;
     GameObject Object; //玩家放的物体
     public GameObject Cam;
@@ -295,15 +301,20 @@ public class Microscope : MonoBehaviour
         {
             PutAndObserve();
             if(lookCamera.activeSelf)QuitObserve();
+            SetcurrentFocal();
         }
         //取下物体
         if(Input.GetKeyDown(KeyCode.R))TakeOutobj();
 
         // 修改原有的T键检测部分
-        if( Input.GetKeyDown(KeyCode.T))RotateGlass();
+        if (Input.GetKeyDown(KeyCode.T))
+        {
+            RotateGlass();
+            SetcurrentFocal();
+        }
+
         AdjustLight(0);
        
-
         if (showCamera.activeSelf)
         {
             // 目标位置和旋转
@@ -363,18 +374,7 @@ public class Microscope : MonoBehaviour
         // 根据模式选择步长
         float step = isCoarseAdjust ? coarseStep : fineStep;
 
-        currentFocal = depthOfField.focusDistance.value;
-        float newFocal = currentFocal + direction * step;
-        
-        if (newFocal < 1)
-        {
-            newFocal = 1;
-        }
-        if (newFocal>300)
-        {
-            newFocal = 300;
-        }
-
+        currentFocal = depthOfField.focalLength.value;
         distance += direction * step;
 
         if (isCoarseAdjust)
@@ -385,13 +385,32 @@ public class Microscope : MonoBehaviour
         {
             slider.value += direction * -0.02f * 0.05f;
         }
-        
-        // 更新景深参数
-        currentFocal = newFocal;
+
+        // Debug.Log("slider.value"+slider.value);
+        // Debug.Log("glass4Choice"+glass4Choice);
+        // Debug.Log("values[glass4Choice]"+values[glass4Choice]);
+        // Debug.Log("values1[glass4Choice]"+values1[glass4Choice]);
+        //调整物体是否显示
+        SetcurrentFocal();
 
         if (depthOfField != null)
         {
-            depthOfField.focusDistance.value = currentFocal;
+            depthOfField.focalLength.value = currentFocal;
+        }
+    }
+
+    void SetcurrentFocal()
+    {
+        if (slider.value > values[glass4Choice] + values1[glass4Choice] ||
+            slider.value < values[glass4Choice] - values1[glass4Choice])
+        {
+            Object.SetActive(false);
+        }
+        else
+        {
+            Object.SetActive(true);
+            //调整清晰
+            currentFocal = math.abs(values[glass4Choice] - slider.value) / values1[glass4Choice] * 300;
         }
     }
 
