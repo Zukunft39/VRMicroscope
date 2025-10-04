@@ -1,0 +1,3 @@
+在头显相机前放置平面raw image实现类似Overlay效果，基于fov缩放raw image的canvas（raw image填满canvas），并设置为MicroscopeUI的layer
+默认头显相机剔除该层，并在需要时加上（目前是观察样本时禁用Main Camera改为仅渲染MicroscopeUI层）
+raw image的Texture是实际相机的渲染结果（target Texture设为该纹理，放在Resources/Texture下），这个相机渲染的对象里有个Camera模式的Canvas，此canvas可以渲染到纹理，但是直接渲染到vr头显，Camera模式就失效了，看不到ui，所以中间多一步
