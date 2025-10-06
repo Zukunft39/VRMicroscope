@@ -31,9 +31,11 @@ public class Microscope : MonoBehaviour
     int[] glass4Size = { 5, 10, 50, 100 };
     int[] aperture = { 16, 10, 6, 1 };
 
-    float[] values = { 0.8f, 0.65f, 0.53f, 0.34f};  //slider的value对应焦距
+    float[] values = { 0.79f, 0.67f, 0.53f, 0.34f };  //slider的value对应焦距
 
-    float[] values1 = { 0.2f, 0.15f, 0.1f, 0.06f};  //物体显示区间，显微镜可以看见物体，在区间内focal length生效
+    float[] values1 = { 0.17f, 0.13f, 0.07f, 0.04f };  //物体显示区间，显微镜可以看见物体，在区间内focal length生效
+
+    float[] values2 = { 0.09f, 0.07f, 0.04f, 0.025f };  //透明度区间
 
     int glass4Choice = 0;
     GameObject Object; //玩家放的物体
@@ -72,15 +74,15 @@ public class Microscope : MonoBehaviour
     private Volume volume; // 后处理Volume组件
     private DepthOfField depthOfField; // 景深效果组件
     private bool isCoarseAdjust = true; // 是否为粗调模式
-    float coarseStep = 2f; // 粗调步长
-    float fineStep = 0.2f; // 细调步长
+    float coarseStep = 0.2f; // 粗调步长
+    float fineStep = 0.02f; // 细调步长
     float minFocal = 1f; // 最小焦距
     float maxFocal = 50f; // 最大焦距
     float distance; //目镜和底座距离
     float currentFocal; // 当前焦距值
     bool change;
     int focalChangeSpeed = 1; // 速率
-    float focalChangeInterval = 0.1f; // 每次调整间隔
+    float focalChangeInterval = 0.01f; // 每次调整间隔
     float lastAdjustmentTimeB = 0f;
     float lastAdjustmentTimeN = 0f;
     Vector3 ObjectInitialScale = Vector3.zero;
@@ -382,11 +384,11 @@ public class Microscope : MonoBehaviour
 
         if (isCoarseAdjust)
         {
-            slider.value += direction * -0.02f;
+            slider.value += direction * -0.1f*focalChangeInterval*10;
         }
         else
         {
-            slider.value += direction * -0.02f * 0.05f;
+            slider.value += direction * -0.04f * 0.1f*focalChangeInterval*10;
         }
 
         // Debug.Log("slider.value"+slider.value);
@@ -412,8 +414,26 @@ public class Microscope : MonoBehaviour
         else
         {
             Object.SetActive(true);
+            ShowObject showObject = Object.GetComponent<ShowObject>();
+
+            showObject.SetColor(SetTarget());
+
             //调整清晰
             currentFocal = math.abs(values[glass4Choice] - slider.value) / values1[glass4Choice] * 300;
+        }
+    }
+
+    //设置透明度
+    float SetTarget()
+    {
+        if (math.abs(values[glass4Choice] - slider.value) < values2[glass4Choice])
+        {
+            return 1;
+        }
+        else
+        {
+            return math.abs(math.abs(values[glass4Choice] - slider.value) - values2[glass4Choice]) /
+            (values[glass4Choice] - values1[glass4Choice]);
         }
     }
 
