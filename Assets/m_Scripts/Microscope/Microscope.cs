@@ -203,10 +203,10 @@ public class Microscope : MonoBehaviour
             // 确保数组长度一致并循环索引
             int maxChoice = Mathf.Min(glass4Rotation.Count, glass4Size.Length);
             targetGlass4Choice = (glass4Choice + 1) % maxChoice;
-
+            glass4Choice = targetGlass4Choice;
+            SetcurrentFocal();
             // 启动旋转过渡
             StartCoroutine(SwitchObjectiveLens());
-            glass4Choice = targetGlass4Choice;
         }
     }
 
@@ -220,10 +220,10 @@ public class Microscope : MonoBehaviour
         // 确保数组长度一致并循环索引
         int maxChoice = Mathf.Min(glass4Rotation.Count, glass4Size.Length);
         targetGlass4Choice = (glass4Choice + 1) % maxChoice;
-
+        glass4Choice = targetGlass4Choice;
+        SetcurrentFocal();
         // 启动旋转过渡
         StartCoroutine(SwitchObjectiveLens());
-        glass4Choice = targetGlass4Choice;
     }
 
     public void AdjustLight(float scrollInput)
@@ -309,12 +309,11 @@ public class Microscope : MonoBehaviour
         //取下物体
         if(Input.GetKeyDown(KeyCode.R))TakeOutobj();
 
-        // 修改原有的T键检测部分
-        if (Input.GetKeyDown(KeyCode.T))
-        {
-            RotateGlass();
-            SetcurrentFocal();
-        }
+        // // 修改原有的T键检测部分
+        // if (Input.GetKeyDown(KeyCode.T))
+        // {
+        //     RotateGlass();
+        // }
 
         AdjustLight(0);
        
@@ -406,6 +405,7 @@ public class Microscope : MonoBehaviour
 
     void SetcurrentFocal()
     {
+        Debug.Log(glass4Choice);
         if (slider.value > values[glass4Choice] + values1[glass4Choice] ||
             slider.value < values[glass4Choice] - values1[glass4Choice])
         {
@@ -496,7 +496,7 @@ public class Microscope : MonoBehaviour
 
         // 记录初始值和目标值
         float startSize = microscopeCamera.GetComponent<Camera>().orthographicSize;
-        float targetSize = glass4Size[glass4Size.Count()-targetGlass4Choice-1] / 5;
+        float targetSize = glass4Size[glass4Size.Count() - targetGlass4Choice - 1] / 5;
         Quaternion startRot = glass4.transform.localRotation;
         Quaternion targetRot = Quaternion.Euler(
             glass4.transform.localEulerAngles.x,
