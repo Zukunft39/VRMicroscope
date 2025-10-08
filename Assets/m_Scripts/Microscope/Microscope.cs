@@ -405,7 +405,6 @@ public class Microscope : MonoBehaviour
 
     void SetcurrentFocal()
     {
-        Debug.Log(glass4Choice);
         if (slider.value > values[glass4Choice] + values1[glass4Choice] ||
             slider.value < values[glass4Choice] - values1[glass4Choice])
         {
@@ -432,8 +431,8 @@ public class Microscope : MonoBehaviour
         }
         else
         {
-            return math.abs(math.abs(values[glass4Choice] - slider.value) - values2[glass4Choice]) /
-            (values[glass4Choice] - values1[glass4Choice]);
+            return math.abs(slider.value-math.abs(values[glass4Choice]) - values2[glass4Choice]) /
+            (values1[glass4Choice] - values2[glass4Choice]);
         }
     }
 
