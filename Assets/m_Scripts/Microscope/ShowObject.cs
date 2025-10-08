@@ -34,7 +34,6 @@ public class ShowObject : MonoBehaviour
         targetAlpha = Mathf.Clamp01(targetAlpha);
 
         material.SetFloat(alphaPropertyName, targetAlpha);
-        Debug.Log(material.GetFloat(alphaPropertyName));
     }
 }
     

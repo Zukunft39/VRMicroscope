@@ -431,7 +431,7 @@ public class Microscope : MonoBehaviour
         }
         else
         {
-            return math.abs(slider.value-math.abs(values[glass4Choice]) - values2[glass4Choice]) /
+            return 1 - (math.abs(slider.value - math.abs(values[glass4Choice])) - values2[glass4Choice]) /
             (values1[glass4Choice] - values2[glass4Choice]);
         }
     }
