@@ -263,8 +263,8 @@ public class Microscope : MonoBehaviour
         lookCamera.SetActive(false);
         pointer = 0;
         MicroUI.setTrue = true;
-        //player.SetActive(true);
-        player.GetComponent<Camera>().cullingMask = ~player.GetComponent<Camera>().cullingMask;
+        player.SetActive(true);
+        //player.GetComponent<Camera>().cullingMask = ~player.GetComponent<Camera>().cullingMask;
         Cam.SetActive(false);
     }
 
@@ -355,9 +355,9 @@ public class Microscope : MonoBehaviour
                 lookCamera.SetActive(true);
                 MicroUI.setTrue = false;
                 p = 0;
-                //player.SetActive(false);
+                player.SetActive(false);
                 //取反 只渲染Microscope的ui
-                player.GetComponent<Camera>().cullingMask = ~player.GetComponent<Camera>().cullingMask;
+                //player.GetComponent<Camera>().cullingMask = ~player.GetComponent<Camera>().cullingMask;
             }
         }
         
