@@ -8,7 +8,7 @@ public class ShowObject : MonoBehaviour
     public MeshRenderer meshRenderer;
     public Material material;
     // 此值设置为Shader中实际控制透明度的属性名
-    public string alphaPropertyName = "Alpha";
+    public string alphaPropertyName = "_Alpha";
 
     void OnEnable()
     {
