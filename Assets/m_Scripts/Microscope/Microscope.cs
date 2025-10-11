@@ -63,9 +63,6 @@ public class Microscope : MonoBehaviour
     private int targetGlass4Choice;
     private Quaternion startRotation;
     private Quaternion targetRotation;
-    private float rotationProgress;
-    private float sizeChangeSpeed = 2.0f;
-    private float rotationSpeed = 90.0f; // 每秒旋转90度
 
     #endregion
 
@@ -221,7 +218,7 @@ public class Microscope : MonoBehaviour
         int maxChoice = Mathf.Min(glass4Rotation.Count, glass4Size.Length);
         targetGlass4Choice = (glass4Choice + 1) % maxChoice;
         glass4Choice = targetGlass4Choice;
-        SetcurrentFocal();
+        Object.SetActive(false);
         // 启动旋转过渡
         StartCoroutine(SwitchObjectiveLens());
     }
@@ -532,6 +529,8 @@ public class Microscope : MonoBehaviour
         glass4.transform.localRotation = targetRot;
         microscopeCamera.GetComponent<Camera>().orthographicSize = targetSize;
         isRotating = false;
+        Object.SetActive(true);
+        SetcurrentFocal();
     }
 
     public int GetScale()
