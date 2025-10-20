@@ -10,6 +10,10 @@ public class ShowObject : MonoBehaviour
     // 此值设置为Shader中实际控制透明度的属性名
     public string alphaPropertyName = "_Alpha";
 
+    public List<Texture2D> textures;
+
+    public int choice;
+
     void OnEnable()
     {
         // 获取组件引用
@@ -34,6 +38,17 @@ public class ShowObject : MonoBehaviour
         targetAlpha = Mathf.Clamp01(targetAlpha);
 
         material.SetFloat(alphaPropertyName, targetAlpha);
+    }
+
+    void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.F))
+        {
+            choice += 1;
+            choice %= textures.Count;
+            material.SetTexture("MainTexture", textures[choice]);
+            material.mainTexture = textures[choice];
+        }
     }
 }
     
