@@ -23,6 +23,7 @@ public class Microscope : MonoBehaviour
     public GameObject knob1;
     public GameObject showCamera;
     public GameObject lookCamera;
+    public GameObject lookCameraCanvas; //观察相机Canvas
     public GameObject screen;
     public GameObject microscopeCamera;
     public GameObject glass4;
@@ -44,6 +45,7 @@ public class Microscope : MonoBehaviour
     private LineRenderer lineRenderer;
     public Material screenMaterial;
 
+    LookOperation lookOperation;
     #endregion
 
     #region 数值和工具类变量
@@ -63,6 +65,8 @@ public class Microscope : MonoBehaviour
     private int targetGlass4Choice;
     private Quaternion startRotation;
     private Quaternion targetRotation;
+
+    private bool operation=false; //操作说明
 
     #endregion
 
@@ -89,6 +93,11 @@ public class Microscope : MonoBehaviour
     // Start 在游戏开始时调用一次
     void Start()
     {
+        operation = false;
+        if (lookCameraCanvas != null)
+        {
+            lookOperation = lookCameraCanvas.GetComponent<LookOperation>();
+        }
         pointer = 0;
         lineRenderer = Line.GetComponent<LineRenderer>(); // 获取 LineRenderer 组件
         lineRenderer.enabled = false;
@@ -293,11 +302,13 @@ public class Microscope : MonoBehaviour
     }
     void Update()
     {
+        if (Input.GetKeyDown(KeyCode.O)) lookOperation.toOperation();
+        if (Input.GetKeyDown(KeyCode.P)) lookOperation.hideOperation();
         //光源开关
         if(Input.GetKeyDown(KeyCode.Q))LightSwitch();
         
         //交互
-        if (Input.GetKeyDown(KeyCode.E))
+        if (Input.GetKeyDown(KeyCode.E) && !operation)
         {
             PutAndObserve();
             if(lookCamera.activeSelf)QuitObserve();
@@ -349,6 +360,15 @@ public class Microscope : MonoBehaviour
             if (Vector3.Distance(showCamera.transform.position, point2.transform.position) < 0.01f)
             {
                 showCamera.SetActive(false);
+                if (Static.isFirstInMicroscope)
+                {
+                    Static.isFirstInMicroscope = false;
+                    lookOperation.toOperation();
+                }
+                else
+                {
+                    lookOperation.hideOperation();
+                }
                 lookCamera.SetActive(true);
                 MicroUI.setTrue = false;
                 p = 0;
