@@ -56,7 +56,7 @@ Material:
     - _CurrentDepth: 3.82
     - _DepthSmooth: 2.05
     - _LightnessGate: 0.348
-    - _LightnessSmooth: 0.477
+    - _LightnessSmooth: 0.9
     - _QueueControl: 0
     - _QueueOffset: 0
     m_Colors:
