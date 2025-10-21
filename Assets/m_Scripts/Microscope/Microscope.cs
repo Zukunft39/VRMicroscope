@@ -53,7 +53,7 @@ public class Microscope : MonoBehaviour
     public int pointer;
     public float widthChangeAmount = 0.05f; // 每次滚动改变的宽度量
     public float minWidth = 0.01f; // 最小宽度
-    public float maxWidth = 0.4f; // 最大宽度
+    public float maxWidth = 0.1f; // 最大宽度
     public float rotationChangeRatio = 10f; // 每次宽度变化对应的旋转增量
     public float minRotationZ = 45f; // z轴旋转的最小值
     public float maxRotationZ = 135f; // z轴旋转的最大值
@@ -160,6 +160,8 @@ public class Microscope : MonoBehaviour
                                 ObjectInitialScale.y / gameObject.transform.localScale.x,
                                 ObjectInitialScale.z / gameObject.transform.localScale.x);
                         show.SetActive(true);
+                        ShowObject showObject = Object.GetComponent<ShowObject>();
+                        showObject.microscope = this;
                     }
                     else
                     {
@@ -196,6 +198,8 @@ public class Microscope : MonoBehaviour
                         ObjectInitialScale.y,
                         ObjectInitialScale.z);
                 Object.transform.SetParent(player.transform);
+                ShowObject showObject = Object.GetComponent<ShowObject>();
+                showObject.microscope = null;
                 Object = null;
                 show.SetActive(false);
             }
@@ -234,7 +238,7 @@ public class Microscope : MonoBehaviour
 
     public void AdjustLight(float scrollInput)
     {
-        if (MicroUI.setTrue && isNear)
+        if ((MicroUI.setTrue && isNear) || lookCamera.activeSelf)
         {
             if (scrollInput == 0)
             {
@@ -244,10 +248,10 @@ public class Microscope : MonoBehaviour
             if (scrollInput != 0) // 如果滚动量不为零
             {
                 // 根据滚轮方向调整激光的宽度
-                float newWidth = Mathf.Clamp(lineRenderer.startWidth + scrollInput * widthChangeAmount, minWidth, maxWidth);
+                float newWidth = Mathf.Clamp(lineRenderer.startWidth + scrollInput * widthChangeAmount*0.05f, minWidth, maxWidth);
                 lineRenderer.startWidth = newWidth;
                 lineRenderer.endWidth = newWidth;
-
+                SetLight();
                 // 计算与宽度变化相对应的旋转角度
                 float rotationAmount = scrollInput * rotationChangeRatio;
                 Vector3 currentRotation = knob1.transform.rotation.eulerAngles;
@@ -439,6 +443,12 @@ public class Microscope : MonoBehaviour
         }
     }
 
+    void SetLight()
+    {
+        ShowObject showObject = Object.GetComponent<ShowObject>();
+        showObject.SetLight(GetLight());
+    }
+
     //设置透明度
     float SetTarget()
     {
@@ -561,5 +571,10 @@ public class Microscope : MonoBehaviour
     public float GetDistance()
     {
         return distance;
+    }
+
+    public float GetLight()
+    {
+        return 0.8f*(lineRenderer.endWidth-0.01f)/0.01f+0.1f;
     }
 }

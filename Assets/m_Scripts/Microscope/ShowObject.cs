@@ -5,10 +5,13 @@ using UnityEngine;
 
 public class ShowObject : MonoBehaviour
 {
+    public Microscope microscope;
     public MeshRenderer meshRenderer;
     public Material material;
     // 此值设置为Shader中实际控制透明度的属性名
     public string alphaPropertyName = "_Alpha";
+
+    public string lightName = "LightnessGate";
 
     public List<Material> textures;
 
@@ -38,6 +41,17 @@ public class ShowObject : MonoBehaviour
         targetAlpha = Mathf.Clamp01(targetAlpha);
 
         material.SetFloat(alphaPropertyName, targetAlpha);
+
+        if(microscope!=null)
+        {
+            SetLight(microscope.GetLight());
+        }
+    }
+
+    public void SetLight(float targetLight)
+    {
+        material.SetFloat(lightName, targetLight);
+        Debug.Log(targetLight);
     }
 
     void Update()
@@ -47,6 +61,11 @@ public class ShowObject : MonoBehaviour
             choice += 1;
             choice %= textures.Count;
             meshRenderer.sharedMaterial = textures[choice];
+        }
+
+        if(microscope!=null)
+        {
+            SetLight(microscope.GetLight());
         }
     }
 }
