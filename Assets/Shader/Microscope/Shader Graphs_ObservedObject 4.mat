@@ -55,8 +55,8 @@ Material:
     - _BlurStrengh: 7.54
     - _CurrentDepth: 3.82
     - _DepthSmooth: 2.05
-    - _LightnessGate: 0.348
-    - _LightnessSmooth: 0.9
+    - _LightnessGate: 0.75
+    - _LightnessSmooth: 1
     - _QueueControl: 0
     - _QueueOffset: 0
     m_Colors:
