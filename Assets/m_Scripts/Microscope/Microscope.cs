@@ -559,7 +559,7 @@ public class Microscope : MonoBehaviour
         glass4.transform.localRotation = targetRot;
         microscopeCamera.GetComponent<Camera>().orthographicSize = targetSize;
         isRotating = false;
-        Object.SetActive(true);
+        if (Object != null) Object.SetActive(true);
         SetcurrentFocal();
     }
 

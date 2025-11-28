@@ -1911,7 +1911,7 @@
     "m_DefaultRefNameVersion": 1,
     "m_RefNameGeneratedByDisplayName": "LightnessGate",
     "m_DefaultReferenceName": "_LightnessGate",
-    "m_OverrideReferenceName": "",
+    "m_OverrideReferenceName": "LightnessGate",
     "m_GeneratePropertyBlock": true,
     "m_UseCustomSlotLabel": false,
     "m_CustomSlotLabel": "",

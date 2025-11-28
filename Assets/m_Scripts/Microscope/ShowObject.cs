@@ -61,6 +61,7 @@ public class ShowObject : MonoBehaviour
             choice += 1;
             choice %= textures.Count;
             meshRenderer.sharedMaterial = textures[choice];
+            material = meshRenderer.sharedMaterial;
         }
 
         if(microscope!=null)
