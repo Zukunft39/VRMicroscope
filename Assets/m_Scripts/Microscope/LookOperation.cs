@@ -17,16 +17,4 @@ public class LookOperation : MonoBehaviour
     {
 
     }
-
-    public void toOperation()
-    {
-        panel.SetActive(true);
-        showOperation = true;
-    }
-    
-    public void hideOperation()
-    {
-        panel.SetActive(false);
-        showOperation = false;
-    }
 }

@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Cinemachine;
+using JetBrains.Annotations;
 using Unity.Mathematics;
 using Unity.VisualScripting;
 using Unity.XR.CoreUtils;
@@ -45,7 +46,13 @@ public class Microscope : MonoBehaviour
     private LineRenderer lineRenderer;
     public Material screenMaterial;
 
+    public Tutorial TutorialUI; //教程UI
+
     LookOperation lookOperation;
+
+    private GameObject knobChild0; // 用于显示粗调的子对象
+
+    private GameObject knobChild1; // 用于显示细调的子对象
     #endregion
 
     #region 数值和工具类变量
@@ -116,8 +123,37 @@ public class Microscope : MonoBehaviour
 
         MeshRenderer meshRenderer = screen.GetComponent<MeshRenderer>();
         meshRenderer.material = screenMaterial;
-    }
 
+        // 在启动时就找到并缓存这些引用
+        if (lookCameraCanvas != null)
+        {
+            Transform knobTransform = lookCameraCanvas.transform.Find("Knob");
+            if (knobTransform != null)
+            {
+                // 检查子对象数量
+                if (knobTransform.childCount >= 2)
+                {
+                    knobChild0 = knobTransform.GetChild(0).gameObject;
+                    knobChild1 = knobTransform.GetChild(1).gameObject;
+                }
+                else
+                {
+                    Debug.LogError("'Knob' 对象需要至少2个子对象！");
+                }
+            }
+            else
+            {
+                Debug.LogError("在 lookCameraCanvas 下找不到 'Knob' 对象！");
+            }
+        }
+        else
+        {
+            Debug.LogError("lookCameraCanvas 未被赋值！");
+        }
+    }
+    /// <summary>
+    /// 灯光开关
+    /// </summary>
     public void LightSwitch()
     {
         if (MicroUI.setTrue && isNear)
@@ -236,6 +272,10 @@ public class Microscope : MonoBehaviour
         StartCoroutine(SwitchObjectiveLens());
     }
 
+    /// <summary>
+    /// 灯光调整
+    /// </summary>
+    /// <param name="scrollInput"></param>
     public void AdjustLight(float scrollInput)
     {
         if ((MicroUI.setTrue && isNear) || lookCamera.activeSelf)
@@ -268,6 +308,9 @@ public class Microscope : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// 退出观察
+    /// </summary>
     public void QuitObserve()
     {
         lookCamera.SetActive(false);
@@ -277,13 +320,28 @@ public class Microscope : MonoBehaviour
         //player.GetComponent<Camera>().cullingMask = ~player.GetComponent<Camera>().cullingMask;
         Cam.SetActive(false);
     }
-
+    
+    /// <summary>
+    /// 切换粗细调节模式（优化后版本）
+    /// </summary>
     public void SwitchModeOfChange()
     {
-        if(!lookCamera.activeSelf)return;
+        // 检查必要的引用是否存在
+        if (lookCamera == null || !lookCamera.activeSelf || knobChild0 == null || knobChild1 == null)
+        {
+            return;
+        }
+
         isCoarseAdjust = !isCoarseAdjust;
+
+        knobChild0.SetActive(isCoarseAdjust);
+        knobChild1.SetActive(!isCoarseAdjust);
     }
 
+    /// <summary>
+    /// 焦距调整
+    /// </summary>
+    /// <param name="mode"></param>
     public void ChangeFocal(float mode)
     {
         if(!lookCamera.activeSelf)return;
@@ -304,10 +362,9 @@ public class Microscope : MonoBehaviour
             }
         }
     }
+    
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.O)) lookOperation.toOperation();
-        if (Input.GetKeyDown(KeyCode.P)) lookOperation.hideOperation();
         //光源开关
         if(Input.GetKeyDown(KeyCode.Q))LightSwitch();
         
@@ -364,19 +421,15 @@ public class Microscope : MonoBehaviour
             if (Vector3.Distance(showCamera.transform.position, point2.transform.position) < 0.01f)
             {
                 showCamera.SetActive(false);
-                if (Static.isFirstInMicroscope)
-                {
-                    Static.isFirstInMicroscope = false;
-                    lookOperation.toOperation();
-                }
-                else
-                {
-                    lookOperation.hideOperation();
-                }
                 lookCamera.SetActive(true);
                 MicroUI.setTrue = false;
                 p = 0;
                 player.SetActive(false);
+
+                if (TutorialUI.CheckFirstLaunch("Tutorial_Microscope_InSide"))
+                {
+                    TutorialUI.ShowTutorial(2); // 显示显微镜内部使用教程
+                }
                 //取反 只渲染Microscope的ui
                 //player.GetComponent<Camera>().cullingMask = ~player.GetComponent<Camera>().cullingMask;
             }
@@ -488,6 +541,11 @@ public class Microscope : MonoBehaviour
                 temp?.EnableInteract(this);
             }
             MicroUI.setTrue = true;
+
+            if (TutorialUI.CheckFirstLaunch("Tutorial_Microscope_OutSide"))
+            {
+                TutorialUI.ShowTutorial(1); // 显示显微镜外部使用教程
+            }
         }
     }
 
