@@ -34,7 +34,9 @@ public class InteractWithMicroscope : MonoBehaviour
         SnapTurnAction.Disable();
         AutoMoveAction.Disable();
     }
-
+    
+    
+    
     private void TakeOutObject(InputAction.CallbackContext context)
     {
         microscope.TakeOutobj();

@@ -477,7 +477,6 @@ public class Microscope : MonoBehaviour
             lineRenderer.SetPosition(1, endPoint);   // 设置结束点
         }
     }
-
     void OnTriggerEnter(Collider other)
     {
         if (other.CompareTag("Player"))
