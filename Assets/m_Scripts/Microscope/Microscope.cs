@@ -507,7 +507,7 @@ public class Microscope : MonoBehaviour
         if (slider.value > values[glass4Choice] + values1[glass4Choice] ||
             slider.value < values[glass4Choice] - values1[glass4Choice])
         {
-            Object.SetActive(false);
+            Object?.SetActive(false);
         }
         else
         {
@@ -558,7 +558,7 @@ public class Microscope : MonoBehaviour
     
     void OnTriggerEnter(Collider other)
     {
-        if (other.CompareTag("Player"))
+        if (other.CompareTag("MainCamera"))
         {
             player = other.gameObject;
             InteractWithMicroscope temp=new();
@@ -586,7 +586,7 @@ public class Microscope : MonoBehaviour
 
     void OnTriggerStay(Collider other)
     {
-        if (other.CompareTag("Player"))
+        if (other.CompareTag("MainCamera"))
         {
             player = other.gameObject;
             isNear = true;
@@ -595,7 +595,7 @@ public class Microscope : MonoBehaviour
 
     private void OnTriggerExit(Collider other)
     {
-        if (other.CompareTag("Player"))
+        if (other.CompareTag("MainCamera"))
         {
             InteractWithMicroscope temp=new();
             if (player.transform.parent?.TryGetComponent<InteractWithMicroscope>(out temp)==true)

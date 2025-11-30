@@ -12,13 +12,13 @@ public class InteractableSamples : MonoBehaviour
 
     private void OnCollisionEnter(Collision other)
     {
-        if(!other.gameObject.CompareTag("Player"))return;
+        if(!other.gameObject.CompareTag("MainCamera"))return;
         other.transform.parent.GetComponent<InteractWithSamples>().EnablePickSample(this);
     }
 
     private void OnCollisionExit(Collision other)
     {
-        if(!other.gameObject.CompareTag("Player"))return;
+        if(!other.gameObject.CompareTag("MainCamera"))return;
         other.transform.parent.GetComponent<InteractWithSamples>().DisablePickSample(this);
     }
 }

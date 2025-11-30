@@ -12,14 +12,13 @@ public class Highlight:MonoBehaviour
 
     private void OnCollisionEnter(Collision other)
     {
-        Debug.Log(111);
-        if(other.transform.CompareTag("Player"))
+        if(other.transform.CompareTag("MainCamera"))
             EnableHighlightAndOutline();
     }
 
     private void OnCollisionExit(Collision other)
     {
-        if(other.transform.CompareTag("Player"))
+        if(other.transform.CompareTag("MainCamera"))
             DisableHighlightAndOutline();
     }
 
