@@ -13,8 +13,6 @@ public class InteractableSamples : MonoBehaviour
     private void OnCollisionEnter(Collision other)
     {
         if(!other.gameObject.CompareTag("Player"))return;
-        Debug.Log(other.gameObject.name);
-        Debug.Log(other.transform.parent.GetComponent<InteractWithSamples>());
         other.transform.parent.GetComponent<InteractWithSamples>().EnablePickSample(this);
     }
 

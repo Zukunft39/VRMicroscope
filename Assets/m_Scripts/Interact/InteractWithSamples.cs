@@ -51,13 +51,19 @@ public class InteractWithSamples:MonoBehaviour
     }
     public void EnablePickSample(InteractableSamples interactable)
     {
+        if (interactableObject == null)
+        {
+            PickOrPutSampleAction.started += PickSample;
+        }
         interactableObject=interactable;
-        PickOrPutSampleAction.started += PickSample;
     }
 
     public void DisablePickSample(InteractableSamples interactable)
     {
-        interactableObject = null;
-        PickOrPutSampleAction.started -= PickSample;
+        if (interactableObject == interactable)
+        {
+            interactableObject = null;
+            PickOrPutSampleAction.started -= PickSample;
+        }
     }
 }

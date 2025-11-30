@@ -12,6 +12,7 @@ public class Highlight:MonoBehaviour
 
     private void OnCollisionEnter(Collision other)
     {
+        Debug.Log(111);
         if(other.transform.CompareTag("Player"))
             EnableHighlightAndOutline();
     }
