@@ -51,8 +51,8 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
-    - LightnessGate: 0.7199997
-    - _Alpha: 1
+    - LightnessGate: 0.9872198
+    - _Alpha: 0.35500583
     - _BlurStrengh: 7.54
     - _CurrentDepth: 3.82
     - _DepthSmooth: 2.05

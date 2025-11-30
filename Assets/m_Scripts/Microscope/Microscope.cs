@@ -50,9 +50,8 @@ public class Microscope : MonoBehaviour
 
     LookOperation lookOperation;
 
-    private GameObject knobChild0; // 用于显示粗调的子对象
-
-    private GameObject knobChild1; // 用于显示细调的子对象
+    public GameObject knobChild0; // 用于显示粗调的子对象
+    public GameObject knobChild1; // 用于显示细调的子对象
     #endregion
 
     #region 数值和工具类变量
@@ -322,7 +321,7 @@ public class Microscope : MonoBehaviour
     }
     
     /// <summary>
-    /// 切换粗细调节模式（优化后版本）
+    /// 切换粗细调节模式
     /// </summary>
     public void SwitchModeOfChange()
     {
@@ -333,9 +332,6 @@ public class Microscope : MonoBehaviour
         }
 
         isCoarseAdjust = !isCoarseAdjust;
-
-        knobChild0.SetActive(isCoarseAdjust);
-        knobChild1.SetActive(!isCoarseAdjust);
     }
 
     /// <summary>
@@ -344,27 +340,56 @@ public class Microscope : MonoBehaviour
     /// <param name="mode"></param>
     public void ChangeFocal(float mode)
     {
-        if(!lookCamera.activeSelf)return;
+        if(!lookCamera.activeSelf) return;
+
+        float knobRotationSpeed = 20f;
+        // 统一计算旋钮旋转角度，使用新的速度变量
+        float rotationAngle = knobRotationSpeed * Time.deltaTime; // 使用 Time.deltaTime 让旋转速度与帧率无关
+
         if (mode < 0)
         {
-            if (Time.time - lastAdjustmentTimeB >= focalChangeInterval) // 控制调整速率
+            if (Time.time - lastAdjustmentTimeB >= focalChangeInterval)
             {
                 AdjustFocal(-focalChangeSpeed);
                 lastAdjustmentTimeB = Time.time;
             }
+            
+            // 绕 Z 轴逆时针旋转 (根据你的模型，可能需要是 Vector3.back)
+            if(isCoarseAdjust)
+            {
+                knobChild0.transform.Rotate(Vector3.forward, -rotationAngle);
+            }
+            else
+            {
+                knobChild1.transform.Rotate(Vector3.forward, -rotationAngle);
+            }
         }
         else if(mode > 0)
         {
-            if (Time.time - lastAdjustmentTimeN >= focalChangeInterval) // 控制调整速率
+            if (Time.time - lastAdjustmentTimeN >= focalChangeInterval)
             {
                 AdjustFocal(focalChangeSpeed);
                 lastAdjustmentTimeN = Time.time;
+            }
+
+            // 绕 Z 轴顺时针旋转
+            if(isCoarseAdjust)
+            {
+                knobChild0.transform.Rotate(Vector3.forward, rotationAngle);
+            }
+            else
+            {
+                knobChild1.transform.Rotate(Vector3.forward, rotationAngle);
             }
         }
     }
     
     void Update()
     {
+        // 显示系统鼠标光标
+        Cursor.visible = true;
+        // 不锁定鼠标（可以自由移出游戏窗口）
+        Cursor.lockState = CursorLockMode.None;
         //光源开关
         if(Input.GetKeyDown(KeyCode.Q))LightSwitch();
         
@@ -530,6 +555,7 @@ public class Microscope : MonoBehaviour
             lineRenderer.SetPosition(1, endPoint);   // 设置结束点
         }
     }
+    
     void OnTriggerEnter(Collider other)
     {
         if (other.CompareTag("Player"))
@@ -542,9 +568,18 @@ public class Microscope : MonoBehaviour
             }
             MicroUI.setTrue = true;
 
-            if (TutorialUI.CheckFirstLaunch("Tutorial_Microscope_OutSide"))
+            Tutorial tutorial = other.GetComponentInChildren<Tutorial>();
+
+            if (tutorial != null)
             {
-                TutorialUI.ShowTutorial(1); // 显示显微镜外部使用教程
+                if (tutorial.CheckFirstLaunch("Tutorial_Microscope_OutSide"))
+                {
+                    tutorial.ShowTutorial(1); // 显示显微镜外部使用教程
+                }
+            }
+            else
+            {
+                Debug.LogWarning("在 Player 或其子物体上没有找到 Tutorial 组件。", this);
             }
         }
     }

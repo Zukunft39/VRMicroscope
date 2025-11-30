@@ -38,6 +38,7 @@ public class Tutorial : MonoBehaviour
     private int currentTutorialIndex = -1;   // 当前教程索引
     private int currentNodeIndex = 0;        // 当前节点索引
     private VideoPlayer currentVideoPlayer;  // 当前正在播放的 VideoPlayer
+    public bool player;
 
     private void Awake()
     {
@@ -52,6 +53,16 @@ public class Tutorial : MonoBehaviour
         }
     }
 
+    void Update()
+    {
+        if (player)
+        {
+            if(Input.GetKeyDown(KeyCode.O))
+            {
+                ReturnToFirstLevel();
+            }
+        }
+    }
     /// <summary>
     /// 检查是否为首次启动
     /// </summary>
@@ -176,7 +187,7 @@ public class Tutorial : MonoBehaviour
         else
         {
             // 没有下一个节点时返回一级UI
-            ReturnToFirstLevel();
+            Back();
         }
     }
 
@@ -212,6 +223,34 @@ public class Tutorial : MonoBehaviour
         if (secondLevelUITemplate != null) secondLevelUITemplate.SetActive(false);
         if (firstLevelUI != null) firstLevelUI.SetActive(true);
 
+        // 清空 RawImage
+        if (videoDisplay != null)
+        {
+            videoDisplay.texture = null;
+        }
+
+        // 重置当前教程索引
+        currentTutorialIndex = -1;
+        currentNodeIndex = 0;
+    }
+
+    /// <summary>
+    /// 返回
+    /// </summary>
+    public void Back()
+    {
+        // 停止当前视频
+        if (currentVideoPlayer != null)
+        {
+            currentVideoPlayer.Stop();
+            currentVideoPlayer.targetTexture = null;
+        }
+        currentVideoPlayer = null;
+
+        // 隐藏二级UI模板
+        if (secondLevelUITemplate != null) secondLevelUITemplate.SetActive(false);
+        // 隐藏一级UI
+        if (firstLevelUI != null) firstLevelUI.SetActive(false);
         // 清空 RawImage
         if (videoDisplay != null)
         {

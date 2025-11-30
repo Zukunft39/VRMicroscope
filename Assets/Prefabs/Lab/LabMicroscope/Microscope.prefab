@@ -10719,6 +10719,8 @@ MonoBehaviour:
   Cam: {fileID: 3070180608323239103}
   screenMaterial: {fileID: 2100000, guid: f6d1e2eeec60f7d41a0e85425189bc52, type: 2}
   TutorialUI: {fileID: 4075707599250875358}
+  knobChild0: {fileID: 0}
+  knobChild1: {fileID: 0}
   pointer: 0
   widthChangeAmount: 0.05
   minWidth: 0.01
@@ -13557,6 +13559,10 @@ PrefabInstance:
       propertyPath: m_Camera
       value: 
       objectReference: {fileID: 3070180608802062225}
+    - target: {fileID: 1586825006417749500, guid: 2b0353e5acd9ceb44baced12643172c4, type: 3}
+      propertyPath: player
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 1586825006417749500, guid: 2b0353e5acd9ceb44baced12643172c4, type: 3}
       propertyPath: tutorialDatas.Array.data[0].nodes.Array.data[0].videoPlayer
       value: 
