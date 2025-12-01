@@ -39593,6 +39593,30 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 3743009682033356852, guid: eb2a0dc7c8122384299656b18f1af357, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 0.7071068
+      objectReference: {fileID: 0}
+    - target: {fileID: 3743009682033356852, guid: eb2a0dc7c8122384299656b18f1af357, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: -0.7071068
+      objectReference: {fileID: 0}
+    - target: {fileID: 3743009682033356852, guid: eb2a0dc7c8122384299656b18f1af357, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3743009682033356852, guid: eb2a0dc7c8122384299656b18f1af357, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3743009682033356852, guid: eb2a0dc7c8122384299656b18f1af357, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: -90
+      objectReference: {fileID: 0}
+    - target: {fileID: 4075707599250875358, guid: eb2a0dc7c8122384299656b18f1af357, type: 3}
+      propertyPath: move
+      value: 
+      objectReference: {fileID: 4224636915810590474}
     - target: {fileID: 4075707599250875358, guid: eb2a0dc7c8122384299656b18f1af357, type: 3}
       propertyPath: tutorialDatas.Array.data[0].nodes.Array.data[0].videoPlayer
       value: 
@@ -42010,7 +42034,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8634758757637626128, guid: acb6f53ed07f3204d9cbf08a9a78d907, type: 3}
       propertyPath: m_RootOrder
-      value: 3
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 8634758757637626128, guid: acb6f53ed07f3204d9cbf08a9a78d907, type: 3}
       propertyPath: m_AnchorMax.x
@@ -42096,6 +42120,10 @@ PrefabInstance:
       propertyPath: m_Camera
       value: 
       objectReference: {fileID: 9014170785400826614}
+    - target: {fileID: 8634758757735704356, guid: acb6f53ed07f3204d9cbf08a9a78d907, type: 3}
+      propertyPath: move
+      value: 
+      objectReference: {fileID: 4224636915810590474}
     - target: {fileID: 8634758757735704356, guid: acb6f53ed07f3204d9cbf08a9a78d907, type: 3}
       propertyPath: microscope
       value: 

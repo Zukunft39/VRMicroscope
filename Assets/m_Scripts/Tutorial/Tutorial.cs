@@ -40,6 +40,7 @@ public class Tutorial : MonoBehaviour
     private int currentTutorialIndex = -1;   // 当前教程索引
     private int currentNodeIndex = 0;        // 当前节点索引
     private VideoPlayer currentVideoPlayer;  // 当前正在播放的 VideoPlayer
+    public GameObject move;
     public bool player;
 
     private void Awake()
@@ -91,6 +92,7 @@ public class Tutorial : MonoBehaviour
             return;
         }
 
+        move.SetActive(false);
         // 更新当前教程索引并重置节点索引
         currentTutorialIndex = tutorialIndex;
         currentNodeIndex = 0;
@@ -263,6 +265,7 @@ public class Tutorial : MonoBehaviour
         // 重置当前教程索引
         currentTutorialIndex = -1;
         currentNodeIndex = 0;
+        move.SetActive(true);
     }
 
     /// <summary>
