@@ -19,8 +19,8 @@ public class NATweaker : MonoBehaviour
             if (value > 1)
                 value = 1;
             curNAValue = value;
-            screenMeshRenderer.material.SetFloat("_Light", curNAValue);
-            screenMeshRenderer.material.SetFloat("_BlurStrengh", 1-curNAValue);
+            screenMeshRenderer?.sharedMaterial?.SetFloat("_Light", curNAValue);
+            screenMeshRenderer?.sharedMaterial?.SetFloat("_BlurStrengh", 1-curNAValue);
         }
     }
     
