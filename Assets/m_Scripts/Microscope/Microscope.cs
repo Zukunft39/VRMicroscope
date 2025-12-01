@@ -52,6 +52,9 @@ public class Microscope : MonoBehaviour
 
     public GameObject knobChild0; // 用于显示粗调的子对象
     public GameObject knobChild1; // 用于显示细调的子对象
+
+    public GameObject Lightmain;
+    public Material mainMaterial;
     #endregion
 
     #region 数值和工具类变量
@@ -122,7 +125,7 @@ public class Microscope : MonoBehaviour
 
         MeshRenderer meshRenderer = screen.GetComponent<MeshRenderer>();
         meshRenderer.material = screenMaterial;
-
+        mainMaterial = Lightmain.GetComponent<Renderer>().material;
         // 在启动时就找到并缓存这些引用
         if (lookCameraCanvas != null)
         {
@@ -570,6 +573,7 @@ public class Microscope : MonoBehaviour
 
             Tutorial tutorial = other.GetComponentInChildren<Tutorial>();
 
+            SetLighting();
             if (tutorial != null)
             {
                 if (tutorial.CheckFirstLaunch("Tutorial_Microscope_OutSide"))
@@ -604,6 +608,7 @@ public class Microscope : MonoBehaviour
             }
             MicroUI.setTrue = false;
             isNear = false;
+            SetNormal();
         }
     }
 
@@ -669,4 +674,23 @@ public class Microscope : MonoBehaviour
     {
         return 0.8f*(lineRenderer.endWidth-0.01f)/0.01f+0.1f;
     }
+
+    #region 高亮设置
+    public void SetBlink()
+    {
+        Lightmain.SetActive(true);
+        mainMaterial.SetFloat("_boolean", 1f);
+    }
+
+    public void SetNormal()
+    {
+        Lightmain.SetActive(false);
+    }
+
+    public void SetLighting()
+    {
+        Lightmain.SetActive(true);
+        mainMaterial.SetFloat("_boolean", 0f);
+    }
+    #endregion
 }

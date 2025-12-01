@@ -35,6 +35,8 @@ public class Tutorial : MonoBehaviour
     [Header("首次启动设置")]
     public int firstLaunchTutorialIndex = 0; // 首次启动显示的教程索引
 
+    public Microscope microscope;
+
     private int currentTutorialIndex = -1;   // 当前教程索引
     private int currentNodeIndex = 0;        // 当前节点索引
     private VideoPlayer currentVideoPlayer;  // 当前正在播放的 VideoPlayer
@@ -47,9 +49,10 @@ public class Tutorial : MonoBehaviour
         if (secondLevelUITemplate != null) secondLevelUITemplate.SetActive(false);
 
         // 检查首次启动
-        if (CheckFirstLaunch("Tutorial_FirstLaunch"))
+        if (CheckFirstLaunch("Tutorial_FirstLaunch") && player)
         {
             ShowTutorial(firstLaunchTutorialIndex);
+            microscope.SetBlink();
         }
     }
 

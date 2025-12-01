@@ -19,18 +19,7 @@ public class ShowObject : MonoBehaviour
 
     void OnEnable()
     {
-        // 获取组件引用
-        if (meshRenderer == null)
-            meshRenderer = gameObject.GetComponentInChildren<MeshRenderer>();
-
-        if (meshRenderer != null && material == null)
-            material = meshRenderer.sharedMaterial;
-
-        if (meshRenderer == null)
-            Debug.LogError("找不到MeshRenderer组件", this);
         
-        if (material == null)
-            Debug.LogError("找不到Material", this);
     }
 
     // 直接设置透明度
@@ -50,6 +39,18 @@ public class ShowObject : MonoBehaviour
 
     public void SetLight(float targetLight)
     {
+        // 获取组件引用
+        if (meshRenderer == null)
+            meshRenderer = gameObject.GetComponentInChildren<MeshRenderer>();
+
+        if (meshRenderer != null && material == null)
+            material = meshRenderer.sharedMaterial;
+        if (meshRenderer == null)
+            Debug.LogError("找不到MeshRenderer组件", this);
+        
+        if (material == null)
+            Debug.LogError("找不到Material", this);
+
         material.SetFloat(lightName, targetLight);
         Debug.Log(targetLight);
     }

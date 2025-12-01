@@ -47,6 +47,7 @@ public class InteractWithSamples:MonoBehaviour
         temp.transform.localPosition=new Vector3(23,-5,-4);
         temp.transform.localRotation = Quaternion.Euler(22, -180, 0);
         Inventory.texture = interactableObject.SampleImage;
+        temp.transform.GetChild(0).GetComponent<Renderer>().material.SetTexture("_MainTexture",interactableObject.SampleImage);
         isSampleOnHand = true;
     }
     public void EnablePickSample(InteractableSamples interactable)
