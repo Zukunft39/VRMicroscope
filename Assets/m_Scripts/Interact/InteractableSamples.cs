@@ -10,14 +10,14 @@ public class InteractableSamples : MonoBehaviour
     public GameObject Sample;
     public Texture SampleImage;
 
-    private void OnCollisionEnter(Collision other)
+    private void OnTriggerEnter(Collider other)
     {
-        if(!other.gameObject.CompareTag("MainCamera"))return;
+        if(!other.CompareTag("MainCamera"))return;
         other.transform.parent.GetComponent<InteractWithSamples>().EnablePickSample(this);
     }
 
-    private void OnCollisionExit(Collision other)
-    {
+    private void OnTriggerExit(Collider other)
+    { 
         if(!other.gameObject.CompareTag("MainCamera"))return;
         other.transform.parent.GetComponent<InteractWithSamples>().DisablePickSample(this);
     }
