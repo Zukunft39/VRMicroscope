@@ -14537,6 +14537,10 @@ PrefabInstance:
       value: Monitor01 (2)
       objectReference: {fileID: 0}
     - target: {fileID: 5145547631860760438, guid: 12de03d83bbe845418fee4e82e37d2c4, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5145547631860760438, guid: 12de03d83bbe845418fee4e82e37d2c4, type: 3}
       propertyPath: m_TagString
       value: Edge
       objectReference: {fileID: 0}
@@ -20674,6 +20678,10 @@ PrefabInstance:
       value: Monitor01
       objectReference: {fileID: 0}
     - target: {fileID: 5145547631860760438, guid: 12de03d83bbe845418fee4e82e37d2c4, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5145547631860760438, guid: 12de03d83bbe845418fee4e82e37d2c4, type: 3}
       propertyPath: m_StaticEditorFlags
       value: 2147483647
       objectReference: {fileID: 0}
@@ -20892,6 +20900,10 @@ PrefabInstance:
     - target: {fileID: 3581737037377778549, guid: 4ae2f4dd691a2394389c3cc346b243b0, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: -269.999
+      objectReference: {fileID: 0}
+    - target: {fileID: 3905242482037358921, guid: 4ae2f4dd691a2394389c3cc346b243b0, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: -0.0578
       objectReference: {fileID: 0}
     - target: {fileID: 4036788837787744722, guid: 4ae2f4dd691a2394389c3cc346b243b0, type: 3}
       propertyPath: m_StaticEditorFlags
