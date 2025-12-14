@@ -1941,7 +1941,7 @@ MonoBehaviour:
   - {fileID: -2492700729341532479}
   - {fileID: -7097554312866994645}
   - {fileID: 183027042207376039}
-  m_renderMode: 1
+  m_renderMode: 0
   m_depthSubmissionMode: 0
   m_symmetricProjection: 0
 --- !u!114 &2177765036662497197
