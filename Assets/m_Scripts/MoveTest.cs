@@ -194,17 +194,48 @@ namespace UnityEngine.XR.Interaction.Toolkit.Samples.StarterAssets
         //     return targetPos!=Vector2.zero?targetPos:leftHandValue + rightHandValue;
         // }
         public ProgressControl progressControl;
+        public bool isAutoNavigating = false; // 是否正在自动导航
+        public Vector3 navTargetWorldPos;     // 导航的目标世界坐标
         protected override Vector2 ReadInput()
         {
-            if(!progressControl.isAutoMoving){
-                return base.ReadInput();
+            if (isAutoNavigating)
+            {
+                Vector3 worldDir = navTargetWorldPos - transform.position;
+                worldDir.y = 0;
+                if (worldDir.magnitude < 0.3f) 
+                {
+                    isAutoNavigating = false;
+                    return Vector2.zero;
+                }
+                if (forwardSource != null)
+                {
+                    Vector3 localDir = forwardSource.InverseTransformDirection(worldDir.normalized);
+                    return new Vector2(localDir.x, localDir.z);
+                }
+                else
+                {
+                    return Vector2.zero;
+                }
             }
-            else{
+            if (progressControl != null && progressControl.isAutoMoving) 
+            {
                 return Vector2.zero;
             }
+            return base.ReadInput();
         }
         public Vector2 read(){
             return ReadInput();
+        }
+        public void SetAutoMoveTarget(Vector3 target)
+        {
+            navTargetWorldPos = target;
+            isAutoNavigating = true;
+        }
+        
+        // 供 Move.cs 检查是否到达
+        public bool IsNavigating()
+        {
+            return isAutoNavigating;
         }
     }
 }

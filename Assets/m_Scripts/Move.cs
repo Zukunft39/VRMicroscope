@@ -21,32 +21,14 @@ public class Move : TInstance<Move>
     private void autoMove(InputAction.CallbackContext  context)
     {
         interactor.endPointDistance=1000f;
-        targetPos=interactor.rayEndPoint;
+        moveTest.SetAutoMoveTarget(interactor.rayEndPoint);
     }
     private void Start() {
-        targetPos=transform.position;
         inputActions.actionMaps[5].actions[0].started+=autoMove;
     }
     private void FixedUpdate() {
         if(progressControl.isAutoMoving){
             transform.position=cinema.GetComponent<CinemachineBrain>().OutputCamera.transform.position;
-            GetComponent<CharacterController>().Move(Vector3.zero);
         }
-        else if(moveTest.read()==Vector2.zero){
-            direction=new Vector3(targetPos.x-transform.position.x,0,targetPos.z-transform.position.z);
-            if(direction.magnitude<0.3f){
-                progressControl.isAutoMoving=false;
-                direction=Vector3.zero;
-            }
-            else GetComponent<CharacterController>().Move(direction.normalized*speed);
-        }
-        else if(moveTest.read()!=Vector2.zero){
-            targetPos=transform.position;
-            direction=Vector3.zero;
-        }
-        
-    }
-    private void OnControllerColliderHit(ControllerColliderHit hit) {
-        direction=Vector3.zero;
     }
 }
