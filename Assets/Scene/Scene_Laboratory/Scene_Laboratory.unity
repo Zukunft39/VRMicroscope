@@ -17104,7 +17104,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
-  m_RaycastTarget: 1
+  m_RaycastTarget: 0
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
@@ -28682,7 +28682,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
-  m_RaycastTarget: 1
+  m_RaycastTarget: 0
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
@@ -30351,6 +30351,30 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1809933559}
   m_CullTransparentMesh: 1
+--- !u!1 &1812244302 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 8634758757637626129, guid: acb6f53ed07f3204d9cbf08a9a78d907, type: 3}
+  m_PrefabInstance: {fileID: 8634758757735704353}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1812244312
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1812244302}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7951c64acb0fa62458bf30a60089fe2d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_IgnoreReversedGraphics: 0
+  m_CheckFor2DOcclusion: 0
+  m_CheckFor3DOcclusion: 0
+  m_BlockingMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_RaycastTriggerInteraction: 1
 --- !u!1001 &1814131083
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -39086,7 +39110,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_ActionAssets:
   - {fileID: -944628639613478452, guid: c348712bda248c246b8c49b3db54643f, type: 3}
-  - {fileID: -944628639613478452, guid: da2b439d1a2de5c46a4f428f8cf4fe19, type: 3}
 --- !u!4 &3127728406567687570
 Transform:
   m_ObjectHideFlags: 0
@@ -39233,7 +39256,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: af6bf904e410ee8479f9093d8830d1f8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_LocomotionProvider: {fileID: 9168142743249570444, guid: 895f6f3c2d334633b5800312285058d2, type: 3}
+  m_LocomotionProvider: {fileID: 1333654019}
   m_MinHeight: 1
   m_MaxHeight: 2.5
 --- !u!1 &3127728407643526763
@@ -39331,11 +39354,11 @@ MonoBehaviour:
   m_RepeatRate: 0.1
   m_TrackedDeviceDragThresholdMultiplier: 2
   m_TrackedScrollDeltaMultiplier: 5
-  m_ActiveInputMode: 1
+  m_ActiveInputMode: 2
   m_MaxTrackedDeviceRaycastDistance: 1000
   m_EnableXRInput: 1
-  m_EnableMouseInput: 1
-  m_EnableTouchInput: 1
+  m_EnableMouseInput: 0
+  m_EnableTouchInput: 0
   m_PointAction: {fileID: 2869410428622933342, guid: c348712bda248c246b8c49b3db54643f, type: 3}
   m_LeftClickAction: {fileID: 1855836014308820768, guid: c348712bda248c246b8c49b3db54643f, type: 3}
   m_MiddleClickAction: {fileID: -6289560987278519447, guid: c348712bda248c246b8c49b3db54643f, type: 3}
@@ -39841,9 +39864,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_ManipulationInteractionGroup: {fileID: 2429146837669592126}
-  m_DirectInteractor: {fileID: 0}
-  m_RayInteractor: {fileID: 0}
-  m_TeleportInteractor: {fileID: 0}
+  m_DirectInteractor: {fileID: 3385890771233271381}
+  m_RayInteractor: {fileID: 9032954040338544909}
+  m_TeleportInteractor: {fileID: 6694496368862741136}
   m_TeleportModeActivate: {fileID: -8061240218431744966, guid: c348712bda248c246b8c49b3db54643f, type: 3}
   m_TeleportModeCancel: {fileID: 2307464322626738743, guid: c348712bda248c246b8c49b3db54643f, type: 3}
   m_Turn: {fileID: -6493913391331992944, guid: c348712bda248c246b8c49b3db54643f, type: 3}
@@ -39851,7 +39874,7 @@ MonoBehaviour:
   m_Move: {fileID: -8198699208435500284, guid: c348712bda248c246b8c49b3db54643f, type: 3}
   m_UIScroll: {fileID: -6756787485274679044, guid: c348712bda248c246b8c49b3db54643f, type: 3}
   m_SmoothMotionEnabled: 0
-  m_SmoothTurnEnabled: 0
+  m_SmoothTurnEnabled: 1
   m_UIScrollingEnabled: 1
   m_RayInteractorChanged:
     m_PersistentCalls:
@@ -40736,9 +40759,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_ManipulationInteractionGroup: {fileID: 8074195217693284668}
-  m_DirectInteractor: {fileID: 0}
-  m_RayInteractor: {fileID: 0}
-  m_TeleportInteractor: {fileID: 0}
+  m_DirectInteractor: {fileID: 6688015754361741216}
+  m_RayInteractor: {fileID: 9146015505277117830}
+  m_TeleportInteractor: {fileID: 9014170784980641417}
   m_TeleportModeActivate: {fileID: 1263111715868034790, guid: c348712bda248c246b8c49b3db54643f, type: 3}
   m_TeleportModeCancel: {fileID: 737890489006591557, guid: c348712bda248c246b8c49b3db54643f, type: 3}
   m_Turn: {fileID: 1010738217276881514, guid: c348712bda248c246b8c49b3db54643f, type: 3}
@@ -41357,7 +41380,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3070180607959308276, guid: eb2a0dc7c8122384299656b18f1af357, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 789.00037
+      value: 780.00024
       objectReference: {fileID: 0}
     - target: {fileID: 3070180607959308277, guid: eb2a0dc7c8122384299656b18f1af357, type: 3}
       propertyPath: m_StaticEditorFlags
@@ -41505,7 +41528,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4075707599148670442, guid: eb2a0dc7c8122384299656b18f1af357, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 787
+      value: 778
+      objectReference: {fileID: 0}
+    - target: {fileID: 4075707599148670443, guid: eb2a0dc7c8122384299656b18f1af357, type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 4075707599148670443, guid: eb2a0dc7c8122384299656b18f1af357, type: 3}
       propertyPath: m_StaticEditorFlags
@@ -41515,6 +41542,10 @@ PrefabInstance:
       propertyPath: move
       value: 
       objectReference: {fileID: 4224636915810590474}
+    - target: {fileID: 4075707599250875358, guid: eb2a0dc7c8122384299656b18f1af357, type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 4075707599250875358, guid: eb2a0dc7c8122384299656b18f1af357, type: 3}
       propertyPath: tutorialDatas.Array.data[0].nodes.Array.data[0].videoPlayer
       value: 
@@ -45171,6 +45202,10 @@ PrefabInstance:
       propertyPath: m_Layer
       value: 5
       objectReference: {fileID: 0}
+    - target: {fileID: 511401958, guid: acb6f53ed07f3204d9cbf08a9a78d907, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 1000960498, guid: acb6f53ed07f3204d9cbf08a9a78d907, type: 3}
       propertyPath: m_Layer
       value: 5
@@ -45202,6 +45237,14 @@ PrefabInstance:
     - target: {fileID: 8634758756240002098, guid: acb6f53ed07f3204d9cbf08a9a78d907, type: 3}
       propertyPath: m_Layer
       value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 8634758756240002098, guid: acb6f53ed07f3204d9cbf08a9a78d907, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8634758756240002100, guid: acb6f53ed07f3204d9cbf08a9a78d907, type: 3}
+      propertyPath: m_RaycastTarget
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8634758756698053982, guid: acb6f53ed07f3204d9cbf08a9a78d907, type: 3}
       propertyPath: m_Layer
@@ -45395,7 +45438,12 @@ PrefabInstance:
       propertyPath: m_Layer
       value: 5
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    - target: {fileID: 8634758758281227233, guid: acb6f53ed07f3204d9cbf08a9a78d907, type: 3}
+      propertyPath: m_RaycastTarget
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents:
+    - {fileID: 8634758757637626131, guid: acb6f53ed07f3204d9cbf08a9a78d907, type: 3}
   m_SourcePrefab: {fileID: 100100000, guid: acb6f53ed07f3204d9cbf08a9a78d907, type: 3}
 --- !u!1 &8659504055885051676
 GameObject:
@@ -46672,7 +46720,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5acdefebb10f4ded8213f75e4d2bb031, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Inventory: {fileID: 0}
+  Inventory: {fileID: 1723693841}
   inputActions: {fileID: -944628639613478452, guid: c348712bda248c246b8c49b3db54643f, type: 3}
 --- !u!1 &9014170785400826608
 GameObject:

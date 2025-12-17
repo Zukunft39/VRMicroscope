@@ -60,7 +60,7 @@ public class Microscope : MonoBehaviour
     #region 数值和工具类变量
 
     public int pointer;
-    public float widthChangeAmount = 0.05f; // 每次滚动改变的宽度量
+    public float widthChangeAmount = -0.05f; // 每次滚动改变的宽度量
     public float minWidth = 0.01f; // 最小宽度
     public float maxWidth = 0.1f; // 最大宽度
     public float rotationChangeRatio = 10f; // 每次宽度变化对应的旋转增量

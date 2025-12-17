@@ -80,8 +80,8 @@ public class InteractWithMicroscope : MonoBehaviour
     {
         if(microscope == null)return;
         Vector2 temp = inputActions.actionMaps[9].actions[3].ReadValue<Vector2>();
-        microscope.ChangeFocal(temp.x);
-        microscope.AdjustLight(temp.y);
+        microscope.ChangeFocal(Math.Abs(temp.x)>0.7f?temp.x:0);
+        microscope.AdjustLight(Math.Abs(temp.y)>0.7f?temp.y:0);
     }
 
     public void DisableInteract(Microscope microscope)
