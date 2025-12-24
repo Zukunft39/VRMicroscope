@@ -215,6 +215,7 @@ public class Microscope : MonoBehaviour
                     Cam.SetActive(true);
                     showCamera.transform.position = player.transform.position;
                     showCamera.transform.rotation = player.transform.rotation;
+                    player.SetActive(false);
                     pointer++;
                 }
                 else
@@ -452,8 +453,6 @@ public class Microscope : MonoBehaviour
                 lookCamera.SetActive(true);
                 MicroUI.setTrue = false;
                 p = 0;
-                player.SetActive(false);
-
                 if (TutorialUI.CheckFirstLaunch("Tutorial_Microscope_InSide"))
                 {
                     TutorialUI.ShowTutorial(2); // 显示显微镜内部使用教程
