@@ -3,53 +3,70 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.Video;
+using System.IO; // 引入 IO 命名空间用于文件操作
+
+// [新增] 用于JSON序列化的数据包装类
+[System.Serializable]
+public class TutorialProgressData
+{
+    public List<string> triggeredTutorialKeys = new List<string>();
+}
 
 [System.Serializable]
 public class TutorialNode
 {
-    public string title;                // 节点标题
-    public string content;              // 节点描述
-    public VideoPlayer videoPlayer;     // 该节点使用的 VideoPlayer 组件
-    public RenderTexture renderTexture; // 该 VideoPlayer 输出的 RenderTexture
+    public string title;                
+    public string content;              
+    public VideoPlayer videoPlayer;     
+    public RenderTexture renderTexture; 
 }
 
 [System.Serializable]
 public class TutorialData
 {
-    public string tutorialName;   // 教程名称
-    public List<TutorialNode> nodes; // 该教程的所有节点
+    public string tutorialName;   
+    public List<TutorialNode> nodes; 
 }
 
 public class Tutorial : MonoBehaviour
 {
     [Header("UI 引用")]
-    public GameObject firstLevelUI;          // 一级UI
-    public GameObject secondLevelUITemplate; // 二级UI模板
-    public Text titleText;                   // 标题文本
-    public Text contentText;                 // 内容文本
-    public RawImage videoDisplay;            // 用于显示视频的 RawImage
+    public GameObject firstLevelUI;          
+    public GameObject secondLevelUITemplate; 
+    public Text titleText;                   
+    public Text contentText;                 
+    public RawImage videoDisplay;            
 
     [Header("教程数据")]
-    public List<TutorialData> tutorialDatas; // 所有教程数据
+    public List<TutorialData> tutorialDatas; 
 
     [Header("首次启动设置")]
-    public int firstLaunchTutorialIndex = 0; // 首次启动显示的教程索引
+    public int firstLaunchTutorialIndex = 0; 
 
     public Microscope microscope;
 
-    private int currentTutorialIndex = -1;   // 当前教程索引
-    private int currentNodeIndex = 0;        // 当前节点索引
-    private VideoPlayer currentVideoPlayer;  // 当前正在播放的 VideoPlayer
+    private int currentTutorialIndex = -1;   
+    private int currentNodeIndex = 0;        
+    private VideoPlayer currentVideoPlayer;  
     public GameObject move;
     public bool player;
 
+    // [新增] 存档数据与路径
+    private TutorialProgressData progressData;
+    private string saveFilePath;
+
     private void Awake()
     {
+        // [新增] 初始化路径并加载数据
+        saveFilePath = Path.Combine(Application.persistentDataPath, "TutorialProgress.json");
+        LoadProgress();
+
         // 初始化UI状态
         if (firstLevelUI != null) firstLevelUI.SetActive(false);
         if (secondLevelUITemplate != null) secondLevelUITemplate.SetActive(false);
 
         // 检查首次启动
+        // 逻辑保持不变，但 CheckFirstLaunch 内部实现已变
         if (CheckFirstLaunch("Tutorial_FirstLaunch") && player)
         {
             ShowTutorial(firstLaunchTutorialIndex);
@@ -67,23 +84,85 @@ public class Tutorial : MonoBehaviour
             }
         }
     }
+
+    // ----------------------------------------------------------------
+    // [修改] JSON 持久化核心逻辑区域
+    // ----------------------------------------------------------------
+
     /// <summary>
-    /// 检查是否为首次启动
+    /// [新增] 加载进度数据
+    /// </summary>
+    private void LoadProgress()
+    {
+        if (File.Exists(saveFilePath))
+        {
+            try
+            {
+                string json = File.ReadAllText(saveFilePath);
+                progressData = JsonUtility.FromJson<TutorialProgressData>(json);
+            }
+            catch (System.Exception e)
+            {
+                Debug.LogError("教程数据加载失败，重置为新数据: " + e.Message);
+                progressData = new TutorialProgressData();
+            }
+        }
+        else
+        {
+            progressData = new TutorialProgressData();
+        }
+    }
+
+    /// <summary>
+    /// [新增] 保存进度数据
+    /// </summary>
+    private void SaveProgress()
+    {
+        string json = JsonUtility.ToJson(progressData, true); // true 表示格式化输出，方便调试查看
+        File.WriteAllText(saveFilePath, json);
+    }
+
+    /// <summary>
+    /// [修改] 检查是否为首次启动 (替换了 PlayerPrefs)
     /// </summary>
     public bool CheckFirstLaunch(string key)
     {
-        if (!PlayerPrefs.HasKey(key))
+        // 如果列表中不包含这个Key，说明是第一次
+        if (!progressData.triggeredTutorialKeys.Contains(key))
         {
-            PlayerPrefs.SetInt(key, 1);
-            PlayerPrefs.Save();
+            // 标记为已触发
+            progressData.triggeredTutorialKeys.Add(key);
+            // 保存到 JSON 文件
+            SaveProgress();
             return true;
         }
         return false;
     }
 
     /// <summary>
-    /// 显示指定索引的教程
+    /// [修改] 重置所有教程进度 (替换了 PlayerPrefs)
     /// </summary>
+    public void ResetAllTutorials()
+    {
+        // 清空列表
+        progressData.triggeredTutorialKeys.Clear();
+        
+        // 删除文件 或 保存空列表 (这里选择删除文件更彻底)
+        if (File.Exists(saveFilePath))
+        {
+            File.Delete(saveFilePath);
+        }
+        
+        // 重新初始化内存中的数据
+        progressData = new TutorialProgressData();
+        
+        Debug.Log("所有教程进度已重置（JSON文件已删除）！");
+    }
+
+    // ----------------------------------------------------------------
+    // 下方逻辑未改动，保持原样
+    // ----------------------------------------------------------------
+
     public void ShowTutorial(int tutorialIndex)
     {
         if (tutorialIndex < 0 || tutorialIndex >= tutorialDatas.Count)
@@ -93,21 +172,15 @@ public class Tutorial : MonoBehaviour
         }
 
         move.SetActive(false);
-        // 更新当前教程索引并重置节点索引
         currentTutorialIndex = tutorialIndex;
         currentNodeIndex = 0;
 
-        // 隐藏一级UI，显示二级UI模板
         if (firstLevelUI != null) firstLevelUI.SetActive(false);
         if (secondLevelUITemplate != null) secondLevelUITemplate.SetActive(true);
 
-        // 加载并显示当前节点内容
         LoadCurrentNodeContent();
     }
 
-    /// <summary>
-    /// 加载当前节点的文本和视频内容
-    /// </summary>
     private void LoadCurrentNodeContent()
     {
         if (currentTutorialIndex == -1) return;
@@ -115,27 +188,20 @@ public class Tutorial : MonoBehaviour
         TutorialData currentTutorial = tutorialDatas[currentTutorialIndex];
         TutorialNode currentNode = currentTutorial.nodes[currentNodeIndex];
 
-        // 更新文本
         if (titleText != null) titleText.text = currentNode.title;
         if (contentText != null) contentText.text = currentNode.content;
 
-        // 更新视频
         UpdateVideoPlayer(currentNode);
     }
 
-    /// <summary>
-    /// 切换并配置当前节点的 VideoPlayer
-    /// </summary>
     private void UpdateVideoPlayer(TutorialNode node)
     {
-        // 停止上一个视频
         if (currentVideoPlayer != null)
         {
             currentVideoPlayer.Stop();
-            currentVideoPlayer.targetTexture = null; // 解除上一个 RenderTexture 的绑定
+            currentVideoPlayer.targetTexture = null; 
         }
 
-        // 如果当前节点没有指定 VideoPlayer，则清空显示
         if (node.videoPlayer == null || node.renderTexture == null)
         {
             if (videoDisplay != null)
@@ -146,25 +212,18 @@ public class Tutorial : MonoBehaviour
             return;
         }
 
-        // 配置新的 VideoPlayer
         currentVideoPlayer = node.videoPlayer;
         currentVideoPlayer.targetTexture = node.renderTexture;
 
-        // 将 RawImage 的显示目标设置为当前节点的 RenderTexture
         if (videoDisplay != null)
         {
             videoDisplay.texture = node.renderTexture;
         }
 
-        // 准备并播放视频
         currentVideoPlayer.Prepare();
-        // 等待一帧确保 Prepare 完成，然后播放
         StartCoroutine(PlayVideoAfterPrepare(currentVideoPlayer));
     }
     
-    /// <summary>
-    /// 协程：等待 VideoPlayer.Prepare() 完成后再播放
-    /// </summary>
     private IEnumerator PlayVideoAfterPrepare(VideoPlayer vp)
     {
         while (!vp.isPrepared)
@@ -174,16 +233,12 @@ public class Tutorial : MonoBehaviour
         vp.Play();
     }
 
-    /// <summary>
-    /// 前往下一个节点
-    /// </summary>
     public void GoToNextNode()
     {
         if (currentTutorialIndex == -1) return;
 
         TutorialData currentTutorial = tutorialDatas[currentTutorialIndex];
 
-        // 检查是否有下一个节点
         if (currentNodeIndex < currentTutorial.nodes.Count - 1)
         {
             currentNodeIndex++;
@@ -191,19 +246,14 @@ public class Tutorial : MonoBehaviour
         }
         else
         {
-            // 没有下一个节点时返回一级UI
             Back();
         }
     }
 
-    /// <summary>
-    /// 前往上一个节点
-    /// </summary>
     public void GoToPreviousNode()
     {
         if (currentTutorialIndex == -1) return;
 
-        // 检查是否有上一个节点
         if (currentNodeIndex > 0)
         {
             currentNodeIndex--;
@@ -211,12 +261,8 @@ public class Tutorial : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// 返回一级UI
-    /// </summary>
     public void ReturnToFirstLevel()
     {
-        // 停止当前视频
         if (currentVideoPlayer != null)
         {
             currentVideoPlayer.Stop();
@@ -224,27 +270,20 @@ public class Tutorial : MonoBehaviour
         }
         currentVideoPlayer = null;
 
-        // 隐藏二级UI模板，显示一级UI
         if (secondLevelUITemplate != null) secondLevelUITemplate.SetActive(false);
         if (firstLevelUI != null) firstLevelUI.SetActive(true);
 
-        // 清空 RawImage
         if (videoDisplay != null)
         {
             videoDisplay.texture = null;
         }
 
-        // 重置当前教程索引
         currentTutorialIndex = -1;
         currentNodeIndex = 0;
     }
 
-    /// <summary>
-    /// 返回
-    /// </summary>
     public void Back()
     {
-        // 停止当前视频
         if (currentVideoPlayer != null)
         {
             currentVideoPlayer.Stop();
@@ -252,37 +291,20 @@ public class Tutorial : MonoBehaviour
         }
         currentVideoPlayer = null;
 
-        // 隐藏二级UI模板
         if (secondLevelUITemplate != null) secondLevelUITemplate.SetActive(false);
-        // 隐藏一级UI
         if (firstLevelUI != null) firstLevelUI.SetActive(false);
-        // 清空 RawImage
         if (videoDisplay != null)
         {
             videoDisplay.texture = null;
         }
 
-        // 重置当前教程索引
         currentTutorialIndex = -1;
         currentNodeIndex = 0;
         move.SetActive(true);
     }
 
-    /// <summary>
-    /// 从一级UI按钮调用，显示指定教程
-    /// </summary>
     public void OnTutorialButtonClick(int tutorialIndex)
     {
         ShowTutorial(tutorialIndex);
-    }
-
-    /// <summary>
-    /// 重置所有教程进度
-    /// </summary>
-    public void ResetAllTutorials()
-    {
-        PlayerPrefs.DeleteKey("Tutorial_FirstLaunch");
-        PlayerPrefs.Save();
-        Debug.Log("所有教程进度已重置！");
     }
 }
