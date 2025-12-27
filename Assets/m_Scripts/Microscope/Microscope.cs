@@ -417,7 +417,41 @@ public class Microscope : MonoBehaviour
        
         if (showCamera.activeSelf)
         {
-            // 目标位置和旋转
+            // ========== 注释掉原有协程平滑移动代码 ==========
+            // // 目标位置和旋转
+            // Vector3 targetPosition;
+            // Quaternion targetRotation;
+
+            // // 根据pointer的值决定目标位置和旋转
+            // if (pointer == 1)
+            // {
+            //     targetPosition = point1.transform.position;
+            //     targetRotation = point1.transform.rotation;
+            //     Camera camera = showCamera.GetComponent<Camera>();
+            //     Camera camera1 = player.GetComponent<Camera>();
+            //     camera.fieldOfView = camera1.fieldOfView;
+            // }
+            // else
+            // {
+            //     targetPosition = point2.transform.position;
+            //     targetRotation = point2.transform.rotation;
+            //     if (p == 0)
+            //     {
+            //         MicroBlack.ToBlack = true;
+            //         p++;
+            //     }
+
+            // }
+            // // 使用MoveTowards平滑过渡位置
+            // showCamera.transform.position = Vector3.MoveTowards(showCamera.transform.position, targetPosition,
+            //     10 * Time.deltaTime * transform.lossyScale.x);
+
+            // // 使用RotateTowards平滑过渡旋转
+            // showCamera.transform.rotation = Quaternion.RotateTowards(showCamera.transform.rotation, targetRotation, 30 * Time.deltaTime);
+            // if (Vector3.Distance(showCamera.transform.position, point2.transform.position) < 0.01f)
+            // ==============================================
+
+            // ========== 新增瞬间移动代码 ==========
             Vector3 targetPosition;
             Quaternion targetRotation;
 
@@ -429,6 +463,10 @@ public class Microscope : MonoBehaviour
                 Camera camera = showCamera.GetComponent<Camera>();
                 Camera camera1 = player.GetComponent<Camera>();
                 camera.fieldOfView = camera1.fieldOfView;
+                
+                // 瞬间移动到point1位置
+                showCamera.transform.position = targetPosition;
+                showCamera.transform.rotation = targetRotation;
             }
             else
             {
@@ -440,14 +478,14 @@ public class Microscope : MonoBehaviour
                     p++;
                 }
 
+                // 瞬间移动到point2位置
+                showCamera.transform.position = targetPosition;
+                showCamera.transform.rotation = targetRotation;
             }
-            // 使用MoveTowards平滑过渡位置
-            showCamera.transform.position = Vector3.MoveTowards(showCamera.transform.position, targetPosition,
-                10 * Time.deltaTime * transform.lossyScale.x);
 
-            // 使用RotateTowards平滑过渡旋转
-            showCamera.transform.rotation = Quaternion.RotateTowards(showCamera.transform.rotation, targetRotation, 30 * Time.deltaTime);
-            if (Vector3.Distance(showCamera.transform.position, point2.transform.position) < 0.01f)
+            // 瞬间判断是否到达目标位置（直接触发后续逻辑）
+            if (pointer != 1) // 只有指向point2时才切换到观察相机
+            // ==============================================
             {
                 showCamera.SetActive(false);
                 lookCamera.SetActive(true);

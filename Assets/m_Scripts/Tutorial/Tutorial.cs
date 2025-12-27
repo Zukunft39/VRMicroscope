@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.Video;
@@ -33,8 +34,8 @@ public class Tutorial : MonoBehaviour
     [Header("UI 引用")]
     public GameObject firstLevelUI;          
     public GameObject secondLevelUITemplate; 
-    public Text titleText;                   
-    public Text contentText;                 
+    public TextMeshProUGUI titleText;                   // 标题文本
+    public TextMeshProUGUI contentText;                 // 内容文本              
     public RawImage videoDisplay;            
 
     [Header("教程数据")]
@@ -43,13 +44,16 @@ public class Tutorial : MonoBehaviour
     [Header("首次启动设置")]
     public int firstLaunchTutorialIndex = 0; 
 
-    public Microscope microscope;
+    public Microscope microscope;  //显微镜脚本
 
     private int currentTutorialIndex = -1;   
     private int currentNodeIndex = 0;        
     private VideoPlayer currentVideoPlayer;  
     public GameObject move;
     public bool player;
+
+    public int level; // 当前级别
+    public List<TextMeshProUGUI> page; // 页码
 
     // [新增] 存档数据与路径
     private TutorialProgressData progressData;
@@ -174,7 +178,7 @@ public class Tutorial : MonoBehaviour
         move.SetActive(false);
         currentTutorialIndex = tutorialIndex;
         currentNodeIndex = 0;
-
+        level=2;
         if (firstLevelUI != null) firstLevelUI.SetActive(false);
         if (secondLevelUITemplate != null) secondLevelUITemplate.SetActive(true);
 
@@ -233,31 +237,38 @@ public class Tutorial : MonoBehaviour
         vp.Play();
     }
 
-    public void GoToNextNode()
+    public void GoToNextNode(int level)
     {
-        if (currentTutorialIndex == -1) return;
-
-        TutorialData currentTutorial = tutorialDatas[currentTutorialIndex];
-
-        if (currentNodeIndex < currentTutorial.nodes.Count - 1)
+        if(level==2)
         {
-            currentNodeIndex++;
-            LoadCurrentNodeContent();
-        }
-        else
-        {
-            Back();
+            if (currentTutorialIndex == -1) return;
+
+            TutorialData currentTutorial = tutorialDatas[currentTutorialIndex];
+
+            if (currentNodeIndex < currentTutorial.nodes.Count - 1)
+            {
+                currentNodeIndex++;
+                LoadCurrentNodeContent();
+            }
+            else
+            {
+                Back();
+            }
         }
     }
 
-    public void GoToPreviousNode()
+    public void GoToPreviousNode(int level)
     {
-        if (currentTutorialIndex == -1) return;
-
-        if (currentNodeIndex > 0)
+        if(level==2)
         {
-            currentNodeIndex--;
-            LoadCurrentNodeContent();
+            if (currentTutorialIndex == -1) return;
+
+            if (currentNodeIndex > 0)
+            {
+                currentNodeIndex--;
+                LoadCurrentNodeContent();
+            }
+            SetPage(currentNodeIndex);
         }
     }
 
@@ -277,7 +288,7 @@ public class Tutorial : MonoBehaviour
         {
             videoDisplay.texture = null;
         }
-
+        level=1;
         currentTutorialIndex = -1;
         currentNodeIndex = 0;
     }
@@ -306,5 +317,17 @@ public class Tutorial : MonoBehaviour
     public void OnTutorialButtonClick(int tutorialIndex)
     {
         ShowTutorial(tutorialIndex);
+    }
+
+    /// <summary>
+    /// 设置页码显示
+    /// </summary>
+    public void SetPage(int pageIndex)
+    {
+        if(level<0 || level>=page.Count)
+        {
+            return;
+        }
+        page[level].text="Page "+(pageIndex+1).ToString();
     }
 }
