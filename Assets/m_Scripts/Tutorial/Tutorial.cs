@@ -49,7 +49,6 @@ public class Tutorial : MonoBehaviour
     private int currentTutorialIndex = -1;   
     private int currentNodeIndex = 0;        
     private VideoPlayer currentVideoPlayer;  
-    public GameObject move;
     public bool player;
 
     public int level; // 当前级别
@@ -59,8 +58,21 @@ public class Tutorial : MonoBehaviour
     private TutorialProgressData progressData;
     private string saveFilePath;
 
+    public TutorialButton tutorialButton;
+
     private void Awake()
     {
+        // 【新增】优先查找TutorialButton组件
+        if (tutorialButton == null)
+        {
+            tutorialButton = FindObjectOfType<TutorialButton>();
+            if (tutorialButton == null)
+            {
+                Debug.LogError("未找到TutorialButton组件，请确保场景中有该脚本！");
+            }
+        }
+
+
         // [新增] 初始化路径并加载数据
         saveFilePath = Path.Combine(Application.persistentDataPath, "TutorialProgress.json");
         LoadProgress();
@@ -175,14 +187,15 @@ public class Tutorial : MonoBehaviour
             return;
         }
 
-        move.SetActive(false);
         currentTutorialIndex = tutorialIndex;
         currentNodeIndex = 0;
         level=2;
+        ChangeLevel();
         if (firstLevelUI != null) firstLevelUI.SetActive(false);
         if (secondLevelUITemplate != null) secondLevelUITemplate.SetActive(true);
 
         LoadCurrentNodeContent();
+
     }
 
     private void LoadCurrentNodeContent()
@@ -289,6 +302,7 @@ public class Tutorial : MonoBehaviour
             videoDisplay.texture = null;
         }
         level=1;
+        ChangeLevel();
         currentTutorialIndex = -1;
         currentNodeIndex = 0;
     }
@@ -311,7 +325,8 @@ public class Tutorial : MonoBehaviour
 
         currentTutorialIndex = -1;
         currentNodeIndex = 0;
-        move.SetActive(true);
+        level=-1;
+        ChangeLevel();
     }
 
     public void OnTutorialButtonClick(int tutorialIndex)
@@ -329,5 +344,13 @@ public class Tutorial : MonoBehaviour
             return;
         }
         page[level].text="Page "+(pageIndex+1).ToString();
+    }
+
+    /// <summary>
+    /// 通知TutorialButton切换级别
+    /// </summary>
+    public void ChangeLevel()
+    {
+        tutorialButton.ChangeLevel(level);
     }
 }

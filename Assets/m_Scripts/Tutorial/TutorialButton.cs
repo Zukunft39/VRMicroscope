@@ -44,11 +44,26 @@ public class TutorialButton : MonoBehaviour
     // 事件回调（便于外部扩展逻辑）
     public Action<Button, GameObject, UILevel, buttonsLevels> OnButtonSelected; // 按钮选中事件（含GameObject）
     public Action<Button> OnButtonClicked;                                      // 按钮点击事件
-
+    
+    // 新增：当前UI层级（-1/1/2），用于控制输入逻辑
+    public int currentUILevel = 1; // 默认一级UI
+    
+    // 依赖的核心脚本
+    private Tutorial tutorial;
     #endregion
 
     private void Start()
     {
+        // 修正：Tutorial脚本不在当前物体上，改为查找或通过Inspector赋值
+        if (tutorial == null)
+        {
+            tutorial = FindObjectOfType<Tutorial>();
+            if (tutorial == null)
+            {
+                Debug.LogError("未找到Tutorial组件，请确保场景中有该脚本！");
+            }
+        }
+        
         // 初始化按钮事件和默认状态
         InitializeButtons();
         // 默认选中指定层级的第二个按钮组第一个按钮（按你的需求）
@@ -107,8 +122,7 @@ public class TutorialButton : MonoBehaviour
                         // 绑定按钮点击事件（触发自身事件+更新选中状态）
                         btn.onClick.AddListener(() =>
                         {
-                            // 更新选中状态
-                            levelIndex = currentLevelIdx;
+
                             buttonIndex = currentBtnGroupIdx;
                             index = currentObjIdx;
                             nowSelectObj = obj;
@@ -145,6 +159,7 @@ public class TutorialButton : MonoBehaviour
         }
 
         UILevel targetLevel = UILevels[levelIdx];
+        levelIndex=levelIdx;
         // 选中第二组（索引1），如果不足则选第一组
         int defaultBtnGroupIdx = targetLevel.theButtons.Length >= 2 ? 1 : 0;
 
@@ -167,8 +182,7 @@ public class TutorialButton : MonoBehaviour
 
         if (defaultBtn != null)
         {
-            // 更新选中状态
-            levelIndex = levelIdx;
+
             buttonIndex = defaultBtnGroupIdx;
             index = 0;
             nowSelectObj = defaultObj;
@@ -527,5 +541,76 @@ public class TutorialButton : MonoBehaviour
         }
 
         return true;
+    }
+
+    /// <summary>
+    /// 核心完善：切换UI级别（-1/1/2）
+    /// </summary>
+    /// <param name="newLevel">新的UI级别：-1（无输入）、1（一级UI）、2（二级UI）</param>
+    public void ChangeLevel(int newLevel)
+    {
+        // 更新当前UI层级
+        currentUILevel = newLevel;
+        
+        // 根据不同级别处理逻辑
+        switch (newLevel)
+        {
+            case -1:
+                // 隐藏所有按钮交互，恢复所有按钮默认状态
+                ResetAllButtonsToNormal();
+                nowButton = null;
+                nowSelectObj = null;
+                Debug.Log("切换到无输入层级，按钮选中状态重置");
+                break;
+            
+            case 1:
+                // 切换到一级UI：选中一级UI对应的默认按钮
+                ResetAllButtonsToNormal();
+                // 一级UI对应UILevels[0]（可根据你的配置调整）
+                SelectDefaultButton(0);
+                Debug.Log("切换到一级UI，已选中默认按钮");
+                break;
+            
+            case 2:
+                // 切换到二级UI：选中二级UI对应的默认按钮
+                ResetAllButtonsToNormal();
+                // 二级UI对应UILevels[1]（可根据你的配置调整）
+                SelectDefaultButton(1);
+                Debug.Log("切换到二级UI，已选中默认按钮");
+                break;
+            
+            default:
+                Debug.LogWarning($"无效的UI级别：{newLevel}，默认切换到一级UI");
+                currentUILevel = 1;
+                ResetAllButtonsToNormal();
+                SelectDefaultButton(0);
+                break;
+        }
+    }
+
+    /// <summary>
+    /// 新增：重置所有按钮为默认状态
+    /// </summary>
+    private void ResetAllButtonsToNormal()
+    {
+        if (UILevels.Count == 0) return;
+        
+        foreach (var uiLevel in UILevels)
+        {
+            foreach (var btnGroup in uiLevel.theButtons)
+            {
+                foreach (var obj in btnGroup.buttons)
+                {
+                    if (obj != null)
+                    {
+                        Button btn = obj.GetComponent<Button>();
+                        if (btn != null)
+                        {
+                            returnNormalButton(btn);
+                        }
+                    }
+                }
+            }
+        }
     }
 }
