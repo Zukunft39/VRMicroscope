@@ -586,7 +586,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &511401959
 RectTransform:
   m_ObjectHideFlags: 0
@@ -2400,11 +2400,11 @@ MonoBehaviour:
       - m_Target: {fileID: 8634758757735704356}
         m_TargetAssemblyTypeName: Tutorial, Assembly-CSharp
         m_MethodName: GoToNextNode
-        m_Mode: 1
+        m_Mode: 3
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
+          m_IntArgument: 2
           m_FloatArgument: 0
           m_StringArgument: 
           m_BoolArgument: 0
@@ -2504,6 +2504,7 @@ GameObject:
   - component: {fileID: 8634758757735704356}
   - component: {fileID: 1364009523}
   - component: {fileID: 1364009527}
+  - component: {fileID: 1364009528}
   m_Layer: 0
   m_Name: Tutorial
   m_TagString: Untagged
@@ -2675,6 +2676,7 @@ MonoBehaviour:
   page:
   - {fileID: 0}
   - {fileID: 0}
+  tutorialButton: {fileID: 0}
 --- !u!114 &1364009523
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2706,7 +2708,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f0d349eaed9faac4e87d7b6aea6cea65, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  highlightColor: {r: 0.9413085, g: 1, b: 0, a: 1}
+  highlightColor: {r: 0.30780604, g: 0.32704395, b: 0, a: 1}
   normalColor: {r: 0.4716981, g: 0.4716981, b: 0.4716981, a: 1}
   highlightScale: 1.1
   keepTextOriginalColor: 1
@@ -2721,10 +2723,36 @@ MonoBehaviour:
     - buttons:
       - {fileID: 741139513}
       - {fileID: 827339090}
-  - theButtons: []
+  - theButtons:
+    - buttons:
+      - {fileID: 8634758758231359221}
+    - buttons:
+      - {fileID: 8634758758281227162}
+    - buttons:
+      - {fileID: 8634758758065117675}
+      - {fileID: 8634758756794595891}
   nowButton: {fileID: 0}
   nowSelectObj: {fileID: 0}
   levelIndex: 0
+  currentUILevel: 1
+--- !u!114 &1364009528
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8634758757637626129}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1e9b9000e78bae9449b6d822a95a4288, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  upGroupKey: 119
+  downGroupKey: 115
+  upItemKey: 97
+  downItemKey: 100
+  triggerKey: 32
+  inputInterval: 0.2
 --- !u!1 &8634758758065117675
 GameObject:
   m_ObjectHideFlags: 0
@@ -2849,11 +2877,11 @@ MonoBehaviour:
       - m_Target: {fileID: 8634758757735704356}
         m_TargetAssemblyTypeName: Tutorial, Assembly-CSharp
         m_MethodName: GoToPreviousNode
-        m_Mode: 1
+        m_Mode: 3
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
+          m_IntArgument: 2
           m_FloatArgument: 0
           m_StringArgument: 
           m_BoolArgument: 0
@@ -3123,6 +3151,7 @@ GameObject:
   - component: {fileID: 8634758758281227165}
   - component: {fileID: 8634758758281227167}
   - component: {fileID: 8634758758281227233}
+  - component: {fileID: 1750717361}
   m_Layer: 0
   m_Name: Video
   m_TagString: Untagged
@@ -3185,3 +3214,47 @@ MonoBehaviour:
     y: 0
     width: 1
     height: 1
+--- !u!114 &1750717361
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8634758758281227162}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4e29b1a8efbd4b44bb3f3716e73f07ff, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Navigation:
+    m_Mode: 3
+    m_WrapAround: 0
+    m_SelectOnUp: {fileID: 0}
+    m_SelectOnDown: {fileID: 0}
+    m_SelectOnLeft: {fileID: 0}
+    m_SelectOnRight: {fileID: 0}
+  m_Transition: 1
+  m_Colors:
+    m_NormalColor: {r: 1, g: 1, b: 1, a: 1}
+    m_HighlightedColor: {r: 0.9607843, g: 0.9607843, b: 0.9607843, a: 1}
+    m_PressedColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 1}
+    m_SelectedColor: {r: 0.9607843, g: 0.9607843, b: 0.9607843, a: 1}
+    m_DisabledColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 0.5019608}
+    m_ColorMultiplier: 1
+    m_FadeDuration: 0.1
+  m_SpriteState:
+    m_HighlightedSprite: {fileID: 0}
+    m_PressedSprite: {fileID: 0}
+    m_SelectedSprite: {fileID: 0}
+    m_DisabledSprite: {fileID: 0}
+  m_AnimationTriggers:
+    m_NormalTrigger: Normal
+    m_HighlightedTrigger: Highlighted
+    m_PressedTrigger: Pressed
+    m_SelectedTrigger: Selected
+    m_DisabledTrigger: Disabled
+  m_Interactable: 1
+  m_TargetGraphic: {fileID: 8634758758281227233}
+  m_OnClick:
+    m_PersistentCalls:
+      m_Calls: []
