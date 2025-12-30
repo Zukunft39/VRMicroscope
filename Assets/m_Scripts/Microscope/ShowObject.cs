@@ -52,7 +52,6 @@ public class ShowObject : MonoBehaviour
             Debug.LogError("找不到Material", this);
 
         material.SetFloat(lightName, targetLight);
-        Debug.Log(targetLight);
     }
 
     void Update()

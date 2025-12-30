@@ -4,17 +4,13 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.UI;
 
+
 public class InteractWithSamples:MonoBehaviour
 {
     InputAction PickOrPutSampleAction;
     private InteractableSamples interactableObject;
     private bool isSampleOnHand = false;
     public RawImage Inventory;
-    public InputActionAsset inputActions;
-    private void Start()
-    {
-        PickOrPutSampleAction = inputActions.actionMaps[9].actions[2];
-    }
 
     private void Update()
     {
@@ -22,13 +18,15 @@ public class InteractWithSamples:MonoBehaviour
         {
             if (Input.GetKey(KeyCode.R))
             {
-                PickSample(new InputAction.CallbackContext());
+                PickSample();
             }
         }
     }
 
-    void PickSample(InputAction.CallbackContext  context)
+    public void PickSample()
     {
+        Debug.Log("Picking Sample");
+        if(ReferenceEquals(interactableObject,null))return;
         if (isSampleOnHand)
         {
             for (int i = 0; i < transform.GetChild(0).transform.childCount; i++)
@@ -52,11 +50,8 @@ public class InteractWithSamples:MonoBehaviour
     }
     public void EnablePickSample(InteractableSamples interactable)
     {
-        if (interactableObject == null)
-        {
-            PickOrPutSampleAction.started += PickSample;
-        }
         interactableObject=interactable;
+        Debug.Log("enable pick sample");
     }
 
     public void DisablePickSample(InteractableSamples interactable)
@@ -64,7 +59,6 @@ public class InteractWithSamples:MonoBehaviour
         if (interactableObject == interactable)
         {
             interactableObject = null;
-            PickOrPutSampleAction.started -= PickSample;
         }
     }
 }

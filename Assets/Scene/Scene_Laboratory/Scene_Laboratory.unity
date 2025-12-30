@@ -37786,8 +37786,8 @@ MonoBehaviour:
   m_DirectInteractor: {fileID: 3385890771233271381}
   m_RayInteractor: {fileID: 9032954040338544909}
   m_TeleportInteractor: {fileID: 6694496368862741136}
-  m_TeleportModeActivate: {fileID: -8061240218431744966, guid: c348712bda248c246b8c49b3db54643f, type: 3}
-  m_TeleportModeCancel: {fileID: 2307464322626738743, guid: c348712bda248c246b8c49b3db54643f, type: 3}
+  m_TeleportModeActivate: {fileID: 0}
+  m_TeleportModeCancel: {fileID: 0}
   m_Turn: {fileID: -6493913391331992944, guid: c348712bda248c246b8c49b3db54643f, type: 3}
   m_SnapTurn: {fileID: -8525429354371678379, guid: c348712bda248c246b8c49b3db54643f, type: 3}
   m_Move: {fileID: -8198699208435500284, guid: c348712bda248c246b8c49b3db54643f, type: 3}
@@ -38734,7 +38734,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4075707599148670443, guid: eb2a0dc7c8122384299656b18f1af357, type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 4075707599148670443, guid: eb2a0dc7c8122384299656b18f1af357, type: 3}
       propertyPath: m_StaticEditorFlags
@@ -38746,7 +38746,7 @@ PrefabInstance:
       objectReference: {fileID: 4224636915810590474}
     - target: {fileID: 4075707599250875358, guid: eb2a0dc7c8122384299656b18f1af357, type: 3}
       propertyPath: m_Enabled
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 4075707599250875358, guid: eb2a0dc7c8122384299656b18f1af357, type: 3}
       propertyPath: tutorialDatas.Array.data[0].nodes.Array.data[0].videoPlayer
@@ -39307,7 +39307,7 @@ MonoBehaviour:
   m_System: {fileID: 7712547943871191102}
   m_TurnSpeed: 60
   m_LeftHandTurnAction:
-    m_UseReference: 1
+    m_UseReference: 0
     m_Action:
       m_Name: Left Hand Turn
       m_Type: 0
@@ -39800,7 +39800,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &6694496368862741149
 Transform:
   m_ObjectHideFlags: 0
@@ -41472,6 +41472,10 @@ PrefabInstance:
       propertyPath: m_Layer
       value: 5
       objectReference: {fileID: 0}
+    - target: {fileID: 8634758757637626129, guid: acb6f53ed07f3204d9cbf08a9a78d907, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 8634758757637626133, guid: acb6f53ed07f3204d9cbf08a9a78d907, type: 3}
       propertyPath: m_Camera
       value: 
@@ -42594,8 +42598,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 9014170785358182098}
-  - component: {fileID: 9014170785358182100}
   - component: {fileID: 9014170785358182101}
+  - component: {fileID: 9014170785358182100}
   m_Layer: 0
   m_Name: Camera Offset
   m_TagString: Untagged
@@ -42612,11 +42616,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 9014170785358182099}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3707caf4680455e4099efcc63aa1e978, type: 3}
+  m_Script: {fileID: 11500000, guid: 5acdefebb10f4ded8213f75e4d2bb031, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  inputActions: {fileID: -944628639613478452, guid: c348712bda248c246b8c49b3db54643f, type: 3}
-  microscope: {fileID: 0}
+  Inventory: {fileID: 1723693841}
 --- !u!114 &9014170785358182101
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -42626,11 +42629,13 @@ MonoBehaviour:
   m_GameObject: {fileID: 9014170785358182099}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5acdefebb10f4ded8213f75e4d2bb031, type: 3}
+  m_Script: {fileID: 11500000, guid: 7ec48de5691989e4399215470367e8eb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Inventory: {fileID: 1723693841}
-  inputActions: {fileID: -944628639613478452, guid: c348712bda248c246b8c49b3db54643f, type: 3}
+  inputActionAsset: {fileID: -944628639613478452, guid: c348712bda248c246b8c49b3db54643f, type: 3}
+  xrLocomotionSys: {fileID: 7712547943871191102}
+  tutorialButtonInput: {fileID: 0}
+  currentTutorial: {fileID: 0}
 --- !u!1 &9014170785400826608
 GameObject:
   m_ObjectHideFlags: 0

@@ -316,12 +316,14 @@ public class Microscope : MonoBehaviour
     /// </summary>
     public void QuitObserve()
     {
+        
         lookCamera.SetActive(false);
         pointer = 0;
         MicroUI.setTrue = true;
         player.SetActive(true);
         //player.GetComponent<Camera>().cullingMask = ~player.GetComponent<Camera>().cullingMask;
         Cam.SetActive(false);
+        
     }
     
     /// <summary>
@@ -491,10 +493,13 @@ public class Microscope : MonoBehaviour
                 lookCamera.SetActive(true);
                 MicroUI.setTrue = false;
                 p = 0;
+                Interactor.Instance.ChangeState(Interactor.GameState.Observing);
                 if (TutorialUI.CheckFirstLaunch("Tutorial_Microscope_InSide"))
                 {
                     TutorialUI.ShowTutorial(2); // 显示显微镜内部使用教程
+                    Interactor.Instance.ChangeState(Interactor.GameState.Tutorial);
                 }
+                
                 //取反 只渲染Microscope的ui
                 //player.GetComponent<Camera>().cullingMask = ~player.GetComponent<Camera>().cullingMask;
             }
@@ -601,10 +606,10 @@ public class Microscope : MonoBehaviour
         if (other.CompareTag("MainCamera"))
         {
             player = other.gameObject;
-            InteractWithMicroscope temp=new();
-            if (player.transform.parent?.TryGetComponent<InteractWithMicroscope>(out temp)==true)
+            Interactor temp=new();
+            if (player.transform.parent?.TryGetComponent<Interactor>(out temp)==true)
             {
-                temp?.EnableInteract(this);
+                temp?.OnMicroscopeIn(this);
             }
             MicroUI.setTrue = true;
 
@@ -638,10 +643,10 @@ public class Microscope : MonoBehaviour
     {
         if (other.CompareTag("MainCamera"))
         {
-            InteractWithMicroscope temp=new();
-            if (player.transform.parent?.TryGetComponent<InteractWithMicroscope>(out temp)==true)
+            Interactor temp=new();
+            if (player.transform.parent?.TryGetComponent<Interactor>(out temp)==true)
             {
-                temp?.DisableInteract(this);
+                temp?.OnMicroscopeOut(this);
             }
             MicroUI.setTrue = false;
             isNear = false;
@@ -716,7 +721,7 @@ public class Microscope : MonoBehaviour
     public void SetBlink()
     {
         Lightmain.SetActive(true);
-        mainMaterial.SetFloat("_boolean", 1f);
+        mainMaterial?.SetFloat("_boolean", 1f);
     }
 
     public void SetNormal()

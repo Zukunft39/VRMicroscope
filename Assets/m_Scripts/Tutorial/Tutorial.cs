@@ -1,10 +1,12 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.Video;
-using System.IO; // 引入 IO 命名空间用于文件操作
+using System.IO;
+using UnityEngine.XR.Management; // 引入 IO 命名空间用于文件操作
 
 // [新增] 用于JSON序列化的数据包装类
 [System.Serializable]
@@ -80,24 +82,39 @@ public class Tutorial : MonoBehaviour
         // 初始化UI状态
         if (firstLevelUI != null) firstLevelUI.SetActive(false);
         if (secondLevelUITemplate != null) secondLevelUITemplate.SetActive(false);
-
+        
+        Interactor.Instance.currentTutorial = this;
+        Interactor.Instance.tutorialButtonInput = GetComponent<TutorialButtonInput>();
+    }
+    private IEnumerator Start()
+    {
+        Interactor.Instance.currentTutorial = this;
+        Interactor.Instance.tutorialButtonInput = GetComponent<TutorialButtonInput>();
         // 检查首次启动
         // 逻辑保持不变，但 CheckFirstLaunch 内部实现已变
-        if (CheckFirstLaunch("Tutorial_FirstLaunch") && player)
+        if (!(CheckFirstLaunch("Tutorial_FirstLaunch") && player))
         {
-            ShowTutorial(firstLaunchTutorialIndex);
-            microscope.SetBlink();
+            yield break;
         }
+
+        yield return new WaitForSeconds(2f);
+        ShowTutorial(firstLaunchTutorialIndex);
+        microscope.SetBlink();
+        
+        Interactor.Instance.ChangeState(Interactor.GameState.Tutorial);
+    }
+
+    private void OnEnable()
+    {
+        Interactor.Instance.currentTutorial = this;
+        Interactor.Instance.tutorialButtonInput = GetComponent<TutorialButtonInput>();
     }
 
     void Update()
     {
-        if (player)
+        if(Input.GetKeyDown(KeyCode.O))
         {
-            if(Input.GetKeyDown(KeyCode.O))
-            {
-                ReturnToFirstLevel();
-            }
+            ReturnToFirstLevel();
         }
     }
 
@@ -143,6 +160,10 @@ public class Tutorial : MonoBehaviour
     /// </summary>
     public bool CheckFirstLaunch(string key)
     {
+        if (progressData?.triggeredTutorialKeys==null)
+        {
+            LoadProgress();
+        }
         // 如果列表中不包含这个Key，说明是第一次
         if (!progressData.triggeredTutorialKeys.Contains(key))
         {
@@ -195,7 +216,8 @@ public class Tutorial : MonoBehaviour
         if (secondLevelUITemplate != null) secondLevelUITemplate.SetActive(true);
 
         LoadCurrentNodeContent();
-
+    
+        Interactor.Instance.ChangeState(Interactor.GameState.Tutorial);
     }
 
     private void LoadCurrentNodeContent()
@@ -287,6 +309,7 @@ public class Tutorial : MonoBehaviour
 
     public void ReturnToFirstLevel()
     {
+        if(!player)return;
         if (currentVideoPlayer != null)
         {
             currentVideoPlayer.Stop();
@@ -327,6 +350,7 @@ public class Tutorial : MonoBehaviour
         currentNodeIndex = 0;
         level=-1;
         ChangeLevel();
+        Interactor.Instance.ChangeState(null);
     }
 
     public void OnTutorialButtonClick(int tutorialIndex)

@@ -24,7 +24,14 @@ public class Move : TInstance<Move>
         moveTest.SetAutoMoveTarget(interactor.rayEndPoint);
     }
     private void Start() {
-        inputActions.actionMaps[5].actions[0].started+=autoMove;
+        inputActions.FindActionMap("Roaming").FindAction("AutoMove").started+=autoMove;
+        inputActions.FindActionMap("XRI LeftHand Locomotion").FindAction("Move").performed += (context) =>
+        {
+            if (context.ReadValue<Vector2>() != Vector2.zero)
+            {
+                moveTest.isAutoNavigating = false;
+            }
+        };
     }
     private void FixedUpdate() {
         if(progressControl.isAutoMoving){
