@@ -29913,17 +29913,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1809933559}
   m_CullTransparentMesh: 1
---- !u!114 &1812244315 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 1364009527, guid: acb6f53ed07f3204d9cbf08a9a78d907, type: 3}
-  m_PrefabInstance: {fileID: 8634758757735704353}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f0d349eaed9faac4e87d7b6aea6cea65, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1001 &1814131083
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -41213,14 +41202,6 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 9014170785400826611}
     m_Modifications:
-    - target: {fileID: 1364009524, guid: acb6f53ed07f3204d9cbf08a9a78d907, type: 3}
-      propertyPath: m_Looping
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 1364009524, guid: acb6f53ed07f3204d9cbf08a9a78d907, type: 3}
-      propertyPath: m_SkipOnDrop
-      value: 0
-      objectReference: {fileID: 0}
     - target: {fileID: 8634758756240002098, guid: acb6f53ed07f3204d9cbf08a9a78d907, type: 3}
       propertyPath: m_IsActive
       value: 0
@@ -41321,106 +41302,18 @@ PrefabInstance:
       propertyPath: microscope
       value: 
       objectReference: {fileID: 7566346503163857812}
-    - target: {fileID: 8634758757735704356, guid: acb6f53ed07f3204d9cbf08a9a78d907, type: 3}
-      propertyPath: tutorialButton
-      value: 
-      objectReference: {fileID: 1812244315}
-    - target: {fileID: 8634758757735704356, guid: acb6f53ed07f3204d9cbf08a9a78d907, type: 3}
-      propertyPath: tutorialDatas.Array.data[0].tutorialName
-      value: Tutorial_How_to_Move
+    - target: {fileID: 8634758758231359222, guid: acb6f53ed07f3204d9cbf08a9a78d907, type: 3}
+      propertyPath: m_Color.b
+      value: 1
       objectReference: {fileID: 0}
-    - target: {fileID: 8634758757735704356, guid: acb6f53ed07f3204d9cbf08a9a78d907, type: 3}
-      propertyPath: tutorialDatas.Array.data[0].nodes.Array.size
-      value: 4
+    - target: {fileID: 8634758758231359222, guid: acb6f53ed07f3204d9cbf08a9a78d907, type: 3}
+      propertyPath: m_Color.g
+      value: 0.375
       objectReference: {fileID: 0}
-    - target: {fileID: 8634758757735704356, guid: acb6f53ed07f3204d9cbf08a9a78d907, type: 3}
-      propertyPath: tutorialDatas.Array.data[1].nodes.Array.size
-      value: 5
+    - target: {fileID: 8634758758231359222, guid: acb6f53ed07f3204d9cbf08a9a78d907, type: 3}
+      propertyPath: m_Color.r
+      value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 8634758757735704356, guid: acb6f53ed07f3204d9cbf08a9a78d907, type: 3}
-      propertyPath: tutorialDatas.Array.data[0].nodes.Array.data[0].title
-      value: How to rotate the view (1)
-      objectReference: {fileID: 0}
-    - target: {fileID: 8634758757735704356, guid: acb6f53ed07f3204d9cbf08a9a78d907, type: 3}
-      propertyPath: tutorialDatas.Array.data[0].nodes.Array.data[1].title
-      value: How to rotate the view (2)
-      objectReference: {fileID: 0}
-    - target: {fileID: 8634758757735704356, guid: acb6f53ed07f3204d9cbf08a9a78d907, type: 3}
-      propertyPath: tutorialDatas.Array.data[0].nodes.Array.data[2].title
-      value: How to move (1)
-      objectReference: {fileID: 0}
-    - target: {fileID: 8634758757735704356, guid: acb6f53ed07f3204d9cbf08a9a78d907, type: 3}
-      propertyPath: tutorialDatas.Array.data[0].nodes.Array.data[3].title
-      value: How to move (2)
-      objectReference: {fileID: 0}
-    - target: {fileID: 8634758757735704356, guid: acb6f53ed07f3204d9cbf08a9a78d907, type: 3}
-      propertyPath: tutorialDatas.Array.data[1].nodes.Array.data[4].title
-      value: Confocal Microscopy(Exterior)
-      objectReference: {fileID: 0}
-    - target: {fileID: 8634758757735704356, guid: acb6f53ed07f3204d9cbf08a9a78d907, type: 3}
-      propertyPath: tutorialDatas.Array.data[0].nodes.Array.data[1].content
-      value: Press the [] key to pick up the item.
-      objectReference: {fileID: 0}
-    - target: {fileID: 8634758757735704356, guid: acb6f53ed07f3204d9cbf08a9a78d907, type: 3}
-      propertyPath: tutorialDatas.Array.data[0].nodes.Array.data[2].content
-      value: Press the [] key to pick up the item.
-      objectReference: {fileID: 0}
-    - target: {fileID: 8634758757735704356, guid: acb6f53ed07f3204d9cbf08a9a78d907, type: 3}
-      propertyPath: tutorialDatas.Array.data[0].nodes.Array.data[3].content
-      value: Press the [] key to pick up the item.
-      objectReference: {fileID: 0}
-    - target: {fileID: 8634758757735704356, guid: acb6f53ed07f3204d9cbf08a9a78d907, type: 3}
-      propertyPath: tutorialDatas.Array.data[1].nodes.Array.data[4].content
-      value: Press [key name] again to enter microscope internal view.
-      objectReference: {fileID: 0}
-    - target: {fileID: 8634758757735704356, guid: acb6f53ed07f3204d9cbf08a9a78d907, type: 3}
-      propertyPath: tutorialDatas.Array.data[0].nodes.Array.data[0].videoClip
-      value: 
-      objectReference: {fileID: 32900000, guid: 9b5a1abda84e6dc46a8471d2832fcbba, type: 3}
-    - target: {fileID: 8634758757735704356, guid: acb6f53ed07f3204d9cbf08a9a78d907, type: 3}
-      propertyPath: tutorialDatas.Array.data[0].nodes.Array.data[1].videoClip
-      value: 
-      objectReference: {fileID: 32900000, guid: 28a0b8735faa271449d918847937ab18, type: 3}
-    - target: {fileID: 8634758757735704356, guid: acb6f53ed07f3204d9cbf08a9a78d907, type: 3}
-      propertyPath: tutorialDatas.Array.data[0].nodes.Array.data[2].videoClip
-      value: 
-      objectReference: {fileID: 32900000, guid: d8e81b8a5d7104c41be436eb8bc9afab, type: 3}
-    - target: {fileID: 8634758757735704356, guid: acb6f53ed07f3204d9cbf08a9a78d907, type: 3}
-      propertyPath: tutorialDatas.Array.data[0].nodes.Array.data[3].videoClip
-      value: 
-      objectReference: {fileID: 32900000, guid: d938feca435c1794c917cf8ce6207a54, type: 3}
-    - target: {fileID: 8634758757735704356, guid: acb6f53ed07f3204d9cbf08a9a78d907, type: 3}
-      propertyPath: tutorialDatas.Array.data[1].nodes.Array.data[3].videoClip
-      value: 
-      objectReference: {fileID: 32900000, guid: 317e27fb8d78f944197e4ea861fc2eba, type: 3}
-    - target: {fileID: 8634758757735704356, guid: acb6f53ed07f3204d9cbf08a9a78d907, type: 3}
-      propertyPath: tutorialDatas.Array.data[1].nodes.Array.data[4].videoClip
-      value: 
-      objectReference: {fileID: 32900000, guid: 6a414c6201016034cb1ddb2b5b21a159, type: 3}
-    - target: {fileID: 8634758757735704356, guid: acb6f53ed07f3204d9cbf08a9a78d907, type: 3}
-      propertyPath: tutorialDatas.Array.data[2].nodes.Array.data[0].videoClip
-      value: 
-      objectReference: {fileID: 32900000, guid: c365dc31d22ae724e9805fed230e3af5, type: 3}
-    - target: {fileID: 8634758757735704356, guid: acb6f53ed07f3204d9cbf08a9a78d907, type: 3}
-      propertyPath: tutorialDatas.Array.data[2].nodes.Array.data[1].videoClip
-      value: 
-      objectReference: {fileID: 32900000, guid: d4d2d88de918abc408d66b83a7cea32c, type: 3}
-    - target: {fileID: 8634758757735704356, guid: acb6f53ed07f3204d9cbf08a9a78d907, type: 3}
-      propertyPath: tutorialDatas.Array.data[2].nodes.Array.data[2].videoClip
-      value: 
-      objectReference: {fileID: 32900000, guid: 08e6a155e5ee58a4dbd0386b3ba87a91, type: 3}
-    - target: {fileID: 8634758757735704356, guid: acb6f53ed07f3204d9cbf08a9a78d907, type: 3}
-      propertyPath: tutorialDatas.Array.data[2].nodes.Array.data[3].videoClip
-      value: 
-      objectReference: {fileID: 32900000, guid: 971f7be4e05d11041a3ccbcbcd7a053b, type: 3}
-    - target: {fileID: 8634758757735704356, guid: acb6f53ed07f3204d9cbf08a9a78d907, type: 3}
-      propertyPath: tutorialDatas.Array.data[2].nodes.Array.data[4].videoClip
-      value: 
-      objectReference: {fileID: 32900000, guid: a55234d6a3841274ba099052d463e9c0, type: 3}
-    - target: {fileID: 8634758757735704356, guid: acb6f53ed07f3204d9cbf08a9a78d907, type: 3}
-      propertyPath: tutorialDatas.Array.data[2].nodes.Array.data[5].videoClip
-      value: 
-      objectReference: {fileID: 32900000, guid: 9b0e49d7843504d4198c249bf1c3cd64, type: 3}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: acb6f53ed07f3204d9cbf08a9a78d907, type: 3}
 --- !u!1 &8677371566924544562
