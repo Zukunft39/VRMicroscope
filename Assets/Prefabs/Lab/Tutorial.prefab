@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 17139093}
   - component: {fileID: 17139095}
   - component: {fileID: 17139094}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: Text (Legacy)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -89,7 +89,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 17282474}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: 0
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -137,7 +137,7 @@ GameObject:
   - component: {fileID: 159469706}
   - component: {fileID: 159469708}
   - component: {fileID: 159469707}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: Text (Legacy)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -219,7 +219,7 @@ GameObject:
   - component: {fileID: 312563307}
   - component: {fileID: 312563309}
   - component: {fileID: 312563308}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: Title
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -580,7 +580,7 @@ GameObject:
   - component: {fileID: 511401959}
   - component: {fileID: 511401961}
   - component: {fileID: 511401960}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: Tutorial
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -611,7 +611,7 @@ RectTransform:
   - {fileID: 2068058165}
   - {fileID: 387287809}
   m_Father: {fileID: 8634758757637626128}
-  m_RootOrder: 0
+  m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
@@ -1044,7 +1044,7 @@ GameObject:
   - component: {fileID: 1000960499}
   - component: {fileID: 1000960501}
   - component: {fileID: 1000960500}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: Text (Legacy)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1125,7 +1125,7 @@ GameObject:
   - component: {fileID: 1001572989}
   - component: {fileID: 1001572988}
   - component: {fileID: 1001572987}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: Book
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1234,6 +1234,80 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls: []
+--- !u!1 &1043748934
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1043748935}
+  - component: {fileID: 1043748937}
+  - component: {fileID: 1043748936}
+  m_Layer: 0
+  m_Name: RawImage
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &1043748935
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1043748934}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 1726.5939}
+  m_LocalScale: {x: 1, y: 1, z: 0}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 1723693840}
+  m_Father: {fileID: 8634758757637626128}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 1, y: 0}
+  m_AnchorMax: {x: 1, y: 0}
+  m_AnchoredPosition: {x: -149.67926, y: 99.93663}
+  m_SizeDelta: {x: 384, y: 216}
+  m_Pivot: {x: 1, y: 0}
+--- !u!222 &1043748937
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1043748934}
+  m_CullTransparentMesh: 1
+--- !u!114 &1043748936
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1043748934}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1344c3c82d62a2a41a3576d8abb8e3ea, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Material: {fileID: 0}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_RaycastTarget: 0
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  m_Texture: {fileID: 2800000, guid: f9eaa8ee0aadd7843aae27bf0ee61821, type: 3}
+  m_UVRect:
+    serializedVersion: 2
+    x: 0
+    y: 0
+    width: 1
+    height: 1
 --- !u!1 &1202428585
 GameObject:
   m_ObjectHideFlags: 0
@@ -1381,7 +1455,7 @@ GameObject:
   - component: {fileID: 1340005267}
   - component: {fileID: 1340005266}
   - component: {fileID: 1340005265}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: Back
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1514,7 +1588,7 @@ GameObject:
   - component: {fileID: 1347130524}
   - component: {fileID: 1347130523}
   - component: {fileID: 1347130522}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: Button (1)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1648,7 +1722,7 @@ GameObject:
   - component: {fileID: 1474910090}
   - component: {fileID: 1474910089}
   - component: {fileID: 1474910088}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: Button (2)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1770,6 +1844,79 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+--- !u!1 &1723693839
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1723693840}
+  - component: {fileID: 1723693842}
+  - component: {fileID: 1723693841}
+  m_Layer: 0
+  m_Name: RawImage
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &1723693840
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1723693839}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1043748935}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 1, y: 1}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!222 &1723693842
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1723693839}
+  m_CullTransparentMesh: 1
+--- !u!114 &1723693841
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1723693839}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1344c3c82d62a2a41a3576d8abb8e3ea, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Material: {fileID: 0}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_RaycastTarget: 0
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  m_Texture: {fileID: 2800000, guid: f9eaa8ee0aadd7843aae27bf0ee61821, type: 3}
+  m_UVRect:
+    serializedVersion: 2
+    x: 0
+    y: 0
+    width: 1
+    height: 1
 --- !u!1 &1742531500
 GameObject:
   m_ObjectHideFlags: 0
@@ -1781,7 +1928,7 @@ GameObject:
   - component: {fileID: 1742531501}
   - component: {fileID: 1742531503}
   - component: {fileID: 1742531502}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: Text (Legacy)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1862,7 +2009,7 @@ GameObject:
   - component: {fileID: 1752513283}
   - component: {fileID: 1752513282}
   - component: {fileID: 1752513281}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: Button
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2130,13 +2277,13 @@ GameObject:
   - component: {fileID: 8634758756240002101}
   - component: {fileID: 8634758756240002103}
   - component: {fileID: 8634758756240002100}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: TutorialContent
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &8634758756240002101
 RectTransform:
   m_ObjectHideFlags: 0
@@ -2151,7 +2298,7 @@ RectTransform:
   m_Children:
   - {fileID: 17282474}
   m_Father: {fileID: 8634758757637626128}
-  m_RootOrder: 1
+  m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
@@ -2180,7 +2327,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 0.5568628}
-  m_RaycastTarget: 1
+  m_RaycastTarget: 0
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
@@ -2207,7 +2354,7 @@ GameObject:
   - component: {fileID: 8634758756698054049}
   - component: {fileID: 8634758756698054051}
   - component: {fileID: 8634758756698054048}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: Title
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2288,7 +2435,7 @@ GameObject:
   - component: {fileID: 8634758756794595895}
   - component: {fileID: 8634758756794595892}
   - component: {fileID: 8634758756794595893}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: Next
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2420,7 +2567,7 @@ GameObject:
   - component: {fileID: 8634758757357028791}
   - component: {fileID: 8634758757357028793}
   - component: {fileID: 8634758757357028790}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: Content
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2500,12 +2647,12 @@ GameObject:
   - component: {fileID: 8634758757637626128}
   - component: {fileID: 8634758757637626133}
   - component: {fileID: 8634758757637626130}
-  - component: {fileID: 8634758757637626131}
   - component: {fileID: 8634758757735704356}
   - component: {fileID: 1364009523}
   - component: {fileID: 1364009527}
   - component: {fileID: 1364009528}
-  m_Layer: 0
+  - component: {fileID: 1812244312}
+  m_Layer: 5
   m_Name: Tutorial
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2521,9 +2668,10 @@ RectTransform:
   m_GameObject: {fileID: 8634758757637626129}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0.011}
-  m_LocalScale: {x: 0.0004, y: 0.0004, z: 0.000008}
+  m_LocalScale: {x: 0.0002, y: 0.0002, z: 0.000008}
   m_ConstrainProportionsScale: 0
   m_Children:
+  - {fileID: 1043748935}
   - {fileID: 511401959}
   - {fileID: 8634758756240002101}
   m_Father: {fileID: 0}
@@ -2551,7 +2699,7 @@ Canvas:
   m_OverrideSorting: 0
   m_OverridePixelPerfect: 0
   m_SortingBucketNormalizedSize: 0
-  m_VertexColorAlwaysGammaSpace: 0
+  m_VertexColorAlwaysGammaSpace: 1
   m_AdditionalShaderChannelsFlag: 25
   m_SortingLayerID: 0
   m_SortingOrder: 0
@@ -2579,23 +2727,6 @@ MonoBehaviour:
   m_DefaultSpriteDPI: 96
   m_DynamicPixelsPerUnit: 1
   m_PresetInfoIsWorld: 1
---- !u!114 &8634758757637626131
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8634758757637626129}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: dc42784cf147c0c48a680349fa168899, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_IgnoreReversedGraphics: 1
-  m_BlockingObjects: 0
-  m_BlockingMask:
-    serializedVersion: 2
-    m_Bits: 4294967295
 --- !u!114 &8634758757735704356
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2613,62 +2744,48 @@ MonoBehaviour:
   titleText: {fileID: 795979427}
   contentText: {fileID: 468440517}
   videoDisplay: {fileID: 8634758758281227233}
+  videoPlayer: {fileID: 1364009524}
   tutorialDatas:
   - tutorialName: Tutorial_FirstLaunch
     nodes:
     - title: Collect The Sample
-      content: Press the [] key to move.
-      videoPlayer: {fileID: 0}
-      renderTexture: {fileID: 8400000, guid: 3c6bcaaab71fec5438103e4d7a2b6b65, type: 2}
-    - title: Collect The Sample
       content: Press the [] key to pick up the item.
-      videoPlayer: {fileID: 0}
-      renderTexture: {fileID: 8400000, guid: 3c6bcaaab71fec5438103e4d7a2b6b65, type: 2}
+      videoClip: {fileID: 32900000, guid: 2c466f004effeda45811864b1c616433, type: 3}
   - tutorialName: Tutorial_Microscope_OutSide
     nodes:
     - title: Confocal Microscopy(Exterior)
       content: Press [_] to turn on the light. No sample visibility in eyepiece otherwise.
-      videoPlayer: {fileID: 0}
-      renderTexture: {fileID: 8400000, guid: 3c6bcaaab71fec5438103e4d7a2b6b65, type: 2}
+      videoClip: {fileID: 32900000, guid: b16f5e1691b26d0408c4031dd415b1a0, type: 3}
     - title: Confocal Microscopy(Exterior)
       content: Press [key name] to place sample on stage (same key for pick-up &
         placement).
-      videoPlayer: {fileID: 0}
-      renderTexture: {fileID: 8400000, guid: 3c6bcaaab71fec5438103e4d7a2b6b65, type: 2}
+      videoClip: {fileID: 32900000, guid: 2c466f004effeda45811864b1c616433, type: 3}
     - title: Confocal Microscopy(Exterior)
       content: Press [key name] to enter observation view.
-      videoPlayer: {fileID: 0}
-      renderTexture: {fileID: 8400000, guid: 3c6bcaaab71fec5438103e4d7a2b6b65, type: 2}
+      videoClip: {fileID: 32900000, guid: 3ac18192c0d15734390bbbb060c61797, type: 3}
     - title: Confocal Microscopy(Exterior)
       content: Press [key name] again to enter microscope internal view.
-      videoPlayer: {fileID: 0}
-      renderTexture: {fileID: 8400000, guid: 3c6bcaaab71fec5438103e4d7a2b6b65, type: 2}
+      videoClip: {fileID: 32900000, guid: 9b0e49d7843504d4198c249bf1c3cd64, type: 3}
   - tutorialName: Tutorial_Microscope_InSide
     nodes:
     - title: Confocal Microscopy(Inside)
       content: Press [Key name] to control observation view movement.
-      videoPlayer: {fileID: 0}
-      renderTexture: {fileID: 8400000, guid: 3c6bcaaab71fec5438103e4d7a2b6b65, type: 2}
+      videoClip: {fileID: 32900000, guid: a55234d6a3841274ba099052d463e9c0, type: 3}
     - title: Confocal Microscopy(Inside)
       content: "Press [Key name] to adjust coarse/fine focus \u2192 Raise lens tube."
-      videoPlayer: {fileID: 0}
-      renderTexture: {fileID: 8400000, guid: 3c6bcaaab71fec5438103e4d7a2b6b65, type: 2}
+      videoClip: {fileID: 32900000, guid: 08e6a155e5ee58a4dbd0386b3ba87a91, type: 3}
     - title: Confocal Microscopy(Inside)
       content: "Press [Key name] to adjust coarse/fine focus \u2192 Lower lens tube."
-      videoPlayer: {fileID: 0}
-      renderTexture: {fileID: 8400000, guid: 3c6bcaaab71fec5438103e4d7a2b6b65, type: 2}
+      videoClip: {fileID: 0}
     - title: Confocal Microscopy(Inside)
       content: Press [Key name] to toggle coarse/fine adjustment knob.
-      videoPlayer: {fileID: 0}
-      renderTexture: {fileID: 8400000, guid: 3c6bcaaab71fec5438103e4d7a2b6b65, type: 2}
+      videoClip: {fileID: 0}
     - title: Confocal Microscopy(Inside)
       content: Press [Key name] to switch objective magnification.
-      videoPlayer: {fileID: 0}
-      renderTexture: {fileID: 8400000, guid: 3c6bcaaab71fec5438103e4d7a2b6b65, type: 2}
+      videoClip: {fileID: 0}
     - title: Confocal Microscopy(Inside)
       content: Press [Key name] to exit current observation.
-      videoPlayer: {fileID: 0}
-      renderTexture: {fileID: 8400000, guid: 3c6bcaaab71fec5438103e4d7a2b6b65, type: 2}
+      videoClip: {fileID: 0}
   firstLaunchTutorialIndex: 0
   microscope: {fileID: 0}
   player: 1
@@ -2708,9 +2825,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f0d349eaed9faac4e87d7b6aea6cea65, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  highlightColor: {r: 0.30780604, g: 0.32704395, b: 0, a: 1}
+  highlightColor: {r: 1, g: 0.9720911, b: 0.3160377, a: 1}
   normalColor: {r: 0.4716981, g: 0.4716981, b: 0.4716981, a: 1}
-  highlightScale: 1.1
+  highlightScale: 1.35
   keepTextOriginalColor: 1
   UILevels:
   - theButtons:
@@ -2747,12 +2864,27 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1e9b9000e78bae9449b6d822a95a4288, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  upGroupKey: 119
-  downGroupKey: 115
-  upItemKey: 97
-  downItemKey: 100
-  triggerKey: 32
+  interactor: {fileID: 0}
   inputInterval: 0.2
+--- !u!114 &1812244312
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8634758757637626129}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7951c64acb0fa62458bf30a60089fe2d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_IgnoreReversedGraphics: 0
+  m_CheckFor2DOcclusion: 0
+  m_CheckFor3DOcclusion: 0
+  m_BlockingMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_RaycastTriggerInteraction: 1
 --- !u!1 &8634758758065117675
 GameObject:
   m_ObjectHideFlags: 0
@@ -2765,7 +2897,7 @@ GameObject:
   - component: {fileID: 8634758758065117679}
   - component: {fileID: 8634758758065117676}
   - component: {fileID: 8634758758065117677}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: Last
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2898,7 +3030,7 @@ GameObject:
   - component: {fileID: 8634758758104061532}
   - component: {fileID: 8634758758104061533}
   - component: {fileID: 8634758758104061530}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: Book
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -3019,7 +3151,7 @@ GameObject:
   - component: {fileID: 8634758758231359225}
   - component: {fileID: 8634758758231359222}
   - component: {fileID: 8634758758231359223}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: Back
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -3154,7 +3286,7 @@ GameObject:
   - component: {fileID: 1750717361}
   - component: {fileID: 1364009524}
   - component: {fileID: 6447458665078375580}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: Video
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -3203,7 +3335,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
-  m_RaycastTarget: 1
+  m_RaycastTarget: 0
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
@@ -3268,27 +3400,25 @@ VideoPlayer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8634758758281227162}
   m_Enabled: 1
-  m_VideoClip: {fileID: 0}
+  m_VideoClip: {fileID: 32900000, guid: bb58254bd3d9b3c4f888843357a44fa7, type: 3}
   m_TargetCameraAlpha: 1
   m_TargetCamera3DLayout: 0
   m_TargetCamera: {fileID: 0}
-  m_TargetTexture: {fileID: 0}
+  m_TargetTexture: {fileID: 8400000, guid: 3c6bcaaab71fec5438103e4d7a2b6b65, type: 2}
   m_TimeReference: 0
   m_TargetMaterialRenderer: {fileID: 0}
   m_TargetMaterialProperty: <noninit>
-  m_RenderMode: 4
+  m_RenderMode: 2
   m_AspectRatio: 2
-  m_DataSource: 1
+  m_DataSource: 0
   m_PlaybackSpeed: 1
   m_AudioOutputMode: 2
-  m_TargetAudioSources:
-  - {fileID: 0}
-  m_DirectAudioVolumes:
-  - 1
+  m_TargetAudioSources: []
+  m_DirectAudioVolumes: []
   m_Url: 
-  m_EnabledAudioTracks: 01
-  m_DirectAudioMutes: 00
-  m_ControlledAudioTrackCount: 1
+  m_EnabledAudioTracks: 
+  m_DirectAudioMutes: 
+  m_ControlledAudioTrackCount: 0
   m_PlayOnAwake: 1
   m_SkipOnDrop: 1
   m_Looping: 0
@@ -3302,7 +3432,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8634758758281227162}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: ba9619c643949d64eb5ef8e9892e06c8, type: 3}
   m_Name: 

@@ -243,6 +243,10 @@ PrefabInstance:
       propertyPath: m_Layer
       value: 9
       objectReference: {fileID: 0}
+    - target: {fileID: 1043748934, guid: acb6f53ed07f3204d9cbf08a9a78d907, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 1065303938, guid: acb6f53ed07f3204d9cbf08a9a78d907, type: 3}
       propertyPath: m_Layer
       value: 9
@@ -537,7 +541,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8634758757637626129, guid: acb6f53ed07f3204d9cbf08a9a78d907, type: 3}
       propertyPath: m_Name
-      value: Tutorial
+      value: Tutorial Variant
       objectReference: {fileID: 0}
     - target: {fileID: 8634758757637626129, guid: acb6f53ed07f3204d9cbf08a9a78d907, type: 3}
       propertyPath: m_Layer

@@ -6,7 +6,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.Video;
 using System.IO;
-using UnityEngine.XR.Management; // 引入 IO 命名空间用于文件操作
+using UnityEngine.XR.Management;
 
 // [新增] 用于JSON序列化的数据包装类
 [System.Serializable]
@@ -20,8 +20,7 @@ public class TutorialNode
 {
     public string title;                
     public string content;              
-    public VideoPlayer videoPlayer;     
-    public RenderTexture renderTexture; 
+    public VideoClip videoClip;
 }
 
 [System.Serializable]
@@ -39,6 +38,8 @@ public class Tutorial : MonoBehaviour
     public TextMeshProUGUI titleText;                   // 标题文本
     public TextMeshProUGUI contentText;                 // 内容文本              
     public RawImage videoDisplay;            
+    [Header("视频播放器")]
+    public VideoPlayer videoPlayer; // 直接引用挂在RawImage上的VideoPlayer组件
 
     [Header("教程数据")]
     public List<TutorialData> tutorialDatas; 
@@ -49,8 +50,7 @@ public class Tutorial : MonoBehaviour
     public Microscope microscope;  //显微镜脚本
 
     private int currentTutorialIndex = -1;   
-    private int currentNodeIndex = 0;        
-    private VideoPlayer currentVideoPlayer;  
+    private int currentNodeIndex = 0;         
     public bool player;
 
     public int level; // 当前级别
@@ -74,6 +74,24 @@ public class Tutorial : MonoBehaviour
             }
         }
 
+        // 初始化VideoPlayer引用（如果未手动赋值，自动从RawImage上查找）
+        if (videoPlayer == null && videoDisplay != null)
+        {
+            videoPlayer = videoDisplay.GetComponent<VideoPlayer>();
+            if (videoPlayer == null)
+            {
+                Debug.LogError("RawImage上未找到VideoPlayer组件，请先挂载！");
+            }
+            else
+            {
+                // 初始化VideoPlayer基础设置
+                videoPlayer.playOnAwake = false;
+                videoPlayer.isLooping = true; // 视频循环播放，可根据需求修改
+                videoPlayer.source = VideoSource.VideoClip;
+                // 关键：确保VideoPlayer的渲染模式正确（自动关联RawImage）
+                videoPlayer.renderMode = VideoRenderMode.RenderTexture;
+            }
+        }
 
         // [新增] 初始化路径并加载数据
         saveFilePath = Path.Combine(Application.persistentDataPath, "TutorialProgress.json");
@@ -86,12 +104,12 @@ public class Tutorial : MonoBehaviour
         Interactor.Instance.currentTutorial = this;
         Interactor.Instance.tutorialButtonInput = GetComponent<TutorialButtonInput>();
     }
+
     private IEnumerator Start()
     {
         Interactor.Instance.currentTutorial = this;
         Interactor.Instance.tutorialButtonInput = GetComponent<TutorialButtonInput>();
         // 检查首次启动
-        // 逻辑保持不变，但 CheckFirstLaunch 内部实现已变
         if (!(CheckFirstLaunch("Tutorial_FirstLaunch") && player))
         {
             yield break;
@@ -117,10 +135,6 @@ public class Tutorial : MonoBehaviour
             ReturnToFirstLevel();
         }
     }
-
-    // ----------------------------------------------------------------
-    // [修改] JSON 持久化核心逻辑区域
-    // ----------------------------------------------------------------
 
     /// <summary>
     /// [新增] 加载进度数据
@@ -151,12 +165,12 @@ public class Tutorial : MonoBehaviour
     /// </summary>
     private void SaveProgress()
     {
-        string json = JsonUtility.ToJson(progressData, true); // true 表示格式化输出，方便调试查看
+        string json = JsonUtility.ToJson(progressData, true);
         File.WriteAllText(saveFilePath, json);
     }
 
     /// <summary>
-    /// [修改] 检查是否为首次启动 (替换了 PlayerPrefs)
+    /// [修改] 检查是否为首次启动
     /// </summary>
     public bool CheckFirstLaunch(string key)
     {
@@ -164,12 +178,9 @@ public class Tutorial : MonoBehaviour
         {
             LoadProgress();
         }
-        // 如果列表中不包含这个Key，说明是第一次
         if (!progressData.triggeredTutorialKeys.Contains(key))
         {
-            // 标记为已触发
             progressData.triggeredTutorialKeys.Add(key);
-            // 保存到 JSON 文件
             SaveProgress();
             return true;
         }
@@ -177,28 +188,21 @@ public class Tutorial : MonoBehaviour
     }
 
     /// <summary>
-    /// [修改] 重置所有教程进度 (替换了 PlayerPrefs)
+    /// [修改] 重置所有教程进度
     /// </summary>
     public void ResetAllTutorials()
     {
-        // 清空列表
         progressData.triggeredTutorialKeys.Clear();
         
-        // 删除文件 或 保存空列表 (这里选择删除文件更彻底)
         if (File.Exists(saveFilePath))
         {
             File.Delete(saveFilePath);
         }
         
-        // 重新初始化内存中的数据
         progressData = new TutorialProgressData();
         
         Debug.Log("所有教程进度已重置（JSON文件已删除）！");
     }
-
-    // ----------------------------------------------------------------
-    // 下方逻辑未改动，保持原样
-    // ----------------------------------------------------------------
 
     public void ShowTutorial(int tutorialIndex)
     {
@@ -231,45 +235,55 @@ public class Tutorial : MonoBehaviour
         if (contentText != null) contentText.text = currentNode.content;
 
         UpdateVideoPlayer(currentNode);
+        // 更新页码显示
+        SetPage(currentNodeIndex);
     }
 
+    /// <summary>
+    /// 最终版视频播放逻辑（完全依赖VideoPlayer自动关联RawImage）
+    /// </summary>
+    /// <param name="node">当前教程节点</param>
     private void UpdateVideoPlayer(TutorialNode node)
     {
-        if (currentVideoPlayer != null)
+        // 检查VideoPlayer是否有效
+        if (videoPlayer == null)
         {
-            currentVideoPlayer.Stop();
-            currentVideoPlayer.targetTexture = null; 
-        }
-
-        if (node.videoPlayer == null || node.renderTexture == null)
-        {
-            if (videoDisplay != null)
-            {
-                videoDisplay.texture = null;
-            }
-            currentVideoPlayer = null;
+            Debug.LogError("VideoPlayer组件未初始化，无法播放视频！");
             return;
         }
 
-        currentVideoPlayer = node.videoPlayer;
-        currentVideoPlayer.targetTexture = node.renderTexture;
+        // 1. 停止当前播放的视频
+        videoPlayer.Stop();
 
-        if (videoDisplay != null)
+        // 2. 如果当前节点没有视频，仅停止播放即可（无需修改texture）
+        if (node.videoClip == null)
         {
-            videoDisplay.texture = node.renderTexture;
+            return;
         }
 
-        currentVideoPlayer.Prepare();
-        StartCoroutine(PlayVideoAfterPrepare(currentVideoPlayer));
+        // 3. 设置新的视频剪辑
+        videoPlayer.clip = node.videoClip;
+
+        // 4. 准备并播放视频
+        StartCoroutine(PlayVideoAfterPrepare(videoPlayer));
     }
     
     private IEnumerator PlayVideoAfterPrepare(VideoPlayer vp)
     {
+        if (vp == null || vp.clip == null) yield break;
+        
+        // 准备视频
+        vp.Prepare();
+        
+        // 等待视频准备完成
         while (!vp.isPrepared)
         {
             yield return null;
         }
+        
+        // 准备完成后播放
         vp.Play();
+        Debug.Log($"视频开始播放: {vp.clip.name}");
     }
 
     public void GoToNextNode(int level)
@@ -310,20 +324,16 @@ public class Tutorial : MonoBehaviour
     public void ReturnToFirstLevel()
     {
         if(!player)return;
-        if (currentVideoPlayer != null)
+
+        // 停止视频播放
+        if (videoPlayer != null)
         {
-            currentVideoPlayer.Stop();
-            currentVideoPlayer.targetTexture = null;
+            videoPlayer.Stop();
         }
-        currentVideoPlayer = null;
 
         if (secondLevelUITemplate != null) secondLevelUITemplate.SetActive(false);
         if (firstLevelUI != null) firstLevelUI.SetActive(true);
-
-        if (videoDisplay != null)
-        {
-            videoDisplay.texture = null;
-        }
+        
         level=1;
         ChangeLevel();
         currentTutorialIndex = -1;
@@ -332,19 +342,14 @@ public class Tutorial : MonoBehaviour
 
     public void Back()
     {
-        if (currentVideoPlayer != null)
+        // 停止视频播放
+        if (videoPlayer != null)
         {
-            currentVideoPlayer.Stop();
-            currentVideoPlayer.targetTexture = null;
+            videoPlayer.Stop();
         }
-        currentVideoPlayer = null;
 
         if (secondLevelUITemplate != null) secondLevelUITemplate.SetActive(false);
         if (firstLevelUI != null) firstLevelUI.SetActive(false);
-        if (videoDisplay != null)
-        {
-            videoDisplay.texture = null;
-        }
 
         currentTutorialIndex = -1;
         currentNodeIndex = 0;
