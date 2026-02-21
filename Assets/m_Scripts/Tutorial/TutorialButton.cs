@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
-
 [System.Serializable]
 public struct buttonsLevels
 {
@@ -24,7 +23,8 @@ public class TutorialButton : MonoBehaviour
     public Color highlightColor = new Color(1f, 0.92f, 0.016f); // 高亮黄色（仅背景）
     public Color normalColor = Color.white;                     // 默认背景色
 
-    public float highlightScale = 1.1f;                        // 高亮缩放比例
+    public float highlightScale;                        // 高亮缩放比例
+    public float videoSelectScale;                  // 视频容器选中时的缩放比例
     [Header("是否保留文字原始颜色（推荐开启）")]
     public bool keepTextOriginalColor = true; // 新增：控制是否保留文字颜色
 
@@ -50,6 +50,8 @@ public class TutorialButton : MonoBehaviour
     
     // 依赖的核心脚本
     private Tutorial tutorial;
+    // 缩放动画的携程
+    private Coroutine pulseCoroutine;
     #endregion
 
     private void Start()
@@ -58,18 +60,29 @@ public class TutorialButton : MonoBehaviour
         if (tutorial == null)
         {
             tutorial = FindObjectOfType<Tutorial>();
-            if (tutorial == null)
-            {
-                Debug.LogError("未找到Tutorial组件，请确保场景中有该脚本！");
-            }
+            
+            ForceResetAllScales(); // 物理重置，防止 Prefab 里的原始缩放干扰
+            InitializeButtons();
+            SelectDefaultButton(levelIndex);
         }
-        
-        // 初始化按钮事件和默认状态
-        InitializeButtons();
-        // 默认选中指定层级的第二个按钮组第一个按钮（按你的需求）
-        SelectDefaultButton(levelIndex);
     }
 
+    /// <summary>
+    /// 新增：强制重置所有按钮容器的缩放为1，防止Prefab里原始缩放干扰高亮效果
+    /// </summary>
+    private void ForceResetAllScales()
+    {
+        foreach (var level in UILevels)
+        {
+            foreach (var group in level.theButtons)
+            {
+                foreach (var obj in group.buttons)
+                {
+                    if (obj != null) obj.transform.localScale = Vector3.one;
+                }
+            }
+        }
+    }
     /// <summary>
     /// 初始化所有按钮容器的事件和默认样式
     /// </summary>
@@ -160,8 +173,9 @@ public class TutorialButton : MonoBehaviour
 
         UILevel targetLevel = UILevels[levelIdx];
         levelIndex=levelIdx;
+
         // 选中第二组（索引1），如果不足则选第一组
-        int defaultBtnGroupIdx = targetLevel.theButtons.Length >= 2 ? 1 : 0;
+        int defaultBtnGroupIdx = targetLevel.theButtons.Length >= 2 ? 2 : 0;
 
         if (defaultBtnGroupIdx >= targetLevel.theButtons.Length)
         {
@@ -397,24 +411,35 @@ public class TutorialButton : MonoBehaviour
     {
         if (button == null) return;
 
-        // 1. 仅修改按钮背景（Image）颜色
-        Image btnImage = button.GetComponent<Image>();
-        if (btnImage != null)
+        // 将当前选中的物体在层级面板中移到最后，使其渲染在最顶层
+        button.transform.SetAsLastSibling();
+
+        // 无论选中什么，先停止上一个按钮的动画（防止快速切换时动画残留）
+        if (pulseCoroutine != null) 
         {
-            btnImage.color = highlightColor;
+            StopCoroutine(pulseCoroutine);
+            pulseCoroutine = null;
         }
 
-        // 2. 保留文字原始颜色（核心修改：注释掉文字颜色修改）
-        // Text btnText = button.GetComponentInChildren<Text>();
-        // if (btnText != null)
-        // {
-        //     btnText.color = highlightColor; // 删掉这行，不再修改文字颜色
-        // }
+        // 判断当前选中的是不是视频容器
+        if (button.CompareTag("VideoContainer"))
+        {
+            // 【视频的专属逻辑】
+            // 不改颜色、不播动画，直接赋予一个固定的放大倍数
+            button.transform.localScale = Vector3.one * videoSelectScale; 
+        }
+        else
+        {
+            // 【普通按钮的专属逻辑】
+            // 1. 改变背景颜色
+            Image btnImage = button.GetComponent<Image>();
+            if (btnImage != null) btnImage.color = highlightColor;
 
-        // 3. 缩放高亮（视觉强化）
-        button.transform.localScale = Vector3.one * highlightScale;
+            // 2. 开启呼吸循环动画
+            pulseCoroutine = StartCoroutine(PulseAnimation(button.transform));
+        }
 
-        // 4. 确保按钮可交互
+        // 确保按钮可交互
         button.interactable = true;
     }
 
@@ -425,25 +450,22 @@ public class TutorialButton : MonoBehaviour
     {
         if (button == null) return;
 
-        // 1. 恢复背景颜色
-        Image btnImage = button.GetComponent<Image>();
-        if (btnImage != null)
+        // 1. 停止可能正在运行的动画
+        if (pulseCoroutine != null)
         {
-            btnImage.color = normalColor;
+            StopCoroutine(pulseCoroutine);
+            pulseCoroutine = null;
         }
 
-        // // 2. 恢复文字为原始颜色（核心修改）
-        // if (keepTextOriginalColor && btnTextOriginalColors.ContainsKey(button))
-        // {
-        //     Text btnText = button.GetComponentInChildren<Text>();
-        //     if (btnText != null)
-        //     {
-        //         btnText.color = btnTextOriginalColors[button];
-        //     }
-        // }
-
-        // 3. 恢复缩放
+        // 2. 强制所有对象（无论是视频还是普通按钮）恢复原始大小
         button.transform.localScale = Vector3.one;
+
+        // 3. 只有非视频容器才需要恢复背景颜色
+        if (!button.CompareTag("VideoContainer"))
+        {
+            Image btnImage = button.GetComponent<Image>();
+            if (btnImage != null) btnImage.color = normalColor;
+        }
     }
 
     /// <summary>
@@ -610,6 +632,40 @@ public class TutorialButton : MonoBehaviour
                         }
                     }
                 }
+            }
+        }
+    }
+
+    /// <summary>
+    /// 缩放动画：1.0 -> highlightScale -> 1.0
+    /// </summary>
+    private System.Collections.IEnumerator PulseAnimation(Transform target)
+    {
+        float halfDuration = 0.4f; // 从1到highlightScale所需的时间（数值越大呼吸越慢）
+        Vector3 initialScale = Vector3.one;
+        Vector3 peakScale = Vector3.one * highlightScale;
+
+        while (true) // 无限循环
+        {
+            // 第一阶段：放大
+            float elapsed = 0f;
+            while (elapsed < halfDuration)
+            {
+                elapsed += Time.deltaTime;
+                // 使用 SmoothStep 让呼吸感更柔和（平滑起止）
+                float t = Mathf.SmoothStep(0, 1, elapsed / halfDuration);
+                target.localScale = Vector3.Lerp(initialScale, peakScale, t);
+                yield return null;
+            }
+
+            // 第二阶段：缩小
+            elapsed = 0f;
+            while (elapsed < halfDuration)
+            {
+                elapsed += Time.deltaTime;
+                float t = Mathf.SmoothStep(0, 1, elapsed / halfDuration);
+                target.localScale = Vector3.Lerp(peakScale, initialScale, t);
+                yield return null;
             }
         }
     }

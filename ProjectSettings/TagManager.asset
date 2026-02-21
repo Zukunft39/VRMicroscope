@@ -9,6 +9,7 @@ TagManager:
   - Filter
   - Edge
   - ObserveObjects
+  - VideoContainer
   layers:
   - Default
   - TransparentFX
