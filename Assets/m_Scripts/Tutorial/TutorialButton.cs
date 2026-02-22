@@ -23,8 +23,8 @@ public class TutorialButton : MonoBehaviour
     public Color highlightColor = new Color(1f, 0.92f, 0.016f); // 高亮黄色（仅背景）
     public Color normalColor = Color.white;                     // 默认背景色
 
-    public float highlightScale;                        // 高亮缩放比例
-    public float videoSelectScale;                  // 视频容器选中时的缩放比例
+    public float highlightScale = 1.35f;                        // 高亮缩放比例
+    public float videoSelectScale = 2.5f;                  // 视频容器选中时的缩放比例
     [Header("是否保留文字原始颜色（推荐开启）")]
     public bool keepTextOriginalColor = true; // 新增：控制是否保留文字颜色
 
@@ -459,7 +459,7 @@ public class TutorialButton : MonoBehaviour
 
         // 2. 强制所有对象（无论是视频还是普通按钮）恢复原始大小
         button.transform.localScale = Vector3.one;
-
+        
         // 3. 只有非视频容器才需要恢复背景颜色
         if (!button.CompareTag("VideoContainer"))
         {
