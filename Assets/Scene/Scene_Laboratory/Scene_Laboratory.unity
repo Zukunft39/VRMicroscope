@@ -41493,6 +41493,11 @@ PrefabInstance:
       propertyPath: microscope
       value: 
       objectReference: {fileID: 7566346503163857812}
+    - target: {fileID: 8634758757735704356, guid: acb6f53ed07f3204d9cbf08a9a78d907, type: 3}
+      propertyPath: tutorialDatas.Array.data[0].nodes.Array.data[0].content
+      value: ' is the fastest way to get an overview of the entire laboratory layout.e.
+        This is the fastest way to get an overview of the entire laboratory layout.'
+      objectReference: {fileID: 0}
     - target: {fileID: 8634758758104061531, guid: acb6f53ed07f3204d9cbf08a9a78d907, type: 3}
       propertyPath: m_AnchorMax.x
       value: 0.17787746

@@ -2780,7 +2780,9 @@ MonoBehaviour:
       videoClip: {fileID: 32900000, guid: 2c466f004effeda45811864b1c616433, type: 3}
     - title: Switch to another sample
       content: To observe a different sample, simply walk over to the new sample,
-        point at it, and press the Right Trigger to collect it.
+        point at it, and press the Right Trigger to collect it. An important thing
+        is that we need to press the Right Trigger to remove the sample from the
+        microscope, so that we can place the new samle on it.
       videoClip: {fileID: 32900000, guid: 317e27fb8d78f944197e4ea861fc2eba, type: 3}
     - title: Adjust external light source
       content: While pointing at the microscope, hold down the X button on the Left
@@ -2871,6 +2873,7 @@ MonoBehaviour:
   highlightColor: {r: 1, g: 0.9720911, b: 0.3160377, a: 1}
   normalColor: {r: 0.4716981, g: 0.4716981, b: 0.4716981, a: 1}
   highlightScale: 1.35
+  videoSelectScale: 2.5
   keepTextOriginalColor: 1
   UILevels:
   - theButtons:
