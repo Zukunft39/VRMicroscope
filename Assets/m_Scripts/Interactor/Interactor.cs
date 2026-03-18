@@ -62,6 +62,24 @@ public class Interactor : MonoBehaviour
         ChangeState(GameState.Roaming);
     }
 
+    private void Update()
+    {
+        // 不通过 Input System，直接检测键盘 H 键呼出教程
+        if (Input.GetKeyDown(KeyCode.H))
+        {
+            if (CurrentState == GameState.Roaming)
+            {
+                currentTutorial.ReturnToFirstLevel();
+                ChangeState(GameState.Tutorial);
+            }
+            else if (CurrentState == GameState.Observing)
+            {
+                currentTutorial.ShowTutorial(2); 
+                ChangeState(GameState.Tutorial);
+            }
+        }
+    }
+
     public void OnMicroscopeIn(Microscope microscope)
     {
         _currentMicroscope = microscope;
