@@ -18,7 +18,7 @@ public class Interactor : MonoBehaviour
     public InputActionAsset inputActionAsset;
     public LocomotionSystem xrLocomotionSys;
     
-    private GameState currentState;
+    public GameState CurrentState { get; private set; }
     private Microscope _currentMicroscope;
     private InteractableSamples _sample;
     private InputActionMap _roamingMap;
@@ -147,38 +147,48 @@ public class Interactor : MonoBehaviour
     {
         _globalMap.FindAction("OpenTutorial").started += (context) =>
         {
-            if(currentState==GameState.Roaming)
+            if(CurrentState==GameState.Roaming)
                 currentTutorial.ReturnToFirstLevel();
-            else if (currentState == GameState.Observing)
+            else if (CurrentState == GameState.Observing)
                 currentTutorial.ShowTutorial(2); 
             ChangeState(GameState.Tutorial);
         };
     }
     public void ChangeState(GameState? newState)
     {
+        bool flag = newState == CurrentState;
+        GameState temp = CurrentState;
+        CurrentState = newState??lastState;
+        lastState=flag?lastState:temp;
+       
+        print($"State Transition: -> {CurrentState}");
+        
+        // 开启协程，将输入映射和组件的切换延迟到当前帧末尾
+        StartCoroutine(ApplyStateChangeNextFrame(CurrentState));
+    }
+
+    private IEnumerator ApplyStateChangeNextFrame(GameState state)
+    {
+        // 等待当前帧所有的物理、Update 和 Input System 内部遍历全部安全结束
+        yield return new WaitForEndOfFrame();
+
         _roamingMap.Disable();
         _observingMap.Disable();
         _tutorialMap.Disable();
-        bool flag = newState == currentState;
-        GameState temp = currentState;
-        currentState = newState??lastState;
-        lastState=flag?lastState:temp;
-       
-        print($"State Transition: -> {currentState}");
-        
-        switch (currentState)
+
+        switch (state)
         {
             case GameState.Roaming:
                 _roamingMap.Enable();
-                xrLocomotionSys.gameObject.SetActive(true);
+                if (xrLocomotionSys != null) xrLocomotionSys.gameObject.SetActive(true);
                 break;
             case GameState.Observing:
                 _observingMap.Enable();
-                xrLocomotionSys.gameObject.SetActive(false);
+                if (xrLocomotionSys != null) xrLocomotionSys.gameObject.SetActive(false);
                 break;
             case GameState.Tutorial:
                 _tutorialMap.Enable();
-                xrLocomotionSys.gameObject.SetActive(false);
+                if (xrLocomotionSys != null) xrLocomotionSys.gameObject.SetActive(false);
                 break;
         }
     }

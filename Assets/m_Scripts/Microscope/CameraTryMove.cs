@@ -1,4 +1,4 @@
-﻿using System.Collections;
+﻿﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -10,7 +10,8 @@ public class CameraTryMove : MonoBehaviour
     private float pitch = 0f;  // 垂直旋转角度
     private float yaw = 0f;  // 水平旋转角度
 
-
+    public bool canMove = true; // 控制是否允许玩家移动视角
+    
     // Start is called before the first frame update
     void Start()
     {
@@ -21,6 +22,18 @@ public class CameraTryMove : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        if (!canMove)
+        {
+            // 如果不允许移动（例如处于教程或UI面板中），解锁并显示鼠标
+            Cursor.lockState = CursorLockMode.None;
+            Cursor.visible = true;
+            return; 
+        }
+
+        // PC正常漫游状态下，锁定并隐藏鼠标
+        Cursor.lockState = CursorLockMode.Locked;
+        Cursor.visible = false;
+
         MoveCamera();
         RotateCamera();
     }

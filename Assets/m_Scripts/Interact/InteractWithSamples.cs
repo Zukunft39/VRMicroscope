@@ -16,6 +16,10 @@ public class InteractWithSamples:MonoBehaviour
     {
         if (!ReferenceEquals(interactableObject,null))
         {
+            // 如果当前处于教程状态，不允许拾取物品
+            if (Interactor.Instance != null && Interactor.Instance.CurrentState == Interactor.GameState.Tutorial)
+                return;
+
             if (Input.GetKey(KeyCode.R))
             {
                 PickSample();
@@ -44,6 +48,14 @@ public class InteractWithSamples:MonoBehaviour
         temp.transform.localScale = Vector3.one;
         temp.transform.localPosition=new Vector3(23,-5,-4);
         temp.transform.localRotation = Quaternion.Euler(22, -180, 0);
+
+        // 拿在手上时，将刚体设置为运动学(Kinematic)，防止物理引擎报错，并避免它受到重力掉落
+        Rigidbody[] rbs = temp.GetComponentsInChildren<Rigidbody>();
+        foreach (var rb in rbs)
+        {
+            rb.isKinematic = true;
+        }
+        
         Inventory.texture = interactableObject.SampleImage;
         temp.transform.GetChild(0).GetComponent<Renderer>().material.SetTexture("_MainTexture",interactableObject.SampleImage);
         isSampleOnHand = true;

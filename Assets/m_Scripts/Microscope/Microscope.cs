@@ -249,12 +249,10 @@ public class Microscope : MonoBehaviour
     {
         if (MicroUI.setTrue && isNear && !isRotating)
         {
-            // 确保数组长度一致并循环索引
             int maxChoice = Mathf.Min(glass4Rotation.Count, glass4Size.Length);
             targetGlass4Choice = (glass4Choice + 1) % maxChoice;
             glass4Choice = targetGlass4Choice;
             SetcurrentFocal();
-            // 启动旋转过渡
             StartCoroutine(SwitchObjectiveLens());
         }
     }
@@ -266,12 +264,12 @@ public class Microscope : MonoBehaviour
         {
             depthOfField.focusDistance.value = 1;
         }
-        // 确保数组长度一致并循环索引
+
         int maxChoice = Mathf.Min(glass4Rotation.Count, glass4Size.Length);
         targetGlass4Choice = (glass4Choice + 1) % maxChoice;
         glass4Choice = targetGlass4Choice;
         Object.SetActive(false);
-        // 启动旋转过渡
+
         StartCoroutine(SwitchObjectiveLens());
     }
 
@@ -285,27 +283,23 @@ public class Microscope : MonoBehaviour
         {
             if (scrollInput == 0)
             {
-                // 获取鼠标滚轮输入
                 scrollInput = Input.GetAxis("Mouse ScrollWheel");
             }
-            if (scrollInput != 0) // 如果滚动量不为零
+            if (scrollInput != 0)
             {
-                // 根据滚轮方向调整激光的宽度
-                float newWidth = Mathf.Clamp(lineRenderer.startWidth + scrollInput * widthChangeAmount*0.05f, minWidth, maxWidth);
+                float newWidth = Mathf.Clamp(lineRenderer.startWidth + scrollInput * widthChangeAmount*0.05f, 
+                                            minWidth, maxWidth);
                 lineRenderer.startWidth = newWidth;
                 lineRenderer.endWidth = newWidth;
                 SetLight();
-                // 计算与宽度变化相对应的旋转角度
+
                 float rotationAmount = scrollInput * rotationChangeRatio;
                 Vector3 currentRotation = knob1.transform.rotation.eulerAngles;
 
-                // 计算新的旋转角度
                 float newRotationZ = currentRotation.z + rotationAmount;
 
-                // 限制旋转角度在[minRotationZ, maxRotationZ]之间
                 newRotationZ = Mathf.Clamp(newRotationZ, minRotationZ, maxRotationZ);
 
-                // 设置旋转，只改变z轴，保持x和y不变
                 knob1.transform.rotation = Quaternion.Euler(currentRotation.x, currentRotation.y, newRotationZ);
             }
         }
@@ -331,27 +325,20 @@ public class Microscope : MonoBehaviour
     /// </summary>
     public void SwitchModeOfChange()
     {
-        // 检查必要的引用是否存在
-        if (lookCamera == null || !lookCamera.activeSelf || knobChild0 == null || knobChild1 == null)
+        if (lookCamera == null || 
+        !lookCamera.activeSelf ||
+         knobChild0 == null || 
+         knobChild1 == null)
         {
             return;
         }
-
         isCoarseAdjust = !isCoarseAdjust;
     }
-
-    /// <summary>
-    /// 焦距调整
-    /// </summary>
-    /// <param name="mode"></param>
     public void ChangeFocal(float mode)
     {
         if(!lookCamera.activeSelf) return;
-
         float knobRotationSpeed = 20f;
-        // 统一计算旋钮旋转角度，使用新的速度变量
-        float rotationAngle = knobRotationSpeed * Time.deltaTime; // 使用 Time.deltaTime 让旋转速度与帧率无关
-
+        float rotationAngle = knobRotationSpeed * Time.deltaTime;
         if (mode < 0)
         {
             if (Time.time - lastAdjustmentTimeB >= focalChangeInterval)
@@ -360,7 +347,6 @@ public class Microscope : MonoBehaviour
                 lastAdjustmentTimeB = Time.time;
             }
             
-            // 绕 Z 轴逆时针旋转 (根据你的模型，可能需要是 Vector3.back)
             if(isCoarseAdjust)
             {
                 knobChild0.transform.Rotate(Vector3.forward, -rotationAngle);
@@ -377,8 +363,6 @@ public class Microscope : MonoBehaviour
                 AdjustFocal(focalChangeSpeed);
                 lastAdjustmentTimeN = Time.time;
             }
-
-            // 绕 Z 轴顺时针旋转
             if(isCoarseAdjust)
             {
                 knobChild0.transform.Rotate(Vector3.forward, rotationAngle);
@@ -392,12 +376,6 @@ public class Microscope : MonoBehaviour
     
     void Update()
     {
-        // 显示系统鼠标光标
-        Cursor.visible = true;
-        // 不锁定鼠标（可以自由移出游戏窗口）
-        Cursor.lockState = CursorLockMode.None;
-        //光源开关
-        if(Input.GetKeyDown(KeyCode.Q))LightSwitch();
         
         //交互
         if (Input.GetKeyDown(KeyCode.E) && !operation)
