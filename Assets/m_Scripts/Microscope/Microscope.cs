@@ -287,8 +287,8 @@ public class Microscope : MonoBehaviour
             }
             if (scrollInput != 0)
             {
-                float newWidth = Mathf.Clamp(lineRenderer.startWidth + scrollInput * widthChangeAmount*0.05f, 
-                                            minWidth, maxWidth);
+                float newWidth = Mathf.Clamp(lineRenderer.startWidth + scrollInput * widthChangeAmount * 0.25f, 
+                                             minWidth, maxWidth);
                 lineRenderer.startWidth = newWidth;
                 lineRenderer.endWidth = newWidth;
                 SetLight();
@@ -386,7 +386,8 @@ public class Microscope : MonoBehaviour
         }
         //取下物体
         if(Input.GetKeyDown(KeyCode.R))TakeOutobj();
-
+        //按Q打开光源
+        if (Input.GetKeyDown(KeyCode.Q)) LightSwitch();
         // // 修改原有的T键检测部分
         // if (Input.GetKeyDown(KeyCode.T))
         // {
@@ -546,6 +547,7 @@ public class Microscope : MonoBehaviour
 
     void SetLight()
     {
+        if (Object == null) return;
         ShowObject showObject = Object.GetComponent<ShowObject>();
         showObject.SetLight(GetLight());
     }
