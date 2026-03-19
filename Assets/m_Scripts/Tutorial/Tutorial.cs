@@ -44,9 +44,6 @@ public class Tutorial : MonoBehaviour
     [Header("教程数据")]
     public List<TutorialData> tutorialDatas; 
 
-    [Header("首次启动设置")]
-    public int firstLaunchTutorialIndex = 0; 
-
     public Microscope microscope;  //显微镜脚本
 
     private int currentTutorialIndex = -1;   
@@ -105,21 +102,10 @@ public class Tutorial : MonoBehaviour
         Interactor.Instance.tutorialButtonInput = GetComponent<TutorialButtonInput>();
     }
 
-    private IEnumerator Start()
+    private void Start()
     {
         Interactor.Instance.currentTutorial = this;
         Interactor.Instance.tutorialButtonInput = GetComponent<TutorialButtonInput>();
-        // 检查首次启动
-        if (!(CheckFirstLaunch("Tutorial_FirstLaunch") && player))
-        {
-            yield break;
-        }
-
-        yield return new WaitForSeconds(2f);
-        ShowTutorial(firstLaunchTutorialIndex);
-        microscope.SetBlink();
-        
-        Interactor.Instance.ChangeState(Interactor.GameState.Tutorial);
     }
 
     private void OnEnable()
@@ -185,6 +171,29 @@ public class Tutorial : MonoBehaviour
             return true;
         }
         return false;
+    }
+
+    /// <summary>
+    /// [新增] 仅检查是否已完成该教程（不写入存档），用于强制性教程的条件判断
+    /// </summary>
+    public bool IsTutorialCompleted(string key)
+    {
+        if (progressData?.triggeredTutorialKeys == null) LoadProgress();
+        return progressData.triggeredTutorialKeys.Contains(key);
+    }
+
+    /// <summary>
+    /// [新增] 标记该教程为已完成并保存存档，在玩家完成强制任务后调用
+    /// </summary>
+    public void CompleteTutorialProgress(string key)
+    {
+        if (progressData?.triggeredTutorialKeys == null) LoadProgress();
+        if (!progressData.triggeredTutorialKeys.Contains(key))
+        {
+            progressData.triggeredTutorialKeys.Add(key);
+            SaveProgress();
+            Debug.Log($"强制性教程 [{key}] 已完成并存盘！");
+        }
     }
 
     /// <summary>
