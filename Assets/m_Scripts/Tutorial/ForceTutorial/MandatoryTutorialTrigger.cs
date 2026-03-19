@@ -8,9 +8,6 @@ public class MandatoryTutorialTrigger : MonoBehaviour
     [Tooltip("该强制教程的唯一标识符，必须全局唯一（例如：Tutorial_PickUpLens）")]
     public string tutorialKey;
     
-    [Tooltip("触发时是否自动弹出指定的UI教学面板（-1为不弹出）")]
-    public int tutorialIndexToDisplay = -1;
-
     [Header("流程事件控制 (限制/恢复操作)")]
     [Tooltip("进入触发器时调用（在这里挂载禁用玩家移动、禁用其余交互的逻辑）")]
     public UnityEvent onTutorialStart;
@@ -51,13 +48,7 @@ public class MandatoryTutorialTrigger : MonoBehaviour
         isActive = true;
         Debug.Log($"[触发强制教学] 锁定玩家操作，当前任务: {tutorialKey}");
 
-        // 1. 如果配置了面板索引，弹出UI
-        if (tutorialIndexToDisplay >= 0)
-        {
-            tutorialSystem.ShowTutorial(tutorialIndexToDisplay);
-        }
-
-        // 2. 执行开始事件（通过Inspector配置：比如把移动组件的 enable 设为 false）
+        // 执行开始事件（通过Inspector配置：比如调用 StandaloneTutorialUI.PlayTutorial，以及禁用玩家移动）
         onTutorialStart?.Invoke();
     }
 
