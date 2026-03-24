@@ -5615,7 +5615,6 @@ GameObject:
   m_Component:
   - component: {fileID: 326538115}
   - component: {fileID: 326538116}
-  - component: {fileID: 326538117}
   m_Layer: 0
   m_Name: Reflection Probe
   m_TagString: Untagged
@@ -5671,18 +5670,6 @@ ReflectionProbe:
   m_UseOcclusionCulling: 1
   m_Importance: 1
   m_CustomBakedTexture: {fileID: 0}
---- !u!114 &326538117
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 326538114}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d0ef8dc2c2eabfa4e8cb77be57a837c0, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1001 &331571905
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -9992,7 +9979,6 @@ GameObject:
   m_Component:
   - component: {fileID: 541210235}
   - component: {fileID: 541210236}
-  - component: {fileID: 541210237}
   m_Layer: 0
   m_Name: Reflection Probe (1)
   m_TagString: Untagged
@@ -10048,18 +10034,6 @@ ReflectionProbe:
   m_UseOcclusionCulling: 1
   m_Importance: 1
   m_CustomBakedTexture: {fileID: 0}
---- !u!114 &541210237
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 541210234}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d0ef8dc2c2eabfa4e8cb77be57a837c0, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1001 &542521629
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -38380,7 +38354,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7696548426260509612}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: c9b3d17eeb2e6bc47ada81d8f7f638d8, type: 3}
   m_Name: 
@@ -39099,6 +39073,10 @@ PrefabInstance:
       propertyPath: m_Mesh
       value: 
       objectReference: {fileID: -4602356720338410404, guid: 385e42afa3943324790789c56e76d752, type: 3}
+    - target: {fileID: 2669266873738600943, guid: eb2a0dc7c8122384299656b18f1af357, type: 3}
+      propertyPath: m_Materials.Array.size
+      value: 4
+      objectReference: {fileID: 0}
     - target: {fileID: 2716598494800756084, guid: eb2a0dc7c8122384299656b18f1af357, type: 3}
       propertyPath: m_StaticEditorFlags
       value: 2147483647
@@ -39134,6 +39112,14 @@ PrefabInstance:
     - target: {fileID: 2931477752288953756, guid: eb2a0dc7c8122384299656b18f1af357, type: 3}
       propertyPath: m_StaticEditorFlags
       value: 2147483647
+      objectReference: {fileID: 0}
+    - target: {fileID: 3001684691360936106, guid: eb2a0dc7c8122384299656b18f1af357, type: 3}
+      propertyPath: m_Materials.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3069912857835105248, guid: eb2a0dc7c8122384299656b18f1af357, type: 3}
+      propertyPath: m_Materials.Array.size
+      value: 6
       objectReference: {fileID: 0}
     - target: {fileID: 3070180607959308276, guid: eb2a0dc7c8122384299656b18f1af357, type: 3}
       propertyPath: m_LocalPosition.y
@@ -39539,9 +39525,17 @@ PrefabInstance:
       propertyPath: m_Mesh
       value: 
       objectReference: {fileID: 6837954231631579503, guid: 385e42afa3943324790789c56e76d752, type: 3}
+    - target: {fileID: 6330994674570918855, guid: eb2a0dc7c8122384299656b18f1af357, type: 3}
+      propertyPath: m_Materials.Array.size
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 6403081499465315201, guid: eb2a0dc7c8122384299656b18f1af357, type: 3}
       propertyPath: m_StaticEditorFlags
       value: 2147483647
+      objectReference: {fileID: 0}
+    - target: {fileID: 6476815676657490604, guid: eb2a0dc7c8122384299656b18f1af357, type: 3}
+      propertyPath: m_Materials.Array.size
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 7176055460953000221, guid: eb2a0dc7c8122384299656b18f1af357, type: 3}
       propertyPath: m_Mesh
@@ -39567,6 +39561,10 @@ PrefabInstance:
       propertyPath: m_Mesh
       value: 
       objectReference: {fileID: -5843519385437538442, guid: 385e42afa3943324790789c56e76d752, type: 3}
+    - target: {fileID: 9095483192889682647, guid: eb2a0dc7c8122384299656b18f1af357, type: 3}
+      propertyPath: m_Materials.Array.size
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 9217775696986026454, guid: eb2a0dc7c8122384299656b18f1af357, type: 3}
       propertyPath: m_StaticEditorFlags
       value: 2147483647
@@ -41524,7 +41522,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7696548426260509612}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 9d2ac5bbcce0e48449f8a3b48c966c60, type: 3}
   m_Name: 
