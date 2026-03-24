@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
 using UnityEngine.Events;
+using VRMicroscope.Tutorial;
 
 [Serializable]
 public enum TutorialStepInputButton
@@ -30,6 +31,14 @@ public enum TutorialStepInputButton
 [Serializable]
 public class TutorialStep
 {
+    public enum InputAccessMode
+    {
+        FullyBlocked = 0,
+        LocomotionOnly = 1,
+        ButtonOnly = 2,
+        FullyUnblocked = 3
+    }
+
     [TextArea(2, 5)]
     [Tooltip("当前步骤要显示的教程文本")]
     public string stepText;
@@ -39,6 +48,9 @@ public class TutorialStep
 
     [Tooltip("当步骤为【强制交互】时，可在这里直接配置允许推进教程的输入。\n支持按钮与摇杆方向。\n留空表示该步骤仍由外部交互脚本手动调用 CompleteAction()。")]
     public List<TutorialStepInputButton> acceptedButtons = new List<TutorialStepInputButton>();
+
+    [Tooltip("该步骤需要开放到什么程度的玩家输入。\n推荐你为每一步明确指定状态。ButtonOnly 会只放开按钮与交互，不放开位姿移动。未手动更改的旧配置会自动按 FullyBlocked 处理。")]
+    public InputAccessMode inputAccessMode = InputAccessMode.FullyBlocked;
 
     [Header("进入该步骤时触发的事件")]
     [Tooltip("可用于：进入该步骤时执行特定操作。\n例如：如果这是强制交互步骤，在这里解开玩家的部分操作（如恢复手柄抓取或按键功能）。")]
@@ -88,18 +100,30 @@ public class StandaloneTutorialUI : MonoBehaviour
     [Tooltip("是否输出教程步骤切换与输入匹配日志")]
     public bool enableDebugLogs = true;
 
+    [Header("错误提示")]
+    [Tooltip("错误提示文本默认显示时长。若玩家在此期间完成了正确操作，会立即中断并进入下一步。")]
+    public float errorDisplayDuration = 1.5f;
+
     private int currentStepIndex = 0;
     private bool isPlaying = false;
     private Coroutine errorCoroutine;
     private Color originalTextColor;
     private Transform mainCameraTransform;
     private float autoAdvanceTimer = 0f;
+    private PlayerInputBlocker playerInputBlocker;
+
+    [SerializeField, HideInInspector]
+    private int inputAccessConfigVersion = 0;
+
+    private const int CurrentInputAccessConfigVersion = 1;
 
     public bool IsPlaying => isPlaying;
     public int CurrentStepIndex => currentStepIndex;
 
     private void Awake()
     {
+        UpgradeLegacyInputAccessModes();
+
         if (tutorialTextDisplay != null)
         {
             originalTextColor = tutorialTextDisplay.color;
@@ -114,6 +138,13 @@ public class StandaloneTutorialUI : MonoBehaviour
         {
             mainCameraTransform = Camera.main.transform;
         }
+
+        playerInputBlocker = FindObjectOfType<PlayerInputBlocker>();
+    }
+
+    private void OnValidate()
+    {
+        UpgradeLegacyInputAccessModes();
     }
 
     private void Update()
@@ -188,6 +219,7 @@ public class StandaloneTutorialUI : MonoBehaviour
             tutorialTextDisplay.color = originalTextColor;
         }
 
+        ApplyCurrentStepInputPolicy(currentStep);
         LogDebug($"进入步骤 {currentStepIndex + 1}/{steps.Count}: {BuildStepDebugSummary(currentStep)}");
         currentStep.onStepStart?.Invoke();
     }
@@ -212,6 +244,7 @@ public class StandaloneTutorialUI : MonoBehaviour
         
         if (steps[currentStepIndex].isMandatoryInteraction)
         {
+            CancelErrorDisplay(restoreCurrentStepText: false);
             AdvanceStep(reason);
         }
     }
@@ -267,6 +300,19 @@ public class StandaloneTutorialUI : MonoBehaviour
         return GetStepInputSummary(steps[currentStepIndex]);
     }
 
+    public bool CurrentStepAcceptsInput(TutorialStepInputButton input)
+    {
+        if (!isPlaying || currentStepIndex >= steps.Count)
+        {
+            return false;
+        }
+
+        TutorialStep currentStep = steps[currentStepIndex];
+        return currentStep.isMandatoryInteraction &&
+               HasConfiguredButtonInput(currentStep) &&
+               StepAcceptsButton(currentStep, input);
+    }
+
     private IEnumerator ShowErrorRoutine(string errorMsg)
     {
         if (tutorialTextDisplay != null)
@@ -274,7 +320,7 @@ public class StandaloneTutorialUI : MonoBehaviour
             tutorialTextDisplay.color = Color.red;
             tutorialTextDisplay.text = errorMsg;
             
-            yield return new WaitForSeconds(1.5f);
+            yield return new WaitForSeconds(Mathf.Max(0.01f, errorDisplayDuration));
             
             if (isPlaying && currentStepIndex < steps.Count)
             {
@@ -282,6 +328,8 @@ public class StandaloneTutorialUI : MonoBehaviour
                 tutorialTextDisplay.text = steps[currentStepIndex].stepText;
             }
         }
+
+        errorCoroutine = null;
     }
 
     private void EndTutorial()
@@ -303,6 +351,7 @@ public class StandaloneTutorialUI : MonoBehaviour
     {
         if (!isPlaying || currentStepIndex >= steps.Count) return;
 
+        CancelErrorDisplay(restoreCurrentStepText: false);
         LogDebug($"完成步骤 {currentStepIndex + 1}/{steps.Count}，原因: {reason}");
         currentStepIndex++;
         ShowCurrentStep();
@@ -330,17 +379,88 @@ public class StandaloneTutorialUI : MonoBehaviour
 
     private string BuildStepDebugSummary(TutorialStep step)
     {
+        string accessModeSummary = $"输入模式: {ResolveInputAccessMode(step)}。";
+
         if (!step.isMandatoryInteraction)
         {
-            return $"普通步骤，可按 Space 跳过，或在 {autoAdvanceDelay:0.##} 秒后自动推进。";
+            return $"普通步骤，{accessModeSummary} 可按 Space 跳过，或在 {autoAdvanceDelay:0.##} 秒后自动推进。";
         }
 
         if (!HasConfiguredButtonInput(step))
         {
-            return "强制交互步骤，等待外部脚本调用 CompleteAction()。";
+            return $"强制交互步骤，{accessModeSummary} 等待外部脚本调用 CompleteAction()。";
         }
 
-        return $"强制输入步骤，允许输入: {GetStepInputSummary(step)}";
+        return $"强制输入步骤，{accessModeSummary} 允许输入: {GetStepInputSummary(step)}";
+    }
+
+    private void ApplyCurrentStepInputPolicy(TutorialStep step)
+    {
+        if (playerInputBlocker == null)
+        {
+            playerInputBlocker = FindObjectOfType<PlayerInputBlocker>();
+        }
+
+        if (playerInputBlocker == null)
+        {
+            return;
+        }
+
+        TutorialInputAccessMode accessMode = ResolveInputAccessMode(step);
+        playerInputBlocker.ApplyAccessMode(accessMode);
+    }
+
+    private TutorialInputAccessMode ResolveInputAccessMode(TutorialStep step)
+    {
+        switch (step.inputAccessMode)
+        {
+            case TutorialStep.InputAccessMode.FullyBlocked:
+                return TutorialInputAccessMode.FullyBlocked;
+            case TutorialStep.InputAccessMode.LocomotionOnly:
+                return TutorialInputAccessMode.LocomotionOnly;
+            case TutorialStep.InputAccessMode.ButtonOnly:
+                return TutorialInputAccessMode.ButtonOnly;
+            case TutorialStep.InputAccessMode.FullyUnblocked:
+                return TutorialInputAccessMode.FullyUnblocked;
+            default:
+                return TutorialInputAccessMode.FullyBlocked;
+        }
+    }
+
+    private void UpgradeLegacyInputAccessModes()
+    {
+        if (inputAccessConfigVersion >= CurrentInputAccessConfigVersion || steps == null)
+        {
+            return;
+        }
+
+        for (int i = 0; i < steps.Count; i++)
+        {
+            TutorialStep step = steps[i];
+            int legacyValue = (int)step.inputAccessMode;
+
+            switch (legacyValue)
+            {
+                case 0: // Legacy Auto
+                case 1: // Legacy FullyBlocked
+                    step.inputAccessMode = TutorialStep.InputAccessMode.FullyBlocked;
+                    break;
+                case 2: // Legacy LocomotionOnly
+                    step.inputAccessMode = TutorialStep.InputAccessMode.LocomotionOnly;
+                    break;
+                case 3: // Legacy ButtonOnly
+                    step.inputAccessMode = TutorialStep.InputAccessMode.ButtonOnly;
+                    break;
+                case 4: // Legacy FullyUnblocked
+                    step.inputAccessMode = TutorialStep.InputAccessMode.FullyUnblocked;
+                    break;
+                default:
+                    step.inputAccessMode = TutorialStep.InputAccessMode.FullyBlocked;
+                    break;
+            }
+        }
+
+        inputAccessConfigVersion = CurrentInputAccessConfigVersion;
     }
 
     private string GetStepInputSummary(TutorialStep step)
@@ -365,6 +485,23 @@ public class StandaloneTutorialUI : MonoBehaviour
     {
         if (!enableDebugLogs) return;
         Debug.Log($"[ForceTutorial/UI] {message}");
+    }
+
+    private void CancelErrorDisplay(bool restoreCurrentStepText)
+    {
+        if (errorCoroutine == null)
+        {
+            return;
+        }
+
+        StopCoroutine(errorCoroutine);
+        errorCoroutine = null;
+
+        if (restoreCurrentStepText && tutorialTextDisplay != null && isPlaying && currentStepIndex < steps.Count)
+        {
+            tutorialTextDisplay.color = originalTextColor;
+            tutorialTextDisplay.text = steps[currentStepIndex].stepText;
+        }
     }
 
     public static string GetButtonDisplayName(TutorialStepInputButton button)

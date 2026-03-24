@@ -10709,7 +10709,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 560992e7a6cc4f8449f394d5879fcc9c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  tutorialKey: First_Look
+  tutorialKey: StartForceKey
   triggerOnStart: 1
   onTutorialStart:
     m_PersistentCalls:
@@ -10763,7 +10763,7 @@ BoxCollider:
   m_GameObject: {fileID: 574288199}
   m_Material: {fileID: 0}
   m_IsTrigger: 1
-  m_Enabled: 1
+  m_Enabled: 0
   serializedVersion: 2
   m_Size: {x: 1, y: 1.4, z: 1}
   m_Center: {x: 0, y: 0.2, z: -0}
@@ -22767,6 +22767,11 @@ MonoBehaviour:
   inputCooldown: 0.15
   stickThreshold: 0.75
   enableDebugLogs: 1
+  enableLocomotionFeedbackAssist: 1
+  movementAssistDistance: 0.55
+  movementAssistDuration: 0.18
+  turnAssistAngle: 35
+  turnAssistDuration: 0.18
 --- !u!114 &1399455090
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -22790,66 +22795,84 @@ MonoBehaviour:
   - stepText: "\u6B22\u8FCE\u6765\u5230 VR \u663E\u5FAE\u955C\u5B9E\u9A8C\u5BA4\u3002"
     isMandatoryInteraction: 0
     acceptedButtons: 
+    inputAccessMode: 1
     onStepStart:
       m_PersistentCalls:
         m_Calls: []
   - stepText: "\u8BF7\u5C06\u5DE6\u624B\u63A7\u5236\u5668\u7684\u6447\u6746\u5411\u524D\u62E8\u52A8\uFF0C\u5C1D\u8BD5\u5411\u524D\u79FB\u52A8\u3002"
     isMandatoryInteraction: 1
     acceptedButtons: 09000000
+    inputAccessMode: 1
     onStepStart:
       m_PersistentCalls:
         m_Calls: []
   - stepText: "\u8BF7\u5C06\u5DE6\u624B\u63A7\u5236\u5668\u7684\u6447\u6746\u5411\u540E\u62E8\u52A8\uFF0C\u5C1D\u8BD5\u5411\u540E\u79FB\u52A8\u3002\r\n"
     isMandatoryInteraction: 1
     acceptedButtons: 0a000000
+    inputAccessMode: 1
     onStepStart:
       m_PersistentCalls:
         m_Calls: []
   - stepText: "\u8BF7\u5C06\u5DE6\u624B\u63A7\u5236\u5668\u7684\u6447\u6746\u5411\u5DE6\u62E8\u52A8\uFF0C\u5C1D\u8BD5\u5411\u5DE6\u79FB\u52A8\u3002"
     isMandatoryInteraction: 1
     acceptedButtons: 0b000000
+    inputAccessMode: 1
     onStepStart:
       m_PersistentCalls:
         m_Calls: []
   - stepText: "\u8BF7\u5C06\u5DE6\u624B\u63A7\u5236\u5668\u7684\u6447\u6746\u5411\u53F3\u62E8\u52A8\uFF0C\u5C1D\u8BD5\u5411\u53F3\u79FB\u52A8\u3002"
     isMandatoryInteraction: 1
     acceptedButtons: 0c000000
+    inputAccessMode: 1
+    onStepStart:
+      m_PersistentCalls:
+        m_Calls: []
+  - stepText: "\u9664\u4E86\u4F7F\u7528\u6447\u6746\u79FB\u52A8\u5916\uFF0C\u4F60\u4E5F\u53EF\u4EE5\u6309\u4E0B\u53F3\u624B\u63A7\u5236\u5668\u7684\u4FA7\u952E\u8FDB\u884C\u4F20\u9001\u3002\u4F7F\u7528\u8FD9\u79CD\u65B9\u5F0F\uFF0C\u4F60\u53EF\u4EE5\u79FB\u52A8\u5230\u53F3\u624B\u6FC0\u5149\u6240\u6307\u5411\u7684\u4F4D\u7F6E\u3002\u4F60\u53EF\u4EE5\u5728\u672C\u6559\u7A0B\u7ED3\u675F\u540E\u81EA\u884C\u5C1D\u8BD5\u3002"
+    isMandatoryInteraction: 0
+    acceptedButtons: 
+    inputAccessMode: 0
     onStepStart:
       m_PersistentCalls:
         m_Calls: []
   - stepText: "\u505A\u5F97\u5F88\u597D\uFF0C\u4F60\u5DF2\u7ECF\u638C\u63E1\u4E86\u57FA\u7840\u79FB\u52A8\u64CD\u4F5C\u3002"
     isMandatoryInteraction: 0
     acceptedButtons: 
+    inputAccessMode: 0
     onStepStart:
       m_PersistentCalls:
         m_Calls: []
   - stepText: "\u8BF7\u5C06\u53F3\u624B\u63A7\u5236\u5668\u7684\u6447\u6746\u5411\u5DE6\u62E8\u52A8\uFF0C\u5C1D\u8BD5\u5411\u5DE6\u8F6C\u52A8\u89C6\u89D2\u3002"
     isMandatoryInteraction: 1
     acceptedButtons: 0f000000
+    inputAccessMode: 1
     onStepStart:
       m_PersistentCalls:
         m_Calls: []
   - stepText: "\u8BF7\u5C06\u53F3\u624B\u63A7\u5236\u5668\u7684\u6447\u6746\u5411\u53F3\u62E8\u52A8\uFF0C\u5C1D\u8BD5\u5411\u53F3\u8F6C\u52A8\u89C6\u89D2\u3002"
     isMandatoryInteraction: 1
     acceptedButtons: 10000000
+    inputAccessMode: 1
+    onStepStart:
+      m_PersistentCalls:
+        m_Calls: []
+  - stepText: "\u9664\u4E86\u4F7F\u7528\u53F3\u624B\u6447\u6746\u8F6C\u52A8\u89C6\u89D2\u5916\uFF0C\u4F60\u4E5F\u53EF\u4EE5\u5728\u73B0\u5B9E\u4E2D\u76F4\u63A5\u8F6C\u52A8\u8EAB\u4F53\u6765\u8C03\u6574\u89C2\u5BDF\u65B9\u5411\u3002\u4F60\u53EF\u4EE5\u5728\u672C\u6559\u7A0B\u7ED3\u675F\u540E\u81EA\u884C\u5C1D\u8BD5\u3002"
+    isMandatoryInteraction: 0
+    acceptedButtons: 
+    inputAccessMode: 0
     onStepStart:
       m_PersistentCalls:
         m_Calls: []
   - stepText: "\u5F88\u597D\uFF0C\u4F60\u5DF2\u7ECF\u638C\u63E1\u4E86\u89C6\u89D2\u8F6C\u52A8\u64CD\u4F5C\u3002"
     isMandatoryInteraction: 0
     acceptedButtons: 
+    inputAccessMode: 0
     onStepStart:
       m_PersistentCalls:
         m_Calls: []
-  - stepText: "\u8BF7\u6309\u4E0B\u53F3\u624B\u63A7\u5236\u5668\u7684\u4FA7\u952E\u3002\u4F7F\u7528\u8FD9\u79CD\u65B9\u5F0F\uFF0C\u4F60\u53EF\u4EE5\u79FB\u52A8\u5230\u53F3\u624B\u6FC0\u5149\u6240\u6307\u5411\u7684\u4F4D\u7F6E\u3002"
-    isMandatoryInteraction: 1
-    acceptedButtons: 08000000
-    onStepStart:
-      m_PersistentCalls:
-        m_Calls: []
-  - stepText: "\u606D\u559C\u4F60\uFF0C\u4F60\u5DF2\u7ECF\u5B8C\u6210\u4E86\u57FA\u7840\u79FB\u52A8\u6559\u5B66\u3002"
+  - stepText: "\u606D\u559C\u4F60\uFF0C\u4F60\u5DF2\u7ECF\u5B8C\u6210\u4E86\u57FA\u7840\u64CD\u4F5C\u6559\u5B66\u3002"
     isMandatoryInteraction: 0
     acceptedButtons: 
+    inputAccessMode: 0
     onStepStart:
       m_PersistentCalls:
         m_Calls: []
@@ -22875,6 +22898,8 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   enableDebugLogs: 1
+  errorDisplayDuration: 1.5
+  inputAccessConfigVersion: 1
 --- !u!1001 &1400812951
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -38383,7 +38408,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7313654228818734187}
   m_LocalRotation: {x: 0, y: -0.7071068, z: 0, w: 0.7071068}
-  m_LocalPosition: {x: -5.39, y: 0.55, z: 4.26}
+  m_LocalPosition: {x: -5.532, y: 0.55, z: 6.011}
   m_LocalScale: {x: 1, y: 1.0000001, z: 1.0000001}
   m_ConstrainProportionsScale: 0
   m_Children:

@@ -471,11 +471,6 @@ public class Microscope : MonoBehaviour
                 MicroUI.setTrue = false;
                 p = 0;
                 Interactor.Instance.ChangeState(Interactor.GameState.Observing);
-                if (TutorialUI.CheckFirstLaunch("Tutorial_Microscope_InSide"))
-                {
-                    TutorialUI.ShowTutorial(2); // 显示显微镜内部使用教程
-                    Interactor.Instance.ChangeState(Interactor.GameState.Tutorial);
-                }
                 
                 //取反 只渲染Microscope的ui
                 //player.GetComponent<Camera>().cullingMask = ~player.GetComponent<Camera>().cullingMask;
@@ -589,21 +584,7 @@ public class Microscope : MonoBehaviour
                 temp.OnMicroscopeIn(this);
             }
             MicroUI.setTrue = true;
-
-            Tutorial tutorial = other.GetComponentInChildren<Tutorial>();
-
             SetLighting();
-            if (tutorial != null)
-            {
-                if (tutorial.CheckFirstLaunch("Tutorial_Microscope_OutSide"))
-                {
-                    tutorial.ShowTutorial(1); // 显示显微镜外部使用教程
-                }
-            }
-            else
-            {
-                Debug.LogWarning("在 Player 或其子物体上没有找到 Tutorial 组件。", this);
-            }
         }
     }
 

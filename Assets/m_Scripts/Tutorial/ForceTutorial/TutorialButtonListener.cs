@@ -1,7 +1,8 @@
-﻿using UnityEngine;
+using UnityEngine;
 using UnityEngine.InputSystem;
 using System.Collections;
 using System.Collections.Generic;
+using Unity.XR.CoreUtils;
 
 namespace VRMicroscope.Tutorial
 {
@@ -44,14 +45,36 @@ namespace VRMicroscope.Tutorial
         [Tooltip("是否输出教程输入监听日志")]
         public bool enableDebugLogs = true;
 
+        [Header("教程反馈增强")]
+        [Tooltip("当玩家在强制教程中输入正确的移动/转向操作时，自动追加一小段位移或转向，让反馈更明显。")]
+        public bool enableLocomotionFeedbackAssist = true;
+
+        [Tooltip("移动教学步骤中，额外追加的位移距离。")]
+        [Min(0f)]
+        public float movementAssistDistance = 0.4f;
+
+        [Tooltip("移动教学反馈持续时长。值越小，额外位移越利落。")]
+        [Min(0.01f)]
+        public float movementAssistDuration = 0.18f;
+
+        [Tooltip("转向教学步骤中，额外追加的转向角度。")]
+        [Min(0f)]
+        public float turnAssistAngle = 25f;
+
+        [Tooltip("转向教学反馈持续时长。")]
+        [Min(0.01f)]
+        public float turnAssistDuration = 0.12f;
+
         private bool isInputActive = false;
         private float nextAllowedInputTime = 0f;
         private Coroutine enableDelayCoroutine;
+        private Coroutine locomotionAssistCoroutine;
         private TutorialStepInputButton lastLeftStickDirection = TutorialStepInputButton.None;
         private TutorialStepInputButton lastRightStickDirection = TutorialStepInputButton.None;
         private readonly Dictionary<TutorialStepInputButton, InputAction> buttonActions = new Dictionary<TutorialStepInputButton, InputAction>();
         private InputAction leftStickAction;
         private InputAction rightStickAction;
+        private XROrigin xrOrigin;
 
         private static readonly TutorialStepInputButton[] ButtonInputCheckOrder =
         {
@@ -71,6 +94,7 @@ namespace VRMicroscope.Tutorial
             lastLeftStickDirection = TutorialStepInputButton.None;
             lastRightStickDirection = TutorialStepInputButton.None;
 
+            CacheXROrigin();
             CacheActionsFromAsset();
             EnableCachedActions();
 
@@ -94,6 +118,12 @@ namespace VRMicroscope.Tutorial
                 enableDelayCoroutine = null;
             }
 
+            if (locomotionAssistCoroutine != null)
+            {
+                StopCoroutine(locomotionAssistCoroutine);
+                locomotionAssistCoroutine = null;
+            }
+
             DisableCachedActions();
         }
 
@@ -115,11 +145,19 @@ namespace VRMicroscope.Tutorial
         {
             if (tutorialUI == null || !isInputActive || Time.unscaledTime < nextAllowedInputTime) return;
 
-            if (TryGetPressedInput(out TutorialStepInputButton input, out string source) &&
-                tutorialUI.TryHandleConfiguredInput(input, source))
+            if (TryGetPressedInput(out TutorialStepInputButton input, out string source))
             {
-                nextAllowedInputTime = Time.unscaledTime + Mathf.Max(0f, inputCooldown);
-                LogDebug($"已处理教程输入: {StandaloneTutorialUI.GetInputDisplayName(input)}，来源: {source}");
+                bool willAdvanceCurrentStep = tutorialUI.CurrentStepAcceptsInput(input);
+                if (tutorialUI.TryHandleConfiguredInput(input, source))
+                {
+                    if (willAdvanceCurrentStep)
+                    {
+                        TriggerLocomotionAssist(input);
+                    }
+
+                    nextAllowedInputTime = Time.unscaledTime + Mathf.Max(0f, inputCooldown);
+                    LogDebug($"已处理教程输入: {StandaloneTutorialUI.GetInputDisplayName(input)}，来源: {source}");
+                }
             }
         }
 
@@ -265,6 +303,14 @@ namespace VRMicroscope.Tutorial
             }
         }
 
+        private void CacheXROrigin()
+        {
+            if (xrOrigin == null)
+            {
+                xrOrigin = FindObjectOfType<XROrigin>();
+            }
+        }
+
         private void CacheButtonAction(TutorialStepInputButton button, string actionName)
         {
             InputAction action = tutorialInputActions.FindAction(actionName, false);
@@ -317,6 +363,169 @@ namespace VRMicroscope.Tutorial
             {
                 rightStickAction.Disable();
             }
+        }
+
+        private void TriggerLocomotionAssist(TutorialStepInputButton input)
+        {
+            if (!enableLocomotionFeedbackAssist)
+            {
+                return;
+            }
+
+            CacheXROrigin();
+            if (xrOrigin == null)
+            {
+                LogDebug("未找到 XROrigin，已跳过教程反馈增强。");
+                return;
+            }
+
+            if (TryGetMovementAssistDirection(input, out Vector3 worldDirection))
+            {
+                StartLocomotionAssist(MoveAssistRoutine(worldDirection));
+                return;
+            }
+
+            if (TryGetTurnAssistAngle(input, out float signedAngle))
+            {
+                StartLocomotionAssist(TurnAssistRoutine(signedAngle));
+            }
+        }
+
+        private void StartLocomotionAssist(IEnumerator routine)
+        {
+            if (locomotionAssistCoroutine != null)
+            {
+                StopCoroutine(locomotionAssistCoroutine);
+            }
+
+            locomotionAssistCoroutine = StartCoroutine(routine);
+        }
+
+        private bool TryGetMovementAssistDirection(TutorialStepInputButton input, out Vector3 worldDirection)
+        {
+            worldDirection = Vector3.zero;
+
+            if (input != TutorialStepInputButton.LeftStickUp &&
+                input != TutorialStepInputButton.LeftStickDown &&
+                input != TutorialStepInputButton.LeftStickLeft &&
+                input != TutorialStepInputButton.LeftStickRight)
+            {
+                return false;
+            }
+
+            Transform referenceTransform = xrOrigin != null && xrOrigin.Camera != null
+                ? xrOrigin.Camera.transform
+                : transform;
+
+            Vector3 forward = Vector3.ProjectOnPlane(referenceTransform.forward, Vector3.up).normalized;
+            if (forward.sqrMagnitude < 0.0001f)
+            {
+                forward = Vector3.forward;
+            }
+
+            Vector3 right = Vector3.ProjectOnPlane(referenceTransform.right, Vector3.up).normalized;
+            if (right.sqrMagnitude < 0.0001f)
+            {
+                right = Vector3.right;
+            }
+
+            switch (input)
+            {
+                case TutorialStepInputButton.LeftStickUp:
+                    worldDirection = forward;
+                    return true;
+                case TutorialStepInputButton.LeftStickDown:
+                    worldDirection = -forward;
+                    return true;
+                case TutorialStepInputButton.LeftStickLeft:
+                    worldDirection = -right;
+                    return true;
+                case TutorialStepInputButton.LeftStickRight:
+                    worldDirection = right;
+                    return true;
+                default:
+                    return false;
+            }
+        }
+
+        private bool TryGetTurnAssistAngle(TutorialStepInputButton input, out float signedAngle)
+        {
+            switch (input)
+            {
+                case TutorialStepInputButton.RightStickLeft:
+                    signedAngle = -Mathf.Abs(turnAssistAngle);
+                    return true;
+                case TutorialStepInputButton.RightStickRight:
+                    signedAngle = Mathf.Abs(turnAssistAngle);
+                    return true;
+                default:
+                    signedAngle = 0f;
+                    return false;
+            }
+        }
+
+        private IEnumerator MoveAssistRoutine(Vector3 worldDirection)
+        {
+            if (xrOrigin == null || xrOrigin.Camera == null || movementAssistDistance <= 0f)
+            {
+                locomotionAssistCoroutine = null;
+                yield break;
+            }
+
+            Vector3 startCameraPosition = xrOrigin.Camera.transform.position;
+            Vector3 targetCameraPosition = startCameraPosition + worldDirection.normalized * movementAssistDistance;
+            float duration = Mathf.Max(0.01f, movementAssistDuration);
+            float elapsed = 0f;
+
+            LogDebug($"执行移动反馈增强，方向: {worldDirection}, 距离: {movementAssistDistance:0.##}");
+
+            while (elapsed < duration)
+            {
+                elapsed += Time.deltaTime;
+                float progress = Mathf.Clamp01(elapsed / duration);
+                float easedProgress = 1f - Mathf.Pow(1f - progress, 3f);
+                Vector3 currentTargetPosition = Vector3.Lerp(startCameraPosition, targetCameraPosition, easedProgress);
+                xrOrigin.MoveCameraToWorldLocation(currentTargetPosition);
+                yield return null;
+            }
+
+            xrOrigin.MoveCameraToWorldLocation(targetCameraPosition);
+            locomotionAssistCoroutine = null;
+        }
+
+        private IEnumerator TurnAssistRoutine(float signedAngle)
+        {
+            if (xrOrigin == null || Mathf.Approximately(signedAngle, 0f))
+            {
+                locomotionAssistCoroutine = null;
+                yield break;
+            }
+
+            float duration = Mathf.Max(0.01f, turnAssistDuration);
+            float elapsed = 0f;
+            float appliedAngle = 0f;
+
+            LogDebug($"执行转向反馈增强，角度: {signedAngle:0.##}");
+
+            while (elapsed < duration)
+            {
+                elapsed += Time.deltaTime;
+                float progress = Mathf.Clamp01(elapsed / duration);
+                float easedProgress = 1f - Mathf.Pow(1f - progress, 3f);
+                float currentAngle = Mathf.Lerp(0f, signedAngle, easedProgress);
+                float deltaAngle = currentAngle - appliedAngle;
+                appliedAngle = currentAngle;
+                xrOrigin.RotateAroundCameraUsingOriginUp(deltaAngle);
+                yield return null;
+            }
+
+            float finalDelta = signedAngle - appliedAngle;
+            if (!Mathf.Approximately(finalDelta, 0f))
+            {
+                xrOrigin.RotateAroundCameraUsingOriginUp(finalDelta);
+            }
+
+            locomotionAssistCoroutine = null;
         }
 
         private void LogDebug(string message)

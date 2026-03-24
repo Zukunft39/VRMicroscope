@@ -5,6 +5,14 @@ using UnityEngine.XR.Interaction.Toolkit.Samples.StarterAssets;
 
 namespace VRMicroscope.Tutorial
 {
+    public enum TutorialInputAccessMode
+    {
+        FullyBlocked,
+        LocomotionOnly,
+        ButtonOnly,
+        FullyUnblocked
+    }
+
     /// <summary>
     /// 该组件负责阻止和恢复玩家的输入。
     /// 建议将其放置在 XR Origin 或其父对象上。
@@ -28,11 +36,15 @@ namespace VRMicroscope.Tutorial
         private bool _enableDebugLogs = true;
 
         private readonly Dictionary<XRRayInteractor, bool> _uiInteractionStates = new Dictionary<XRRayInteractor, bool>();
+        private readonly Dictionary<XRBaseInteractor, bool> _hoverStates = new Dictionary<XRBaseInteractor, bool>();
+        private readonly Dictionary<XRBaseInteractor, bool> _selectStates = new Dictionary<XRBaseInteractor, bool>();
 
         private Vector3 _lockedPosition;
         private Quaternion _lockedRotation;
         private CharacterController _characterController;
-        private bool _isInputBlocked = false;
+        private bool _isInteractionBlocked = false;
+        private bool _isLocomotionBlocked = false;
+        private TutorialInputAccessMode _currentAccessMode = TutorialInputAccessMode.FullyUnblocked;
 
         private void EnsureComponents()
         {
@@ -58,54 +70,137 @@ namespace VRMicroscope.Tutorial
 
         public void BlockInput()
         {
-            if (_isInputBlocked) return;
-            _isInputBlocked = true;
+            ApplyAccessMode(TutorialInputAccessMode.FullyBlocked);
+        }
 
+        public void UnblockInput()
+        {
+            ApplyAccessMode(TutorialInputAccessMode.FullyUnblocked);
+        }
+
+        public void ApplyAccessMode(TutorialInputAccessMode accessMode)
+        {
             EnsureComponents();
-            _uiInteractionStates.Clear();
-            
-            if (_playerRoot != null)
+
+            switch (accessMode)
             {
-                _lockedPosition = _playerRoot.position;
-                _lockedRotation = _playerRoot.rotation;
-                
-                _characterController = _playerRoot.GetComponent<CharacterController>();
-                if (_characterController != null)
-                {
-                    _characterController.enabled = false;
-                }
+                case TutorialInputAccessMode.FullyBlocked:
+                    SetInteractionBlocked(true);
+                    SetLocomotionBlocked(true);
+                    break;
+                case TutorialInputAccessMode.LocomotionOnly:
+                    SetInteractionBlocked(true);
+                    SetLocomotionBlocked(false);
+                    break;
+                case TutorialInputAccessMode.ButtonOnly:
+                    ForceEnableInteractions();
+                    SetLocomotionBlocked(true);
+                    break;
+                case TutorialInputAccessMode.FullyUnblocked:
+                    ForceEnableInteractions();
+                    SetLocomotionBlocked(false);
+                    break;
             }
-            else
+
+            if (_currentAccessMode != accessMode)
             {
-                Debug.LogWarning("[PlayerInputBlocker] 未能找到玩家根节点(Player Root)，物理锚定可能失败！");
+                _currentAccessMode = accessMode;
+                LogDebug($"输入模式切换为: {accessMode}");
+            }
+        }
+
+        private void SetInteractionBlocked(bool shouldBlock)
+        {
+            if (shouldBlock == _isInteractionBlocked)
+            {
+                return;
+            }
+
+            _isInteractionBlocked = shouldBlock;
+
+            if (shouldBlock)
+            {
+                _uiInteractionStates.Clear();
+                _hoverStates.Clear();
+                _selectStates.Clear();
+
+                foreach (XRBaseInteractor interactor in _interactors)
+                {
+                    if (interactor == null) continue;
+
+                    _hoverStates[interactor] = interactor.allowHover;
+                    _selectStates[interactor] = interactor.allowSelect;
+                    interactor.allowHover = false;
+                    interactor.allowSelect = false;
+
+                    XRRayInteractor ray = interactor as XRRayInteractor;
+                    if (ray != null)
+                    {
+                        _uiInteractionStates[ray] = ray.enableUIInteraction;
+                        ray.enableUIInteraction = false;
+                    }
+                }
+
+                LogDebug("交互输入已锁定。");
+                return;
             }
 
             foreach (XRBaseInteractor interactor in _interactors)
             {
                 if (interactor == null) continue;
-                interactor.allowHover = false;
-                interactor.allowSelect = false;
 
                 XRRayInteractor ray = interactor as XRRayInteractor;
-                if (ray != null)
+                bool hoverState;
+                if (_hoverStates.TryGetValue(interactor, out hoverState))
                 {
-                    _uiInteractionStates[ray] = ray.enableUIInteraction;
-                    ray.enableUIInteraction = false;
+                    interactor.allowHover = hoverState;
+                }
+                else
+                {
+                    interactor.allowHover = true;
+                }
+
+                bool selectState;
+                if (_selectStates.TryGetValue(interactor, out selectState))
+                {
+                    interactor.allowSelect = selectState;
+                }
+                else
+                {
+                    interactor.allowSelect = true;
+                }
+
+                bool uiState;
+                if (ray != null && _uiInteractionStates.TryGetValue(ray, out uiState))
+                {
+                    ray.enableUIInteraction = uiState;
                 }
             }
 
-            LogDebug("玩家输入已锁定。");
+            LogDebug("交互输入已恢复。");
         }
 
-        public void UnblockInput()
+        private void ForceEnableInteractions()
         {
-            if (!_isInputBlocked) return;
-            _isInputBlocked = false;
-
-            if (_characterController != null)
+            if (!_isInteractionBlocked)
             {
-                _characterController.enabled = true;
+                foreach (XRBaseInteractor interactor in _interactors)
+                {
+                    if (interactor == null) continue;
+                    interactor.allowHover = true;
+                    interactor.allowSelect = true;
+
+                    XRRayInteractor ray = interactor as XRRayInteractor;
+                    if (ray != null)
+                    {
+                        ray.enableUIInteraction = true;
+                    }
+                }
+
+                return;
             }
+
+            _isInteractionBlocked = false;
 
             foreach (XRBaseInteractor interactor in _interactors)
             {
@@ -114,19 +209,57 @@ namespace VRMicroscope.Tutorial
                 interactor.allowSelect = true;
 
                 XRRayInteractor ray = interactor as XRRayInteractor;
-                bool uiState;
-                if (ray != null && _uiInteractionStates.TryGetValue(ray, out uiState))
+                if (ray != null)
                 {
-                    ray.enableUIInteraction = uiState;
+                    ray.enableUIInteraction = true;
                 }
             }
 
-            LogDebug("玩家输入已恢复。");
+            LogDebug("交互输入已强制开启。");
+        }
+
+        private void SetLocomotionBlocked(bool shouldBlock)
+        {
+            if (shouldBlock == _isLocomotionBlocked)
+            {
+                return;
+            }
+
+            _isLocomotionBlocked = shouldBlock;
+
+            if (shouldBlock)
+            {
+                if (_playerRoot != null)
+                {
+                    _lockedPosition = _playerRoot.position;
+                    _lockedRotation = _playerRoot.rotation;
+
+                    _characterController = _playerRoot.GetComponent<CharacterController>();
+                    if (_characterController != null)
+                    {
+                        _characterController.enabled = false;
+                    }
+                }
+                else
+                {
+                    Debug.LogWarning("[PlayerInputBlocker] 未能找到玩家根节点(Player Root)，物理锚定可能失败！");
+                }
+
+                LogDebug("位姿移动已锁定。");
+                return;
+            }
+
+            if (_characterController != null)
+            {
+                _characterController.enabled = true;
+            }
+
+            LogDebug("位姿移动已恢复。");
         }
 
         private void LateUpdate()
         {
-            if (_isInputBlocked && _playerRoot != null)
+            if (_isLocomotionBlocked && _playerRoot != null)
             {
                 _playerRoot.position = _lockedPosition;
                 _playerRoot.rotation = _lockedRotation;
