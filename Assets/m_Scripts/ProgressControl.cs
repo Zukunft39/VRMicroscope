@@ -28,7 +28,11 @@ public class ProgressControl : TInstance<ProgressControl>
     public Vector3 velocity;
     public CinemachineVirtualCamera CurrentCinema;
     public CinemachineBrain cinemachineBrain;
-    private void Awake() =>progress=GetComponent<Progress>();
+    protected new void Awake() 
+    {
+        base.Awake();
+        progress = GetComponent<Progress>();
+    }
     private void Start() {
         origin.transform.position=new Vector3(progress.chapters[0].position.transform.position.x,origin.transform.position.y,progress.chapters[0].position.transform.position.z);
         origin.transform.GetChild(3).GetComponent<CharacterController>().Move(Vector2.zero);

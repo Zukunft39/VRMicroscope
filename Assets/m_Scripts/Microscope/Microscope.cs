@@ -86,11 +86,10 @@ public class Microscope : MonoBehaviour
     private bool isCoarseAdjust = true; // 是否为粗调模式
     float coarseStep = 0.2f; // 粗调步长
     float fineStep = 0.02f; // 细调步长
-    float minFocal = 1f; // 最小焦距
-    float maxFocal = 50f; // 最大焦距
+    // float minFocal = 1f; // 最小焦距
+    // float maxFocal = 50f; // 最大焦距
     float distance; //目镜和底座距离
     float currentFocal; // 当前焦距值
-    bool change;
     int focalChangeSpeed = 1; // 速率
     float focalChangeInterval = 0.01f; // 每次调整间隔
     float lastAdjustmentTimeB = 0f;
@@ -116,7 +115,6 @@ public class Microscope : MonoBehaviour
         Cam.SetActive(false);
         screen.SetActive(false);
         StartCoroutine(SwitchObjectiveLens());
-        change = false;
         volume = lookCamera.GetComponent<Volume>();
         if (volume != null && volume.profile.TryGet(out depthOfField))
         {
@@ -586,10 +584,9 @@ public class Microscope : MonoBehaviour
         if (other.CompareTag("MainCamera"))
         {
             player = other.gameObject;
-            Interactor temp=new();
-            if (player.transform.parent?.TryGetComponent<Interactor>(out temp)==true)
+            if (player.transform.parent != null && player.transform.parent.TryGetComponent<Interactor>(out Interactor temp))
             {
-                temp?.OnMicroscopeIn(this);
+                temp.OnMicroscopeIn(this);
             }
             MicroUI.setTrue = true;
 
@@ -623,10 +620,9 @@ public class Microscope : MonoBehaviour
     {
         if (other.CompareTag("MainCamera"))
         {
-            Interactor temp=new();
-            if (player.transform.parent?.TryGetComponent<Interactor>(out temp)==true)
+            if (player.transform.parent != null && player.transform.parent.TryGetComponent<Interactor>(out Interactor temp))
             {
-                temp?.OnMicroscopeOut(this);
+                temp.OnMicroscopeOut(this);
             }
             MicroUI.setTrue = false;
             isNear = false;

@@ -63,7 +63,7 @@ public class InteractWithSamples:MonoBehaviour
     public void EnablePickSample(InteractableSamples interactable)
     {
         interactableObject=interactable;
-        Debug.Log("enable pick sample");
+        // Debug.Log("enable pick sample");
     }
 
     public void DisablePickSample(InteractableSamples interactable)

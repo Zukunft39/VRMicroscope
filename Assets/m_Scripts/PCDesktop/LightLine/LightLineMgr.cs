@@ -13,7 +13,7 @@ public class LightLineMgr : TInstance<LightLineMgr>
     public float duration=1000f;
 
 
-    protected void Awake()
+    protected new void Awake()
     {
         base.Awake();
         lightLine=Resources.Load("Prefab/LightLineRenderer") as GameObject;
@@ -85,7 +85,6 @@ public class LightLineMgr : TInstance<LightLineMgr>
         Vector3[] startPoints = new Vector3[segments];
         float lenPerClip=width / segments;
         Vector3 startPoint;
-        Vector3 endPoint;
         if (segments%2==0)
         {
             startPoint=start+direction*((segments-1)/2+0.5f)*lenPerClip;
