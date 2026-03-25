@@ -96,10 +96,6 @@ public class StandaloneTutorialUI : MonoBehaviour
     [Tooltip("玩家在强制交互阶段执行了【错误操作】时触发（可配置播放错误提示音等）")]
     public UnityEvent onWrongAction;
 
-    [Header("Debug")]
-    [Tooltip("是否输出教程步骤切换与输入匹配日志")]
-    public bool enableDebugLogs = true;
-
     [Header("错误提示")]
     [Tooltip("错误提示文本默认显示时长。若玩家在此期间完成了正确操作，会立即中断并进入下一步。")]
     public float errorDisplayDuration = 1.5f;
@@ -197,7 +193,6 @@ public class StandaloneTutorialUI : MonoBehaviour
             uiRoot.SetActive(true);
         }
 
-        LogDebug("教程开始。");
         onTutorialStart?.Invoke();
         ShowCurrentStep();
     }
@@ -220,7 +215,6 @@ public class StandaloneTutorialUI : MonoBehaviour
         }
 
         ApplyCurrentStepInputPolicy(currentStep);
-        LogDebug($"进入步骤 {currentStepIndex + 1}/{steps.Count}: {BuildStepDebugSummary(currentStep)}");
         currentStep.onStepStart?.Invoke();
     }
 
@@ -238,7 +232,6 @@ public class StandaloneTutorialUI : MonoBehaviour
     {
         if (!isPlaying || currentStepIndex >= steps.Count)
         {
-            LogDebug("忽略 CompleteAction()，当前教程未播放或已经结束。");
             return;
         }
         
@@ -255,7 +248,6 @@ public class StandaloneTutorialUI : MonoBehaviour
 
         if (steps[currentStepIndex].isMandatoryInteraction)
         {
-            LogDebug($"步骤 {currentStepIndex + 1} 操作失败: {errorMsg}");
             onWrongAction?.Invoke();
             
             if (errorCoroutine != null) StopCoroutine(errorCoroutine);
@@ -281,7 +273,6 @@ public class StandaloneTutorialUI : MonoBehaviour
         if (!StepAcceptsButton(currentStep, input))
         {
             string expectedInputs = GetStepInputSummary(currentStep);
-            LogDebug($"步骤 {currentStepIndex + 1} 收到未匹配输入: {GetInputDisplayName(input)}，来源: {sourceName}，期望: {expectedInputs}");
             FailAction($"当前步骤需要执行输入：{expectedInputs}");
             return true;
         }
@@ -343,7 +334,6 @@ public class StandaloneTutorialUI : MonoBehaviour
         }
 
         if (uiRoot != null) uiRoot.SetActive(false);
-        LogDebug("教程结束。");
         onTutorialFinish?.Invoke();
     }
 
@@ -352,7 +342,6 @@ public class StandaloneTutorialUI : MonoBehaviour
         if (!isPlaying || currentStepIndex >= steps.Count) return;
 
         CancelErrorDisplay(restoreCurrentStepText: false);
-        LogDebug($"完成步骤 {currentStepIndex + 1}/{steps.Count}，原因: {reason}");
         currentStepIndex++;
         ShowCurrentStep();
     }
@@ -375,23 +364,6 @@ public class StandaloneTutorialUI : MonoBehaviour
         }
 
         return false;
-    }
-
-    private string BuildStepDebugSummary(TutorialStep step)
-    {
-        string accessModeSummary = $"输入模式: {ResolveInputAccessMode(step)}。";
-
-        if (!step.isMandatoryInteraction)
-        {
-            return $"普通步骤，{accessModeSummary} 可按 Space 跳过，或在 {autoAdvanceDelay:0.##} 秒后自动推进。";
-        }
-
-        if (!HasConfiguredButtonInput(step))
-        {
-            return $"强制交互步骤，{accessModeSummary} 等待外部脚本调用 CompleteAction()。";
-        }
-
-        return $"强制输入步骤，{accessModeSummary} 允许输入: {GetStepInputSummary(step)}";
     }
 
     private void ApplyCurrentStepInputPolicy(TutorialStep step)
@@ -479,12 +451,6 @@ public class StandaloneTutorialUI : MonoBehaviour
         }
 
         return buttonNames.Count == 0 ? "未配置教程输入" : string.Join(" / ", buttonNames);
-    }
-
-    private void LogDebug(string message)
-    {
-        if (!enableDebugLogs) return;
-        Debug.Log($"[ForceTutorial/UI] {message}");
     }
 
     private void CancelErrorDisplay(bool restoreCurrentStepText)

@@ -42,9 +42,6 @@ namespace VRMicroscope.Tutorial
         [Range(0.1f, 1f)]
         public float stickThreshold = 0.75f;
 
-        [Tooltip("是否输出教程输入监听日志")]
-        public bool enableDebugLogs = true;
-
         [Header("教程反馈增强")]
         [Tooltip("当玩家在强制教程中输入正确的移动/转向操作时，自动追加一小段位移或转向，让反馈更明显。")]
         public bool enableLocomotionFeedbackAssist = true;
@@ -138,7 +135,6 @@ namespace VRMicroscope.Tutorial
             isInputActive = true;
             nextAllowedInputTime = 0f;
             enableDelayCoroutine = null;
-            LogDebug("教程输入监听已启用。");
         }
 
         private void Update()
@@ -156,7 +152,6 @@ namespace VRMicroscope.Tutorial
                     }
 
                     nextAllowedInputTime = Time.unscaledTime + Mathf.Max(0f, inputCooldown);
-                    LogDebug($"已处理教程输入: {StandaloneTutorialUI.GetInputDisplayName(input)}，来源: {source}");
                 }
             }
         }
@@ -375,7 +370,6 @@ namespace VRMicroscope.Tutorial
             CacheXROrigin();
             if (xrOrigin == null)
             {
-                LogDebug("未找到 XROrigin，已跳过教程反馈增强。");
                 return;
             }
 
@@ -477,8 +471,6 @@ namespace VRMicroscope.Tutorial
             float duration = Mathf.Max(0.01f, movementAssistDuration);
             float elapsed = 0f;
 
-            LogDebug($"执行移动反馈增强，方向: {worldDirection}, 距离: {movementAssistDistance:0.##}");
-
             while (elapsed < duration)
             {
                 elapsed += Time.deltaTime;
@@ -505,8 +497,6 @@ namespace VRMicroscope.Tutorial
             float elapsed = 0f;
             float appliedAngle = 0f;
 
-            LogDebug($"执行转向反馈增强，角度: {signedAngle:0.##}");
-
             while (elapsed < duration)
             {
                 elapsed += Time.deltaTime;
@@ -528,10 +518,5 @@ namespace VRMicroscope.Tutorial
             locomotionAssistCoroutine = null;
         }
 
-        private void LogDebug(string message)
-        {
-            if (!enableDebugLogs) return;
-            Debug.Log($"[ForceTutorial/Input] {message}");
-        }
     }
 }

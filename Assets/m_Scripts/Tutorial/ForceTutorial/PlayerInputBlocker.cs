@@ -30,11 +30,6 @@ namespace VRMicroscope.Tutorial
         [Tooltip("【可选】玩家的根节点(XR Origin)。如果未设置，将自动通过 LocomotionSystem 寻找。")]
         private Transform _playerRoot;
 
-        [Header("Debug")]
-        [SerializeField]
-        [Tooltip("是否输出输入锁定与恢复日志")]
-        private bool _enableDebugLogs = true;
-
         private readonly Dictionary<XRRayInteractor, bool> _uiInteractionStates = new Dictionary<XRRayInteractor, bool>();
         private readonly Dictionary<XRBaseInteractor, bool> _hoverStates = new Dictionary<XRBaseInteractor, bool>();
         private readonly Dictionary<XRBaseInteractor, bool> _selectStates = new Dictionary<XRBaseInteractor, bool>();
@@ -105,7 +100,6 @@ namespace VRMicroscope.Tutorial
             if (_currentAccessMode != accessMode)
             {
                 _currentAccessMode = accessMode;
-                LogDebug($"输入模式切换为: {accessMode}");
             }
         }
 
@@ -141,7 +135,6 @@ namespace VRMicroscope.Tutorial
                     }
                 }
 
-                LogDebug("交互输入已锁定。");
                 return;
             }
 
@@ -177,7 +170,6 @@ namespace VRMicroscope.Tutorial
                 }
             }
 
-            LogDebug("交互输入已恢复。");
         }
 
         private void ForceEnableInteractions()
@@ -215,7 +207,6 @@ namespace VRMicroscope.Tutorial
                 }
             }
 
-            LogDebug("交互输入已强制开启。");
         }
 
         private void SetLocomotionBlocked(bool shouldBlock)
@@ -245,7 +236,6 @@ namespace VRMicroscope.Tutorial
                     Debug.LogWarning("[PlayerInputBlocker] 未能找到玩家根节点(Player Root)，物理锚定可能失败！");
                 }
 
-                LogDebug("位姿移动已锁定。");
                 return;
             }
 
@@ -254,7 +244,6 @@ namespace VRMicroscope.Tutorial
                 _characterController.enabled = true;
             }
 
-            LogDebug("位姿移动已恢复。");
         }
 
         private void LateUpdate()
@@ -266,10 +255,5 @@ namespace VRMicroscope.Tutorial
             }
         }
 
-        private void LogDebug(string message)
-        {
-            if (!_enableDebugLogs) return;
-            Debug.Log($"[ForceTutorial/InputBlocker] {message}");
-        }
     }
 }
