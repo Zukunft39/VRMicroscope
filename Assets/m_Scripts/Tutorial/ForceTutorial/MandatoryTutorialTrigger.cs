@@ -31,6 +31,7 @@ public class MandatoryTutorialTrigger : MonoBehaviour
     private Tutorial tutorialSystem;
     private ForceTutorialSequenceController sequenceController;
     private bool isActive = false;
+    private bool isInvokingPrerequisiteBlocked = false;
 
     public string TutorialKey => tutorialKey;
     public bool TriggerOnStart => triggerOnStart;
@@ -130,8 +131,18 @@ public class MandatoryTutorialTrigger : MonoBehaviour
 
     public void SetPrerequisiteSatisfied(bool isSatisfied)
     {
+        bool wasSatisfied = prerequisiteSatisfied;
         prerequisiteSatisfied = isSatisfied;
-        TryEvaluatePendingStart();
+
+        if (!isSatisfied)
+        {
+            return;
+        }
+
+        if (!wasSatisfied || isInvokingPrerequisiteBlocked)
+        {
+            TryEvaluatePendingStart();
+        }
     }
 
     public void AllowPrerequisite()
@@ -159,9 +170,8 @@ public class MandatoryTutorialTrigger : MonoBehaviour
     private bool CanStartTutorial()
     {
         return !isActive &&
-               tutorialSystem != null &&
                IsPrerequisiteSatisfied &&
-               !tutorialSystem.IsTutorialCompleted(tutorialKey);
+               !IsTutorialAlreadyCompleted();
     }
 
     private void EnsureTutorialSystem()
@@ -172,10 +182,6 @@ public class MandatoryTutorialTrigger : MonoBehaviour
         }
 
         tutorialSystem = FindObjectOfType<Tutorial>();
-        if (tutorialSystem == null)
-        {
-            Debug.LogError("场景中未找到 Tutorial 脚本！");
-        }
     }
 
     private ForceTutorialSequenceController FindSequenceController()
@@ -226,9 +232,25 @@ public class MandatoryTutorialTrigger : MonoBehaviour
 
     private void InvokePrerequisiteBlockedIfNeeded()
     {
-        if (requirePrerequisite && !prerequisiteSatisfied)
+        if (!requirePrerequisite || prerequisiteSatisfied || isInvokingPrerequisiteBlocked)
+        {
+            return;
+        }
+
+        isInvokingPrerequisiteBlocked = true;
+        try
         {
             onPrerequisiteBlocked?.Invoke();
         }
+        finally
+        {
+            isInvokingPrerequisiteBlocked = false;
+        }
+    }
+
+    private bool IsTutorialAlreadyCompleted()
+    {
+        EnsureTutorialSystem();
+        return tutorialSystem != null && tutorialSystem.IsTutorialCompleted(tutorialKey);
     }
 }

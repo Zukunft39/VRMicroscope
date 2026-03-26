@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using TMPro;
 [System.Serializable]
 public struct buttonsLevels
 {
@@ -30,6 +31,10 @@ public class TutorialButton : MonoBehaviour
 
     [Header("层级数据配置")]
     public List<UILevel> UILevels = new List<UILevel>();
+
+    [Header("默认焦点")]
+    public bool preferNamedDefaultButton = true;
+    public List<string> preferredDefaultButtonKeywords = new List<string> { "Back", "关闭" };
 
     [Header("当前选中状态")]
     public Button nowButton;          // 当前选中的按钮组件
@@ -174,6 +179,17 @@ public class TutorialButton : MonoBehaviour
         UILevel targetLevel = UILevels[levelIdx];
         levelIndex=levelIdx;
 
+        if (TryFindPreferredDefaultButton(levelIdx, out int preferredGroupIndex, out int preferredObjectIndex, out GameObject preferredObject, out Button preferredButton))
+        {
+            buttonIndex = preferredGroupIndex;
+            index = preferredObjectIndex;
+            nowSelectObj = preferredObject;
+            nowButton = preferredButton;
+            hilightButton(preferredButton);
+            OnButtonSelected?.Invoke(preferredButton, preferredObject, targetLevel, targetLevel.theButtons[preferredGroupIndex]);
+            return;
+        }
+
         // 选中第二组（索引1），如果不足则选第一组
         int defaultBtnGroupIdx = targetLevel.theButtons.Length >= 2 ? 2 : 0;
 
@@ -210,6 +226,102 @@ public class TutorialButton : MonoBehaviour
         {
             Debug.LogWarning($"默认对象[{defaultObj.name}] 上无Button组件！");
         }
+    }
+
+    private bool TryFindPreferredDefaultButton(int levelIdx, out int btnGroupIdx, out int objIdx, out GameObject targetObj, out Button targetBtn)
+    {
+        btnGroupIdx = -1;
+        objIdx = -1;
+        targetObj = null;
+        targetBtn = null;
+
+        if (!preferNamedDefaultButton || preferredDefaultButtonKeywords == null || preferredDefaultButtonKeywords.Count == 0)
+        {
+            return false;
+        }
+
+        UILevel targetLevel = UILevels[levelIdx];
+        for (int i = 0; i < targetLevel.theButtons.Length; i++)
+        {
+            buttonsLevels btnGroup = targetLevel.theButtons[i];
+            for (int j = 0; j < btnGroup.buttons.Length; j++)
+            {
+                GameObject candidateObj = btnGroup.buttons[j];
+                if (candidateObj == null)
+                {
+                    continue;
+                }
+
+                Button candidateButton = candidateObj.GetComponent<Button>();
+                if (candidateButton == null)
+                {
+                    continue;
+                }
+
+                if (!MatchesPreferredDefaultButton(candidateObj, candidateButton))
+                {
+                    continue;
+                }
+
+                btnGroupIdx = i;
+                objIdx = j;
+                targetObj = candidateObj;
+                targetBtn = candidateButton;
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private bool MatchesPreferredDefaultButton(GameObject obj, Button button)
+    {
+        if (obj == null || button == null)
+        {
+            return false;
+        }
+
+        string buttonText = string.Empty;
+        Text legacyText = button.GetComponentInChildren<Text>(true);
+        if (legacyText != null)
+        {
+            buttonText = legacyText.text;
+        }
+
+        if (string.IsNullOrWhiteSpace(buttonText))
+        {
+            TMP_Text tmpText = button.GetComponentInChildren<TMP_Text>(true);
+            if (tmpText != null)
+            {
+                buttonText = tmpText.text;
+            }
+        }
+
+        for (int i = 0; i < preferredDefaultButtonKeywords.Count; i++)
+        {
+            string keyword = preferredDefaultButtonKeywords[i];
+            if (string.IsNullOrWhiteSpace(keyword))
+            {
+                continue;
+            }
+
+            if (ContainsIgnoreCase(obj.name, keyword) || ContainsIgnoreCase(button.name, keyword) || ContainsIgnoreCase(buttonText, keyword))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private static bool ContainsIgnoreCase(string source, string value)
+    {
+        if (string.IsNullOrEmpty(source) || string.IsNullOrEmpty(value))
+        {
+            return false;
+        }
+
+        return source.IndexOf(value, StringComparison.OrdinalIgnoreCase) >= 0;
     }
 
     /// <summary>

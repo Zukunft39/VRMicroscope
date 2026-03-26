@@ -5970,6 +5970,15 @@ MonoBehaviour:
   speed: 0.02
   cinema: {fileID: 9014170785400826608}
   targetPos: {x: 0, y: 0, z: 0}
+  useInstantTeleportOnGrip: 1
+  fallbackToAutoMoveWhenTeleportFails: 0
+  maxTeleportDistance: 30
+  maxTeleportSurfaceAngle: 60
+  teleportSurfaceMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  teleportationProvider: {fileID: 0}
+  xrOrigin: {fileID: 0}
 --- !u!1001 &337627524
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -11530,8 +11539,8 @@ MonoBehaviour:
   m_fontMaterials: []
   m_fontColor32:
     serializedVersion: 2
-    rgba: 4278190080
-  m_fontColor: {r: 0, g: 0, b: 0, a: 1}
+    rgba: 4294967295
+  m_fontColor: {r: 1, g: 1, b: 1, a: 1}
   m_enableVertexGradient: 0
   m_colorMode: 3
   m_fontColorGradient:
@@ -18387,6 +18396,37 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 718eaa61d94be28438b75da80ba6eb14, type: 3}
+--- !u!1 &1102884986
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1102884987}
+  m_Layer: 8
+  m_Name: ForceTutorial_Pivot
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1102884987
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1102884986}
+  m_LocalRotation: {x: 0, y: 1, z: 0, w: 0}
+  m_LocalPosition: {x: -1.89, y: 0.77, z: -14.62}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 7082685169939353903}
+  m_RootOrder: 26
+  m_LocalEulerAnglesHint: {x: 0, y: 180, z: 0}
 --- !u!1 &1104311626
 GameObject:
   m_ObjectHideFlags: 0
@@ -19012,14 +19052,14 @@ MonoBehaviour:
   m_text: 
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 4458abc7175d8a44d9ec354a1ed1b293, type: 2}
-  m_sharedMaterial: {fileID: -3397416590922239334, guid: 4458abc7175d8a44d9ec354a1ed1b293, type: 2}
+  m_sharedMaterial: {fileID: 2100000, guid: 1c90250fb5c3c1d4388a8963fbefd0a3, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
   m_fontColor32:
     serializedVersion: 2
     rgba: 4278190080
-  m_fontColor: {r: 0, g: 0, b: 0, a: 1}
+  m_fontColor: {r: 1, g: 1, b: 1, a: 1}
   m_enableVertexGradient: 0
   m_colorMode: 3
   m_fontColorGradient:
@@ -19317,8 +19357,8 @@ MonoBehaviour:
   m_fontMaterials: []
   m_fontColor32:
     serializedVersion: 2
-    rgba: 4278190080
-  m_fontColor: {r: 0, g: 0, b: 0, a: 1}
+    rgba: 4294967295
+  m_fontColor: {r: 1, g: 1, b: 1, a: 1}
   m_enableVertexGradient: 0
   m_colorMode: 3
   m_fontColorGradient:
@@ -20942,6 +20982,9 @@ MonoBehaviour:
   followHeightOffset: -0.1
   faceCameraLerpSpeed: 5
   autoAdvanceDelay: 5
+  bringTutorialToFront: 1
+  frontSortingOrder: 500
+  mandatoryConfiguredInputAcceptDelay: 2
   steps:
   - stepText: "\u4F60\u9762\u524D\u7684\u662F\u5171\u805A\u7126\u663E\u5FAE\u955C\u3002"
     isMandatoryInteraction: 0
@@ -20950,6 +20993,7 @@ MonoBehaviour:
     onStepStart:
       m_PersistentCalls:
         m_Calls: []
+    customUIAnchor: {fileID: 0}
   - stepText: "\u8BA9\u6211\u4EEC\u4E00\u8D77\u5B66\u4E60\u5982\u4F55\u4F7F\u7528\u5B83\u6765\u89C2\u5BDF\u6837\u672C\u3002"
     isMandatoryInteraction: 0
     acceptedButtons: 
@@ -20957,6 +21001,7 @@ MonoBehaviour:
     onStepStart:
       m_PersistentCalls:
         m_Calls: []
+    customUIAnchor: {fileID: 0}
   - stepText: "\u9996\u5148\uFF0C\u6211\u4EEC\u9700\u8981\u53D6\u5F97\u6837\u672C\u3002"
     isMandatoryInteraction: 0
     acceptedButtons: 
@@ -20964,6 +21009,7 @@ MonoBehaviour:
     onStepStart:
       m_PersistentCalls:
         m_Calls: []
+    customUIAnchor: {fileID: 0}
   - stepText: "\u5B9E\u9A8C\u5BA4\u91CC\u63D0\u4F9B\u4E86\u56DB\u4E2A\u6837\u672C\uFF0C\u5206\u522B\u5BF9\u5E94\u7740\u7EA2\u8272\u3001\u84DD\u8272\u3001\u9EC4\u8272\u548C\u7EFF\u8272\u3002"
     isMandatoryInteraction: 0
     acceptedButtons: 
@@ -20971,13 +21017,23 @@ MonoBehaviour:
     onStepStart:
       m_PersistentCalls:
         m_Calls: []
-  - stepText: "\u63A5\u8FD1\u8FD9\u4E9B\u6837\u672C\u540E\uFF0C\u4F60\u53EF\u4EE5\u6309\u4E0B\u53F3\u624B\u63A7\u5236\u5668\u7684\u6273\u673A\u952E\u6765\u53D6\u5F97\u5B83\u3002\u53D6\u5F97\u6837\u672C\u7684\u9884\u89C8\u56FE\u5C06\u5728\u53F3\u4E0B\u89D2\u4E2D\u5C55\u793A\u51FA\u6765\u3002"
+    customUIAnchor: {fileID: 0}
+  - stepText: "\u63A5\u8FD1\u8FD9\u4E9B\u6837\u672C\u540E\uFF0C\u4F60\u53EF\u4EE5\u6309\u4E0B\u53F3\u624B\u63A7\u5236\u5668\u7684\u6273\u673A\u952E\u6765\u53D6\u5F97\u5B83\u3002"
     isMandatoryInteraction: 0
     acceptedButtons: 
     inputAccessMode: 0
     onStepStart:
       m_PersistentCalls:
         m_Calls: []
+    customUIAnchor: {fileID: 0}
+  - stepText: "\u53D6\u5F97\u6837\u672C\u7684\u9884\u89C8\u56FE\u5C06\u5728\u53F3\u4E0B\u89D2\u4E2D\u5C55\u793A\u51FA\u6765\u3002"
+    isMandatoryInteraction: 0
+    acceptedButtons: 
+    inputAccessMode: 0
+    onStepStart:
+      m_PersistentCalls:
+        m_Calls: []
+    customUIAnchor: {fileID: 0}
   - stepText: "\u8BF7\u5728\u5B9E\u9A8C\u5BA4\u91CC\u81EA\u884C\u5BFB\u627E\u5E76\u53D6\u5F97\u6837\u672C\u3002"
     isMandatoryInteraction: 0
     acceptedButtons: 
@@ -20985,6 +21041,7 @@ MonoBehaviour:
     onStepStart:
       m_PersistentCalls:
         m_Calls: []
+    customUIAnchor: {fileID: 0}
   onTutorialStart:
     m_PersistentCalls:
       m_Calls: []
@@ -23437,10 +23494,10 @@ MonoBehaviour:
   inputCooldown: 0.15
   stickThreshold: 0.75
   enableLocomotionFeedbackAssist: 1
-  movementAssistDistance: 0.55
-  movementAssistDuration: 0.18
-  turnAssistAngle: 35
-  turnAssistDuration: 0.18
+  movementAssistDistance: 0.3
+  movementAssistDuration: 1
+  turnAssistAngle: 20
+  turnAssistDuration: 1
 --- !u!114 &1399455090
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -23459,15 +23516,19 @@ MonoBehaviour:
   followDistance: 1.2
   followHeightOffset: -0.1
   faceCameraLerpSpeed: 5
-  autoAdvanceDelay: 5
+  autoAdvanceDelay: 7
+  bringTutorialToFront: 1
+  frontSortingOrder: 500
+  mandatoryConfiguredInputAcceptDelay: 2
   steps:
   - stepText: "\u6B22\u8FCE\u6765\u5230 VR \u663E\u5FAE\u955C\u5B9E\u9A8C\u5BA4\u3002"
     isMandatoryInteraction: 0
     acceptedButtons: 
-    inputAccessMode: 1
+    inputAccessMode: 0
     onStepStart:
       m_PersistentCalls:
         m_Calls: []
+    customUIAnchor: {fileID: 0}
   - stepText: "\u8BF7\u5C06\u5DE6\u624B\u63A7\u5236\u5668\u7684\u6447\u6746\u5411\u524D\u62E8\u52A8\uFF0C\u5C1D\u8BD5\u5411\u524D\u79FB\u52A8\u3002"
     isMandatoryInteraction: 1
     acceptedButtons: 09000000
@@ -23475,6 +23536,7 @@ MonoBehaviour:
     onStepStart:
       m_PersistentCalls:
         m_Calls: []
+    customUIAnchor: {fileID: 0}
   - stepText: "\u8BF7\u5C06\u5DE6\u624B\u63A7\u5236\u5668\u7684\u6447\u6746\u5411\u540E\u62E8\u52A8\uFF0C\u5C1D\u8BD5\u5411\u540E\u79FB\u52A8\u3002\r\n"
     isMandatoryInteraction: 1
     acceptedButtons: 0a000000
@@ -23482,6 +23544,7 @@ MonoBehaviour:
     onStepStart:
       m_PersistentCalls:
         m_Calls: []
+    customUIAnchor: {fileID: 0}
   - stepText: "\u8BF7\u5C06\u5DE6\u624B\u63A7\u5236\u5668\u7684\u6447\u6746\u5411\u5DE6\u62E8\u52A8\uFF0C\u5C1D\u8BD5\u5411\u5DE6\u79FB\u52A8\u3002"
     isMandatoryInteraction: 1
     acceptedButtons: 0b000000
@@ -23489,6 +23552,7 @@ MonoBehaviour:
     onStepStart:
       m_PersistentCalls:
         m_Calls: []
+    customUIAnchor: {fileID: 0}
   - stepText: "\u8BF7\u5C06\u5DE6\u624B\u63A7\u5236\u5668\u7684\u6447\u6746\u5411\u53F3\u62E8\u52A8\uFF0C\u5C1D\u8BD5\u5411\u53F3\u79FB\u52A8\u3002"
     isMandatoryInteraction: 1
     acceptedButtons: 0c000000
@@ -23496,13 +23560,23 @@ MonoBehaviour:
     onStepStart:
       m_PersistentCalls:
         m_Calls: []
-  - stepText: "\u9664\u4E86\u4F7F\u7528\u6447\u6746\u79FB\u52A8\u5916\uFF0C\u4F60\u4E5F\u53EF\u4EE5\u6309\u4E0B\u53F3\u624B\u63A7\u5236\u5668\u7684\u63E1\u952E\u8FDB\u884C\u4F20\u9001\u3002\u4F7F\u7528\u8FD9\u79CD\u65B9\u5F0F\uFF0C\u4F60\u53EF\u4EE5\u79FB\u52A8\u5230\u53F3\u624B\u6FC0\u5149\u6240\u6307\u5411\u7684\u4F4D\u7F6E\u3002\u4F60\u53EF\u4EE5\u5728\u672C\u6559\u7A0B\u7ED3\u675F\u540E\u81EA\u884C\u5C1D\u8BD5\u3002"
+    customUIAnchor: {fileID: 0}
+  - stepText: "\u9664\u4E86\u4F7F\u7528\u6447\u6746\u79FB\u52A8\u5916\uFF0C\u4F60\u4E5F\u53EF\u4EE5\u6309\u4E0B\u53F3\u624B\u63A7\u5236\u5668\u7684\u63E1\u952E\u8FDB\u884C\u4F20\u9001\u3002"
+    isMandatoryInteraction: 1
+    acceptedButtons: 08000000
+    inputAccessMode: 2
+    onStepStart:
+      m_PersistentCalls:
+        m_Calls: []
+    customUIAnchor: {fileID: 0}
+  - stepText: "\u4F7F\u7528\u8FD9\u79CD\u65B9\u5F0F\uFF0C\u4F60\u53EF\u4EE5\u79FB\u52A8\u5230\u53F3\u624B\u6FC0\u5149\u6240\u6307\u5411\u7684\u4F4D\u7F6E\u3002\u4F60\u53EF\u4EE5\u5728\u672C\u6559\u7A0B\u7ED3\u675F\u540E\u81EA\u884C\u5C1D\u8BD5\u3002"
     isMandatoryInteraction: 0
     acceptedButtons: 
     inputAccessMode: 0
     onStepStart:
       m_PersistentCalls:
         m_Calls: []
+    customUIAnchor: {fileID: 0}
   - stepText: "\u505A\u5F97\u5F88\u597D\uFF0C\u4F60\u5DF2\u7ECF\u638C\u63E1\u4E86\u57FA\u7840\u79FB\u52A8\u64CD\u4F5C\u3002"
     isMandatoryInteraction: 0
     acceptedButtons: 
@@ -23510,6 +23584,7 @@ MonoBehaviour:
     onStepStart:
       m_PersistentCalls:
         m_Calls: []
+    customUIAnchor: {fileID: 0}
   - stepText: "\u8BF7\u5C06\u53F3\u624B\u63A7\u5236\u5668\u7684\u6447\u6746\u5411\u5DE6\u62E8\u52A8\uFF0C\u5C1D\u8BD5\u5411\u5DE6\u8F6C\u52A8\u89C6\u89D2\u3002"
     isMandatoryInteraction: 1
     acceptedButtons: 0f000000
@@ -23517,6 +23592,7 @@ MonoBehaviour:
     onStepStart:
       m_PersistentCalls:
         m_Calls: []
+    customUIAnchor: {fileID: 0}
   - stepText: "\u8BF7\u5C06\u53F3\u624B\u63A7\u5236\u5668\u7684\u6447\u6746\u5411\u53F3\u62E8\u52A8\uFF0C\u5C1D\u8BD5\u5411\u53F3\u8F6C\u52A8\u89C6\u89D2\u3002"
     isMandatoryInteraction: 1
     acceptedButtons: 10000000
@@ -23524,13 +23600,15 @@ MonoBehaviour:
     onStepStart:
       m_PersistentCalls:
         m_Calls: []
-  - stepText: "\u9664\u4E86\u4F7F\u7528\u53F3\u624B\u6447\u6746\u8F6C\u52A8\u89C6\u89D2\u5916\uFF0C\u4F60\u4E5F\u53EF\u4EE5\u5728\u73B0\u5B9E\u4E2D\u76F4\u63A5\u8F6C\u52A8\u8EAB\u4F53\u6765\u8C03\u6574\u89C2\u5BDF\u65B9\u5411\u3002\u4F60\u53EF\u4EE5\u5728\u672C\u6559\u7A0B\u7ED3\u675F\u540E\u81EA\u884C\u5C1D\u8BD5\u3002"
+    customUIAnchor: {fileID: 0}
+  - stepText: "\u9664\u4E86\u4F7F\u7528\u53F3\u624B\u6447\u6746\u8F6C\u52A8\u89C6\u89D2\u5916\uFF0C\u4F60\u4E5F\u53EF\u4EE5\u5728\u73B0\u5B9E\u4E2D\u76F4\u63A5\u8F6C\u52A8\u8EAB\u4F53\u6765\u8C03\u6574\u89C2\u5BDF\u65B9\u5411\u3002"
     isMandatoryInteraction: 0
     acceptedButtons: 
     inputAccessMode: 0
     onStepStart:
       m_PersistentCalls:
         m_Calls: []
+    customUIAnchor: {fileID: 0}
   - stepText: "\u5F88\u597D\uFF0C\u4F60\u5DF2\u7ECF\u638C\u63E1\u4E86\u89C6\u89D2\u8F6C\u52A8\u64CD\u4F5C\u3002"
     isMandatoryInteraction: 0
     acceptedButtons: 
@@ -23538,6 +23616,7 @@ MonoBehaviour:
     onStepStart:
       m_PersistentCalls:
         m_Calls: []
+    customUIAnchor: {fileID: 0}
   - stepText: "\u606D\u559C\u4F60\uFF0C\u4F60\u5DF2\u7ECF\u5B8C\u6210\u4E86\u57FA\u7840\u64CD\u4F5C\u6559\u5B66\u3002"
     isMandatoryInteraction: 0
     acceptedButtons: 
@@ -23545,13 +23624,31 @@ MonoBehaviour:
     onStepStart:
       m_PersistentCalls:
         m_Calls: []
-  - stepText: "\u4F60\u53EF\u4EE5\u5728\u672C\u6559\u7A0B\u7ED3\u675F\u540E\u6309\u4E0B\u5DE6\u624B\u63A7\u5236\u5668\u4E0A\u7684Y\u952E\uFF0C\u4EE5\u6B64\u4EFB\u610F\u9009\u62E9\u5176\u4E2D\u4E00\u9879\u6559\u7A0B\u67E5\u770B\u3002\u4F60\u53EF\u4EE5\u901A\u8FC7\u53F3\u624B\u63A7\u5236\u5668\u7684\u6447\u6746\u9009\u62E9\u4E0D\u540C\u7684\u6559\u7A0B\uFF0C\u5E76\u6309\u4E0B\u53F3\u624B\u63A7\u5236\u5668\u7684A\u952E\u8FDB\u884C\u786E\u8BA4\u3002"
-    isMandatoryInteraction: 0
-    acceptedButtons: 
-    inputAccessMode: 0
+    customUIAnchor: {fileID: 0}
+  - stepText: "\u8BF7\u6309\u4E0B\u5DE6\u624B\u63A7\u5236\u5668\u4E0A\u7684Y\u952E\uFF0C\u4EE5\u6B64\u4EFB\u610F\u9009\u62E9\u5176\u4E2D\u4E00\u9879\u6559\u7A0B\u67E5\u770B\u3002"
+    isMandatoryInteraction: 1
+    acceptedButtons: 02000000
+    inputAccessMode: 2
     onStepStart:
       m_PersistentCalls:
         m_Calls: []
+    customUIAnchor: {fileID: 0}
+  - stepText: "\u4F60\u53EF\u4EE5\u901A\u8FC7\u53F3\u624B\u63A7\u5236\u5668\u7684\u6447\u6746\u9009\u62E9\u4E0D\u540C\u7684\u6559\u7A0B\uFF0C\u5E76\u6309\u4E0B\u53F3\u624B\u63A7\u5236\u5668\u7684A\u952E\u8FDB\u884C\u786E\u8BA4\u3002"
+    isMandatoryInteraction: 0
+    acceptedButtons: 
+    inputAccessMode: 2
+    onStepStart:
+      m_PersistentCalls:
+        m_Calls: []
+    customUIAnchor: {fileID: 0}
+  - stepText: "\u9009\u4E2D\u53F3\u4E0A\u89D2\u7684x\u53F7\u4EE5\u9000\u51FA\u8BE5\u754C\u9762\uFF0C\u4F60\u9700\u8981\u79FB\u52A8\u5230\u5171\u805A\u7126\u663E\u5FAE\u955C\u7684\u9644\u8FD1\uFF0C\u4EE5\u8FDB\u884C\u76F8\u5173\u7684\u5B9E\u9A8C\u3002"
+    isMandatoryInteraction: 0
+    acceptedButtons: 
+    inputAccessMode: 2
+    onStepStart:
+      m_PersistentCalls:
+        m_Calls: []
+    customUIAnchor: {fileID: 0}
   onTutorialStart:
     m_PersistentCalls:
       m_Calls: []
@@ -27309,14 +27406,50 @@ MonoBehaviour:
   followHeightOffset: -0.1
   faceCameraLerpSpeed: 5
   autoAdvanceDelay: 5
+  bringTutorialToFront: 1
+  frontSortingOrder: 500
+  mandatoryConfiguredInputAcceptDelay: 0
   steps:
-  - stepText: "\u73B0\u5728\u4F60\u5DF2\u7ECF\u53D6\u5F97\u4E86\u6837\u672C"
+  - stepText: "\u73B0\u5728\u4F60\u5DF2\u7ECF\u53D6\u5F97\u4E86\u6837\u672C\uFF0C\u63A5\u4E0B\u6765\u6211\u4EEC\u6765\u5B66\u4E60\u5982\u4F55\u653E\u7F6E\u3002"
     isMandatoryInteraction: 0
     acceptedButtons: 
     inputAccessMode: 0
     onStepStart:
       m_PersistentCalls:
         m_Calls: []
+    customUIAnchor: {fileID: 0}
+  - stepText: "\u8BF7\u6309\u4E0B\u53F3\u63A7\u5236\u5668\u7684B\u952E\u5F00\u542F\u5149\u6E90\uFF0C\u5982\u679C\u4E0D\u5F00\u542F\uFF0C\u663E\u5FAE\u955C\u4E0B\u5C06\u65E0\u6CD5\u770B\u5230\u56FE\u50CF\u3002"
+    isMandatoryInteraction: 1
+    acceptedButtons: 06000000
+    inputAccessMode: 2
+    onStepStart:
+      m_PersistentCalls:
+        m_Calls: []
+    customUIAnchor: {fileID: 0}
+  - stepText: "\u8BF7\u6309\u4E0B\u5DE6\u63A7\u5236\u5668\u7684\u6273\u673A\u952E\u653E\u7F6E\u6837\u672C\u4E8E\u8F7D\u73BB\u53F0\u4E0A\u3002"
+    isMandatoryInteraction: 1
+    acceptedButtons: 03000000
+    inputAccessMode: 2
+    onStepStart:
+      m_PersistentCalls:
+        m_Calls: []
+    customUIAnchor: {fileID: 0}
+  - stepText: "\u8BF7\u6309\u4E0B\u5DE6\u63A7\u5236\u5668\u7684\u6273\u673A\u952E\u5C06\u4F60\u7684\u89C6\u89D2\u56FA\u5B9A\u5728\u663E\u5FAE\u955C\u4E0A\u3002"
+    isMandatoryInteraction: 1
+    acceptedButtons: 03000000
+    inputAccessMode: 2
+    onStepStart:
+      m_PersistentCalls:
+        m_Calls: []
+    customUIAnchor: {fileID: 0}
+  - stepText: "\u8BF7\u518D\u6B21\u6309\u4E0B\u5DE6\u63A7\u5236\u5668\u7684\u6273\u673A\u952E\u8FDB\u5165\u89C2\u5BDF\u6A21\u5F0F\u3002"
+    isMandatoryInteraction: 1
+    acceptedButtons: 03000000
+    inputAccessMode: 2
+    onStepStart:
+      m_PersistentCalls:
+        m_Calls: []
+    customUIAnchor: {fileID: 1102884987}
   onTutorialStart:
     m_PersistentCalls:
       m_Calls: []
@@ -28765,9 +28898,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 560992e7a6cc4f8449f394d5879fcc9c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  tutorialKey: Tutorial_002
+  tutorialKey: Tutorial_003
   triggerOnStart: 0
-  requirePrerequisite: 0
+  requirePrerequisite: 1
   prerequisiteSatisfied: 0
   onTutorialStart:
     m_PersistentCalls:
@@ -28813,7 +28946,19 @@ MonoBehaviour:
         m_CallState: 2
   onPrerequisiteBlocked:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 9014170785358182100}
+        m_TargetAssemblyTypeName: InteractWithSamples, Assembly-CSharp
+        m_MethodName: ApplySampleStateToTutorialPrerequisite
+        m_Mode: 2
+        m_Arguments:
+          m_ObjectArgument: {fileID: 1637832235}
+          m_ObjectArgumentAssemblyTypeName: MandatoryTutorialTrigger, Assembly-CSharp
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!65 &1637832236
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -28825,8 +28970,8 @@ BoxCollider:
   m_IsTrigger: 1
   m_Enabled: 1
   serializedVersion: 2
-  m_Size: {x: 1, y: 1.4, z: 1}
-  m_Center: {x: 0, y: 0.2, z: -0}
+  m_Size: {x: 0.6593361, y: 1.0542821, z: 0.6496446}
+  m_Center: {x: 0.17033198, y: 0.3057203, z: 0.17517774}
 --- !u!1001 &1638906431
 PrefabInstance:
   m_ObjectHideFlags: 0

@@ -1,4 +1,4 @@
-﻿using System;
+﻿﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -55,6 +55,10 @@ public class TutorialStep
     [Header("进入该步骤时触发的事件")]
     [Tooltip("可用于：进入该步骤时执行特定操作。\n例如：如果这是强制交互步骤，在这里解开玩家的部分操作（如恢复手柄抓取或按键功能）。")]
     public UnityEvent onStepStart;
+
+    [Header("UI 位置覆盖")]
+    [Tooltip("【可选】如果指定了 Transform，该步骤的 UI 将固定在此位置和朝向，不再跟随玩家相机。非常适合显微镜操作等需要固定视角的场景。")]
+    public Transform customUIAnchor;
 }
 
 public class StandaloneTutorialUI : MonoBehaviour
@@ -82,6 +86,17 @@ public class StandaloneTutorialUI : MonoBehaviour
     [Tooltip("非强制交互步骤自动进入下一步的等待时间（秒）")]
     public float autoAdvanceDelay = 5f;
 
+    [Header("渲染层级")]
+    [Tooltip("播放强制教程时，临时将本教程相关 Canvas 提到更前面，避免被普通教程菜单遮住。")]
+    public bool bringTutorialToFront = true;
+
+    [Tooltip("强制教程临时使用的排序层级。数值越大，渲染越靠前。")]
+    public int frontSortingOrder = 500;
+
+    [Header("强制输入节奏")]
+    [Tooltip("进入带有教程输入配置的强制步骤后，等待多久才开始接受按键/摇杆判定。")]
+    public float mandatoryConfiguredInputAcceptDelay = 2f;
+
     [Header("教程流程配置")]
     public List<TutorialStep> steps = new List<TutorialStep>();
     
@@ -106,12 +121,21 @@ public class StandaloneTutorialUI : MonoBehaviour
     private Color originalTextColor;
     private Transform mainCameraTransform;
     private float autoAdvanceTimer = 0f;
+    private float currentStepShownUnscaledTime = 0f;
     private PlayerInputBlocker playerInputBlocker;
+    private Canvas[] managedCanvases = Array.Empty<Canvas>();
+    private CanvasSortingState[] originalCanvasSortingStates = Array.Empty<CanvasSortingState>();
 
     [SerializeField, HideInInspector]
     private int inputAccessConfigVersion = 0;
 
     private const int CurrentInputAccessConfigVersion = 1;
+
+    private struct CanvasSortingState
+    {
+        public bool overrideSorting;
+        public int sortingOrder;
+    }
 
     public bool IsPlaying => isPlaying;
     public int CurrentStepIndex => currentStepIndex;
@@ -136,6 +160,7 @@ public class StandaloneTutorialUI : MonoBehaviour
         }
 
         playerInputBlocker = FindObjectOfType<PlayerInputBlocker>();
+        CacheManagedCanvases();
     }
 
     private void OnValidate()
@@ -147,12 +172,25 @@ public class StandaloneTutorialUI : MonoBehaviour
     {
         if (!isPlaying || currentStepIndex >= steps.Count) return;
 
-        if (mainCameraTransform == null && Camera.main != null)
+        // 增强相机获取逻辑：如果旧相机被禁用（显微镜视角切换），重新获取主相机
+        if (mainCameraTransform == null || !mainCameraTransform.gameObject.activeInHierarchy)
         {
-            mainCameraTransform = Camera.main.transform;
+            if (Camera.main != null)
+            {
+                mainCameraTransform = Camera.main.transform;
+            }
         }
 
-        if (alwaysFaceCamera && uiRoot != null && mainCameraTransform != null)
+        TutorialStep currentStep = steps[currentStepIndex];
+
+        // 如果当前步骤配置了自定义锚点，则优先使用自定义锚点（例如固定在显微镜旁边的面板）
+        if (currentStep.customUIAnchor != null && uiRoot != null)
+        {
+            uiRoot.transform.SetPositionAndRotation(currentStep.customUIAnchor.position, currentStep.customUIAnchor.rotation);
+            return; //  使用 customUIAnchor 后，直接返回，不再执行后续的相机跟随逻辑
+        }
+        // 否则使用默认的相机跟随逻辑
+        else if (alwaysFaceCamera && uiRoot != null && mainCameraTransform != null)
         {
             Vector3 targetPosition = mainCameraTransform.position + mainCameraTransform.forward * followDistance + Vector3.up * followHeightOffset;
             Quaternion targetRotation = mainCameraTransform.rotation;
@@ -169,7 +207,7 @@ public class StandaloneTutorialUI : MonoBehaviour
             }
         }
 
-        if (!steps[currentStepIndex].isMandatoryInteraction)
+        if (!currentStep.isMandatoryInteraction)
         {
             autoAdvanceTimer += Time.deltaTime;
             bool pressedSpace = Input.GetKeyDown(KeyCode.Space);
@@ -187,6 +225,7 @@ public class StandaloneTutorialUI : MonoBehaviour
         
         isPlaying = true;
         currentStepIndex = 0;
+        BringManagedCanvasesToFront();
         
         if (uiRoot != null)
         {
@@ -200,6 +239,7 @@ public class StandaloneTutorialUI : MonoBehaviour
     private void ShowCurrentStep()
     {
         autoAdvanceTimer = 0f;
+        currentStepShownUnscaledTime = Time.unscaledTime;
         
         if (currentStepIndex >= steps.Count)
         {
@@ -270,6 +310,11 @@ public class StandaloneTutorialUI : MonoBehaviour
             return false;
         }
 
+        if (!CanAcceptConfiguredInputNow())
+        {
+            return false;
+        }
+
         if (!StepAcceptsButton(currentStep, input))
         {
             string expectedInputs = GetStepInputSummary(currentStep);
@@ -300,8 +345,39 @@ public class StandaloneTutorialUI : MonoBehaviour
 
         TutorialStep currentStep = steps[currentStepIndex];
         return currentStep.isMandatoryInteraction &&
+               CanAcceptConfiguredInputNow() &&
                HasConfiguredButtonInput(currentStep) &&
                StepAcceptsButton(currentStep, input);
+    }
+
+    public bool CanAcceptConfiguredInputNow()
+    {
+        if (!isPlaying || currentStepIndex >= steps.Count)
+        {
+            return false;
+        }
+
+        TutorialStep currentStep = steps[currentStepIndex];
+        if (!currentStep.isMandatoryInteraction || !HasConfiguredButtonInput(currentStep))
+        {
+            return true;
+        }
+
+        float delay = Mathf.Max(0f, mandatoryConfiguredInputAcceptDelay);
+        return Time.unscaledTime >= currentStepShownUnscaledTime + delay;
+    }
+
+    public bool IsWaitingForConfiguredInputDelay()
+    {
+        if (!isPlaying || currentStepIndex >= steps.Count)
+        {
+            return false;
+        }
+
+        TutorialStep currentStep = steps[currentStepIndex];
+        return currentStep.isMandatoryInteraction &&
+               HasConfiguredButtonInput(currentStep) &&
+               !CanAcceptConfiguredInputNow();
     }
 
     private IEnumerator ShowErrorRoutine(string errorMsg)
@@ -334,6 +410,7 @@ public class StandaloneTutorialUI : MonoBehaviour
         }
 
         if (uiRoot != null) uiRoot.SetActive(false);
+        RestoreManagedCanvasSorting();
         onTutorialFinish?.Invoke();
     }
 
@@ -433,6 +510,64 @@ public class StandaloneTutorialUI : MonoBehaviour
         }
 
         inputAccessConfigVersion = CurrentInputAccessConfigVersion;
+    }
+
+    private void CacheManagedCanvases()
+    {
+        managedCanvases = GetComponentsInChildren<Canvas>(true);
+        originalCanvasSortingStates = new CanvasSortingState[managedCanvases.Length];
+    }
+
+    private void BringManagedCanvasesToFront()
+    {
+        if (!bringTutorialToFront)
+        {
+            return;
+        }
+
+        if (managedCanvases == null || managedCanvases.Length == 0)
+        {
+            CacheManagedCanvases();
+        }
+
+        for (int i = 0; i < managedCanvases.Length; i++)
+        {
+            Canvas canvas = managedCanvases[i];
+            if (canvas == null)
+            {
+                continue;
+            }
+
+            originalCanvasSortingStates[i] = new CanvasSortingState
+            {
+                overrideSorting = canvas.overrideSorting,
+                sortingOrder = canvas.sortingOrder
+            };
+
+            canvas.overrideSorting = true;
+            canvas.sortingOrder = frontSortingOrder + i;
+        }
+    }
+
+    private void RestoreManagedCanvasSorting()
+    {
+        if (managedCanvases == null || originalCanvasSortingStates == null)
+        {
+            return;
+        }
+
+        int canvasCount = Mathf.Min(managedCanvases.Length, originalCanvasSortingStates.Length);
+        for (int i = 0; i < canvasCount; i++)
+        {
+            Canvas canvas = managedCanvases[i];
+            if (canvas == null)
+            {
+                continue;
+            }
+
+            canvas.overrideSorting = originalCanvasSortingStates[i].overrideSorting;
+            canvas.sortingOrder = originalCanvasSortingStates[i].sortingOrder;
+        }
     }
 
     private string GetStepInputSummary(TutorialStep step)

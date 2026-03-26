@@ -103,12 +103,7 @@ public class ForceTutorialSequenceController : MonoBehaviour
             }
 
             Tutorial triggerTutorialSystem = trigger.GetTutorialSystem();
-            if (triggerTutorialSystem == null)
-            {
-                continue;
-            }
-
-            if (!triggerTutorialSystem.IsTutorialCompleted(trigger.TutorialKey))
+            if (triggerTutorialSystem == null || !triggerTutorialSystem.IsTutorialCompleted(trigger.TutorialKey))
             {
                 return trigger;
             }

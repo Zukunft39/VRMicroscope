@@ -69,9 +69,14 @@ namespace VRMicroscope.Tutorial
         private TutorialStepInputButton lastLeftStickDirection = TutorialStepInputButton.None;
         private TutorialStepInputButton lastRightStickDirection = TutorialStepInputButton.None;
         private readonly Dictionary<TutorialStepInputButton, InputAction> buttonActions = new Dictionary<TutorialStepInputButton, InputAction>();
+        private readonly List<InputAction> cachedActions = new List<InputAction>();
         private InputAction leftStickAction;
         private InputAction rightStickAction;
         private XROrigin xrOrigin;
+        private int observedStepIndex = -1;
+        private bool observedIsPlaying;
+        private bool wasWaitingForConfiguredInputDelay = false;
+        private static readonly Dictionary<InputAction, int> SharedActionEnableCounts = new Dictionary<InputAction, int>();
 
         private static readonly TutorialStepInputButton[] ButtonInputCheckOrder =
         {
@@ -90,6 +95,9 @@ namespace VRMicroscope.Tutorial
             isInputActive = false;
             lastLeftStickDirection = TutorialStepInputButton.None;
             lastRightStickDirection = TutorialStepInputButton.None;
+            observedStepIndex = -1;
+            observedIsPlaying = false;
+            wasWaitingForConfiguredInputDelay = false;
 
             CacheXROrigin();
             CacheActionsFromAsset();
@@ -108,6 +116,9 @@ namespace VRMicroscope.Tutorial
             isInputActive = false;
             lastLeftStickDirection = TutorialStepInputButton.None;
             lastRightStickDirection = TutorialStepInputButton.None;
+            observedStepIndex = -1;
+            observedIsPlaying = false;
+            wasWaitingForConfiguredInputDelay = false;
 
             if (enableDelayCoroutine != null)
             {
@@ -139,7 +150,24 @@ namespace VRMicroscope.Tutorial
 
         private void Update()
         {
-            if (tutorialUI == null || !isInputActive || Time.unscaledTime < nextAllowedInputTime) return;
+            if (tutorialUI == null || !isInputActive) return;
+
+            RefreshStepInputStateIfNeeded();
+
+            if (tutorialUI.IsWaitingForConfiguredInputDelay())
+            {
+                wasWaitingForConfiguredInputDelay = true;
+                SyncCurrentStickDirections();
+                return;
+            }
+
+            if (wasWaitingForConfiguredInputDelay)
+            {
+                wasWaitingForConfiguredInputDelay = false;
+                ResetCachedStepInputState();
+            }
+
+            if (Time.unscaledTime < nextAllowedInputTime) return;
 
             if (TryGetPressedInput(out TutorialStepInputButton input, out string source))
             {
@@ -154,6 +182,34 @@ namespace VRMicroscope.Tutorial
                     nextAllowedInputTime = Time.unscaledTime + Mathf.Max(0f, inputCooldown);
                 }
             }
+        }
+
+        private void RefreshStepInputStateIfNeeded()
+        {
+            bool isPlaying = tutorialUI.IsPlaying;
+            int currentStepIndex = isPlaying ? tutorialUI.CurrentStepIndex : -1;
+
+            if (observedIsPlaying == isPlaying && observedStepIndex == currentStepIndex)
+            {
+                return;
+            }
+
+            observedIsPlaying = isPlaying;
+            observedStepIndex = currentStepIndex;
+            ResetCachedStepInputState();
+        }
+
+        private void ResetCachedStepInputState()
+        {
+            lastLeftStickDirection = TutorialStepInputButton.None;
+            lastRightStickDirection = TutorialStepInputButton.None;
+            nextAllowedInputTime = Time.unscaledTime;
+        }
+
+        private void SyncCurrentStickDirections()
+        {
+            lastLeftStickDirection = GetCurrentStickDirection(leftStickAction, true);
+            lastRightStickDirection = GetCurrentStickDirection(rightStickAction, false);
         }
 
         private bool TryGetPressedInput(out TutorialStepInputButton input, out string source)
@@ -231,6 +287,16 @@ namespace VRMicroscope.Tutorial
             return false;
         }
 
+        private TutorialStepInputButton GetCurrentStickDirection(InputAction action, bool isLeftStick)
+        {
+            if (action == null)
+            {
+                return TutorialStepInputButton.None;
+            }
+
+            return GetStickDirection(action.ReadValue<Vector2>(), isLeftStick);
+        }
+
         private TutorialStepInputButton GetStickDirection(Vector2 value, bool isLeftStick)
         {
             float threshold = Mathf.Clamp(stickThreshold, 0.1f, 1f);
@@ -266,6 +332,7 @@ namespace VRMicroscope.Tutorial
         private void CacheActionsFromAsset()
         {
             buttonActions.Clear();
+            cachedActions.Clear();
             leftStickAction = null;
             rightStickAction = null;
 
@@ -291,10 +358,18 @@ namespace VRMicroscope.Tutorial
             {
                 Debug.LogWarning($"[ForceTutorial/Input] 在输入资源中未找到 Action: {LeftStickActionName}");
             }
+            else
+            {
+                RegisterCachedAction(leftStickAction);
+            }
 
             if (rightStickAction == null)
             {
                 Debug.LogWarning($"[ForceTutorial/Input] 在输入资源中未找到 Action: {RightStickActionName}");
+            }
+            else
+            {
+                RegisterCachedAction(rightStickAction);
             }
         }
 
@@ -316,48 +391,83 @@ namespace VRMicroscope.Tutorial
             }
 
             buttonActions[button] = action;
+            RegisterCachedAction(action);
         }
 
         private void EnableCachedActions()
         {
-            foreach (KeyValuePair<TutorialStepInputButton, InputAction> pair in buttonActions)
+            for (int i = 0; i < cachedActions.Count; i++)
             {
-                if (pair.Value != null && !pair.Value.enabled)
-                {
-                    pair.Value.Enable();
-                }
-            }
-
-            if (leftStickAction != null && !leftStickAction.enabled)
-            {
-                leftStickAction.Enable();
-            }
-
-            if (rightStickAction != null && !rightStickAction.enabled)
-            {
-                rightStickAction.Enable();
+                AcquireSharedAction(cachedActions[i]);
             }
         }
 
         private void DisableCachedActions()
         {
-            foreach (KeyValuePair<TutorialStepInputButton, InputAction> pair in buttonActions)
+            for (int i = 0; i < cachedActions.Count; i++)
             {
-                if (pair.Value != null && pair.Value.enabled)
+                ReleaseSharedAction(cachedActions[i]);
+            }
+        }
+
+        private void RegisterCachedAction(InputAction action)
+        {
+            if (action == null || cachedActions.Contains(action))
+            {
+                return;
+            }
+
+            cachedActions.Add(action);
+        }
+
+        private static void AcquireSharedAction(InputAction action)
+        {
+            if (action == null)
+            {
+                return;
+            }
+
+            int usageCount;
+            SharedActionEnableCounts.TryGetValue(action, out usageCount);
+            if (usageCount == 0 && !action.enabled)
+            {
+                action.Enable();
+            }
+
+            SharedActionEnableCounts[action] = usageCount + 1;
+        }
+
+        private static void ReleaseSharedAction(InputAction action)
+        {
+            if (action == null)
+            {
+                return;
+            }
+
+            int usageCount;
+            if (!SharedActionEnableCounts.TryGetValue(action, out usageCount))
+            {
+                if (action.enabled)
                 {
-                    pair.Value.Disable();
+                    action.Disable();
                 }
+
+                return;
             }
 
-            if (leftStickAction != null && leftStickAction.enabled)
+            usageCount--;
+            if (usageCount <= 0)
             {
-                leftStickAction.Disable();
+                SharedActionEnableCounts.Remove(action);
+                if (action.enabled)
+                {
+                    action.Disable();
+                }
+
+                return;
             }
 
-            if (rightStickAction != null && rightStickAction.enabled)
-            {
-                rightStickAction.Disable();
-            }
+            SharedActionEnableCounts[action] = usageCount;
         }
 
         private void TriggerLocomotionAssist(TutorialStepInputButton input)

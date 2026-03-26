@@ -60,6 +60,22 @@ public class InteractWithSamples:MonoBehaviour
         temp.transform.GetChild(0).GetComponent<Renderer>().material.SetTexture("_MainTexture",interactableObject.SampleImage);
         isSampleOnHand = true;
     }
+
+    public bool HasSampleOnHand()
+    {
+        return isSampleOnHand;
+    }
+
+    public void ApplySampleStateToTutorialPrerequisite(MandatoryTutorialTrigger tutorialTrigger)
+    {
+        if (tutorialTrigger == null)
+        {
+            return;
+        }
+
+        tutorialTrigger.SetPrerequisiteSatisfied(isSampleOnHand);
+    }
+
     public void EnablePickSample(InteractableSamples interactable)
     {
         interactableObject=interactable;
