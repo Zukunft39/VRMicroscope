@@ -35,7 +35,7 @@ public class ForceTutorialSequenceController : MonoBehaviour
 
         InitializeIfNeeded();
 
-        if (currentTrigger != trigger || !trigger.CanStartFromSequence())
+        if (currentTrigger != trigger)
         {
             return;
         }
