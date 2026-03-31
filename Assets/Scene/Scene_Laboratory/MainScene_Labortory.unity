@@ -3968,7 +3968,7 @@ GameObject:
   - component: {fileID: 229668830}
   - component: {fileID: 229668832}
   - component: {fileID: 229668831}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: Inside BG
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -21186,6 +21186,8 @@ MonoBehaviour:
   - stepText: "\u4F60\u9762\u524D\u7684\u662F\u5171\u805A\u7126\u663E\u5FAE\u955C\u3002"
     isMandatoryInteraction: 0
     acceptedButtons: 
+    requireHoldButtonCombo: 0
+    requiredHeldButton: 0
     inputAccessMode: 0
     onStepStart:
       m_PersistentCalls:
@@ -21194,6 +21196,8 @@ MonoBehaviour:
   - stepText: "\u8BA9\u6211\u4EEC\u4E00\u8D77\u5B66\u4E60\u5982\u4F55\u4F7F\u7528\u5B83\u6765\u89C2\u5BDF\u6837\u672C\u3002"
     isMandatoryInteraction: 0
     acceptedButtons: 
+    requireHoldButtonCombo: 0
+    requiredHeldButton: 0
     inputAccessMode: 0
     onStepStart:
       m_PersistentCalls:
@@ -21202,6 +21206,8 @@ MonoBehaviour:
   - stepText: "\u9996\u5148\uFF0C\u6211\u4EEC\u9700\u8981\u53D6\u5F97\u6837\u672C\u3002"
     isMandatoryInteraction: 0
     acceptedButtons: 
+    requireHoldButtonCombo: 0
+    requiredHeldButton: 0
     inputAccessMode: 0
     onStepStart:
       m_PersistentCalls:
@@ -21210,6 +21216,8 @@ MonoBehaviour:
   - stepText: "\u5B9E\u9A8C\u5BA4\u91CC\u63D0\u4F9B\u4E86\u56DB\u4E2A\u6837\u672C\uFF0C\u5206\u522B\u5BF9\u5E94\u7740\u7EA2\u8272\u3001\u84DD\u8272\u3001\u9EC4\u8272\u548C\u7EFF\u8272\u3002"
     isMandatoryInteraction: 0
     acceptedButtons: 
+    requireHoldButtonCombo: 0
+    requiredHeldButton: 0
     inputAccessMode: 0
     onStepStart:
       m_PersistentCalls:
@@ -21218,6 +21226,8 @@ MonoBehaviour:
   - stepText: "\u63A5\u8FD1\u8FD9\u4E9B\u6837\u672C\u540E\uFF0C\u4F60\u53EF\u4EE5\u6309\u4E0B\u53F3\u624B\u63A7\u5236\u5668\u7684\u6273\u673A\u952E\u6765\u53D6\u5F97\u5B83\u3002"
     isMandatoryInteraction: 0
     acceptedButtons: 
+    requireHoldButtonCombo: 0
+    requiredHeldButton: 0
     inputAccessMode: 0
     onStepStart:
       m_PersistentCalls:
@@ -21226,6 +21236,8 @@ MonoBehaviour:
   - stepText: "\u53D6\u5F97\u6837\u672C\u7684\u9884\u89C8\u56FE\u5C06\u5728\u53F3\u4E0B\u89D2\u4E2D\u5C55\u793A\u51FA\u6765\u3002"
     isMandatoryInteraction: 0
     acceptedButtons: 
+    requireHoldButtonCombo: 0
+    requiredHeldButton: 0
     inputAccessMode: 0
     onStepStart:
       m_PersistentCalls:
@@ -21234,6 +21246,8 @@ MonoBehaviour:
   - stepText: "\u8BF7\u5728\u5B9E\u9A8C\u5BA4\u91CC\u81EA\u884C\u5BFB\u627E\u5E76\u53D6\u5F97\u6837\u672C\u3002"
     isMandatoryInteraction: 0
     acceptedButtons: 
+    requireHoldButtonCombo: 0
+    requiredHeldButton: 0
     inputAccessMode: 0
     onStepStart:
       m_PersistentCalls:
@@ -23721,22 +23735,28 @@ MonoBehaviour:
   - stepText: "\u6B22\u8FCE\u6765\u5230 VR \u663E\u5FAE\u955C\u5B9E\u9A8C\u5BA4\u3002"
     isMandatoryInteraction: 0
     acceptedButtons: 
+    requireHoldButtonCombo: 0
+    requiredHeldButton: 0
     inputAccessMode: 0
     onStepStart:
       m_PersistentCalls:
         m_Calls: []
     customUIAnchor: {fileID: 0}
-  - stepText: "\u8BF7\u5C06\u5DE6\u624B\u63A7\u5236\u5668\u7684\u6447\u6746\u5411\u524D\u62E8\u52A8\uFF0C\u5C1D\u8BD5\u5411\u524D\u79FB\u52A8\u3002"
+  - stepText: "\u8BF7\u5C06\u5DE6\u624B\u63A7\u5236\u5668\u7684\u6447\u6746\u5411\u4E0A\u62E8\u52A8\uFF0C\u5C1D\u8BD5\u5411\u524D\u79FB\u52A8\u3002"
     isMandatoryInteraction: 1
     acceptedButtons: 09000000
+    requireHoldButtonCombo: 0
+    requiredHeldButton: 0
     inputAccessMode: 1
     onStepStart:
       m_PersistentCalls:
         m_Calls: []
     customUIAnchor: {fileID: 0}
-  - stepText: "\u8BF7\u5C06\u5DE6\u624B\u63A7\u5236\u5668\u7684\u6447\u6746\u5411\u540E\u62E8\u52A8\uFF0C\u5C1D\u8BD5\u5411\u540E\u79FB\u52A8\u3002\r\n"
+  - stepText: "\u8BF7\u5C06\u5DE6\u624B\u63A7\u5236\u5668\u7684\u6447\u6746\u5411\u4E0B\u62E8\u52A8\uFF0C\u5C1D\u8BD5\u5411\u540E\u79FB\u52A8\u3002\r\n"
     isMandatoryInteraction: 1
     acceptedButtons: 0a000000
+    requireHoldButtonCombo: 0
+    requiredHeldButton: 0
     inputAccessMode: 1
     onStepStart:
       m_PersistentCalls:
@@ -23745,6 +23765,8 @@ MonoBehaviour:
   - stepText: "\u8BF7\u5C06\u5DE6\u624B\u63A7\u5236\u5668\u7684\u6447\u6746\u5411\u5DE6\u62E8\u52A8\uFF0C\u5C1D\u8BD5\u5411\u5DE6\u79FB\u52A8\u3002"
     isMandatoryInteraction: 1
     acceptedButtons: 0b000000
+    requireHoldButtonCombo: 0
+    requiredHeldButton: 0
     inputAccessMode: 1
     onStepStart:
       m_PersistentCalls:
@@ -23753,6 +23775,8 @@ MonoBehaviour:
   - stepText: "\u8BF7\u5C06\u5DE6\u624B\u63A7\u5236\u5668\u7684\u6447\u6746\u5411\u53F3\u62E8\u52A8\uFF0C\u5C1D\u8BD5\u5411\u53F3\u79FB\u52A8\u3002"
     isMandatoryInteraction: 1
     acceptedButtons: 0c000000
+    requireHoldButtonCombo: 0
+    requiredHeldButton: 0
     inputAccessMode: 1
     onStepStart:
       m_PersistentCalls:
@@ -23761,6 +23785,8 @@ MonoBehaviour:
   - stepText: "\u9664\u4E86\u4F7F\u7528\u6447\u6746\u79FB\u52A8\u5916\uFF0C\u4F60\u4E5F\u53EF\u4EE5\u6309\u4E0B\u53F3\u624B\u63A7\u5236\u5668\u7684\u63E1\u952E\u8FDB\u884C\u4F20\u9001\u3002"
     isMandatoryInteraction: 1
     acceptedButtons: 08000000
+    requireHoldButtonCombo: 0
+    requiredHeldButton: 0
     inputAccessMode: 2
     onStepStart:
       m_PersistentCalls:
@@ -23769,6 +23795,8 @@ MonoBehaviour:
   - stepText: "\u4F7F\u7528\u8FD9\u79CD\u65B9\u5F0F\uFF0C\u4F60\u53EF\u4EE5\u79FB\u52A8\u5230\u53F3\u624B\u6FC0\u5149\u6240\u6307\u5411\u7684\u4F4D\u7F6E\u3002\u4F60\u53EF\u4EE5\u5728\u672C\u6559\u7A0B\u7ED3\u675F\u540E\u81EA\u884C\u5C1D\u8BD5\u3002"
     isMandatoryInteraction: 0
     acceptedButtons: 
+    requireHoldButtonCombo: 0
+    requiredHeldButton: 0
     inputAccessMode: 0
     onStepStart:
       m_PersistentCalls:
@@ -23777,6 +23805,8 @@ MonoBehaviour:
   - stepText: "\u505A\u5F97\u5F88\u597D\uFF0C\u4F60\u5DF2\u7ECF\u638C\u63E1\u4E86\u57FA\u7840\u79FB\u52A8\u64CD\u4F5C\u3002"
     isMandatoryInteraction: 0
     acceptedButtons: 
+    requireHoldButtonCombo: 0
+    requiredHeldButton: 0
     inputAccessMode: 0
     onStepStart:
       m_PersistentCalls:
@@ -23785,6 +23815,8 @@ MonoBehaviour:
   - stepText: "\u8BF7\u5C06\u53F3\u624B\u63A7\u5236\u5668\u7684\u6447\u6746\u5411\u5DE6\u62E8\u52A8\uFF0C\u5C1D\u8BD5\u5411\u5DE6\u8F6C\u52A8\u89C6\u89D2\u3002"
     isMandatoryInteraction: 1
     acceptedButtons: 0f000000
+    requireHoldButtonCombo: 0
+    requiredHeldButton: 0
     inputAccessMode: 1
     onStepStart:
       m_PersistentCalls:
@@ -23793,6 +23825,8 @@ MonoBehaviour:
   - stepText: "\u8BF7\u5C06\u53F3\u624B\u63A7\u5236\u5668\u7684\u6447\u6746\u5411\u53F3\u62E8\u52A8\uFF0C\u5C1D\u8BD5\u5411\u53F3\u8F6C\u52A8\u89C6\u89D2\u3002"
     isMandatoryInteraction: 1
     acceptedButtons: 10000000
+    requireHoldButtonCombo: 0
+    requiredHeldButton: 0
     inputAccessMode: 1
     onStepStart:
       m_PersistentCalls:
@@ -23801,6 +23835,8 @@ MonoBehaviour:
   - stepText: "\u9664\u4E86\u4F7F\u7528\u53F3\u624B\u6447\u6746\u8F6C\u52A8\u89C6\u89D2\u5916\uFF0C\u4F60\u4E5F\u53EF\u4EE5\u5728\u73B0\u5B9E\u4E2D\u76F4\u63A5\u8F6C\u52A8\u8EAB\u4F53\u6765\u8C03\u6574\u89C2\u5BDF\u65B9\u5411\u3002"
     isMandatoryInteraction: 0
     acceptedButtons: 
+    requireHoldButtonCombo: 0
+    requiredHeldButton: 0
     inputAccessMode: 0
     onStepStart:
       m_PersistentCalls:
@@ -23809,6 +23845,8 @@ MonoBehaviour:
   - stepText: "\u5F88\u597D\uFF0C\u4F60\u5DF2\u7ECF\u638C\u63E1\u4E86\u89C6\u89D2\u8F6C\u52A8\u64CD\u4F5C\u3002"
     isMandatoryInteraction: 0
     acceptedButtons: 
+    requireHoldButtonCombo: 0
+    requiredHeldButton: 0
     inputAccessMode: 0
     onStepStart:
       m_PersistentCalls:
@@ -23817,6 +23855,8 @@ MonoBehaviour:
   - stepText: "\u606D\u559C\u4F60\uFF0C\u4F60\u5DF2\u7ECF\u5B8C\u6210\u4E86\u57FA\u7840\u64CD\u4F5C\u6559\u5B66\u3002"
     isMandatoryInteraction: 0
     acceptedButtons: 
+    requireHoldButtonCombo: 0
+    requiredHeldButton: 0
     inputAccessMode: 0
     onStepStart:
       m_PersistentCalls:
@@ -23825,6 +23865,8 @@ MonoBehaviour:
   - stepText: "\u8BF7\u6309\u4E0B\u5DE6\u624B\u63A7\u5236\u5668\u4E0A\u7684Y\u952E\uFF0C\u4EE5\u6B64\u4EFB\u610F\u9009\u62E9\u5176\u4E2D\u4E00\u9879\u6559\u7A0B\u67E5\u770B\u3002"
     isMandatoryInteraction: 1
     acceptedButtons: 02000000
+    requireHoldButtonCombo: 0
+    requiredHeldButton: 0
     inputAccessMode: 2
     onStepStart:
       m_PersistentCalls:
@@ -23833,6 +23875,8 @@ MonoBehaviour:
   - stepText: "\u4F60\u53EF\u4EE5\u901A\u8FC7\u53F3\u624B\u63A7\u5236\u5668\u7684\u6447\u6746\u9009\u62E9\u4E0D\u540C\u7684\u6559\u7A0B\uFF0C\u5E76\u6309\u4E0B\u53F3\u624B\u63A7\u5236\u5668\u7684A\u952E\u8FDB\u884C\u786E\u8BA4\u3002"
     isMandatoryInteraction: 0
     acceptedButtons: 
+    requireHoldButtonCombo: 0
+    requiredHeldButton: 0
     inputAccessMode: 2
     onStepStart:
       m_PersistentCalls:
@@ -23841,6 +23885,8 @@ MonoBehaviour:
   - stepText: "\u9009\u4E2D\u53F3\u4E0A\u89D2\u7684x\u53F7\u4EE5\u9000\u51FA\u8BE5\u754C\u9762\uFF0C\u4F60\u9700\u8981\u79FB\u52A8\u5230\u5171\u805A\u7126\u663E\u5FAE\u955C\u7684\u9644\u8FD1\uFF0C\u4EE5\u8FDB\u884C\u76F8\u5173\u7684\u5B9E\u9A8C\u3002"
     isMandatoryInteraction: 0
     acceptedButtons: 
+    requireHoldButtonCombo: 0
+    requiredHeldButton: 0
     inputAccessMode: 2
     onStepStart:
       m_PersistentCalls:
@@ -24398,8 +24444,7 @@ GameObject:
   - component: {fileID: 1430339407}
   - component: {fileID: 1430339406}
   - component: {fileID: 1430339405}
-  - component: {fileID: 1430339404}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: Inside Canvas
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -24427,19 +24472,6 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 1920, y: 1080}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &1430339404
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1430339402}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 68fbd75e0d5ecb648b02d38699afe356, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  currentTriggerToComplete: {fileID: 97735849}
 --- !u!114 &1430339405
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -24483,19 +24515,183 @@ MonoBehaviour:
   autoAdvanceDelay: 5
   bringTutorialToFront: 1
   frontSortingOrder: 500
-  mandatoryConfiguredInputAcceptDelay: 0
+  mandatoryConfiguredInputAcceptDelay: 0.5
   steps:
   - stepText: "\u73B0\u5728\u4F60\u5DF2\u7ECF\u8FDB\u5165\u4E86\u89C2\u5BDF\u6A21\u5F0F\u3002"
     isMandatoryInteraction: 0
-    acceptedButtons: 03000000
+    acceptedButtons: 
+    requireHoldButtonCombo: 0
+    requiredHeldButton: 0
     inputAccessMode: 0
     onStepStart:
       m_PersistentCalls:
         m_Calls: []
     customUIAnchor: {fileID: 0}
-  - stepText: "\u73B0\u5728\u4F60\u5DF2\u7ECF\u8FDB\u5165\u4E86\u89C2\u5BDF\u6A21\u5F0F\u3002"
+  - stepText: "\u8BF7\u5C06\u5DE6\u624B\u63A7\u5236\u5668\u7684\u6447\u6746\u5411\u4E0A\u62E8\u52A8\uFF0C\u5411\u4E0A\u79FB\u52A8\u7269\u50CF\u3002"
+    isMandatoryInteraction: 1
+    acceptedButtons: 09000000
+    requireHoldButtonCombo: 0
+    requiredHeldButton: 0
+    inputAccessMode: 1
+    onStepStart:
+      m_PersistentCalls:
+        m_Calls: []
+    customUIAnchor: {fileID: 0}
+  - stepText: "\u4E0E\u6B64\u540C\u7406\u7684\uFF0C\u4F60\u53EF\u4EE5\u7528\u8FD9\u4E2A\u6447\u6746\u6765\u63A7\u5236\u4EFB\u610F\u65B9\u5411\u7684\u7269\u50CF\u79FB\u52A8\u3002"
     isMandatoryInteraction: 0
+    acceptedButtons: 
+    requireHoldButtonCombo: 0
+    requiredHeldButton: 0
+    inputAccessMode: 0
+    onStepStart:
+      m_PersistentCalls:
+        m_Calls: []
+    customUIAnchor: {fileID: 0}
+  - stepText: "\u63A5\u4E0B\u6765\u6211\u4EEC\u6765\u5B66\u4E60\u5982\u4F55\u8C03\u8282\u7126\u8DDD\u3002"
+    isMandatoryInteraction: 0
+    acceptedButtons: 
+    requireHoldButtonCombo: 0
+    requiredHeldButton: 0
+    inputAccessMode: 0
+    onStepStart:
+      m_PersistentCalls:
+        m_Calls: []
+    customUIAnchor: {fileID: 0}
+  - stepText: "\u8BF7\u957F\u6309\u4E0B\u5DE6\u624B\u63A7\u5236\u5668\u4E0A\u7684X\u952E\uFF0C\u540C\u65F6\u5411\u5DE6\u62E8\u52A8\u53F3\u624B\u63A7\u5236\u5668\u7684\u6447\u6746\u3002"
+    isMandatoryInteraction: 1
+    acceptedButtons: 0f000000
+    requireHoldButtonCombo: 1
+    requiredHeldButton: 1
+    inputAccessMode: 3
+    onStepStart:
+      m_PersistentCalls:
+        m_Calls: []
+    customUIAnchor: {fileID: 0}
+  - stepText: "\u8BF7\u957F\u6309\u4E0B\u5DE6\u624B\u63A7\u5236\u5668\u4E0A\u7684X\u952E\uFF0C\u540C\u65F6\u5411\u53F3\u62E8\u52A8\u53F3\u624B\u63A7\u5236\u5668\u7684\u6447\u6746\u3002"
+    isMandatoryInteraction: 1
+    acceptedButtons: 10000000
+    requireHoldButtonCombo: 1
+    requiredHeldButton: 1
+    inputAccessMode: 3
+    onStepStart:
+      m_PersistentCalls:
+        m_Calls: []
+    customUIAnchor: {fileID: 0}
+  - stepText: "\u5F88\u597D\uFF0C\u4F60\u5DF2\u7ECF\u5B8C\u6210\u4E86\u7126\u8DDD\u8C03\u8282\u7684\u6559\u5B66\u3002"
+    isMandatoryInteraction: 0
+    acceptedButtons: 
+    requireHoldButtonCombo: 0
+    requiredHeldButton: 0
+    inputAccessMode: 0
+    onStepStart:
+      m_PersistentCalls:
+        m_Calls: []
+    customUIAnchor: {fileID: 0}
+  - stepText: "\u8BF7\u957F\u6309\u4E0B\u5DE6\u624B\u63A7\u5236\u5668\u4E0A\u7684X\u952E\uFF0C\u540C\u65F6\u5411\u4E0A\u62E8\u52A8\u53F3\u624B\u63A7\u5236\u5668\u7684\u6447\u6746\u3002"
+    isMandatoryInteraction: 1
+    acceptedButtons: 0d000000
+    requireHoldButtonCombo: 1
+    requiredHeldButton: 1
+    inputAccessMode: 3
+    onStepStart:
+      m_PersistentCalls:
+        m_Calls: []
+    customUIAnchor: {fileID: 0}
+  - stepText: "\u8BF7\u957F\u6309\u4E0B\u5DE6\u624B\u63A7\u5236\u5668\u4E0A\u7684X\u952E\uFF0C\u540C\u65F6\u5411\u4E0B\u62E8\u52A8\u53F3\u624B\u63A7\u5236\u5668\u7684\u6447\u6746"
+    isMandatoryInteraction: 1
+    acceptedButtons: 0e000000
+    requireHoldButtonCombo: 1
+    requiredHeldButton: 1
+    inputAccessMode: 3
+    onStepStart:
+      m_PersistentCalls:
+        m_Calls: []
+    customUIAnchor: {fileID: 0}
+  - stepText: "\u5F88\u597D\uFF0C\u4F60\u5DF2\u7ECF\u5B8C\u6210\u4E86\u5149\u6E90\u8C03\u8282\u7684\u6559\u5B66\u3002"
+    isMandatoryInteraction: 0
+    acceptedButtons: 
+    requireHoldButtonCombo: 0
+    requiredHeldButton: 0
+    inputAccessMode: 0
+    onStepStart:
+      m_PersistentCalls:
+        m_Calls: []
+    customUIAnchor: {fileID: 0}
+  - stepText: "\u8BF7\u5411\u91CC\u6309\u4E0B\u53F3\u624B\u63A7\u5236\u5668\u4E0A\u7684\u6447\u6746\u952E\uFF0C\u4EE5\u5207\u6362\u7C97/\u7EC6\u51C6\u7126\u87BA\u65CB\u3002"
+    isMandatoryInteraction: 1
+    acceptedButtons: 12000000
+    requireHoldButtonCombo: 0
+    requiredHeldButton: 0
+    inputAccessMode: 2
+    onStepStart:
+      m_PersistentCalls:
+        m_Calls: []
+    customUIAnchor: {fileID: 0}
+  - stepText: "\u5F88\u597D\uFF0C\u4F60\u5DF2\u7ECF\u5B66\u4F1A\u4E86\u5982\u4F55\u5207\u6362\u7C97/\u7EC6\u51C6\u7126\u87BA\u65CB\u8FDB\u884C\u8C03\u8282\u7126\u8DDD\u3002"
+    isMandatoryInteraction: 0
+    acceptedButtons: 
+    requireHoldButtonCombo: 0
+    requiredHeldButton: 0
+    inputAccessMode: 0
+    onStepStart:
+      m_PersistentCalls:
+        m_Calls: []
+    customUIAnchor: {fileID: 0}
+  - stepText: "\u8BF7\u6309\u4E0B\u53F3\u624B\u63A7\u5236\u5668\u4E0A\u7684B\u952E\uFF0C\u4EE5\u5207\u6362\u4E0D\u540C\u7269\u955C\u3002"
+    isMandatoryInteraction: 1
+    acceptedButtons: 06000000
+    requireHoldButtonCombo: 0
+    requiredHeldButton: 0
+    inputAccessMode: 2
+    onStepStart:
+      m_PersistentCalls:
+        m_Calls: []
+    customUIAnchor: {fileID: 0}
+  - stepText: "\u5F88\u597D\uFF0C\u4F60\u5DF2\u7ECF\u5B66\u4F1A\u4E86\u5982\u4F55\u5207\u6362\u7269\u955C\u6765\u8FBE\u5230\u4E0D\u540C\u7684\u653E\u5927\u500D\u7387\u3002"
+    isMandatoryInteraction: 0
+    acceptedButtons: 
+    requireHoldButtonCombo: 0
+    requiredHeldButton: 0
+    inputAccessMode: 0
+    onStepStart:
+      m_PersistentCalls:
+        m_Calls: []
+    customUIAnchor: {fileID: 0}
+  - stepText: "\u5728\u64CD\u4F5C\u663E\u5FAE\u955C\u65F6\uFF0C\u6211\u4EEC\u9700\u8981\u5408\u9002\u7684\u7126\u8DDD\u3001\u5149\u6E90\u5927\u5C0F\u4E0E\u7269\u955C\uFF0C\u624D\u80FD\u89C2\u5BDF\u5230\u66F4\u6E05\u6670\u7684\u7269\u50CF\u3002"
+    isMandatoryInteraction: 0
+    acceptedButtons: 
+    requireHoldButtonCombo: 0
+    requiredHeldButton: 0
+    inputAccessMode: 0
+    onStepStart:
+      m_PersistentCalls:
+        m_Calls: []
+    customUIAnchor: {fileID: 0}
+  - stepText: "\u56E0\u6B64\uFF0C\u8BF7\u52A1\u5FC5\u786E\u4FDD\u8DB3\u591F\u7406\u89E3\u663E\u5FAE\u955C\u7684\u64CD\u4F5C\u6D41\u7A0B\u3002\u4F60\u53EF\u4EE5\u5728\u672C\u6559\u7A0B\u7ED3\u675F\u540E\u6309Y\u6253\u5F00\u6559\u7A0B\u91CD\u65B0\u5B66\u4E60\u3002"
+    isMandatoryInteraction: 0
+    acceptedButtons: 
+    requireHoldButtonCombo: 0
+    requiredHeldButton: 0
+    inputAccessMode: 0
+    onStepStart:
+      m_PersistentCalls:
+        m_Calls: []
+    customUIAnchor: {fileID: 0}
+  - stepText: "\u73B0\u5728\uFF0C\u8BF7\u6309\u4E0B\u5DE6\u624B\u63A7\u5236\u5668\u4E0A\u7684\u6273\u673A\u952E\uFF0C\u4EE5\u9000\u51FA\u89C2\u5BDF\u6A21\u5F0F\u3002"
+    isMandatoryInteraction: 1
     acceptedButtons: 03000000
+    requireHoldButtonCombo: 0
+    requiredHeldButton: 0
+    inputAccessMode: 2
+    onStepStart:
+      m_PersistentCalls:
+        m_Calls: []
+    customUIAnchor: {fileID: 0}
+  - stepText: "\u606D\u559C\u4F60\u5DF2\u5B8C\u6210\u6240\u6709\u7684\u6559\u7A0B\uFF01"
+    isMandatoryInteraction: 0
+    acceptedButtons: 
+    requireHoldButtonCombo: 0
+    requiredHeldButton: 0
     inputAccessMode: 0
     onStepStart:
       m_PersistentCalls:
@@ -24507,7 +24703,7 @@ MonoBehaviour:
   onTutorialFinish:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1430339404}
+      - m_Target: {fileID: 0}
         m_TargetAssemblyTypeName: TutorialTransition, Assembly-CSharp
         m_MethodName: TriggerNextTutorial
         m_Mode: 1
@@ -27737,7 +27933,6 @@ GameObject:
   - component: {fileID: 1571187784}
   - component: {fileID: 1571187783}
   - component: {fileID: 1571187782}
-  - component: {fileID: 1571187787}
   m_Layer: 0
   m_Name: Outside Canvas (2)
   m_TagString: Untagged
@@ -27814,6 +28009,8 @@ MonoBehaviour:
   - stepText: "\u73B0\u5728\u4F60\u5DF2\u7ECF\u53D6\u5F97\u4E86\u6837\u672C\uFF0C\u63A5\u4E0B\u6765\u6211\u4EEC\u6765\u5B66\u4E60\u5982\u4F55\u653E\u7F6E\u3002"
     isMandatoryInteraction: 0
     acceptedButtons: 
+    requireHoldButtonCombo: 0
+    requiredHeldButton: 0
     inputAccessMode: 0
     onStepStart:
       m_PersistentCalls:
@@ -27822,6 +28019,8 @@ MonoBehaviour:
   - stepText: "\u8BF7\u6309\u4E0B\u53F3\u63A7\u5236\u5668\u7684B\u952E\u5F00\u542F\u5149\u6E90\uFF0C\u5982\u679C\u4E0D\u5F00\u542F\uFF0C\u663E\u5FAE\u955C\u4E0B\u5C06\u65E0\u6CD5\u770B\u5230\u56FE\u50CF\u3002"
     isMandatoryInteraction: 1
     acceptedButtons: 06000000
+    requireHoldButtonCombo: 0
+    requiredHeldButton: 0
     inputAccessMode: 2
     onStepStart:
       m_PersistentCalls:
@@ -27830,6 +28029,8 @@ MonoBehaviour:
   - stepText: "\u8BF7\u6309\u4E0B\u5DE6\u63A7\u5236\u5668\u7684\u6273\u673A\u952E\u653E\u7F6E\u6837\u672C\u4E8E\u8F7D\u73BB\u53F0\u4E0A\u3002"
     isMandatoryInteraction: 1
     acceptedButtons: 03000000
+    requireHoldButtonCombo: 0
+    requiredHeldButton: 0
     inputAccessMode: 2
     onStepStart:
       m_PersistentCalls:
@@ -27838,6 +28039,8 @@ MonoBehaviour:
   - stepText: "\u8BF7\u6309\u4E0B\u5DE6\u63A7\u5236\u5668\u7684\u6273\u673A\u952E\u5C06\u4F60\u7684\u89C6\u89D2\u56FA\u5B9A\u5728\u663E\u5FAE\u955C\u4E0A\u3002"
     isMandatoryInteraction: 1
     acceptedButtons: 03000000
+    requireHoldButtonCombo: 0
+    requiredHeldButton: 0
     inputAccessMode: 2
     onStepStart:
       m_PersistentCalls:
@@ -27846,19 +28049,13 @@ MonoBehaviour:
   - stepText: "\u8BF7\u518D\u6B21\u6309\u4E0B\u5DE6\u63A7\u5236\u5668\u7684\u6273\u673A\u952E\u8FDB\u5165\u89C2\u5BDF\u6A21\u5F0F\u3002"
     isMandatoryInteraction: 1
     acceptedButtons: 03000000
+    requireHoldButtonCombo: 0
+    requiredHeldButton: 0
     inputAccessMode: 2
     onStepStart:
       m_PersistentCalls:
         m_Calls: []
     customUIAnchor: {fileID: 1102884987}
-  - stepText: "\u73B0\u5728\u4F60\u5DF2\u7ECF\u8FDB\u5165\u4E86\u89C2\u5BDF\u6A21\u5F0F\u3002"
-    isMandatoryInteraction: 0
-    acceptedButtons: 03000000
-    inputAccessMode: 0
-    onStepStart:
-      m_PersistentCalls:
-        m_Calls: []
-    customUIAnchor: {fileID: 0}
   onTutorialStart:
     m_PersistentCalls:
       m_Calls: []
@@ -27868,18 +28065,6 @@ MonoBehaviour:
       - m_Target: {fileID: 1637832235}
         m_TargetAssemblyTypeName: MandatoryTutorialTrigger, Assembly-CSharp
         m_MethodName: CompleteTutorial
-        m_Mode: 1
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
-      - m_Target: {fileID: 1571187787}
-        m_TargetAssemblyTypeName: TutorialTransition, Assembly-CSharp
-        m_MethodName: TriggerNextTutorial
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -27956,19 +28141,6 @@ Canvas:
   m_SortingLayerID: 0
   m_SortingOrder: 0
   m_TargetDisplay: 0
---- !u!114 &1571187787
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1571187780}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 68fbd75e0d5ecb648b02d38699afe356, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  currentTriggerToComplete: {fileID: 1637832235}
 --- !u!1001 &1572526715
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -28420,7 +28592,7 @@ GameObject:
   - component: {fileID: 1589204587}
   - component: {fileID: 1589204589}
   - component: {fileID: 1589204588}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: Inside Text
   m_TagString: Untagged
   m_Icon: {fileID: 0}

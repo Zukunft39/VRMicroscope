@@ -87,6 +87,24 @@
                     "initialStateCheck": false
                 },
                 {
+                    "name": "LeftStickPress",
+                    "type": "Button",
+                    "id": "5c8fbfd5-0c88-4bd7-8ab5-528c7f22ab7f",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "RightStickPress",
+                    "type": "Button",
+                    "id": "e5a6f570-780e-4d06-b5b3-0b1bbdbcc001",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
                     "name": "LeftStick",
                     "type": "Value",
                     "id": "95ae24dc-9388-4f14-85a1-1de7b598c679",
@@ -202,6 +220,28 @@
                     "processors": "",
                     "groups": "",
                     "action": "RightGripButton",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "d46d9d52-9f0d-4838-95d9-e2cbf2ce1f53",
+                    "path": "<XRController>{LeftHand}/primary2DAxisClick",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "LeftStickPress",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "7f361a44-69d1-4d8d-a6b6-a4490581cf68",
+                    "path": "<XRController>{RightHand}/primary2DAxisClick",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "RightStickPress",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },

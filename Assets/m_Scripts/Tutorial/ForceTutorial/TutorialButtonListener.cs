@@ -20,6 +20,8 @@ namespace VRMicroscope.Tutorial
         private const string RightSecondaryButtonActionName = "RightSecondaryButton";
         private const string RightTriggerButtonActionName = "RightTriggerButton";
         private const string RightGripButtonActionName = "RightGripButton";
+        private const string LeftStickPressActionName = "LeftStickPress";
+        private const string RightStickPressActionName = "RightStickPress";
         private const string LeftStickActionName = "LeftStick";
         private const string RightStickActionName = "RightStick";
 
@@ -87,7 +89,9 @@ namespace VRMicroscope.Tutorial
             TutorialStepInputButton.RightPrimaryButton,
             TutorialStepInputButton.RightSecondaryButton,
             TutorialStepInputButton.RightTriggerButton,
-            TutorialStepInputButton.RightGripButton
+            TutorialStepInputButton.RightGripButton,
+            TutorialStepInputButton.LeftStickPress,
+            TutorialStepInputButton.RightStickPress
         };
 
         private void OnEnable()
@@ -171,8 +175,14 @@ namespace VRMicroscope.Tutorial
 
             if (TryGetPressedInput(out TutorialStepInputButton input, out string source))
             {
-                bool willAdvanceCurrentStep = tutorialUI.CurrentStepAcceptsInput(input);
-                if (tutorialUI.TryHandleConfiguredInput(input, source))
+                if (tutorialUI.ShouldIgnoreCurrentStepModifierPress(input))
+                {
+                    return;
+                }
+
+                bool isRequiredHoldButtonHeld = IsCurrentStepRequiredHoldButtonHeld();
+                bool willAdvanceCurrentStep = tutorialUI.CurrentStepAcceptsInput(input, isRequiredHoldButtonHeld);
+                if (tutorialUI.TryHandleConfiguredInput(input, source, isRequiredHoldButtonHeld))
                 {
                     if (willAdvanceCurrentStep)
                     {
@@ -350,6 +360,8 @@ namespace VRMicroscope.Tutorial
             CacheButtonAction(TutorialStepInputButton.RightSecondaryButton, RightSecondaryButtonActionName);
             CacheButtonAction(TutorialStepInputButton.RightTriggerButton, RightTriggerButtonActionName);
             CacheButtonAction(TutorialStepInputButton.RightGripButton, RightGripButtonActionName);
+            CacheButtonAction(TutorialStepInputButton.LeftStickPress, LeftStickPressActionName);
+            CacheButtonAction(TutorialStepInputButton.RightStickPress, RightStickPressActionName);
 
             leftStickAction = tutorialInputActions.FindAction(LeftStickActionName, false);
             rightStickAction = tutorialInputActions.FindAction(RightStickActionName, false);
@@ -379,6 +391,32 @@ namespace VRMicroscope.Tutorial
             {
                 xrOrigin = FindObjectOfType<XROrigin>();
             }
+        }
+
+        private bool IsCurrentStepRequiredHoldButtonHeld()
+        {
+            if (tutorialUI == null ||
+                !tutorialUI.CurrentStepRequiresHeldButtonCombo(out TutorialStepInputButton requiredHeldButton))
+            {
+                return false;
+            }
+
+            return IsButtonHeld(requiredHeldButton);
+        }
+
+        private bool IsButtonHeld(TutorialStepInputButton button)
+        {
+            if (!StandaloneTutorialUI.IsButtonStyleInput(button))
+            {
+                return false;
+            }
+
+            if (!buttonActions.TryGetValue(button, out InputAction action) || action == null)
+            {
+                return false;
+            }
+
+            return action.IsPressed();
         }
 
         private void CacheButtonAction(TutorialStepInputButton button, string actionName)

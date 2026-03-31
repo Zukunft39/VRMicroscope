@@ -25,7 +25,9 @@ public enum TutorialStepInputButton
     RightStickUp = 13,
     RightStickDown = 14,
     RightStickLeft = 15,
-    RightStickRight = 16
+    RightStickRight = 16,
+    LeftStickPress = 17,
+    RightStickPress = 18
 }
 
 [Serializable]
@@ -48,6 +50,13 @@ public class TutorialStep
 
     [Tooltip("当步骤为【强制交互】时，可在这里直接配置允许推进教程的输入。\n支持按钮与摇杆方向。\n留空表示该步骤仍由外部交互脚本手动调用 CompleteAction()。")]
     public List<TutorialStepInputButton> acceptedButtons = new List<TutorialStepInputButton>();
+
+    [Header("组合输入")]
+    [Tooltip("勾选后，本步骤需要先按住下方按钮，再执行 acceptedButtons 中配置的输入。\n适合“按住 X + 右手摇杆方向”这类组合判定。")]
+    public bool requireHoldButtonCombo = false;
+
+    [Tooltip("组合输入模式下，需要保持按住的按钮。\nacceptedButtons 则填写真正要触发推进的方向或按钮。")]
+    public TutorialStepInputButton requiredHeldButton = TutorialStepInputButton.None;
 
     [Tooltip("该步骤需要开放到什么程度的玩家输入。\n推荐你为每一步明确指定状态。ButtonOnly 会只放开按钮与交互，不放开位姿移动。未手动更改的旧配置会自动按 FullyBlocked 处理。")]
     public InputAccessMode inputAccessMode = InputAccessMode.FullyBlocked;
@@ -120,6 +129,7 @@ public class StandaloneTutorialUI : MonoBehaviour
     private Coroutine errorCoroutine;
     private Color originalTextColor;
     private Transform mainCameraTransform;
+    private Canvas ownerCanvas;
     private float autoAdvanceTimer = 0f;
     private float currentStepShownUnscaledTime = 0f;
     private PlayerInputBlocker playerInputBlocker;
@@ -153,11 +163,14 @@ public class StandaloneTutorialUI : MonoBehaviour
         {
             uiRoot.SetActive(false);
         }
-        
-        if (Camera.main != null)
+
+        ownerCanvas = GetComponent<Canvas>();
+        if (ownerCanvas == null)
         {
-            mainCameraTransform = Camera.main.transform;
+            ownerCanvas = GetComponentInParent<Canvas>();
         }
+
+        mainCameraTransform = ResolveFollowCameraTransform();
 
         playerInputBlocker = FindObjectOfType<PlayerInputBlocker>();
         CacheManagedCanvases();
@@ -172,13 +185,10 @@ public class StandaloneTutorialUI : MonoBehaviour
     {
         if (!isPlaying || currentStepIndex >= steps.Count) return;
 
-        // 增强相机获取逻辑：如果旧相机被禁用（显微镜视角切换），重新获取主相机
-        if (mainCameraTransform == null || !mainCameraTransform.gameObject.activeInHierarchy)
+        Transform resolvedFollowCamera = ResolveFollowCameraTransform();
+        if (resolvedFollowCamera != null)
         {
-            if (Camera.main != null)
-            {
-                mainCameraTransform = Camera.main.transform;
-            }
+            mainCameraTransform = resolvedFollowCamera;
         }
 
         TutorialStep currentStep = steps[currentStepIndex];
@@ -217,6 +227,39 @@ public class StandaloneTutorialUI : MonoBehaviour
                 AdvanceStep(reason);
             }
         }
+    }
+
+    private Transform ResolveFollowCameraTransform()
+    {
+        if (ownerCanvas == null)
+        {
+            ownerCanvas = GetComponent<Canvas>();
+            if (ownerCanvas == null)
+            {
+                ownerCanvas = GetComponentInParent<Canvas>();
+            }
+        }
+
+        if (ownerCanvas != null && ownerCanvas.renderMode != RenderMode.ScreenSpaceOverlay)
+        {
+            Camera canvasCamera = ownerCanvas.worldCamera;
+            if (canvasCamera != null && canvasCamera.gameObject.activeInHierarchy)
+            {
+                return canvasCamera.transform;
+            }
+        }
+
+        if (Camera.main != null && Camera.main.gameObject.activeInHierarchy)
+        {
+            return Camera.main.transform;
+        }
+
+        if (mainCameraTransform != null && mainCameraTransform.gameObject.activeInHierarchy)
+        {
+            return mainCameraTransform;
+        }
+
+        return null;
     }
 
     public void PlayTutorial()
@@ -302,6 +345,11 @@ public class StandaloneTutorialUI : MonoBehaviour
 
     public bool TryHandleConfiguredInput(TutorialStepInputButton input, string sourceName)
     {
+        return TryHandleConfiguredInput(input, sourceName, false);
+    }
+
+    public bool TryHandleConfiguredInput(TutorialStepInputButton input, string sourceName, bool isRequiredHoldButtonHeld)
+    {
         if (!isPlaying || currentStepIndex >= steps.Count) return false;
 
         TutorialStep currentStep = steps[currentStepIndex];
@@ -315,6 +363,13 @@ public class StandaloneTutorialUI : MonoBehaviour
             return false;
         }
 
+        if (StepRequiresHeldButtonCombo(currentStep, out TutorialStepInputButton requiredHeldButton) &&
+            !isRequiredHoldButtonHeld)
+        {
+            FailAction($"当前步骤需要执行输入：{GetStepInputSummary(currentStep)}");
+            return true;
+        }
+
         if (!StepAcceptsButton(currentStep, input))
         {
             string expectedInputs = GetStepInputSummary(currentStep);
@@ -322,7 +377,15 @@ public class StandaloneTutorialUI : MonoBehaviour
             return true;
         }
 
-        CompleteAction($"输入 {GetInputDisplayName(input)} ({sourceName})");
+        if (StepRequiresHeldButtonCombo(currentStep, out requiredHeldButton))
+        {
+            CompleteAction($"按住 {GetInputDisplayName(requiredHeldButton)} 并输入 {GetInputDisplayName(input)} ({sourceName})");
+        }
+        else
+        {
+            CompleteAction($"输入 {GetInputDisplayName(input)} ({sourceName})");
+        }
+
         return true;
     }
 
@@ -338,16 +401,48 @@ public class StandaloneTutorialUI : MonoBehaviour
 
     public bool CurrentStepAcceptsInput(TutorialStepInputButton input)
     {
+        return CurrentStepAcceptsInput(input, false);
+    }
+
+    public bool CurrentStepAcceptsInput(TutorialStepInputButton input, bool isRequiredHoldButtonHeld)
+    {
         if (!isPlaying || currentStepIndex >= steps.Count)
         {
             return false;
         }
 
         TutorialStep currentStep = steps[currentStepIndex];
+        if (StepRequiresHeldButtonCombo(currentStep, out _) && !isRequiredHoldButtonHeld)
+        {
+            return false;
+        }
+
         return currentStep.isMandatoryInteraction &&
                CanAcceptConfiguredInputNow() &&
                HasConfiguredButtonInput(currentStep) &&
                StepAcceptsButton(currentStep, input);
+    }
+
+    public bool CurrentStepRequiresHeldButtonCombo(out TutorialStepInputButton requiredHeldButton)
+    {
+        requiredHeldButton = TutorialStepInputButton.None;
+
+        if (!isPlaying || currentStepIndex >= steps.Count)
+        {
+            return false;
+        }
+
+        return StepRequiresHeldButtonCombo(steps[currentStepIndex], out requiredHeldButton);
+    }
+
+    public bool ShouldIgnoreCurrentStepModifierPress(TutorialStepInputButton input)
+    {
+        if (!CurrentStepRequiresHeldButtonCombo(out TutorialStepInputButton requiredHeldButton))
+        {
+            return false;
+        }
+
+        return input == requiredHeldButton && !StepAcceptsButton(steps[currentStepIndex], input);
     }
 
     public bool CanAcceptConfiguredInputNow()
@@ -441,6 +536,23 @@ public class StandaloneTutorialUI : MonoBehaviour
         }
 
         return false;
+    }
+
+    private bool StepRequiresHeldButtonCombo(TutorialStep step, out TutorialStepInputButton requiredHeldButton)
+    {
+        requiredHeldButton = TutorialStepInputButton.None;
+        if (step == null || !step.requireHoldButtonCombo)
+        {
+            return false;
+        }
+
+        if (!IsButtonStyleInput(step.requiredHeldButton))
+        {
+            return false;
+        }
+
+        requiredHeldButton = step.requiredHeldButton;
+        return true;
     }
 
     private void ApplyCurrentStepInputPolicy(TutorialStep step)
@@ -585,7 +697,18 @@ public class StandaloneTutorialUI : MonoBehaviour
             buttonNames.Add(GetInputDisplayName(button));
         }
 
-        return buttonNames.Count == 0 ? "未配置教程输入" : string.Join(" / ", buttonNames);
+        if (buttonNames.Count == 0)
+        {
+            return "未配置教程输入";
+        }
+
+        string inputSummary = string.Join(" / ", buttonNames);
+        if (StepRequiresHeldButtonCombo(step, out TutorialStepInputButton requiredHeldButton))
+        {
+            return $"按住 {GetInputDisplayName(requiredHeldButton)} + {inputSummary}";
+        }
+
+        return inputSummary;
     }
 
     private void CancelErrorDisplay(bool restoreCurrentStepText)
@@ -646,8 +769,32 @@ public class StandaloneTutorialUI : MonoBehaviour
                 return "右手摇杆向左";
             case TutorialStepInputButton.RightStickRight:
                 return "右手摇杆向右";
+            case TutorialStepInputButton.LeftStickPress:
+                return "左手摇杆按下";
+            case TutorialStepInputButton.RightStickPress:
+                return "右手摇杆按下";
             default:
                 return "未指定输入";
+        }
+    }
+
+    public static bool IsButtonStyleInput(TutorialStepInputButton button)
+    {
+        switch (button)
+        {
+            case TutorialStepInputButton.LeftPrimaryButton:
+            case TutorialStepInputButton.LeftSecondaryButton:
+            case TutorialStepInputButton.LeftTriggerButton:
+            case TutorialStepInputButton.LeftGripButton:
+            case TutorialStepInputButton.RightPrimaryButton:
+            case TutorialStepInputButton.RightSecondaryButton:
+            case TutorialStepInputButton.RightTriggerButton:
+            case TutorialStepInputButton.RightGripButton:
+            case TutorialStepInputButton.LeftStickPress:
+            case TutorialStepInputButton.RightStickPress:
+                return true;
+            default:
+                return false;
         }
     }
 }
