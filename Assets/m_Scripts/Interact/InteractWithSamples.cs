@@ -59,6 +59,7 @@ public class InteractWithSamples:MonoBehaviour
         Inventory.texture = interactableObject.SampleImage;
         temp.transform.GetChild(0).GetComponent<Renderer>().material.SetTexture("_MainTexture",interactableObject.SampleImage);
         isSampleOnHand = true;
+        SyncSampleStateToForceTutorialPrerequisites();
     }
 
     public bool HasSampleOnHand()
@@ -74,6 +75,21 @@ public class InteractWithSamples:MonoBehaviour
         }
 
         tutorialTrigger.SetPrerequisiteSatisfied(isSampleOnHand);
+    }
+
+    public void SyncSampleStateToForceTutorialPrerequisites()
+    {
+        MandatoryTutorialTrigger[] tutorialTriggers = FindObjectsOfType<MandatoryTutorialTrigger>(true);
+        for (int i = 0; i < tutorialTriggers.Length; i++)
+        {
+            MandatoryTutorialTrigger tutorialTrigger = tutorialTriggers[i];
+            if (tutorialTrigger == null || !tutorialTrigger.requirePrerequisite)
+            {
+                continue;
+            }
+
+            tutorialTrigger.SetPrerequisiteSatisfied(isSampleOnHand);
+        }
     }
 
     public void EnablePickSample(InteractableSamples interactable)

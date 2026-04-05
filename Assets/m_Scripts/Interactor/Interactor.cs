@@ -30,6 +30,8 @@ public class Interactor : MonoBehaviour
     public TutorialButtonInput tutorialButtonInput;
     public Tutorial currentTutorial;
     private GameState lastState;
+    private bool _forceTutorialGameplayInputBlocked;
+    private Coroutine _pendingStateApplyCoroutine;
     public static Interactor Instance { get; private set; }
     
     private void Awake()
@@ -180,9 +182,31 @@ public class Interactor : MonoBehaviour
         lastState=flag?lastState:temp;
        
         print($"State Transition: -> {CurrentState}");
+        MandatoryTutorialTrigger.NotifyGlobalStartConditionsMayHaveChanged();
         
         // 开启协程，将输入映射和组件的切换延迟到当前帧末尾
-        StartCoroutine(ApplyStateChangeNextFrame(CurrentState));
+        QueueStateMapRefresh();
+    }
+
+    public void SetForceTutorialGameplayInputBlocked(bool isBlocked)
+    {
+        if (_forceTutorialGameplayInputBlocked == isBlocked)
+        {
+            return;
+        }
+
+        _forceTutorialGameplayInputBlocked = isBlocked;
+        QueueStateMapRefresh();
+    }
+
+    private void QueueStateMapRefresh()
+    {
+        if (_pendingStateApplyCoroutine != null)
+        {
+            StopCoroutine(_pendingStateApplyCoroutine);
+        }
+
+        _pendingStateApplyCoroutine = StartCoroutine(ApplyStateChangeNextFrame(CurrentState));
     }
 
     private IEnumerator ApplyStateChangeNextFrame(GameState state)
@@ -197,11 +221,17 @@ public class Interactor : MonoBehaviour
         switch (state)
         {
             case GameState.Roaming:
-                _roamingMap.Enable();
+                if (!_forceTutorialGameplayInputBlocked)
+                {
+                    _roamingMap.Enable();
+                }
                 if (xrLocomotionSys != null) xrLocomotionSys.gameObject.SetActive(true);
                 break;
             case GameState.Observing:
-                _observingMap.Enable();
+                if (!_forceTutorialGameplayInputBlocked)
+                {
+                    _observingMap.Enable();
+                }
                 if (xrLocomotionSys != null) xrLocomotionSys.gameObject.SetActive(false);
                 break;
             case GameState.Tutorial:
@@ -209,6 +239,8 @@ public class Interactor : MonoBehaviour
                 if (xrLocomotionSys != null) xrLocomotionSys.gameObject.SetActive(false);
                 break;
         }
+
+        _pendingStateApplyCoroutine = null;
     }
     private IEnumerator AdjustMicroscopeRoutine(InputAction action)
     {

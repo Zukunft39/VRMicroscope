@@ -40,6 +40,11 @@ public class ForceTutorialSequenceController : MonoBehaviour
             return;
         }
 
+        if (!trigger.CanStartFromSequence() || !trigger.ShouldAutoStartFromSequence())
+        {
+            return;
+        }
+
         trigger.StartFromSequence();
     }
 
@@ -86,7 +91,9 @@ public class ForceTutorialSequenceController : MonoBehaviour
         currentTrigger = nextTrigger;
         ApplyActivationState(nextTrigger);
 
-        if (nextTrigger != null && nextTrigger.ShouldAutoStartFromSequence())
+        if (nextTrigger != null &&
+            nextTrigger.CanStartFromSequence() &&
+            nextTrigger.ShouldAutoStartFromSequence())
         {
             nextTrigger.StartFromSequence();
         }

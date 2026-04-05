@@ -76,6 +76,7 @@ namespace VRMicroscope.Tutorial
         public void ApplyAccessMode(TutorialInputAccessMode accessMode)
         {
             EnsureComponents();
+            ApplyInteractorGameplayBlock(accessMode);
 
             switch (accessMode)
             {
@@ -101,6 +102,20 @@ namespace VRMicroscope.Tutorial
             {
                 _currentAccessMode = accessMode;
             }
+        }
+
+        private void ApplyInteractorGameplayBlock(TutorialInputAccessMode accessMode)
+        {
+            if (Interactor.Instance == null)
+            {
+                return;
+            }
+
+            // 强制教程里真正的显微镜/交互输入来自 Interactor 的状态输入图。
+            // 如果这里只锁 XR 交互器和位姿，观察模式下后续步骤重新切回 FullyBlocked 时，
+            // 显微镜操作输入仍会继续生效。
+            bool shouldBlockGameplayInput = accessMode == TutorialInputAccessMode.FullyBlocked;
+            Interactor.Instance.SetForceTutorialGameplayInputBlocked(shouldBlockGameplayInput);
         }
 
         private void SetInteractionBlocked(bool shouldBlock)

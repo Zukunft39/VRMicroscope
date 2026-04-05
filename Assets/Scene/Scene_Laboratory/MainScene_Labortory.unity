@@ -1528,6 +1528,9 @@ MonoBehaviour:
   triggerOnStart: 0
   requirePrerequisite: 1
   prerequisiteSatisfied: 0
+  requireInteractorState: 1
+  requiredInteractorState: 1
+  autoStartWhenInteractorStateMatches: 1
   onTutorialStart:
     m_PersistentCalls:
       m_Calls:
@@ -10996,6 +10999,9 @@ MonoBehaviour:
   triggerOnStart: 1
   requirePrerequisite: 0
   prerequisiteSatisfied: 0
+  requireInteractorState: 0
+  requiredInteractorState: 1
+  autoStartWhenInteractorStateMatches: 1
   onTutorialStart:
     m_PersistentCalls:
       m_Calls:
@@ -16360,6 +16366,9 @@ MonoBehaviour:
   triggerOnStart: 0
   requirePrerequisite: 0
   prerequisiteSatisfied: 0
+  requireInteractorState: 0
+  requiredInteractorState: 1
+  autoStartWhenInteractorStateMatches: 1
   onTutorialStart:
     m_PersistentCalls:
       m_Calls:
@@ -24617,12 +24626,12 @@ MonoBehaviour:
       m_PersistentCalls:
         m_Calls: []
     customUIAnchor: {fileID: 0}
-  - stepText: "\u8BF7\u5411\u91CC\u6309\u4E0B\u53F3\u624B\u63A7\u5236\u5668\u4E0A\u7684\u6447\u6746\u952E\uFF0C\u4EE5\u5207\u6362\u7C97/\u7EC6\u51C6\u7126\u87BA\u65CB\u3002"
-    isMandatoryInteraction: 1
-    acceptedButtons: 12000000
+  - stepText: "\u4F60\u53EF\u4EE5\u5411\u91CC\u6309\u4E0B\u53F3\u624B\u63A7\u5236\u5668\u4E0A\u7684\u6447\u6746\u952E\uFF0C\u4EE5\u5207\u6362\u7C97/\u7EC6\u51C6\u7126\u87BA\u65CB\u3002\u8BF7\u5728\u672C\u6559\u7A0B\u7ED3\u675F\u540E\u81EA\u884C\u5C1D\u8BD5\u3002"
+    isMandatoryInteraction: 0
+    acceptedButtons: 
     requireHoldButtonCombo: 0
     requiredHeldButton: 0
-    inputAccessMode: 2
+    inputAccessMode: 0
     onStepStart:
       m_PersistentCalls:
         m_Calls: []
@@ -24642,7 +24651,7 @@ MonoBehaviour:
     acceptedButtons: 06000000
     requireHoldButtonCombo: 0
     requiredHeldButton: 0
-    inputAccessMode: 2
+    inputAccessMode: 1
     onStepStart:
       m_PersistentCalls:
         m_Calls: []
@@ -24687,25 +24696,15 @@ MonoBehaviour:
       m_PersistentCalls:
         m_Calls: []
     customUIAnchor: {fileID: 0}
-  - stepText: "\u606D\u559C\u4F60\u5DF2\u5B8C\u6210\u6240\u6709\u7684\u6559\u7A0B\uFF01"
-    isMandatoryInteraction: 0
-    acceptedButtons: 
-    requireHoldButtonCombo: 0
-    requiredHeldButton: 0
-    inputAccessMode: 0
-    onStepStart:
-      m_PersistentCalls:
-        m_Calls: []
-    customUIAnchor: {fileID: 0}
   onTutorialStart:
     m_PersistentCalls:
       m_Calls: []
   onTutorialFinish:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
-        m_TargetAssemblyTypeName: TutorialTransition, Assembly-CSharp
-        m_MethodName: TriggerNextTutorial
+      - m_Target: {fileID: 97735849}
+        m_TargetAssemblyTypeName: MandatoryTutorialTrigger, Assembly-CSharp
+        m_MethodName: CompleteTutorial
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -29643,6 +29642,9 @@ MonoBehaviour:
   triggerOnStart: 0
   requirePrerequisite: 1
   prerequisiteSatisfied: 0
+  requireInteractorState: 0
+  requiredInteractorState: 1
+  autoStartWhenInteractorStateMatches: 1
   onTutorialStart:
     m_PersistentCalls:
       m_Calls:
