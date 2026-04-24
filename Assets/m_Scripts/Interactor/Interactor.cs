@@ -103,8 +103,16 @@ public class Interactor : MonoBehaviour
         };
         _roamingMap.FindAction("TakeObj").started += (context) =>
         {
-            _currentMicroscope?.TakeOutobj();
-            _interactWithSamples?.PickSample();
+            // 优先处理“从显微镜上取下当前样本”，避免同一输入同时触发“再实例化一个新样本”，
+            // 导致显微镜观察对象被替换或状态混乱。
+            if (_currentMicroscope != null && _currentMicroscope.HasPlacedSample())
+            {
+                _currentMicroscope.TakeOutobj();
+            }
+            else
+            {
+                _interactWithSamples?.PickSample();
+            }
         };
         _roamingMap.FindAction("ChangeGlass").started += (context) =>
         {

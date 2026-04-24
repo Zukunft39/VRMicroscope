@@ -195,9 +195,16 @@ public class Microscope : MonoBehaviour
                             Vector3(ObjectInitialScale.x / gameObject.transform.localScale.x,
                                 ObjectInitialScale.y / gameObject.transform.localScale.x,
                                 ObjectInitialScale.z / gameObject.transform.localScale.x);
+                        // 样本被重新放上载物台时，先确保对象恢复激活，再由焦距逻辑决定最终可见性。
+                        Object.SetActive(true);
                         show.SetActive(true);
                         ShowObject showObject = Object.GetComponent<ShowObject>();
-                        showObject.microscope = this;
+                        if (showObject != null)
+                        {
+                            showObject.microscope = this;
+                        }
+                        // 无论是键盘还是手柄输入路径，放置后都统一执行一次焦距可见性评估。
+                        SetcurrentFocal();
                     }
                     else
                     {
@@ -230,17 +237,27 @@ public class Microscope : MonoBehaviour
         {
             if (Object != null)
             {
+                // 防止在“失焦隐藏状态”下被取下后仍然保持 inactive，造成再次放置后看不到。
+                Object.SetActive(true);
                 Object.transform.localScale = new
                     Vector3(ObjectInitialScale.x,
                         ObjectInitialScale.y,
                         ObjectInitialScale.z);
                 Object.transform.SetParent(player.transform);
                 ShowObject showObject = Object.GetComponent<ShowObject>();
-                showObject.microscope = null;
+                if (showObject != null)
+                {
+                    showObject.microscope = null;
+                }
                 Object = null;
                 show.SetActive(false);
             }
         }
+    }
+
+    public bool HasPlacedSample()
+    {
+        return Object != null;
     }
 
     public void RotateGlass()
