@@ -1077,44 +1077,44 @@ MonoBehaviour:
   explodeDistance: 0.35
   radialDistanceFactor: 0.1
   normalizeRadialDistance: 1
-  maxExplodeDistance: 0.1
+  maxExplodeDistance: 0.4
   rebuildCacheBeforeEachPlay: 0
   directionalOverrides:
   - enabled: 1
     partTransform: {fileID: 6973861758174773735}
     directionSpace: 0
-    direction: {x: -1, y: 0, z: 0}
+    direction: {x: 0, y: -1, z: -8}
     distanceMultiplier: 0
     useAbsoluteDistance: 1
-    absoluteDistance: 1
+    absoluteDistance: 0.38
   - enabled: 1
     partTransform: {fileID: 1839898227}
     directionSpace: 0
-    direction: {x: -1, y: 0, z: 0}
+    direction: {x: 0, y: -1, z: -1.1}
     distanceMultiplier: 0
     useAbsoluteDistance: 1
-    absoluteDistance: 1
+    absoluteDistance: 0.35
   - enabled: 1
     partTransform: {fileID: 1518794202}
     directionSpace: 0
-    direction: {x: 1, y: 0, z: 0}
+    direction: {x: 0, y: 0, z: 1}
     distanceMultiplier: 0
     useAbsoluteDistance: 1
-    absoluteDistance: 1
+    absoluteDistance: 0.2
   - enabled: 1
     partTransform: {fileID: 1620241473723744996}
     directionSpace: 0
     direction: {x: 0, y: -1, z: 0}
     distanceMultiplier: 0
     useAbsoluteDistance: 1
-    absoluteDistance: 1
+    absoluteDistance: 0.02
   - enabled: 1
     partTransform: {fileID: 561461272}
     directionSpace: 0
-    direction: {x: 1, y: 0, z: 0}
+    direction: {x: 0, y: 5, z: -0.6}
     distanceMultiplier: 0
     useAbsoluteDistance: 1
-    absoluteDistance: 1
+    absoluteDistance: 0.1
   animationDuration: 0.6
   staggerPerPart: 0.015
   forceSynchronizedAnimation: 1
