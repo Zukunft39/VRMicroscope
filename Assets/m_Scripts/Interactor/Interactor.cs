@@ -103,6 +103,15 @@ public class Interactor : MonoBehaviour
         };
         _roamingMap.FindAction("TakeObj").started += (context) =>
         {
+            bool handledByExploderMode = MicroscopeExploderModeController.TryHandleRightTrigger();
+            Debug.Log(
+                $"[Interactor] TakeObj triggered. handledByExploderMode={handledByExploderMode}, currentMicroscope='{_currentMicroscope?.name ?? "null"}', hasPlacedSample={(_currentMicroscope != null && _currentMicroscope.HasPlacedSample())}");
+
+            if (handledByExploderMode)
+            {
+                return;
+            }
+
             // 优先处理“从显微镜上取下当前样本”，避免同一输入同时触发“再实例化一个新样本”，
             // 导致显微镜观察对象被替换或状态混乱。
             if (_currentMicroscope != null && _currentMicroscope.HasPlacedSample())

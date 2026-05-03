@@ -68,18 +68,42 @@ public class ProgressControl : TInstance<ProgressControl>
     async UniTask TranslateTo(CinemachineVirtualCamera current,CinemachineVirtualCamera next,bool isCut){
         if(!isCut){
             //isAutoMoving=true;
-            current?.gameObject.SetActive(false);
-            next?.gameObject.SetActive(true);
-            
+            ActivatePresetCamera(current, next);
             await UniTask.WaitForSeconds(cinemachineBrain.m_DefaultBlend.BlendTime);
             //isAutoMoving=false;
-            CurrentCinema=next;
             return ;
         }
         else{
 
         }
     }
+
+    private void ActivatePresetCamera(CinemachineVirtualCamera current, CinemachineVirtualCamera next)
+    {
+        current?.gameObject.SetActive(false);
+        next?.gameObject.SetActive(true);
+        CurrentCinema = next;
+    }
+
+    public void SwitchToPresetCamera(CinemachineVirtualCamera targetCamera)
+    {
+        if (targetCamera == null)
+        {
+            Debug.LogWarning("SwitchToPresetCamera failed: targetCamera is null.");
+            return;
+        }
+
+        ActivatePresetCamera(CurrentCinema, targetCamera);
+        ChangeViewToPreset();
+    }
+
+    public void SwitchToFreeView(CinemachineVirtualCamera activePresetCamera = null)
+    {
+        CinemachineVirtualCamera cameraToDisable = activePresetCamera != null ? activePresetCamera : CurrentCinema;
+        cameraToDisable?.gameObject.SetActive(false);
+        ChangeViewToFree();
+    }
+
     public void ChangeViewToFree(){
         Debug.Log("切换至自由视角");
         cinemachineBrain.enabled=false;

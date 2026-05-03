@@ -1,4 +1,5 @@
 using UnityEngine;
+using System;
 using System.Collections.Generic;
 using DG.Tweening;
 
@@ -103,6 +104,10 @@ public class ModelExploder : MonoBehaviour
     private List<PartData> partsList = new List<PartData>();
     private bool isExploded = false;
     private Tween activeTween;
+
+    public bool IsExploded => isExploded;
+    public bool IsAnimating => activeTween != null && activeTween.IsActive();
+    public event Action<bool> ExplodedStateApplied;
 
     private void Start()
     {
@@ -265,6 +270,27 @@ public class ModelExploder : MonoBehaviour
         InitializeParts();
     }
 
+    public void SetExplodedState(bool exploded, bool instant = false)
+    {
+        if (instant)
+        {
+            ApplyStateImmediate(exploded);
+            return;
+        }
+
+        PlayExplodeAnimation(exploded);
+    }
+
+    public void ExplodeImmediate()
+    {
+        ApplyStateImmediate(true);
+    }
+
+    public void AssembleImmediate()
+    {
+        ApplyStateImmediate(false);
+    }
+
     private void PlayExplodeAnimation(bool exploding)
     {
         if (rebuildCacheBeforeEachPlay || partsList.Count == 0)
@@ -339,11 +365,60 @@ public class ModelExploder : MonoBehaviour
             isExploded = exploding;
             activeTween = null;
             DebugLog($"Animation completed. isExploded={isExploded}");
+            NotifyExplodedStateApplied(isExploded);
         });
 
         activeTween = sequence;
         DebugLog($"Animation started. exploding={exploding}, parts={validPartCount}, duration={safeDuration:F2}, stagger={safeStagger:F3}, sync={forceSynchronizedAnimation}");
         sequence.Play();
+    }
+
+    private void ApplyStateImmediate(bool exploded)
+    {
+        if (rebuildCacheBeforeEachPlay || partsList.Count == 0)
+        {
+            InitializeParts();
+        }
+
+        if (partsList.Count == 0)
+        {
+            DebugLogWarning("ApplyStateImmediate: partsList 为空，状态未更新。");
+            return;
+        }
+
+        KillAllPartTweens();
+
+        for (int i = 0; i < partsList.Count; i++)
+        {
+            PartData part = partsList[i];
+            if (part == null || part.partTransform == null)
+            {
+                continue;
+            }
+
+            if (moveInWorldSpace)
+            {
+                part.partTransform.position = exploded ? part.explodedWorldPosition : part.originalWorldPosition;
+            }
+            else
+            {
+                part.partTransform.localPosition = exploded ? part.explodedLocalPosition : part.originalLocalPosition;
+            }
+
+            if (!exploded && restoreOriginalRotationOnAssemble)
+            {
+                part.partTransform.localRotation = part.originalLocalRotation;
+            }
+        }
+
+        isExploded = exploded;
+        DebugLog($"ApplyStateImmediate completed. isExploded={isExploded}");
+        NotifyExplodedStateApplied(isExploded);
+    }
+
+    private void NotifyExplodedStateApplied(bool exploded)
+    {
+        ExplodedStateApplied?.Invoke(exploded);
     }
 
     private List<Transform> CollectTargetParts()

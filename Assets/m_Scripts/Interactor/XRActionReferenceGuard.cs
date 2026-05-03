@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
 using UnityEngine.XR.Interaction.Toolkit;
+using System.Reflection;
 
 /// <summary>
 /// Repairs corrupted Action reference serialization at runtime.
@@ -10,6 +11,12 @@ using UnityEngine.XR.Interaction.Toolkit;
 /// </summary>
 public static class XRActionReferenceGuard
 {
+    private static readonly FieldInfo SerializedReferenceField =
+        typeof(InputActionProperty).GetField("m_Reference", BindingFlags.Instance | BindingFlags.NonPublic);
+
+    private static readonly FieldInfo UseReferenceField =
+        typeof(InputActionProperty).GetField("m_UseReference", BindingFlags.Instance | BindingFlags.NonPublic);
+
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
     private static void RegisterSceneHook()
     {
@@ -17,7 +24,18 @@ public static class XRActionReferenceGuard
         SceneManager.sceneLoaded += OnSceneLoaded;
     }
 
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
+    private static void RepairLoadedSceneOnStartup()
+    {
+        RepairAllTurnProviders();
+    }
+
     private static void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        RepairAllTurnProviders();
+    }
+
+    public static void RepairAllTurnProviders()
     {
         ActionBasedContinuousTurnProvider[] providers = Object.FindObjectsOfType<ActionBasedContinuousTurnProvider>(true);
         for (int i = 0; i < providers.Length; i++)
@@ -35,15 +53,15 @@ public static class XRActionReferenceGuard
 
         bool changed = false;
 
-        if (NeedsReferenceRebind(provider.leftHandTurnAction))
+        if (TryGetReboundProperty(provider.leftHandTurnAction, out InputActionProperty repairedLeftAction))
         {
-            provider.leftHandTurnAction = new InputActionProperty(provider.leftHandTurnAction.reference);
+            provider.leftHandTurnAction = repairedLeftAction;
             changed = true;
         }
 
-        if (NeedsReferenceRebind(provider.rightHandTurnAction))
+        if (TryGetReboundProperty(provider.rightHandTurnAction, out InputActionProperty repairedRightAction))
         {
-            provider.rightHandTurnAction = new InputActionProperty(provider.rightHandTurnAction.reference);
+            provider.rightHandTurnAction = repairedRightAction;
             changed = true;
         }
 
@@ -53,9 +71,11 @@ public static class XRActionReferenceGuard
         }
     }
 
-    private static bool NeedsReferenceRebind(InputActionProperty property)
+    private static bool TryGetReboundProperty(InputActionProperty property, out InputActionProperty repairedProperty)
     {
-        InputActionReference reference = property.reference;
+        repairedProperty = property;
+
+        InputActionReference reference = GetSerializedReference(property);
         if (reference == null)
         {
             return false;
@@ -67,7 +87,32 @@ public static class XRActionReferenceGuard
             return true;
         }
 
-        // Corrupted inline actions usually have no bindings and empty expected control type.
-        return action.bindings.Count == 0 || string.IsNullOrEmpty(action.expectedControlType);
+        bool missingBindings = action.bindings.Count == 0;
+        bool missingExpectedControlType = string.IsNullOrEmpty(action.expectedControlType);
+        bool hiddenReferenceNotActivated = !IsUsingReference(property);
+
+        if (!missingBindings && !missingExpectedControlType && !hiddenReferenceNotActivated)
+        {
+            return false;
+        }
+
+        repairedProperty = new InputActionProperty(reference);
+        return true;
+    }
+
+    private static InputActionReference GetSerializedReference(InputActionProperty property)
+    {
+        return property.reference ?? SerializedReferenceField?.GetValue(property) as InputActionReference;
+    }
+
+    private static bool IsUsingReference(InputActionProperty property)
+    {
+        if (UseReferenceField == null)
+        {
+            return property.reference != null;
+        }
+
+        object useReferenceValue = UseReferenceField.GetValue(property);
+        return useReferenceValue is bool boolValue && boolValue;
     }
 }
