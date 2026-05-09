@@ -14,6 +14,8 @@ public class MicroscopeExploderModeController : MonoBehaviour
 
     public static MicroscopeExploderModeController Instance { get; private set; }
 
+    private static int tutorialModeLockCount = 0;
+
     [Header("Core References")]
     [SerializeField] private XRRayInteractor rightRayInteractor;
     [SerializeField] private ProgressControl progressControl;
@@ -35,6 +37,7 @@ public class MicroscopeExploderModeController : MonoBehaviour
     [SerializeField] private bool enableDebugLogs = true;
 
     public AssemblyMode CurrentMode => currentMode;
+    public static bool IsTutorialModeLocked => tutorialModeLockCount > 0;
 
     private AssemblyMode currentMode = AssemblyMode.Normal;
     private Renderer[] cachedExploderRenderers;
@@ -54,8 +57,32 @@ public class MicroscopeExploderModeController : MonoBehaviour
 
     public static bool TryHandleRightTrigger()
     {
+        if (IsTutorialModeLocked)
+        {
+            MicroscopeExploderModeController lockedController = ResolveAvailableInstance();
+            lockedController?.ApplyTutorialModeLockState();
+            return true;
+        }
+
         MicroscopeExploderModeController controller = ResolveAvailableInstance();
         return controller != null && controller.TryHandleRightTriggerInRoaming();
+    }
+
+    public static void PushTutorialModeLock()
+    {
+        tutorialModeLockCount++;
+        MicroscopeExploderModeController controller = ResolveAvailableInstance();
+        controller?.ApplyTutorialModeLockState();
+    }
+
+    public static void PopTutorialModeLock()
+    {
+        tutorialModeLockCount = Mathf.Max(0, tutorialModeLockCount - 1);
+        MicroscopeExploderModeController controller = ResolveAvailableInstance();
+        if (controller != null && IsTutorialModeLocked)
+        {
+            controller.ApplyTutorialModeLockState();
+        }
     }
 
     private void Awake()
@@ -178,6 +205,12 @@ public class MicroscopeExploderModeController : MonoBehaviour
 
     public bool TryHandleRightTriggerInRoaming()
     {
+        if (IsTutorialModeLocked)
+        {
+            ApplyTutorialModeLockState();
+            return true;
+        }
+
         if (!isActiveAndEnabled)
         {
             return false;
@@ -291,6 +324,28 @@ public class MicroscopeExploderModeController : MonoBehaviour
         SetLocomotionEnabled(true);
         XRActionReferenceGuard.RepairAllTurnProviders();
         DebugLog("Returned to Normal mode.");
+    }
+
+    private void ApplyTutorialModeLockState()
+    {
+        if (!EnsureReferences())
+        {
+            return;
+        }
+
+        if (currentMode != AssemblyMode.Normal)
+        {
+            ReturnToNormalOperation();
+        }
+        else
+        {
+            pendingMicroscopeRestoreAfterAssemble = false;
+            UpdateModelsVisibility();
+            SetExploderState(false, true);
+            RestoreDefaultRayPresentation();
+        }
+
+        DebugLog($"Tutorial mode lock active. lockCount={tutorialModeLockCount}");
     }
 
     private bool EnsureReferences()
@@ -744,7 +799,7 @@ public class MicroscopeExploderModeController : MonoBehaviour
 
     private void UpdateModelsVisibility()
     {
-        bool useExploder = currentMode != AssemblyMode.Normal;
+        bool useExploder = !IsTutorialModeLocked && currentMode != AssemblyMode.Normal;
 
         if (microscopeRoot != null && microscopeRoot.activeSelf == useExploder)
         {

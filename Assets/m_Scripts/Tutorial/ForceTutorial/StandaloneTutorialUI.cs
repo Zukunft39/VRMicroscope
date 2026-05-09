@@ -135,6 +135,7 @@ public class StandaloneTutorialUI : MonoBehaviour
     private PlayerInputBlocker playerInputBlocker;
     private Canvas[] managedCanvases = Array.Empty<Canvas>();
     private CanvasSortingState[] originalCanvasSortingStates = Array.Empty<CanvasSortingState>();
+    private bool assemblyModeLockRegistered = false;
 
     [SerializeField, HideInInspector]
     private int inputAccessConfigVersion = 0;
@@ -179,6 +180,11 @@ public class StandaloneTutorialUI : MonoBehaviour
     private void OnValidate()
     {
         UpgradeLegacyInputAccessModes();
+    }
+
+    private void OnDisable()
+    {
+        ReleaseAssemblyModeLock();
     }
 
     private void Update()
@@ -269,6 +275,7 @@ public class StandaloneTutorialUI : MonoBehaviour
         isPlaying = true;
         currentStepIndex = 0;
         BringManagedCanvasesToFront();
+        RegisterAssemblyModeLock();
         
         if (uiRoot != null)
         {
@@ -325,7 +332,7 @@ public class StandaloneTutorialUI : MonoBehaviour
         }
     }
 
-    public void FailAction(string errorMsg = "操作错误，请按照提示进行操作！")
+    public void FailAction(string errorMsg = "Incorrect action. Please follow the instruction.")
     {
         if (!isPlaying || currentStepIndex >= steps.Count) return;
 
@@ -366,24 +373,24 @@ public class StandaloneTutorialUI : MonoBehaviour
         if (StepRequiresHeldButtonCombo(currentStep, out TutorialStepInputButton requiredHeldButton) &&
             !isRequiredHoldButtonHeld)
         {
-            FailAction($"当前步骤需要执行输入：{GetStepInputSummary(currentStep)}");
+            FailAction($"Expected input for this step: {GetStepInputSummary(currentStep)}");
             return true;
         }
 
         if (!StepAcceptsButton(currentStep, input))
         {
             string expectedInputs = GetStepInputSummary(currentStep);
-            FailAction($"当前步骤需要执行输入：{expectedInputs}");
+            FailAction($"Expected input for this step: {expectedInputs}");
             return true;
         }
 
         if (StepRequiresHeldButtonCombo(currentStep, out requiredHeldButton))
         {
-            CompleteAction($"按住 {GetInputDisplayName(requiredHeldButton)} 并输入 {GetInputDisplayName(input)} ({sourceName})");
+            CompleteAction($"Hold {GetInputDisplayName(requiredHeldButton)} and perform {GetInputDisplayName(input)} ({sourceName})");
         }
         else
         {
-            CompleteAction($"输入 {GetInputDisplayName(input)} ({sourceName})");
+            CompleteAction($"Input {GetInputDisplayName(input)} ({sourceName})");
         }
 
         return true;
@@ -507,6 +514,29 @@ public class StandaloneTutorialUI : MonoBehaviour
         if (uiRoot != null) uiRoot.SetActive(false);
         RestoreManagedCanvasSorting();
         onTutorialFinish?.Invoke();
+        ReleaseAssemblyModeLock();
+    }
+
+    private void RegisterAssemblyModeLock()
+    {
+        if (assemblyModeLockRegistered)
+        {
+            return;
+        }
+
+        MicroscopeExploderModeController.PushTutorialModeLock();
+        assemblyModeLockRegistered = true;
+    }
+
+    private void ReleaseAssemblyModeLock()
+    {
+        if (!assemblyModeLockRegistered)
+        {
+            return;
+        }
+
+        MicroscopeExploderModeController.PopTutorialModeLock();
+        assemblyModeLockRegistered = false;
     }
 
     private void AdvanceStep(string reason)
@@ -686,7 +716,7 @@ public class StandaloneTutorialUI : MonoBehaviour
     {
         if (step.acceptedButtons == null || step.acceptedButtons.Count == 0)
         {
-            return "未配置教程输入";
+            return "No tutorial input configured";
         }
 
         List<string> buttonNames = new List<string>();
@@ -699,13 +729,13 @@ public class StandaloneTutorialUI : MonoBehaviour
 
         if (buttonNames.Count == 0)
         {
-            return "未配置教程输入";
+            return "No tutorial input configured";
         }
 
         string inputSummary = string.Join(" / ", buttonNames);
         if (StepRequiresHeldButtonCombo(step, out TutorialStepInputButton requiredHeldButton))
         {
-            return $"按住 {GetInputDisplayName(requiredHeldButton)} + {inputSummary}";
+            return $"Hold {GetInputDisplayName(requiredHeldButton)} + {inputSummary}";
         }
 
         return inputSummary;
@@ -738,43 +768,43 @@ public class StandaloneTutorialUI : MonoBehaviour
         switch (button)
         {
             case TutorialStepInputButton.LeftPrimaryButton:
-                return "左手 Primary";
+                return "Left Primary Button";
             case TutorialStepInputButton.LeftSecondaryButton:
-                return "左手 Secondary";
+                return "Left Secondary Button";
             case TutorialStepInputButton.LeftTriggerButton:
-                return "左手 Trigger";
+                return "Left Trigger";
             case TutorialStepInputButton.LeftGripButton:
-                return "左手 Grip";
+                return "Left Grip";
             case TutorialStepInputButton.RightPrimaryButton:
-                return "右手 Primary";
+                return "Right Primary Button";
             case TutorialStepInputButton.RightSecondaryButton:
-                return "右手 Secondary";
+                return "Right Secondary Button";
             case TutorialStepInputButton.RightTriggerButton:
-                return "右手 Trigger";
+                return "Right Trigger";
             case TutorialStepInputButton.RightGripButton:
-                return "右手 Grip";
+                return "Right Grip";
             case TutorialStepInputButton.LeftStickUp:
-                return "左手摇杆向上";
+                return "Left Thumbstick Up";
             case TutorialStepInputButton.LeftStickDown:
-                return "左手摇杆向下";
+                return "Left Thumbstick Down";
             case TutorialStepInputButton.LeftStickLeft:
-                return "左手摇杆向左";
+                return "Left Thumbstick Left";
             case TutorialStepInputButton.LeftStickRight:
-                return "左手摇杆向右";
+                return "Left Thumbstick Right";
             case TutorialStepInputButton.RightStickUp:
-                return "右手摇杆向上";
+                return "Right Thumbstick Up";
             case TutorialStepInputButton.RightStickDown:
-                return "右手摇杆向下";
+                return "Right Thumbstick Down";
             case TutorialStepInputButton.RightStickLeft:
-                return "右手摇杆向左";
+                return "Right Thumbstick Left";
             case TutorialStepInputButton.RightStickRight:
-                return "右手摇杆向右";
+                return "Right Thumbstick Right";
             case TutorialStepInputButton.LeftStickPress:
-                return "左手摇杆按下";
+                return "Left Thumbstick Press";
             case TutorialStepInputButton.RightStickPress:
-                return "右手摇杆按下";
+                return "Right Thumbstick Press";
             default:
-                return "未指定输入";
+                return "Unspecified Input";
         }
     }
 
