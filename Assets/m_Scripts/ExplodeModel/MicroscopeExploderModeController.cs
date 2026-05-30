@@ -23,6 +23,7 @@ public class MicroscopeExploderModeController : MonoBehaviour
     [SerializeField] private GameObject microscopeRoot;
     [SerializeField] private GameObject microscopeExploderRoot;
     [SerializeField] private ModelExploder modelExploder;
+    [SerializeField] private SuperAssemblyPartSelectionController partSelectionController;
 
     [SerializeField, HideInInspector, FormerlySerializedAs("preAssemblyCameraObject")]
     private GameObject legacyPreAssemblyCameraObject;
@@ -200,6 +201,7 @@ public class MicroscopeExploderModeController : MonoBehaviour
         if (microscopeRoot != null) score += 1;
         if (microscopeExploderRoot != null) score += 2;
         if (modelExploder != null) score += 2;
+        if (partSelectionController != null) score += 1;
         return score;
     }
 
@@ -247,6 +249,11 @@ public class MicroscopeExploderModeController : MonoBehaviour
                 return true;
 
             case AssemblyMode.SuperAssembly:
+                if (SuperAssemblyPartSelectionController.TryHandleRightTrigger())
+                {
+                    return true;
+                }
+
                 if (isPointingAtExploder)
                 {
                     return true;
@@ -272,6 +279,7 @@ public class MicroscopeExploderModeController : MonoBehaviour
         ApplyAssemblyRayPresentation();
         pendingMicroscopeRestoreAfterAssemble = false;
         currentMode = AssemblyMode.PreAssembly;
+        partSelectionController?.ForceExitSelection(true);
         UpdateModelsVisibility();
         SetExploderState(false, true);
         DebugLog("Entered PreAssembly mode.");
@@ -290,6 +298,7 @@ public class MicroscopeExploderModeController : MonoBehaviour
         ApplyAssemblyRayPresentation();
         pendingMicroscopeRestoreAfterAssemble = false;
         currentMode = AssemblyMode.SuperAssembly;
+        partSelectionController?.ForceExitSelection(true);
         UpdateModelsVisibility();
         SetExploderState(true, false);
         DebugLog("Entered SuperAssembly mode.");
@@ -307,6 +316,7 @@ public class MicroscopeExploderModeController : MonoBehaviour
         SetLocomotionEnabled(false);
         ApplyAssemblyRayPresentation();
         pendingMicroscopeRestoreAfterAssemble = false;
+        partSelectionController?.ForceExitSelection(true);
         currentMode = AssemblyMode.PreAssembly;
         UpdateModelsVisibility();
         SetExploderState(false, false);
@@ -316,6 +326,7 @@ public class MicroscopeExploderModeController : MonoBehaviour
     public void ReturnToNormalOperation()
     {
         pendingMicroscopeRestoreAfterAssemble = false;
+        partSelectionController?.ForceExitSelection(true);
         currentMode = AssemblyMode.Normal;
         UpdateModelsVisibility();
         SetExploderState(false, true);
@@ -375,6 +386,8 @@ public class MicroscopeExploderModeController : MonoBehaviour
             modelExploder = microscopeExploderRoot.GetComponent<ModelExploder>();
         }
 
+        EnsurePartSelectionController();
+
         if (cachedRightLineVisual == null && rightRayInteractor != null)
         {
             cachedRightLineVisual = rightRayInteractor.GetComponent<XRInteractorLineVisual>();
@@ -417,6 +430,25 @@ public class MicroscopeExploderModeController : MonoBehaviour
         }
 
         return isReady;
+    }
+
+    private void EnsurePartSelectionController()
+    {
+        if (partSelectionController == null && microscopeExploderRoot != null)
+        {
+            partSelectionController = microscopeExploderRoot.GetComponentInChildren<SuperAssemblyPartSelectionController>(true);
+        }
+
+        if (partSelectionController == null)
+        {
+            partSelectionController = GetComponentInChildren<SuperAssemblyPartSelectionController>(true);
+        }
+
+        if (partSelectionController != null)
+        {
+            Transform rootTransform = microscopeExploderRoot != null ? microscopeExploderRoot.transform : null;
+            partSelectionController.Configure(this, rightRayInteractor, modelExploder, rootTransform);
+        }
     }
 
     private XRRayInteractor FindPreferredRightRayInteractor()

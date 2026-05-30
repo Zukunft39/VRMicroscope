@@ -82,6 +82,12 @@ public class SuperAssemblyPartHoverPulse : MonoBehaviour
 
         wasInSuperAssembly = true;
 
+        if (!CanRunHoverPulse())
+        {
+            ClearCurrentSelection(restoreImmediately: true);
+            return;
+        }
+
         if (cachedParts.Count == 0)
         {
             RebuildPartCache();
@@ -92,6 +98,16 @@ public class SuperAssemblyPartHoverPulse : MonoBehaviour
         {
             SetCurrentPart(hoveredPart);
         }
+    }
+
+    private bool CanRunHoverPulse()
+    {
+        if (SuperAssemblyPartSelectionController.HasActiveSelection)
+        {
+            return false;
+        }
+
+        return modelExploder == null || (modelExploder.IsExploded && !modelExploder.IsAnimating);
     }
 
     [ContextMenu("Rebuild Part Cache")]
