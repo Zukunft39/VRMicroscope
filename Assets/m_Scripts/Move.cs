@@ -28,8 +28,24 @@ public class Move : TInstance<Move>
     [SerializeField] private TeleportationProvider teleportationProvider;
     [SerializeField] private XROrigin xrOrigin;
 
+    private bool isGripMovementBlocked;
+
+    public void SetGripMovementBlocked(bool isBlocked)
+    {
+        isGripMovementBlocked = isBlocked;
+        if (isBlocked && moveTest != null)
+        {
+            moveTest.isAutoNavigating = false;
+        }
+    }
+
     private void autoMove(InputAction.CallbackContext  context)
     {
+        if (isGripMovementBlocked)
+        {
+            return;
+        }
+
         if (useInstantTeleportOnGrip)
         {
             if (TryTeleportToReachableRayPoint() || !fallbackToAutoMoveWhenTeleportFails)

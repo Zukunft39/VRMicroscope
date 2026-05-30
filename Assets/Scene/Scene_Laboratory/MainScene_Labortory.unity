@@ -18308,6 +18308,8 @@ MonoBehaviour:
   experimentButtonText: {fileID: 521538563}
   uiViewportPosition: {x: 0.6, y: 0.38}
   lockUiPoseOnSelectionEnter: 1
+  lockUiToFixedReferencePose: 1
+  keepUiWorldUpright: 1
   uiDistanceFromCamera: 1.15
   uiWorldScale: 0.00135
   uiFadeDuration: 0.28
@@ -45752,6 +45754,9 @@ MonoBehaviour:
   animateExploderTransitions: 1
   copyFieldOfViewFromCurrentView: 1
   allowMicroscopeAsAssemblyTarget: 1
+  useTrackedPreAssemblyView: 1
+  restorePlayerPoseAfterAssembly: 1
+  lockTrackedPreAssemblyPose: 1
   enableDebugLogs: 1
 --- !u!1 &9014170785400826608
 GameObject:

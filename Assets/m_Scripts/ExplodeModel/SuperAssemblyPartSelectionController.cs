@@ -72,6 +72,8 @@ public class SuperAssemblyPartSelectionController : MonoBehaviour
     [SerializeField] private Vector2 uiViewportPosition = new Vector2(0.73f, 0.5f);
 
     [SerializeField] private bool lockUiPoseOnSelectionEnter = true;
+    [SerializeField] private bool lockUiToFixedReferencePose = true;
+    [SerializeField] private bool keepUiWorldUpright = true;
 
     [Min(0.1f)]
     [SerializeField] private float uiDistanceFromCamera = 1.15f;
@@ -107,6 +109,10 @@ public class SuperAssemblyPartSelectionController : MonoBehaviour
     private bool experimentButtonBound;
     private bool rightRayUiInteractionCached;
     private bool originalRightRayUiInteraction;
+    private bool hasFixedUiReferencePose;
+    private Vector3 fixedUiReferenceWorldPosition;
+    private Quaternion fixedUiReferenceWorldRotation;
+    private Vector3 fixedUiReferenceWorldScale;
 
     public static bool HasActiveSelection => Instance != null && Instance.isSelectionActive;
     public bool IsSelectionActive => isSelectionActive;
@@ -893,18 +899,83 @@ public class SuperAssemblyPartSelectionController : MonoBehaviour
         }
 
         Transform uiTransform = uiCanvasGroup.transform;
-        uiTransform.position = camera.ViewportToWorldPoint(new Vector3(
+        Vector3 targetPosition = camera.ViewportToWorldPoint(new Vector3(
             uiViewportPosition.x,
             uiViewportPosition.y,
             uiDistanceFromCamera));
-        uiTransform.rotation = camera.transform.rotation;
-        SetWorldScale(uiTransform, Vector3.one * uiWorldScale);
+        Quaternion targetRotation = GetUiRotation(camera, targetPosition);
+        Vector3 targetWorldScale = Vector3.one * uiWorldScale;
+
+        if (lockUiToFixedReferencePose)
+        {
+            CacheFixedUiReferencePoseIfNeeded(targetPosition, targetRotation, targetWorldScale);
+            ApplyUiWorldPose(
+                uiTransform,
+                fixedUiReferenceWorldPosition,
+                fixedUiReferenceWorldRotation,
+                fixedUiReferenceWorldScale);
+        }
+        else
+        {
+            ApplyUiWorldPose(uiTransform, targetPosition, targetRotation, targetWorldScale);
+        }
 
         Canvas canvas = uiCanvasGroup.GetComponent<Canvas>();
         if (canvas != null)
         {
             canvas.worldCamera = camera;
         }
+    }
+
+    private void CacheFixedUiReferencePoseIfNeeded(Vector3 position, Quaternion rotation, Vector3 worldScale)
+    {
+        if (hasFixedUiReferencePose)
+        {
+            return;
+        }
+
+        fixedUiReferenceWorldPosition = position;
+        fixedUiReferenceWorldRotation = rotation;
+        fixedUiReferenceWorldScale = worldScale;
+        hasFixedUiReferencePose = true;
+    }
+
+    private void ApplyUiWorldPose(Transform uiTransform, Vector3 position, Quaternion rotation, Vector3 worldScale)
+    {
+        if (uiTransform == null)
+        {
+            return;
+        }
+
+        uiTransform.position = position;
+        uiTransform.rotation = rotation;
+        SetWorldScale(uiTransform, worldScale);
+    }
+
+    private Quaternion GetUiRotation(Camera camera, Vector3 uiPosition)
+    {
+        if (camera == null)
+        {
+            return Quaternion.identity;
+        }
+
+        if (!keepUiWorldUpright)
+        {
+            return camera.transform.rotation;
+        }
+
+        Vector3 flatForward = Vector3.ProjectOnPlane(camera.transform.forward, Vector3.up);
+        if (flatForward.sqrMagnitude < 0.000001f)
+        {
+            flatForward = Vector3.ProjectOnPlane(uiPosition - camera.transform.position, Vector3.up);
+        }
+
+        if (flatForward.sqrMagnitude < 0.000001f)
+        {
+            flatForward = Vector3.forward;
+        }
+
+        return Quaternion.LookRotation(flatForward.normalized, Vector3.up);
     }
 
     private void SetWorldScale(Transform target, Vector3 worldScale)

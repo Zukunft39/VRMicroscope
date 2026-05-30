@@ -1,6 +1,7 @@
 using Cinemachine;
 using UnityEngine;
 using UnityEngine.Serialization;
+using Unity.XR.CoreUtils;
 using UnityEngine.XR.Interaction.Toolkit;
 
 public class MicroscopeExploderModeController : MonoBehaviour
@@ -33,6 +34,9 @@ public class MicroscopeExploderModeController : MonoBehaviour
     [SerializeField] private bool animateExploderTransitions = true;
     [SerializeField] private bool copyFieldOfViewFromCurrentView = true;
     [SerializeField] private bool allowMicroscopeAsAssemblyTarget = true;
+    [SerializeField] private bool useTrackedPreAssemblyView = true;
+    [SerializeField] private bool restorePlayerPoseAfterAssembly = true;
+    [SerializeField] private bool lockTrackedPreAssemblyPose = true;
 
     [Header("Debug")]
     [SerializeField] private bool enableDebugLogs = true;
@@ -44,9 +48,16 @@ public class MicroscopeExploderModeController : MonoBehaviour
     private Renderer[] cachedExploderRenderers;
     private Renderer[] cachedMicroscopeRenderers;
     private GameObject cachedLocomotionRoot;
+    private XROrigin cachedXrOrigin;
     private XRInteractorLineVisual cachedRightLineVisual;
     private ModelExploder subscribedModelExploder;
     private bool pendingMicroscopeRestoreAfterAssemble;
+    private bool hasCachedTrackedAssemblyPose;
+    private Vector3 cachedTrackedAssemblyOriginPosition;
+    private Quaternion cachedTrackedAssemblyOriginRotation;
+    private bool hasFixedTrackedPreAssemblyOriginPose;
+    private Vector3 fixedTrackedPreAssemblyOriginPosition;
+    private Quaternion fixedTrackedPreAssemblyOriginRotation;
     private bool rayPresentationCached;
     private bool originalEnableUiInteraction;
     private bool originalHitClosestOnly;
@@ -276,6 +287,7 @@ public class MicroscopeExploderModeController : MonoBehaviour
         SyncPresetCameraFieldOfView();
         SwitchToPreAssemblyView();
         SetLocomotionEnabled(false);
+        SetGripMovementBlocked(true);
         ApplyAssemblyRayPresentation();
         pendingMicroscopeRestoreAfterAssemble = false;
         currentMode = AssemblyMode.PreAssembly;
@@ -295,6 +307,7 @@ public class MicroscopeExploderModeController : MonoBehaviour
         SyncPresetCameraFieldOfView();
         SwitchToPreAssemblyView();
         SetLocomotionEnabled(false);
+        SetGripMovementBlocked(true);
         ApplyAssemblyRayPresentation();
         pendingMicroscopeRestoreAfterAssemble = false;
         currentMode = AssemblyMode.SuperAssembly;
@@ -314,6 +327,7 @@ public class MicroscopeExploderModeController : MonoBehaviour
         SyncPresetCameraFieldOfView();
         SwitchToPreAssemblyView();
         SetLocomotionEnabled(false);
+        SetGripMovementBlocked(true);
         ApplyAssemblyRayPresentation();
         pendingMicroscopeRestoreAfterAssemble = false;
         partSelectionController?.ForceExitSelection(true);
@@ -332,6 +346,7 @@ public class MicroscopeExploderModeController : MonoBehaviour
         SetExploderState(false, true);
         RestoreDefaultRayPresentation();
         SwitchToFreeView();
+        SetGripMovementBlocked(false);
         SetLocomotionEnabled(true);
         XRActionReferenceGuard.RepairAllTurnProviders();
         DebugLog("Returned to Normal mode.");
@@ -354,6 +369,7 @@ public class MicroscopeExploderModeController : MonoBehaviour
             UpdateModelsVisibility();
             SetExploderState(false, true);
             RestoreDefaultRayPresentation();
+            SetGripMovementBlocked(false);
         }
 
         DebugLog($"Tutorial mode lock active. lockCount={tutorialModeLockCount}");
@@ -409,6 +425,11 @@ public class MicroscopeExploderModeController : MonoBehaviour
         if (cachedLocomotionRoot == null && Interactor.Instance != null && Interactor.Instance.xrLocomotionSys != null)
         {
             cachedLocomotionRoot = Interactor.Instance.xrLocomotionSys.gameObject;
+        }
+
+        if (cachedXrOrigin == null)
+        {
+            cachedXrOrigin = FindXrOrigin();
         }
 
         bool isReady = rightRayInteractor != null &&
@@ -765,6 +786,11 @@ public class MicroscopeExploderModeController : MonoBehaviour
             return;
         }
 
+        if (useTrackedPreAssemblyView && TrySwitchToTrackedPreAssemblyView())
+        {
+            return;
+        }
+
         progressControl.SwitchToPresetCamera(preAssemblyCamera);
     }
 
@@ -776,6 +802,164 @@ public class MicroscopeExploderModeController : MonoBehaviour
         }
 
         progressControl.SwitchToFreeView(preAssemblyCamera);
+        RestoreTrackedAssemblyOriginPoseIfNeeded();
+    }
+
+    private bool TrySwitchToTrackedPreAssemblyView()
+    {
+        XROrigin xrOrigin = cachedXrOrigin != null ? cachedXrOrigin : FindXrOrigin();
+        if (xrOrigin == null)
+        {
+            DebugLogWarning("Tracked pre-assembly view fallback: XROrigin was not found.");
+            return false;
+        }
+
+        Camera outputCamera = ResolveOutputCamera();
+        if (xrOrigin.Camera == null && outputCamera != null)
+        {
+            xrOrigin.Camera = outputCamera;
+        }
+
+        if (xrOrigin.Camera == null)
+        {
+            DebugLogWarning("Tracked pre-assembly view fallback: XROrigin has no Camera.");
+            return false;
+        }
+
+        cachedXrOrigin = xrOrigin;
+        CacheTrackedAssemblyOriginPoseIfNeeded(xrOrigin);
+
+        preAssemblyCamera.gameObject.SetActive(false);
+        progressControl.ChangeViewToFree();
+        ApplyTrackedPreAssemblyOriginPose(xrOrigin, preAssemblyCamera.transform);
+
+        DebugLog("Switched to tracked pre-assembly view.");
+        return true;
+    }
+
+    private XROrigin FindXrOrigin()
+    {
+        if (progressControl != null && progressControl.origin != null)
+        {
+            XROrigin origin = progressControl.origin.GetComponent<XROrigin>();
+            if (origin != null)
+            {
+                return origin;
+            }
+
+            origin = progressControl.origin.GetComponentInParent<XROrigin>();
+            if (origin != null)
+            {
+                return origin;
+            }
+
+            origin = progressControl.origin.GetComponentInChildren<XROrigin>(true);
+            if (origin != null)
+            {
+                return origin;
+            }
+        }
+
+        return FindObjectOfType<XROrigin>();
+    }
+
+    private Camera ResolveOutputCamera()
+    {
+        if (progressControl != null &&
+            progressControl.cinemachineBrain != null &&
+            progressControl.cinemachineBrain.OutputCamera != null)
+        {
+            return progressControl.cinemachineBrain.OutputCamera;
+        }
+
+        return Camera.main;
+    }
+
+    private void CacheTrackedAssemblyOriginPoseIfNeeded(XROrigin xrOrigin)
+    {
+        if (!restorePlayerPoseAfterAssembly || hasCachedTrackedAssemblyPose)
+        {
+            return;
+        }
+
+        Transform originTransform = GetXrOriginTransform(xrOrigin);
+        if (originTransform == null)
+        {
+            return;
+        }
+
+        cachedTrackedAssemblyOriginPosition = originTransform.position;
+        cachedTrackedAssemblyOriginRotation = originTransform.rotation;
+        hasCachedTrackedAssemblyPose = true;
+    }
+
+    private void AlignXrOriginToPreAssemblyCamera(XROrigin xrOrigin, Transform targetCameraTransform)
+    {
+        if (xrOrigin == null || targetCameraTransform == null)
+        {
+            return;
+        }
+
+        Vector3 targetForward = Vector3.ProjectOnPlane(targetCameraTransform.forward, Vector3.up);
+        if (targetForward.sqrMagnitude < 0.000001f)
+        {
+            targetForward = targetCameraTransform.forward;
+        }
+
+        xrOrigin.MatchOriginUpCameraForward(Vector3.up, targetForward.normalized);
+        xrOrigin.MoveCameraToWorldLocation(targetCameraTransform.position);
+    }
+
+    private void ApplyTrackedPreAssemblyOriginPose(XROrigin xrOrigin, Transform targetCameraTransform)
+    {
+        Transform originTransform = GetXrOriginTransform(xrOrigin);
+        if (lockTrackedPreAssemblyPose && hasFixedTrackedPreAssemblyOriginPose && originTransform != null)
+        {
+            originTransform.SetPositionAndRotation(
+                fixedTrackedPreAssemblyOriginPosition,
+                fixedTrackedPreAssemblyOriginRotation);
+            return;
+        }
+
+        AlignXrOriginToPreAssemblyCamera(xrOrigin, targetCameraTransform);
+
+        if (!lockTrackedPreAssemblyPose || originTransform == null)
+        {
+            return;
+        }
+
+        fixedTrackedPreAssemblyOriginPosition = originTransform.position;
+        fixedTrackedPreAssemblyOriginRotation = originTransform.rotation;
+        hasFixedTrackedPreAssemblyOriginPose = true;
+    }
+
+    private void RestoreTrackedAssemblyOriginPoseIfNeeded()
+    {
+        if (!hasCachedTrackedAssemblyPose)
+        {
+            return;
+        }
+
+        XROrigin xrOrigin = cachedXrOrigin != null ? cachedXrOrigin : FindXrOrigin();
+        Transform originTransform = GetXrOriginTransform(xrOrigin);
+        if (originTransform != null)
+        {
+            originTransform.SetPositionAndRotation(
+                cachedTrackedAssemblyOriginPosition,
+                cachedTrackedAssemblyOriginRotation);
+        }
+
+        hasCachedTrackedAssemblyPose = false;
+    }
+
+    private Transform GetXrOriginTransform(XROrigin xrOrigin)
+    {
+        if (xrOrigin == null)
+        {
+            return null;
+        }
+
+        return xrOrigin.Origin != null ? xrOrigin.Origin.transform : xrOrigin.transform;
     }
 
     private void SyncPresetCameraFieldOfView()
@@ -816,6 +1000,14 @@ public class MicroscopeExploderModeController : MonoBehaviour
         if (cachedLocomotionRoot != null)
         {
             cachedLocomotionRoot.SetActive(isEnabled);
+        }
+    }
+
+    private void SetGripMovementBlocked(bool isBlocked)
+    {
+        if (Move.Instance != null)
+        {
+            Move.Instance.SetGripMovementBlocked(isBlocked);
         }
     }
 
