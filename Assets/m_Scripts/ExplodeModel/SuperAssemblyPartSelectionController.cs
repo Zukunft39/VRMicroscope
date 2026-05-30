@@ -41,6 +41,8 @@ public class SuperAssemblyPartSelectionController : MonoBehaviour
     [SerializeField] private float boundsPadding = 0.005f;
 
     [Header("Selection Pose")]
+    [SerializeField] private bool alignSelectedPartVisualCenter = true;
+
     [SerializeField] private Vector2 selectedPartViewportPosition = new Vector2(0.33f, 0.5f);
 
     [Min(0.1f)]
@@ -58,6 +60,9 @@ public class SuperAssemblyPartSelectionController : MonoBehaviour
     [SerializeField] private bool hideOtherParts = true;
     [SerializeField] private bool disableCollidersForHiddenParts = true;
 
+    [Tooltip("Extra scene objects to hide while a part is selected. This supplements the normal part cache.")]
+    [SerializeField] private List<Transform> additionalHideTargets = new List<Transform>();
+
     [Header("UI")]
     [SerializeField] private CanvasGroup uiCanvasGroup;
     [SerializeField] private TextMeshProUGUI partNameText;
@@ -65,6 +70,8 @@ public class SuperAssemblyPartSelectionController : MonoBehaviour
     [SerializeField] private Button experimentButton;
     [SerializeField] private TextMeshProUGUI experimentButtonText;
     [SerializeField] private Vector2 uiViewportPosition = new Vector2(0.73f, 0.5f);
+
+    [SerializeField] private bool lockUiPoseOnSelectionEnter = true;
 
     [Min(0.1f)]
     [SerializeField] private float uiDistanceFromCamera = 1.15f;
@@ -225,8 +232,10 @@ public class SuperAssemblyPartSelectionController : MonoBehaviour
             return;
         }
 
-        UpdateSelectedPartTargetPose(false);
-        UpdateUiPose();
+        if (!lockUiPoseOnSelectionEnter)
+        {
+            UpdateUiPose();
+        }
     }
 
     [ContextMenu("Rebuild Part Cache")]
@@ -330,13 +339,13 @@ public class SuperAssemblyPartSelectionController : MonoBehaviour
             ExitSelection(true);
         }
 
+        SetHoverPulseComponentsEnabled(false);
         selectedPart = part;
         selectedPartInfo = FindPartInfo(part);
         selectedPartOriginalWorldPosition = part.position;
         selectedPartOriginalLocalScale = part.localScale;
         isSelectionActive = true;
 
-        SetHoverPulseComponentsEnabled(false);
         CacheAndEnableUiInteractionForSelection();
         ApplyOtherPartsVisibility(part, false);
         UpdateUiContent(part, selectedPartInfo);
@@ -631,58 +640,95 @@ public class SuperAssemblyPartSelectionController : MonoBehaviour
 
     private void ApplyOtherPartsVisibility(Transform partToKeep, bool visible)
     {
-        if (!hideOtherParts)
+        hiddenRendererStates.Clear();
+        hiddenColliderStates.Clear();
+
+        if (hideOtherParts)
+        {
+            for (int i = 0; i < cachedParts.Count; i++)
+            {
+                Transform part = cachedParts[i];
+                if (part == null || part == partToKeep)
+                {
+                    continue;
+                }
+
+                if (partToKeep != null && (partToKeep.IsChildOf(part) || part.IsChildOf(partToKeep)))
+                {
+                    continue;
+                }
+
+                ApplyTransformVisibility(part, visible, null);
+            }
+        }
+
+        ApplyAdditionalHideTargetsVisibility(partToKeep, visible);
+    }
+
+    private void ApplyAdditionalHideTargetsVisibility(Transform partToKeep, bool visible)
+    {
+        if (additionalHideTargets == null || additionalHideTargets.Count == 0)
         {
             return;
         }
 
-        hiddenRendererStates.Clear();
-        hiddenColliderStates.Clear();
-
-        for (int i = 0; i < cachedParts.Count; i++)
+        for (int i = 0; i < additionalHideTargets.Count; i++)
         {
-            Transform part = cachedParts[i];
-            if (part == null || part == partToKeep)
+            Transform target = additionalHideTargets[i];
+            if (target == null)
             {
                 continue;
             }
 
-            if (partToKeep != null && (partToKeep.IsChildOf(part) || part.IsChildOf(partToKeep)))
-            {
-                continue;
-            }
-
-            Renderer[] renderers = part.GetComponentsInChildren<Renderer>(true);
-            for (int j = 0; j < renderers.Length; j++)
-            {
-                Renderer targetRenderer = renderers[j];
-                if (targetRenderer == null || hiddenRendererStates.ContainsKey(targetRenderer))
-                {
-                    continue;
-                }
-
-                hiddenRendererStates.Add(targetRenderer, targetRenderer.enabled);
-                targetRenderer.enabled = visible;
-            }
-
-            if (!disableCollidersForHiddenParts)
-            {
-                continue;
-            }
-
-            Collider[] colliders = part.GetComponentsInChildren<Collider>(true);
-            for (int j = 0; j < colliders.Length; j++)
-            {
-                Collider targetCollider = colliders[j];
-                if (targetCollider == null || hiddenColliderStates.ContainsKey(targetCollider))
-                {
-                    continue;
-                }
-
-                hiddenColliderStates.Add(targetCollider, targetCollider.enabled);
-                targetCollider.enabled = visible;
-            }
+            ApplyTransformVisibility(target, visible, partToKeep);
         }
+    }
+
+    private void ApplyTransformVisibility(Transform target, bool visible, Transform partToKeep)
+    {
+        Renderer[] renderers = target.GetComponentsInChildren<Renderer>(true);
+        for (int i = 0; i < renderers.Length; i++)
+        {
+            Renderer targetRenderer = renderers[i];
+            if (targetRenderer == null ||
+                hiddenRendererStates.ContainsKey(targetRenderer) ||
+                ShouldKeepTransformVisible(targetRenderer.transform, partToKeep))
+            {
+                continue;
+            }
+
+            hiddenRendererStates.Add(targetRenderer, targetRenderer.enabled);
+            targetRenderer.enabled = visible;
+        }
+
+        if (!disableCollidersForHiddenParts)
+        {
+            return;
+        }
+
+        Collider[] colliders = target.GetComponentsInChildren<Collider>(true);
+        for (int i = 0; i < colliders.Length; i++)
+        {
+            Collider targetCollider = colliders[i];
+            if (targetCollider == null ||
+                hiddenColliderStates.ContainsKey(targetCollider) ||
+                ShouldKeepTransformVisible(targetCollider.transform, partToKeep))
+            {
+                continue;
+            }
+
+            hiddenColliderStates.Add(targetCollider, targetCollider.enabled);
+            targetCollider.enabled = visible;
+        }
+    }
+
+    private bool ShouldKeepTransformVisible(Transform candidate, Transform partToKeep)
+    {
+        return candidate != null &&
+               partToKeep != null &&
+               (candidate == partToKeep ||
+                candidate.IsChildOf(partToKeep) ||
+                partToKeep.IsChildOf(candidate));
     }
 
     private void RestoreOtherPartsVisibility()
@@ -715,7 +761,8 @@ public class SuperAssemblyPartSelectionController : MonoBehaviour
         }
 
         KillSelectedPartTween();
-        Vector3 targetPosition = GetViewportWorldPosition(selectedPartViewportPosition, selectedPartDistanceFromCamera);
+        Vector3 targetVisualCenter = GetViewportWorldPosition(selectedPartViewportPosition, selectedPartDistanceFromCamera);
+        Vector3 targetPosition = GetSelectedPartTargetPosition(part, targetVisualCenter);
         Vector3 targetScale = selectedPartOriginalLocalScale * selectedPartScaleMultiplier;
 
         selectedPartTween = DOTween.Sequence();
@@ -725,19 +772,49 @@ public class SuperAssemblyPartSelectionController : MonoBehaviour
         selectedPartTween.OnComplete(() => selectedPartTween = null);
     }
 
-    private void UpdateSelectedPartTargetPose(bool animate)
+    private Vector3 GetSelectedPartTargetPosition(Transform part, Vector3 targetVisualCenter)
     {
-        if (selectedPart == null)
+        if (!alignSelectedPartVisualCenter || part == null)
         {
-            return;
+            return targetVisualCenter;
         }
 
-        if (animate || selectedPartTween != null && selectedPartTween.IsActive())
+        Vector3 visualCenterOffset = GetPartVisualCenterWorld(part) - part.position;
+        return targetVisualCenter - visualCenterOffset * selectedPartScaleMultiplier;
+    }
+
+    private Vector3 GetPartVisualCenterWorld(Transform part)
+    {
+        if (part == null)
         {
-            return;
+            return selectedPart != null ? selectedPart.position : transform.position;
         }
 
-        selectedPart.position = GetViewportWorldPosition(selectedPartViewportPosition, selectedPartDistanceFromCamera);
+        Renderer[] renderers = part.GetComponentsInChildren<Renderer>(true);
+        if (renderers != null && renderers.Length > 0)
+        {
+            Bounds bounds = renderers[0].bounds;
+            for (int i = 1; i < renderers.Length; i++)
+            {
+                bounds.Encapsulate(renderers[i].bounds);
+            }
+
+            return bounds.center;
+        }
+
+        Collider[] colliders = part.GetComponentsInChildren<Collider>(true);
+        if (colliders != null && colliders.Length > 0)
+        {
+            Bounds bounds = colliders[0].bounds;
+            for (int i = 1; i < colliders.Length; i++)
+            {
+                bounds.Encapsulate(colliders[i].bounds);
+            }
+
+            return bounds.center;
+        }
+
+        return part.position;
     }
 
     private Vector3 GetViewportWorldPosition(Vector2 viewportPosition, float distance)
@@ -821,13 +898,39 @@ public class SuperAssemblyPartSelectionController : MonoBehaviour
             uiViewportPosition.y,
             uiDistanceFromCamera));
         uiTransform.rotation = camera.transform.rotation;
-        uiTransform.localScale = Vector3.one * uiWorldScale;
+        SetWorldScale(uiTransform, Vector3.one * uiWorldScale);
 
         Canvas canvas = uiCanvasGroup.GetComponent<Canvas>();
         if (canvas != null)
         {
             canvas.worldCamera = camera;
         }
+    }
+
+    private void SetWorldScale(Transform target, Vector3 worldScale)
+    {
+        if (target == null)
+        {
+            return;
+        }
+
+        Transform parent = target.parent;
+        if (parent == null)
+        {
+            target.localScale = worldScale;
+            return;
+        }
+
+        Vector3 parentScale = parent.lossyScale;
+        target.localScale = new Vector3(
+            SafeDivideScale(worldScale.x, parentScale.x),
+            SafeDivideScale(worldScale.y, parentScale.y),
+            SafeDivideScale(worldScale.z, parentScale.z));
+    }
+
+    private float SafeDivideScale(float targetScale, float parentScale)
+    {
+        return Mathf.Abs(parentScale) > 0.000001f ? targetScale / parentScale : targetScale;
     }
 
     private void ShowUi()

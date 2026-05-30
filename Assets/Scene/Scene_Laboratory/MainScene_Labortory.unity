@@ -10257,7 +10257,7 @@ MonoBehaviour:
       m_Calls: []
   m_text: Related Experiment
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 4458abc7175d8a44d9ec354a1ed1b293, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
@@ -10321,7 +10321,7 @@ MonoBehaviour:
   m_margin: {x: 0, y: 0, z: 0, w: 0}
   m_isUsingLegacyAnimationComponent: 0
   m_isVolumetricText: 0
-  m_hasFontAssetChanged: 0
+  m_hasFontAssetChanged: 1
   m_baseMaterial: {fileID: 0}
   m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
 --- !u!222 &521538564
@@ -18283,12 +18283,6 @@ MonoBehaviour:
     onExperimentButtonClicked:
       m_PersistentCalls:
         m_Calls: []
-  - partTransform: {fileID: 52920576}
-    displayName: "\u4E3B\u4F53"
-    description: "\u663E\u5FAE\u955C\u7684\u4E3B\u4F53\u7ED3\u6784"
-    onExperimentButtonClicked:
-      m_PersistentCalls:
-        m_Calls: []
   - partTransform: {fileID: 52920575}
     displayName: "\u7126\u87BA\u65CB"
     description: "\u7528\u4E8E\u8C03\u8282\u7126\u8DDD"
@@ -18297,19 +18291,23 @@ MonoBehaviour:
         m_Calls: []
   useRendererBoundsFallback: 1
   boundsPadding: 0.005
-  selectedPartViewportPosition: {x: 0.33, y: 0.5}
+  alignSelectedPartVisualCenter: 1
+  selectedPartViewportPosition: {x: 0.4, y: 0.38}
   selectedPartDistanceFromCamera: 1.2
   selectedPartScaleMultiplier: 1.8
   selectedPartMoveDuration: 0.45
   selectedPartEase: 9
   hideOtherParts: 1
   disableCollidersForHiddenParts: 1
+  additionalHideTargets:
+  - {fileID: 52920576}
   uiCanvasGroup: {fileID: 1261436813}
   partNameText: {fileID: 1394312345}
   partDescriptionText: {fileID: 1489998571}
   experimentButton: {fileID: 321251886}
   experimentButtonText: {fileID: 521538563}
-  uiViewportPosition: {x: 0.73, y: 0.5}
+  uiViewportPosition: {x: 0.6, y: 0.38}
+  lockUiPoseOnSelectionEnter: 1
   uiDistanceFromCamera: 1.15
   uiWorldScale: 0.00135
   uiFadeDuration: 0.28
@@ -24223,7 +24221,7 @@ MonoBehaviour:
       m_Calls: []
   m_text: 
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 4458abc7175d8a44d9ec354a1ed1b293, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
@@ -24287,7 +24285,7 @@ MonoBehaviour:
   m_margin: {x: 0, y: 0, z: 0, w: 0}
   m_isUsingLegacyAnimationComponent: 0
   m_isVolumetricText: 0
-  m_hasFontAssetChanged: 0
+  m_hasFontAssetChanged: 1
   m_baseMaterial: {fileID: 0}
   m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
 --- !u!222 &1394312346
@@ -26997,7 +26995,7 @@ MonoBehaviour:
       m_Calls: []
   m_text: 
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 4458abc7175d8a44d9ec354a1ed1b293, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
@@ -27061,7 +27059,7 @@ MonoBehaviour:
   m_margin: {x: 0, y: 0, z: 0, w: 0}
   m_isUsingLegacyAnimationComponent: 0
   m_isVolumetricText: 0
-  m_hasFontAssetChanged: 0
+  m_hasFontAssetChanged: 1
   m_baseMaterial: {fileID: 0}
   m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
 --- !u!222 &1489998572
