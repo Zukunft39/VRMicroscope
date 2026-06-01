@@ -110,6 +110,8 @@ public class SuperAssemblyPartSelectionController : MonoBehaviour
     private bool rightRayUiInteractionCached;
     private bool originalRightRayUiInteraction;
     private bool hasFixedUiReferencePose;
+    private bool externalInteractionLocked;
+    private bool selectionUiTemporarilyHidden;
     private Vector3 fixedUiReferenceWorldPosition;
     private Quaternion fixedUiReferenceWorldRotation;
     private Vector3 fixedUiReferenceWorldScale;
@@ -186,6 +188,33 @@ public class SuperAssemblyPartSelectionController : MonoBehaviour
         ExitSelection(immediate);
     }
 
+    public void SetExternalInteractionLocked(bool isLocked)
+    {
+        externalInteractionLocked = isLocked;
+    }
+
+    public void SetSelectionUiTemporarilyHidden(bool isHidden)
+    {
+        selectionUiTemporarilyHidden = isHidden;
+
+        if (isHidden)
+        {
+            HideUi(true);
+            return;
+        }
+
+        if (!isSelectionActive || selectedPart == null || !HasRequiredUiReferences())
+        {
+            return;
+        }
+
+        CacheAndEnableUiInteractionForSelection();
+        UpdateUiContent(selectedPart, selectedPartInfo);
+        EnsureUi();
+        UpdateUiPose();
+        ShowUi();
+    }
+
     public void InvokeCurrentExperiment()
     {
         if (!isSelectionActive || selectedPart == null)
@@ -217,6 +246,8 @@ public class SuperAssemblyPartSelectionController : MonoBehaviour
     private void OnDisable()
     {
         ExitSelection(true);
+        externalInteractionLocked = false;
+        selectionUiTemporarilyHidden = false;
         UnbindExperimentButton();
 
         if (Instance == this)
@@ -240,7 +271,10 @@ public class SuperAssemblyPartSelectionController : MonoBehaviour
 
         if (!lockUiPoseOnSelectionEnter)
         {
-            UpdateUiPose();
+            if (!selectionUiTemporarilyHidden)
+            {
+                UpdateUiPose();
+            }
         }
     }
 
@@ -300,6 +334,11 @@ public class SuperAssemblyPartSelectionController : MonoBehaviour
     private bool TryHandleRightTriggerInternal()
     {
         EnsureReferences();
+
+        if (externalInteractionLocked)
+        {
+            return true;
+        }
 
         if (isSelectionActive)
         {
@@ -370,6 +409,8 @@ public class SuperAssemblyPartSelectionController : MonoBehaviour
         {
             HideUiImmediate();
             RestoreUiInteractionAfterSelection();
+            externalInteractionLocked = false;
+            selectionUiTemporarilyHidden = false;
             return;
         }
 
@@ -378,6 +419,8 @@ public class SuperAssemblyPartSelectionController : MonoBehaviour
         RestoreOtherPartsVisibility();
         HideUi(immediate);
         RestoreUiInteractionAfterSelection();
+        externalInteractionLocked = false;
+        selectionUiTemporarilyHidden = false;
 
         if (partToRestore != null)
         {
