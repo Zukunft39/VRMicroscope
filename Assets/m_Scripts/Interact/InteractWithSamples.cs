@@ -12,21 +12,6 @@ public class InteractWithSamples:MonoBehaviour
     private bool isSampleOnHand = false;
     public RawImage Inventory;
 
-    private void Update()
-    {
-        if (!ReferenceEquals(interactableObject,null))
-        {
-            // 如果当前处于教程状态，不允许拾取物品
-            if (Interactor.Instance != null && Interactor.Instance.CurrentState == Interactor.GameState.Tutorial)
-                return;
-
-            if (Input.GetKey(KeyCode.R))
-            {
-                PickSample();
-            }
-        }
-    }
-
     public void PickSample()
     {
         Debug.Log("Picking Sample");

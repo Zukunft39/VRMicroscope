@@ -17,9 +17,5 @@ public class MicroBlack : MonoBehaviour
             animator.SetTrigger("ToBlack");
             ToBlack = false;
         }
-        if (Input.GetKeyDown(KeyCode.I))
-        {
-            ToBlack = true;
-        }
     }
 }

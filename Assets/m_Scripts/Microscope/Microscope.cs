@@ -75,8 +75,6 @@ public class Microscope : MonoBehaviour
     private Quaternion startRotation;
     private Quaternion targetRotation;
 
-    private bool operation=false; //操作说明
-
     #endregion
 
     #region 焦距调整相关变量
@@ -101,7 +99,6 @@ public class Microscope : MonoBehaviour
     // Start 在游戏开始时调用一次
     void Start()
     {
-        operation = false;
         if (lookCameraCanvas != null)
         {
             lookOperation = lookCameraCanvas.GetComponent<LookOperation>();
@@ -392,23 +389,6 @@ public class Microscope : MonoBehaviour
     void Update()
     {
         
-        //交互
-        if (Input.GetKeyDown(KeyCode.E) && !operation)
-        {
-            PutAndObserve();
-            if(lookCamera.activeSelf)QuitObserve();
-            SetcurrentFocal();
-        }
-        //取下物体
-        if(Input.GetKeyDown(KeyCode.R))TakeOutobj();
-        //按Q打开光源
-        if (Input.GetKeyDown(KeyCode.Q)) LightSwitch();
-        // // 修改原有的T键检测部分
-        // if (Input.GetKeyDown(KeyCode.T))
-        // {
-        //     RotateGlass();
-        // }
-
         AdjustLight(0);
        
         if (showCamera.activeSelf)
@@ -494,16 +474,6 @@ public class Microscope : MonoBehaviour
             }
         }
         
-        if (Input.GetKeyDown(KeyCode.T))RotateGlassOnObserving();
-
-        // 切换粗细调节模式
-        if (Input.GetKeyDown(KeyCode.M))SwitchModeOfChange();
-
-        // 焦距减少（B键）
-        if (Input.GetKey(KeyCode.B))ChangeFocal(-1);
-
-        // 焦距增加（N键）
-        if (Input.GetKey(KeyCode.N))ChangeFocal(1);
     }
     // 焦距调整方法
     private void AdjustFocal(int direction)

@@ -66,20 +66,6 @@ public class Interactor : MonoBehaviour
 
     private void Update()
     {
-        // 不通过 Input System，直接检测键盘 H 键呼出教程
-        if (Input.GetKeyDown(KeyCode.H))
-        {
-            if (CurrentState == GameState.Roaming)
-            {
-                currentTutorial.ReturnToFirstLevel();
-                ChangeState(GameState.Tutorial);
-            }
-            else if (CurrentState == GameState.Observing)
-            {
-                currentTutorial.ShowTutorial(2); 
-                ChangeState(GameState.Tutorial);
-            }
-        }
     }
 
     public void OnMicroscopeIn(Microscope microscope)
@@ -95,44 +81,23 @@ public class Interactor : MonoBehaviour
     {
         _roamingMap.FindAction("LightSwitch").started += (context) =>
         {
-            _currentMicroscope?.LightSwitch();
+            TriggerLightSwitch();
         };
         _roamingMap.FindAction("PutAndObserve").started += (context) =>
         {
-            _currentMicroscope?.PutAndObserve();
+            TriggerPutAndObserve();
         };
         _roamingMap.FindAction("TakeObj").started += (context) =>
         {
-            bool handledByExploderMode = MicroscopeExploderModeController.TryHandleRightTrigger();
-            Debug.Log(
-                $"[Interactor] TakeObj triggered. handledByExploderMode={handledByExploderMode}, currentMicroscope='{_currentMicroscope?.name ?? "null"}', hasPlacedSample={(_currentMicroscope != null && _currentMicroscope.HasPlacedSample())}");
-
-            if (handledByExploderMode)
-            {
-                return;
-            }
-
-            // 优先处理“从显微镜上取下当前样本”，避免同一输入同时触发“再实例化一个新样本”，
-            // 导致显微镜观察对象被替换或状态混乱。
-            if (_currentMicroscope != null && _currentMicroscope.HasPlacedSample())
-            {
-                _currentMicroscope.TakeOutobj();
-            }
-            else
-            {
-                _interactWithSamples?.PickSample();
-            }
+            TriggerTakeObjectOrSample();
         };
         _roamingMap.FindAction("ChangeGlass").started += (context) =>
         {
-            _currentMicroscope?.RotateGlass();
-            _currentMicroscope?.RotateGlassOnObserving();
+            TriggerChangeGlass();
         };
         _roamingMap.FindAction("ChangeFocusOrChangeLIght").performed += (context) =>
         {
-            Vector2 temp = context.ReadValue<Vector2>();
-            _currentMicroscope.ChangeFocal(Math.Abs(temp.x) > 0.7f ? temp.x : 0);
-            _currentMicroscope.AdjustLight(Math.Abs(temp.y) > 0.7f ? temp.y : 0);
+            ApplyRoamingFocusLightInput(context.ReadValue<Vector2>());
         };
     }
 
@@ -141,12 +106,11 @@ public class Interactor : MonoBehaviour
     {
         _observingMap.FindAction("ChangeMode").started += (context) =>
         {
-            _currentMicroscope?.SwitchModeOfChange();
+            TriggerChangeFocusMode();
         };
         _observingMap.FindAction("QuitObserve").started += (context) =>
         {
-            _currentMicroscope?.QuitObserve();
-            ChangeState(GameState.Roaming);
+            TriggerQuitObserve();
         };
         _observingMap.FindAction("ChangeFocusOrChangeLIght").performed += (context) =>
         {
@@ -163,8 +127,7 @@ public class Interactor : MonoBehaviour
         };
         _observingMap.FindAction("ChangeGlass").started += (context) =>
         {
-            _currentMicroscope?.RotateGlass();
-            _currentMicroscope?.RotateGlassOnObserving();
+            TriggerChangeGlass();
         };
     }
     void BindTutorial()
@@ -184,13 +147,110 @@ public class Interactor : MonoBehaviour
     {
         _globalMap.FindAction("OpenTutorial").started += (context) =>
         {
-            if(CurrentState==GameState.Roaming)
-                currentTutorial.ReturnToFirstLevel();
-            else if (CurrentState == GameState.Observing)
-                currentTutorial.ShowTutorial(2); 
-            ChangeState(GameState.Tutorial);
+            TriggerOpenTutorial();
         };
     }
+
+    public void TriggerOpenTutorial()
+    {
+        if (CurrentState == GameState.Roaming)
+        {
+            currentTutorial.ReturnToFirstLevel();
+        }
+        else if (CurrentState == GameState.Observing)
+        {
+            currentTutorial.ShowTutorial(2);
+        }
+
+        ChangeState(GameState.Tutorial);
+    }
+
+    public void TriggerLightSwitch()
+    {
+        _currentMicroscope?.LightSwitch();
+    }
+
+    public void TriggerPutAndObserve()
+    {
+        _currentMicroscope?.PutAndObserve();
+    }
+
+    public void TriggerTakeObjectOrSample()
+    {
+        TriggerTakeObjectOrSample(MicroscopeExploderModeController.TryHandleRightTrigger);
+    }
+
+    public void TriggerTakeObjectOrSample(Func<bool> assemblyHandler)
+    {
+        bool handledByExploderMode = assemblyHandler != null && assemblyHandler.Invoke();
+        Debug.Log(
+            $"[Interactor] TakeObj triggered. handledByExploderMode={handledByExploderMode}, currentMicroscope='{_currentMicroscope?.name ?? "null"}', hasPlacedSample={(_currentMicroscope != null && _currentMicroscope.HasPlacedSample())}");
+
+        if (handledByExploderMode)
+        {
+            return;
+        }
+
+        // 优先处理“从显微镜上取下当前样本”，避免同一输入同时触发“再实例化一个新样本”，
+        // 导致显微镜观察对象被替换或状态混乱。
+        if (_currentMicroscope != null && _currentMicroscope.HasPlacedSample())
+        {
+            _currentMicroscope.TakeOutobj();
+        }
+        else
+        {
+            _interactWithSamples?.PickSample();
+        }
+    }
+
+    public void TriggerChangeGlass()
+    {
+        _currentMicroscope?.RotateGlass();
+        _currentMicroscope?.RotateGlassOnObserving();
+    }
+
+    public void TriggerChangeFocusMode()
+    {
+        _currentMicroscope?.SwitchModeOfChange();
+    }
+
+    public void TriggerQuitObserve()
+    {
+        _currentMicroscope?.QuitObserve();
+        ChangeState(GameState.Roaming);
+    }
+
+    public void ApplyRoamingFocusLightInput(Vector2 input)
+    {
+        if (_currentMicroscope == null)
+        {
+            return;
+        }
+
+        _currentMicroscope.ChangeFocal(Math.Abs(input.x) > 0.7f ? input.x : 0);
+        _currentMicroscope.AdjustLight(Math.Abs(input.y) > 0.7f ? input.y : 0);
+    }
+
+    public void ApplyObservingFocusLightInput(Vector2 input, float deltaTime)
+    {
+        if (_currentMicroscope == null)
+        {
+            return;
+        }
+
+        float xVal = Math.Abs(input.x) > 0.7f ? input.x : 0;
+        float yVal = Math.Abs(input.y) > 0.7f ? input.y : 0;
+        if (xVal != 0)
+        {
+            _currentMicroscope.ChangeFocal(xVal * deltaTime);
+        }
+
+        if (yVal != 0)
+        {
+            _currentMicroscope.AdjustLight(yVal * deltaTime);
+        }
+    }
+
     public void ChangeState(GameState? newState)
     {
         bool flag = newState == CurrentState;
@@ -268,11 +328,7 @@ public class Interactor : MonoBehaviour
             float xVal = Mathf.Abs(input.x) > 0.7f ? input.x : 0;
             float yVal = Mathf.Abs(input.y) > 0.7f ? input.y : 0;
 
-            if (_currentMicroscope != null)
-            {
-                if (xVal != 0) _currentMicroscope.ChangeFocal(xVal * Time.deltaTime);
-                if (yVal != 0) _currentMicroscope.AdjustLight(yVal * Time.deltaTime);
-            }
+            ApplyObservingFocusLightInput(new Vector2(xVal, yVal), Time.deltaTime);
 
             // 暂停一帧，等待下一次循环（相当于 Update 的效果）
             yield return null; 

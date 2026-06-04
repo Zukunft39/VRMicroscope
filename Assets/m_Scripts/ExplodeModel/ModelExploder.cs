@@ -98,7 +98,6 @@ public class ModelExploder : MonoBehaviour
     public bool useUnscaledTime = false;
 
     [Header("调试")]
-    public bool allowSpaceToggleInPlayMode = true;
     public bool enableDebugLogs = true;
 
     private List<PartData> partsList = new List<PartData>();
@@ -582,15 +581,6 @@ public class ModelExploder : MonoBehaviour
     private void OnDestroy()
     {
         KillAllPartTweens();
-    }
-
-    // 测试用：按下空格键触发
-    private void Update()
-    {
-        if (allowSpaceToggleInPlayMode && Input.GetKeyDown(KeyCode.Space))
-        {
-            ToggleExplode();
-        }
     }
 
     private void DebugLog(string message)

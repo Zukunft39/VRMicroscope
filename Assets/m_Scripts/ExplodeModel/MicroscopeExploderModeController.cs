@@ -80,6 +80,19 @@ public class MicroscopeExploderModeController : MonoBehaviour
         return controller != null && controller.TryHandleRightTriggerInRoaming();
     }
 
+    public static bool TryHandleDesktopPrimaryClick(Ray ray, float maxDistance, bool isPointerOverUi)
+    {
+        if (IsTutorialModeLocked)
+        {
+            MicroscopeExploderModeController lockedController = ResolveAvailableInstance();
+            lockedController?.ApplyTutorialModeLockState();
+            return true;
+        }
+
+        MicroscopeExploderModeController controller = ResolveAvailableInstance();
+        return controller != null && controller.TryHandleDesktopPrimaryClickInRoaming(ray, maxDistance, isPointerOverUi);
+    }
+
     public static void PushTutorialModeLock()
     {
         tutorialModeLockCount++;
@@ -261,6 +274,68 @@ public class MicroscopeExploderModeController : MonoBehaviour
 
             case AssemblyMode.SuperAssembly:
                 if (SuperAssemblyPartSelectionController.TryHandleRightTrigger())
+                {
+                    return true;
+                }
+
+                if (isPointingAtExploder)
+                {
+                    return true;
+                }
+
+                ExitSuperAssemblyToPreAssembly();
+                return true;
+        }
+
+        return false;
+    }
+
+    public bool TryHandleDesktopPrimaryClickInRoaming(Ray ray, float maxDistance, bool isPointerOverUi)
+    {
+        if (IsTutorialModeLocked)
+        {
+            ApplyTutorialModeLockState();
+            return true;
+        }
+
+        if (!isActiveAndEnabled)
+        {
+            return false;
+        }
+
+        if (!EnsureReferences())
+        {
+            return false;
+        }
+
+        bool isPointingAtExploder = IsRayPointingAtAssemblyTarget(ray, maxDistance);
+        DebugLog($"TryHandleDesktopPrimaryClickInRoaming mode={currentMode}, pointingAtAssemblyTarget={isPointingAtExploder}");
+
+        switch (currentMode)
+        {
+            case AssemblyMode.Normal:
+                if (!isPointingAtExploder)
+                {
+                    return false;
+                }
+
+                EnterPreAssembly();
+                return true;
+
+            case AssemblyMode.PreAssembly:
+                if (isPointingAtExploder)
+                {
+                    EnterSuperAssembly();
+                }
+                else
+                {
+                    ReturnToNormalOperation();
+                }
+
+                return true;
+
+            case AssemblyMode.SuperAssembly:
+                if (SuperAssemblyPartSelectionController.TryHandleDesktopPrimaryClick(ray, maxDistance, isPointerOverUi))
                 {
                     return true;
                 }
@@ -633,6 +708,47 @@ public class MicroscopeExploderModeController : MonoBehaviour
         return false;
     }
 
+    private bool IsRayPointingAtAssemblyTarget(Ray ray, float maxDistance)
+    {
+        if (microscopeExploderRoot == null && microscopeRoot == null)
+        {
+            return false;
+        }
+
+        float safeMaxDistance = maxDistance > 0.0001f ? maxDistance : 100f;
+        bool canTargetMicroscope = currentMode == AssemblyMode.Normal || allowMicroscopeAsAssemblyTarget;
+
+        if (Physics.Raycast(ray, out RaycastHit hitInfo, safeMaxDistance, ~0, QueryTriggerInteraction.Collide))
+        {
+            if (IsTransformPartOfExploder(hitInfo.transform))
+            {
+                DebugLog($"Desktop ray hit exploder directly: '{GetHierarchyPath(hitInfo.transform)}'");
+                return true;
+            }
+
+            if (canTargetMicroscope && IsTransformPartOfMicroscope(hitInfo.transform))
+            {
+                DebugLog($"Desktop ray hit microscope directly: '{GetHierarchyPath(hitInfo.transform)}'");
+                return true;
+            }
+
+            DebugLog($"Desktop ray hit non-target object first: '{GetHierarchyPath(hitInfo.transform)}'. Continue bounds test.");
+        }
+
+        bool hitExploderBounds = DoesRayHitBounds(ray, safeMaxDistance, cachedExploderRenderers, microscopeExploderRoot, "Exploder");
+        if (hitExploderBounds)
+        {
+            return true;
+        }
+
+        if (canTargetMicroscope)
+        {
+            return DoesRayHitBounds(ray, safeMaxDistance, cachedMicroscopeRenderers, microscopeRoot, "Microscope");
+        }
+
+        return false;
+    }
+
     private bool IsTransformPartOfExploder(Transform hitTransform)
     {
         return IsTransformPartOfRoot(hitTransform, microscopeExploderRoot);
@@ -673,6 +789,16 @@ public class MicroscopeExploderModeController : MonoBehaviour
         }
 
         Ray ray = new Ray(origin, direction.normalized);
+        return DoesRayHitBounds(ray, maxDistance, renderers, rootObject, targetLabel);
+    }
+
+    private bool DoesRayHitBounds(Ray ray, float maxDistance, Renderer[] renderers, GameObject rootObject, string targetLabel)
+    {
+        if (renderers == null || renderers.Length == 0 || rootObject == null)
+        {
+            return false;
+        }
+
         for (int i = 0; i < renderers.Length; i++)
         {
             Renderer renderer = renderers[i];

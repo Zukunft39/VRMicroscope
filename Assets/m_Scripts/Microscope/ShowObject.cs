@@ -56,14 +56,6 @@ public class ShowObject : MonoBehaviour
 
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.F))
-        {
-            choice += 1;
-            choice %= textures.Count;
-            meshRenderer.sharedMaterial = textures[choice];
-            material = meshRenderer.sharedMaterial;
-        }
-
         if(microscope!=null)
         {
             SetLight(microscope.GetLight());

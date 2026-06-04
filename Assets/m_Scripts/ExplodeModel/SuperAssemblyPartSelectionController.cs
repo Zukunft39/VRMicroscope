@@ -127,6 +127,12 @@ public class SuperAssemblyPartSelectionController : MonoBehaviour
         return controller != null && controller.TryHandleRightTriggerInternal();
     }
 
+    public static bool TryHandleDesktopPrimaryClick(Ray ray, float maxDistance, bool isPointerOverUi)
+    {
+        SuperAssemblyPartSelectionController controller = ResolveAvailableInstance();
+        return controller != null && controller.TryHandleDesktopPrimaryClickInternal(ray, maxDistance, isPointerOverUi);
+    }
+
     private static SuperAssemblyPartSelectionController ResolveAvailableInstance()
     {
         if (Instance != null && Instance.isActiveAndEnabled)
@@ -366,6 +372,41 @@ public class SuperAssemblyPartSelectionController : MonoBehaviour
         return true;
     }
 
+    private bool TryHandleDesktopPrimaryClickInternal(Ray ray, float maxDistance, bool isPointerOverUi)
+    {
+        EnsureReferences();
+
+        if (externalInteractionLocked)
+        {
+            return true;
+        }
+
+        if (isSelectionActive)
+        {
+            if (isPointerOverUi)
+            {
+                return true;
+            }
+
+            ExitSelection(false);
+            return true;
+        }
+
+        if (!IsInReadySuperAssemblyState())
+        {
+            return false;
+        }
+
+        Transform hoveredPart = ResolvePartFromRay(ray, maxDistance);
+        if (hoveredPart == null)
+        {
+            return false;
+        }
+
+        EnterSelection(hoveredPart);
+        return true;
+    }
+
     private void EnterSelection(Transform part)
     {
         if (part == null)
@@ -563,6 +604,22 @@ public class SuperAssemblyPartSelectionController : MonoBehaviour
         return useRendererBoundsFallback ? ResolvePartByRendererBounds() : null;
     }
 
+    private Transform ResolvePartFromRay(Ray ray, float maxDistance)
+    {
+        float safeMaxDistance = maxDistance > 0.0001f ? maxDistance : 100f;
+
+        if (Physics.Raycast(ray, out RaycastHit hitInfo, safeMaxDistance, ~0, QueryTriggerInteraction.Collide))
+        {
+            Transform hitPart = ResolvePartFromTransform(hitInfo.transform);
+            if (hitPart != null)
+            {
+                return hitPart;
+            }
+        }
+
+        return useRendererBoundsFallback ? ResolvePartByRendererBounds(ray, safeMaxDistance) : null;
+    }
+
     private Transform ResolvePartFromTransform(Transform hitTransform)
     {
         if (hitTransform == null)
@@ -590,6 +647,11 @@ public class SuperAssemblyPartSelectionController : MonoBehaviour
     private Transform ResolvePartByRendererBounds()
     {
         Ray ray = BuildInteractorRay(out float maxDistance);
+        return ResolvePartByRendererBounds(ray, maxDistance);
+    }
+
+    private Transform ResolvePartByRendererBounds(Ray ray, float maxDistance)
+    {
         Transform bestPart = null;
         float bestDistance = float.MaxValue;
 

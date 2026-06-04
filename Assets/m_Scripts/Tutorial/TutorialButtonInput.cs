@@ -26,63 +26,6 @@ public class TutorialButtonInput : MonoBehaviour
         }
     }
 
-    private void Update()
-    {
-        // 检测WASD按键输入
-        HandleWASDInput();
-        
-        // 检测空格键确认输入
-        HandleSpaceConfirmInput();
-    }
-
-    /// <summary>
-    /// 检测WASD按键输入并转换为Vector2传递给导航逻辑
-    /// </summary>
-    private void HandleWASDInput()
-    {
-        // 构建WASD的输入向量（仅在按键按下时触发一次，避免持续输入）
-        Vector2 input = Vector2.zero;
-        
-        // W键（上）- Y轴正方向
-        if (Input.GetKeyDown(KeyCode.W))
-        {
-            input.y = 1f;
-        }
-        // S键（下）- Y轴负方向
-        else if (Input.GetKeyDown(KeyCode.S))
-        {
-            input.y = -1f;
-        }
-        // A键（左）- X轴负方向
-        else if (Input.GetKeyDown(KeyCode.A))
-        {
-            input.x = -1f;
-        }
-        // D键（右）- X轴正方向
-        else if (Input.GetKeyDown(KeyCode.D))
-        {
-            input.x = 1f;
-        }
-
-        // 如果有有效输入，调用导航处理方法
-        if (input != Vector2.zero)
-        {
-            HandleNavigate(input);
-        }
-    }
-
-    /// <summary>
-    /// 检测空格键输入并触发确认操作
-    /// </summary>
-    private void HandleSpaceConfirmInput()
-    {
-        // 空格键按下时触发确认
-        if (Input.GetKeyDown(KeyCode.Space))
-        {
-            HandleConfirm();
-        }
-    }
-
     /// <summary>
     /// 处理导航输入 (WASD / 摇杆)
     /// </summary>

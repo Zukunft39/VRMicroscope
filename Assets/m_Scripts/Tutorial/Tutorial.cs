@@ -114,14 +114,6 @@ public class Tutorial : MonoBehaviour
         Interactor.Instance.tutorialButtonInput = GetComponent<TutorialButtonInput>();
     }
 
-    void Update()
-    {
-        if(Input.GetKeyDown(KeyCode.O))
-        {
-            ReturnToFirstLevel();
-        }
-    }
-
     /// <summary>
     /// [新增] 加载进度数据
     /// </summary>
