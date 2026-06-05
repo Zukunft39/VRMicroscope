@@ -74,6 +74,10 @@ public class SuperAssemblyPartSelectionController : MonoBehaviour
     [SerializeField] private bool lockUiPoseOnSelectionEnter = true;
     [SerializeField] private bool lockUiToFixedReferencePose = true;
     [SerializeField] private bool keepUiWorldUpright = true;
+    [SerializeField] private bool fitUiInsideCameraView = true;
+    [SerializeField] private Vector2 uiViewportPadding = new Vector2(0.04f, 0.08f);
+    [Range(0.1f, 1f)]
+    [SerializeField] private float minUiFitScaleMultiplier = 0.65f;
 
     [Min(0.1f)]
     [SerializeField] private float uiDistanceFromCamera = 1.15f;
@@ -1011,6 +1015,8 @@ public class SuperAssemblyPartSelectionController : MonoBehaviour
         Quaternion targetRotation = GetUiRotation(camera, targetPosition);
         Vector3 targetWorldScale = Vector3.one * uiWorldScale;
 
+        FitUiPoseInsideCameraView(camera, uiTransform, targetRotation, ref targetPosition, ref targetWorldScale);
+
         if (lockUiToFixedReferencePose)
         {
             CacheFixedUiReferencePoseIfNeeded(targetPosition, targetRotation, targetWorldScale);
@@ -1030,6 +1036,125 @@ public class SuperAssemblyPartSelectionController : MonoBehaviour
         {
             canvas.worldCamera = camera;
         }
+    }
+
+    private void FitUiPoseInsideCameraView(
+        Camera camera,
+        Transform uiTransform,
+        Quaternion rotation,
+        ref Vector3 position,
+        ref Vector3 worldScale)
+    {
+        if (!fitUiInsideCameraView || camera == null || uiTransform == null)
+        {
+            return;
+        }
+
+        RectTransform rectTransform = uiTransform as RectTransform;
+        if (rectTransform == null)
+        {
+            rectTransform = uiTransform.GetComponent<RectTransform>();
+        }
+
+        if (rectTransform == null)
+        {
+            return;
+        }
+
+        ApplyUiWorldPose(uiTransform, position, rotation, worldScale);
+        Canvas.ForceUpdateCanvases();
+
+        Vector2 viewportMin;
+        Vector2 viewportMax;
+        if (!TryGetUiViewportBounds(camera, rectTransform, out viewportMin, out viewportMax))
+        {
+            return;
+        }
+
+        Vector2 padding = new Vector2(
+            Mathf.Clamp(uiViewportPadding.x, 0f, 0.45f),
+            Mathf.Clamp(uiViewportPadding.y, 0f, 0.45f));
+
+        float availableWidth = Mathf.Max(0.05f, 1f - padding.x * 2f);
+        float availableHeight = Mathf.Max(0.05f, 1f - padding.y * 2f);
+        float currentWidth = Mathf.Max(0.0001f, viewportMax.x - viewportMin.x);
+        float currentHeight = Mathf.Max(0.0001f, viewportMax.y - viewportMin.y);
+
+        float fitScale = Mathf.Min(1f, availableWidth / currentWidth, availableHeight / currentHeight);
+        fitScale = Mathf.Clamp(fitScale, Mathf.Clamp(minUiFitScaleMultiplier, 0.1f, 1f), 1f);
+
+        if (fitScale < 0.999f)
+        {
+            worldScale *= fitScale;
+            ApplyUiWorldPose(uiTransform, position, rotation, worldScale);
+            Canvas.ForceUpdateCanvases();
+            TryGetUiViewportBounds(camera, rectTransform, out viewportMin, out viewportMax);
+        }
+
+        Vector2 viewportOffset = Vector2.zero;
+        if (viewportMin.x < padding.x)
+        {
+            viewportOffset.x += padding.x - viewportMin.x;
+        }
+        else if (viewportMax.x > 1f - padding.x)
+        {
+            viewportOffset.x -= viewportMax.x - (1f - padding.x);
+        }
+
+        if (viewportMin.y < padding.y)
+        {
+            viewportOffset.y += padding.y - viewportMin.y;
+        }
+        else if (viewportMax.y > 1f - padding.y)
+        {
+            viewportOffset.y -= viewportMax.y - (1f - padding.y);
+        }
+
+        if (viewportOffset.sqrMagnitude <= 0.0000001f)
+        {
+            return;
+        }
+
+        Vector3 viewportPosition = camera.WorldToViewportPoint(position);
+        viewportPosition.x += viewportOffset.x;
+        viewportPosition.y += viewportOffset.y;
+        position = camera.ViewportToWorldPoint(viewportPosition);
+    }
+
+    private bool TryGetUiViewportBounds(
+        Camera camera,
+        RectTransform rectTransform,
+        out Vector2 viewportMin,
+        out Vector2 viewportMax)
+    {
+        viewportMin = new Vector2(float.PositiveInfinity, float.PositiveInfinity);
+        viewportMax = new Vector2(float.NegativeInfinity, float.NegativeInfinity);
+
+        if (camera == null || rectTransform == null)
+        {
+            return false;
+        }
+
+        Vector3[] worldCorners = new Vector3[4];
+        rectTransform.GetWorldCorners(worldCorners);
+
+        bool hasValidCorner = false;
+        for (int i = 0; i < worldCorners.Length; i++)
+        {
+            Vector3 viewportPoint = camera.WorldToViewportPoint(worldCorners[i]);
+            if (viewportPoint.z <= 0f)
+            {
+                continue;
+            }
+
+            hasValidCorner = true;
+            viewportMin.x = Mathf.Min(viewportMin.x, viewportPoint.x);
+            viewportMin.y = Mathf.Min(viewportMin.y, viewportPoint.y);
+            viewportMax.x = Mathf.Max(viewportMax.x, viewportPoint.x);
+            viewportMax.y = Mathf.Max(viewportMax.y, viewportPoint.y);
+        }
+
+        return hasValidCorner;
     }
 
     private void CacheFixedUiReferencePoseIfNeeded(Vector3 position, Quaternion rotation, Vector3 worldScale)

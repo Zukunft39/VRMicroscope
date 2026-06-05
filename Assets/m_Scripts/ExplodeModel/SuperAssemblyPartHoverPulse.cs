@@ -241,6 +241,20 @@ public class SuperAssemblyPartHoverPulse : MonoBehaviour
 
     private Transform ResolveHoveredPart()
     {
+        if (CameraTryMove.TryGetDesktopPointerRay(out Ray desktopRay, out float desktopMaxDistance))
+        {
+            if (Physics.Raycast(desktopRay, out RaycastHit desktopHitInfo, desktopMaxDistance, ~0, QueryTriggerInteraction.Collide))
+            {
+                Transform desktopHitPart = ResolvePartFromTransform(desktopHitInfo.transform);
+                if (desktopHitPart != null)
+                {
+                    return desktopHitPart;
+                }
+            }
+
+            return useRendererBoundsFallback ? ResolvePartByRendererBounds(desktopRay, desktopMaxDistance) : null;
+        }
+
         if (rightRayInteractor == null)
         {
             return null;
@@ -285,6 +299,11 @@ public class SuperAssemblyPartHoverPulse : MonoBehaviour
     private Transform ResolvePartByRendererBounds()
     {
         Ray ray = BuildInteractorRay(out float maxDistance);
+        return ResolvePartByRendererBounds(ray, maxDistance);
+    }
+
+    private Transform ResolvePartByRendererBounds(Ray ray, float maxDistance)
+    {
         Transform bestPart = null;
         float bestDistance = float.MaxValue;
 

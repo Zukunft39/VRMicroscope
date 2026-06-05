@@ -5512,7 +5512,7 @@ MonoBehaviour:
   m_LookAt: {fileID: 0}
   m_Follow: {fileID: 0}
   m_Lens:
-    FieldOfView: 98.04017
+    FieldOfView: 40
     OrthographicSize: 10
     NearClipPlane: 0.1
     FarClipPlane: 5000
@@ -6466,7 +6466,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7696548426260509612}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: d433a4ebe611ec44d8864a34579f2b62, type: 3}
   m_Name: 
@@ -41152,7 +41152,6 @@ GameObject:
   - component: {fileID: 3127728408165770465}
   - component: {fileID: 3127728408165770464}
   - component: {fileID: 3127728408165770466}
-  - component: {fileID: 3127728408165770495}
   m_Layer: 0
   m_Name: EventSystem
   m_TagString: Untagged
@@ -41160,42 +41159,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &3127728408165770495
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3127728408165770494}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e896e8f48ad44dfd8c06ed7fbd21220a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  enableDesktopDebugInput: 1
-  autoCreateWhenSceneLoads: 1
-  forceTutorialInputActions: {fileID: 0}
-  interactor: {fileID: 0}
-  targetCamera: {fileID: 0}
-  xrOrigin: {fileID: 0}
-  characterController: {fileID: 0}
-  enableDirectKeyboardMove: 1
-  moveSpeed: 2.2
-  allowMoveOnlyInRoaming: 1
-  enableMouseLook: 1
-  mouseLookButton: 324
-  mouseLookSensitivity: 0.18
-  minPitch: -70
-  maxPitch: 70
-  forceDesktopCameraControlInRoaming: 1
-  mouseLeftClickAsRightTrigger: 1
-  keyboardRightTriggerKey: 102
-  keyboardTeleportKey: 103
-  desktopRayDistance: 100
-  desktopRayMask:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  enableDebugLogs: 0
 --- !u!1 &3166571519320534623
 GameObject:
   m_ObjectHideFlags: 0
@@ -44042,14 +44005,52 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7696548426260509612}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 9d2ac5bbcce0e48449f8a3b48c966c60, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  moveSpeed: 5
-  rotationSpeed: 2
   canMove: 1
+  moveSpeed: 5
+  fastMoveMultiplier: 2
+  rotationSpeed: 2
+  keyboardTurnSpeed: 75
+  sprintKey: 304
+  moveUpKey: 101
+  moveDownKey: 113
+  lookMouseButton: 1
+  lockCursorWhileLooking: 1
+  hideCursorWhileLooking: 1
+  primaryClickMouseButton: 0
+  desktopRayMaxDistance: 100
+  desktopRaycastMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  teleportSurfaceMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  maxTeleportSurfaceAngle: 60
+  leftPrimaryButtonKey: 120
+  leftSecondaryButtonKey: 121
+  leftTriggerButtonKey: 122
+  leftGripButtonKey: 99
+  rightPrimaryButtonKey: 114
+  rightSecondaryButtonKey: 98
+  rightGripButtonKey: 103
+  leftStickPressKey: 118
+  rightStickPressKey: 9
+  leftStickUpKey: 119
+  leftStickDownKey: 115
+  leftStickLeftKey: 97
+  leftStickRightKey: 100
+  rightStickUpKey: 273
+  rightStickDownKey: 274
+  rightStickLeftKey: 276
+  rightStickRightKey: 275
+  openTutorialKey: 121
+  confirmTutorialKey: 32
+  alternateConfirmTutorialKey: 13
+  quitObserveKey: 27
 --- !u!114 &7873184976552145455
 MonoBehaviour:
   m_ObjectHideFlags: 0
