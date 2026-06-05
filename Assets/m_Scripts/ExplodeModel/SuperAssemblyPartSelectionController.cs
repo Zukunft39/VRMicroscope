@@ -22,6 +22,14 @@ public class SuperAssemblyPartSelectionController : MonoBehaviour
         public UnityEvent onExperimentButtonClicked = new UnityEvent();
     }
 
+    [Serializable]
+    public class PartExperimentBinding
+    {
+        public Transform partTransform;
+        public NumericalApertureExperimentController numericalApertureExperiment;
+        public string buttonText = "Start Numerical Aperture Experiment";
+    }
+
     public static SuperAssemblyPartSelectionController Instance { get; private set; }
 
     [Header("References")]
@@ -34,6 +42,13 @@ public class SuperAssemblyPartSelectionController : MonoBehaviour
     [Header("Parts")]
     [Tooltip("Optional part metadata. Leave empty to use ModelExploder's part list with default names.")]
     [SerializeField] private List<PartInfo> partInfos = new List<PartInfo>();
+
+    [Header("Part Experiments")]
+    [Tooltip("Parts listed here will enable the third UI panel button while selected.")]
+    [SerializeField] private List<PartExperimentBinding> partExperimentBindings = new List<PartExperimentBinding>();
+    [SerializeField] private bool autoBindAboveMirrorNumericalAperture = true;
+    [SerializeField] private bool hideExperimentButtonWhenUnavailable = true;
+    [SerializeField] private string unavailableExperimentText = "No Experiment Available";
 
     [SerializeField] private bool useRendererBoundsFallback = true;
 
@@ -90,6 +105,14 @@ public class SuperAssemblyPartSelectionController : MonoBehaviour
 
     [SerializeField] private Ease uiFadeEase = Ease.OutCubic;
 
+    [Header("Experiment Button Hover")]
+    [SerializeField] private bool animateExperimentButtonOnHover = true;
+    [Min(1f)]
+    [SerializeField] private float experimentButtonHoverScaleMultiplier = 1.08f;
+    [Min(0.01f)]
+    [SerializeField] private float experimentButtonHoverPulseDuration = 0.45f;
+    [SerializeField] private Ease experimentButtonHoverEase = Ease.InOutSine;
+
     [Header("Events")]
     [SerializeField] private UnityEvent onSelectionEntered = new UnityEvent();
     [SerializeField] private UnityEvent onSelectionExited = new UnityEvent();
@@ -105,6 +128,7 @@ public class SuperAssemblyPartSelectionController : MonoBehaviour
 
     private Transform selectedPart;
     private PartInfo selectedPartInfo;
+    private PartExperimentBinding selectedExperimentBinding;
     private Vector3 selectedPartOriginalWorldPosition;
     private Vector3 selectedPartOriginalLocalScale;
     private Sequence selectedPartTween;
@@ -119,6 +143,12 @@ public class SuperAssemblyPartSelectionController : MonoBehaviour
     private Vector3 fixedUiReferenceWorldPosition;
     private Quaternion fixedUiReferenceWorldRotation;
     private Vector3 fixedUiReferenceWorldScale;
+    private PartExperimentBinding runtimeAboveMirrorExperimentBinding;
+    private Transform cachedExperimentButtonTransform;
+    private Vector3 experimentButtonOriginalLocalScale;
+    private Tween experimentButtonHoverTween;
+    private bool hasExperimentButtonOriginalScale;
+    private int lastExperimentRequestFrame = -1;
 
     public static bool HasActiveSelection => Instance != null && Instance.isSelectionActive;
     public bool IsSelectionActive => isSelectionActive;
@@ -209,6 +239,7 @@ public class SuperAssemblyPartSelectionController : MonoBehaviour
 
         if (isHidden)
         {
+            StopExperimentButtonHoverPulse();
             HideUi(true);
             return;
         }
@@ -232,9 +263,34 @@ public class SuperAssemblyPartSelectionController : MonoBehaviour
             return;
         }
 
+        if (lastExperimentRequestFrame == Time.frameCount)
+        {
+            return;
+        }
+
+        lastExperimentRequestFrame = Time.frameCount;
+
+        bool startedExperiment = false;
+        NumericalApertureExperimentController experimentController =
+            selectedExperimentBinding != null
+                ? selectedExperimentBinding.numericalApertureExperiment
+                : null;
+
+        if (experimentController == null && selectedExperimentBinding != null)
+        {
+            experimentController = ResolveNumericalApertureExperiment();
+            selectedExperimentBinding.numericalApertureExperiment = experimentController;
+        }
+
+        if (experimentController != null)
+        {
+            experimentController.StartExperiment();
+            startedExperiment = true;
+        }
+
         selectedPartInfo?.onExperimentButtonClicked?.Invoke();
         onExperimentRequested?.Invoke();
-        DebugLog($"Experiment requested for part='{selectedPart.name}'");
+        DebugLog($"Experiment requested for part='{selectedPart.name}', started={startedExperiment}");
     }
 
     private void Awake()
@@ -286,6 +342,14 @@ public class SuperAssemblyPartSelectionController : MonoBehaviour
                 UpdateUiPose();
             }
         }
+
+        if (selectionUiTemporarilyHidden)
+        {
+            StopExperimentButtonHoverPulse();
+            return;
+        }
+
+        UpdateExperimentButtonHoverPulse();
     }
 
     [ContextMenu("Rebuild Part Cache")]
@@ -352,7 +416,7 @@ public class SuperAssemblyPartSelectionController : MonoBehaviour
 
         if (isSelectionActive)
         {
-            if (IsPointingAtSelectionUi())
+            if (TryInvokeExperimentButtonFromPointer(allowMousePointer: false) || IsPointingAtSelectionUi())
             {
                 return true;
             }
@@ -389,6 +453,7 @@ public class SuperAssemblyPartSelectionController : MonoBehaviour
         {
             if (isPointerOverUi)
             {
+                TryInvokeExperimentButtonFromPointer(allowMousePointer: true);
                 return true;
             }
 
@@ -418,6 +483,7 @@ public class SuperAssemblyPartSelectionController : MonoBehaviour
             return;
         }
 
+        EnsureUi();
         if (!HasRequiredUiReferences())
         {
             DebugLogWarning("Selection UI references are missing. Please assign CanvasGroup, Name Text, Description Text, and Experiment Button in the scene.");
@@ -432,6 +498,7 @@ public class SuperAssemblyPartSelectionController : MonoBehaviour
         SetHoverPulseComponentsEnabled(false);
         selectedPart = part;
         selectedPartInfo = FindPartInfo(part);
+        selectedExperimentBinding = FindPartExperimentBinding(part, selectedPartInfo);
         selectedPartOriginalWorldPosition = part.position;
         selectedPartOriginalLocalScale = part.localScale;
         isSelectionActive = true;
@@ -461,6 +528,7 @@ public class SuperAssemblyPartSelectionController : MonoBehaviour
 
         Transform partToRestore = selectedPart;
         KillSelectedPartTween();
+        StopExperimentButtonHoverPulse();
         RestoreOtherPartsVisibility();
         HideUi(immediate);
         RestoreUiInteractionAfterSelection();
@@ -490,6 +558,7 @@ public class SuperAssemblyPartSelectionController : MonoBehaviour
 
         selectedPart = null;
         selectedPartInfo = null;
+        selectedExperimentBinding = null;
         isSelectionActive = false;
         SetHoverPulseComponentsEnabled(true);
         onSelectionExited?.Invoke();
@@ -753,6 +822,84 @@ public class SuperAssemblyPartSelectionController : MonoBehaviour
         return null;
     }
 
+    private PartExperimentBinding FindPartExperimentBinding(Transform part, PartInfo info)
+    {
+        if (part == null)
+        {
+            return null;
+        }
+
+        if (partExperimentBindings != null)
+        {
+            for (int i = 0; i < partExperimentBindings.Count; i++)
+            {
+                PartExperimentBinding binding = partExperimentBindings[i];
+                if (binding == null || binding.partTransform == null)
+                {
+                    continue;
+                }
+
+                if (part == binding.partTransform ||
+                    part.IsChildOf(binding.partTransform) ||
+                    binding.partTransform.IsChildOf(part))
+                {
+                    if (binding.numericalApertureExperiment == null)
+                    {
+                        binding.numericalApertureExperiment = ResolveNumericalApertureExperiment();
+                    }
+
+                    return binding;
+                }
+            }
+        }
+
+        if (!autoBindAboveMirrorNumericalAperture || !IsAboveMirrorPart(part, info))
+        {
+            return null;
+        }
+
+        if (runtimeAboveMirrorExperimentBinding == null)
+        {
+            runtimeAboveMirrorExperimentBinding = new PartExperimentBinding();
+        }
+
+        runtimeAboveMirrorExperimentBinding.partTransform = part;
+        runtimeAboveMirrorExperimentBinding.buttonText = "Start Numerical Aperture Experiment";
+        runtimeAboveMirrorExperimentBinding.numericalApertureExperiment = ResolveNumericalApertureExperiment();
+        return runtimeAboveMirrorExperimentBinding;
+    }
+
+    private bool IsAboveMirrorPart(Transform part, PartInfo info)
+    {
+        if (part != null && part.name.IndexOf("AboveMirror", StringComparison.OrdinalIgnoreCase) >= 0)
+        {
+            return true;
+        }
+
+        if (info == null)
+        {
+            return false;
+        }
+
+        string displayName = info.displayName ?? string.Empty;
+        return displayName.Contains("上半") && displayName.Contains("镜");
+    }
+
+    private NumericalApertureExperimentController ResolveNumericalApertureExperiment()
+    {
+        NumericalApertureExperimentController controller =
+            FindObjectOfType<NumericalApertureExperimentController>(true);
+
+        if (controller != null)
+        {
+            return controller;
+        }
+
+        controller = gameObject.AddComponent<NumericalApertureExperimentController>();
+        DebugLog("Created NumericalApertureExperimentController at runtime for AboveMirror.");
+        return controller;
+    }
+
     private void ApplyOtherPartsVisibility(Transform partToKeep, bool visible)
     {
         hiddenRendererStates.Clear();
@@ -955,6 +1102,7 @@ public class SuperAssemblyPartSelectionController : MonoBehaviour
 
     private void EnsureUi()
     {
+        ResolveOrCreateExperimentButton();
         BindExperimentButton();
     }
 
@@ -990,7 +1138,31 @@ public class SuperAssemblyPartSelectionController : MonoBehaviour
 
         if (experimentButtonText != null)
         {
-            experimentButtonText.text = "Related Experiment";
+            experimentButtonText.text = selectedExperimentBinding != null &&
+                                        !string.IsNullOrWhiteSpace(selectedExperimentBinding.buttonText)
+                ? selectedExperimentBinding.buttonText
+                : unavailableExperimentText;
+        }
+
+        UpdateExperimentButtonState(selectedExperimentBinding != null);
+    }
+
+    private void UpdateExperimentButtonState(bool hasExperiment)
+    {
+        if (experimentButton == null)
+        {
+            return;
+        }
+
+        experimentButton.interactable = hasExperiment;
+        if (hideExperimentButtonWhenUnavailable)
+        {
+            experimentButton.gameObject.SetActive(hasExperiment);
+        }
+
+        if (!hasExperiment)
+        {
+            StopExperimentButtonHoverPulse();
         }
     }
 
@@ -1330,18 +1502,225 @@ public class SuperAssemblyPartSelectionController : MonoBehaviour
             return false;
         }
 
-        if (!rightRayInteractor.TryGetCurrentUIRaycastResult(out RaycastResult result))
+        if (rightRayInteractor.TryGetCurrentUIRaycastResult(out RaycastResult result) &&
+            result.gameObject != null &&
+            result.gameObject.transform != null &&
+            result.gameObject.transform.IsChildOf(uiCanvasGroup.transform))
+        {
+            return true;
+        }
+
+        RectTransform uiRect = uiCanvasGroup.transform as RectTransform;
+        if (uiRect == null)
+        {
+            uiRect = uiCanvasGroup.GetComponent<RectTransform>();
+        }
+
+        if (uiRect == null)
         {
             return false;
         }
 
-        return result.gameObject != null &&
-               result.gameObject.transform != null &&
-               result.gameObject.transform.IsChildOf(uiCanvasGroup.transform);
+        Ray ray = BuildInteractorRay(out float maxDistance);
+        return IsRayPointingAtRectTransform(ray, maxDistance, uiRect);
+    }
+
+    private bool TryInvokeExperimentButtonFromPointer(bool allowMousePointer)
+    {
+        if (experimentButton == null || !experimentButton.interactable || !experimentButton.gameObject.activeInHierarchy)
+        {
+            return false;
+        }
+
+        if (!allowMousePointer)
+        {
+            if (IsExperimentButtonHoveredByRightRay())
+            {
+                InvokeCurrentExperiment();
+                return true;
+            }
+
+            return false;
+        }
+
+        if (EventSystem.current == null)
+        {
+            return false;
+        }
+
+        PointerEventData pointerEventData = new PointerEventData(EventSystem.current)
+        {
+            position = Input.mousePosition
+        };
+
+        List<RaycastResult> results = new List<RaycastResult>();
+        EventSystem.current.RaycastAll(pointerEventData, results);
+
+        for (int i = 0; i < results.Count; i++)
+        {
+            if (IsTransformChildOf(results[i].gameObject != null ? results[i].gameObject.transform : null,
+                    experimentButton.transform))
+            {
+                InvokeCurrentExperiment();
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private void UpdateExperimentButtonHoverPulse()
+    {
+        bool shouldPulse = animateExperimentButtonOnHover && IsExperimentButtonPointerHovered();
+        SetExperimentButtonHoverPulse(shouldPulse);
+    }
+
+    private bool IsExperimentButtonPointerHovered()
+    {
+        if (experimentButton == null || !experimentButton.interactable || !experimentButton.gameObject.activeInHierarchy)
+        {
+            return false;
+        }
+
+        return IsExperimentButtonHoveredByRightRay() || IsExperimentButtonHoveredByMouse();
+    }
+
+    private bool IsExperimentButtonHoveredByRightRay()
+    {
+        if (rightRayInteractor == null || experimentButton == null)
+        {
+            return false;
+        }
+
+        if (rightRayInteractor.TryGetCurrentUIRaycastResult(out RaycastResult xrResult) &&
+            IsTransformChildOf(xrResult.gameObject != null ? xrResult.gameObject.transform : null,
+                experimentButton.transform))
+        {
+            return true;
+        }
+
+        RectTransform buttonRect = experimentButton.transform as RectTransform;
+        if (buttonRect == null)
+        {
+            buttonRect = experimentButton.GetComponent<RectTransform>();
+        }
+
+        if (buttonRect == null)
+        {
+            return false;
+        }
+
+        Ray ray = BuildInteractorRay(out float maxDistance);
+        return IsRayPointingAtRectTransform(ray, maxDistance, buttonRect);
+    }
+
+    private bool IsExperimentButtonHoveredByMouse()
+    {
+        if (EventSystem.current == null || experimentButton == null)
+        {
+            return false;
+        }
+
+        PointerEventData pointerEventData = new PointerEventData(EventSystem.current)
+        {
+            position = Input.mousePosition
+        };
+
+        List<RaycastResult> results = new List<RaycastResult>();
+        EventSystem.current.RaycastAll(pointerEventData, results);
+
+        for (int i = 0; i < results.Count; i++)
+        {
+            if (IsTransformChildOf(results[i].gameObject != null ? results[i].gameObject.transform : null,
+                    experimentButton.transform))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private bool IsRayPointingAtRectTransform(Ray ray, float maxDistance, RectTransform rectTransform)
+    {
+        if (rectTransform == null)
+        {
+            return false;
+        }
+
+        Plane plane = new Plane(rectTransform.forward, rectTransform.position);
+        if (!plane.Raycast(ray, out float enter) || enter < 0f || enter > maxDistance)
+        {
+            return false;
+        }
+
+        Vector3 localPoint = rectTransform.InverseTransformPoint(ray.GetPoint(enter));
+        return rectTransform.rect.Contains(new Vector2(localPoint.x, localPoint.y));
+    }
+
+    private void SetExperimentButtonHoverPulse(bool shouldPulse)
+    {
+        if (!shouldPulse)
+        {
+            StopExperimentButtonHoverPulse();
+            return;
+        }
+
+        CacheExperimentButtonOriginalScale();
+        if (!hasExperimentButtonOriginalScale || experimentButtonHoverTween != null && experimentButtonHoverTween.IsActive())
+        {
+            return;
+        }
+
+        experimentButtonHoverTween = cachedExperimentButtonTransform
+            .DOScale(experimentButtonOriginalLocalScale * experimentButtonHoverScaleMultiplier,
+                experimentButtonHoverPulseDuration)
+            .SetEase(experimentButtonHoverEase)
+            .SetLoops(-1, LoopType.Yoyo)
+            .OnKill(() => experimentButtonHoverTween = null);
+    }
+
+    private void StopExperimentButtonHoverPulse()
+    {
+        if (experimentButtonHoverTween != null && experimentButtonHoverTween.IsActive())
+        {
+            experimentButtonHoverTween.Kill(false);
+        }
+
+        experimentButtonHoverTween = null;
+        if (hasExperimentButtonOriginalScale && cachedExperimentButtonTransform != null)
+        {
+            cachedExperimentButtonTransform.localScale = experimentButtonOriginalLocalScale;
+        }
+    }
+
+    private void CacheExperimentButtonOriginalScale()
+    {
+        if (experimentButton == null)
+        {
+            return;
+        }
+
+        Transform buttonTransform = experimentButton.transform;
+        if (buttonTransform == cachedExperimentButtonTransform && hasExperimentButtonOriginalScale)
+        {
+            return;
+        }
+
+        cachedExperimentButtonTransform = buttonTransform;
+        experimentButtonOriginalLocalScale = buttonTransform.localScale;
+        hasExperimentButtonOriginalScale = true;
+    }
+
+    private bool IsTransformChildOf(Transform candidate, Transform root)
+    {
+        return candidate != null && root != null && (candidate == root || candidate.IsChildOf(root));
     }
 
     private void BindExperimentButton()
     {
+        ResolveOrCreateExperimentButton();
+
         if (experimentButton == null || experimentButtonBound)
         {
             return;
@@ -1360,6 +1739,36 @@ public class SuperAssemblyPartSelectionController : MonoBehaviour
 
         experimentButton.onClick.RemoveListener(InvokeCurrentExperiment);
         experimentButtonBound = false;
+    }
+
+    private void ResolveOrCreateExperimentButton()
+    {
+        if (experimentButton == null && uiCanvasGroup != null)
+        {
+            experimentButton = uiCanvasGroup.GetComponentInChildren<Button>(true);
+        }
+
+        if (experimentButton == null || uiCanvasGroup == null)
+        {
+            return;
+        }
+
+        Graphic targetGraphic = experimentButton.targetGraphic;
+        if (targetGraphic == null)
+        {
+            Image image = experimentButton.GetComponent<Image>();
+            if (image == null)
+            {
+                image = experimentButton.gameObject.AddComponent<Image>();
+            }
+
+            experimentButton.targetGraphic = image;
+        }
+
+        if (experimentButtonText == null)
+        {
+            experimentButtonText = experimentButton.GetComponentInChildren<TextMeshProUGUI>(true);
+        }
     }
 
     private void SetHoverPulseComponentsEnabled(bool enabled)

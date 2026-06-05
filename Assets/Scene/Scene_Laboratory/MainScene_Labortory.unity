@@ -18289,10 +18289,14 @@ MonoBehaviour:
     onExperimentButtonClicked:
       m_PersistentCalls:
         m_Calls: []
+  partExperimentBindings: []
+  autoBindAboveMirrorNumericalAperture: 1
+  hideExperimentButtonWhenUnavailable: 1
+  unavailableExperimentText: No Experiment Available
   useRendererBoundsFallback: 1
   boundsPadding: 0.005
   alignSelectedPartVisualCenter: 1
-  selectedPartViewportPosition: {x: 0.4, y: 0.38}
+  selectedPartViewportPosition: {x: 0.34, y: 0.38}
   selectedPartDistanceFromCamera: 1.2
   selectedPartScaleMultiplier: 1.8
   selectedPartMoveDuration: 0.45
@@ -18306,14 +18310,21 @@ MonoBehaviour:
   partDescriptionText: {fileID: 1489998571}
   experimentButton: {fileID: 321251886}
   experimentButtonText: {fileID: 521538563}
-  uiViewportPosition: {x: 0.6, y: 0.38}
+  uiViewportPosition: {x: 0.66, y: 0.38}
   lockUiPoseOnSelectionEnter: 1
   lockUiToFixedReferencePose: 1
   keepUiWorldUpright: 1
+  fitUiInsideCameraView: 1
+  uiViewportPadding: {x: 0.04, y: 0.08}
+  minUiFitScaleMultiplier: 0.65
   uiDistanceFromCamera: 1.15
   uiWorldScale: 0.00135
   uiFadeDuration: 0.28
   uiFadeEase: 9
+  animateExperimentButtonOnHover: 1
+  experimentButtonHoverScaleMultiplier: 1.08
+  experimentButtonHoverPulseDuration: 0.45
+  experimentButtonHoverEase: 4
   onSelectionEntered:
     m_PersistentCalls:
       m_Calls: []

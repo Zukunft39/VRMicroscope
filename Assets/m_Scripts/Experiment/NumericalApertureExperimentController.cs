@@ -110,6 +110,12 @@ public class NumericalApertureExperimentController : MonoBehaviour
     [Header("Debug")]
     [SerializeField] private bool enableDebugLogs = false;
 
+    [Header("Runtime Fallback UI")]
+    [SerializeField] private bool createRuntimeFallbackUi = true;
+    [SerializeField] private int runtimeCanvasSortingOrder = 900;
+    [SerializeField] private Color runtimePanelColor = new Color(0.04f, 0.05f, 0.06f, 0.92f);
+    [SerializeField] private Color runtimeAccentColor = new Color(1f, 0.78f, 0.12f, 0.95f);
+
     private Coroutine transitionRoutine;
     private InputAction resolvedSliderAction;
     private Mesh coneMesh;
@@ -123,7 +129,10 @@ public class NumericalApertureExperimentController : MonoBehaviour
     private bool rightRayUiInteractionCached;
     private bool originalRightRayUiInteraction;
     private bool sliderReadWarningShown;
+    private bool runtimeFallbackUiCreated;
     private float currentNA;
+    private Canvas runtimeFadeCanvas;
+    private Canvas runtimeExperimentCanvas;
     private readonly List<InputActionMap> blockedInputMaps = new List<InputActionMap>();
     private readonly List<bool> blockedInputMapWasEnabled = new List<bool>();
 
@@ -155,6 +164,7 @@ public class NumericalApertureExperimentController : MonoBehaviour
     private void Awake()
     {
         EnsureReferences();
+        EnsureRuntimeFallbackUi();
         BindUi();
         CacheObjectiveBasePose();
         PrepareConeMesh();
@@ -164,6 +174,7 @@ public class NumericalApertureExperimentController : MonoBehaviour
     private void OnEnable()
     {
         EnsureReferences();
+        EnsureRuntimeFallbackUi();
         BindUi();
     }
 
@@ -200,6 +211,8 @@ public class NumericalApertureExperimentController : MonoBehaviour
         }
 
         EnsureReferences();
+        EnsureRuntimeFallbackUi();
+        BindUi();
         if (!CanStartExperiment())
         {
             DebugLogWarning("Numerical aperture experiment can only start from a stable selected super-assembly part.");
@@ -237,6 +250,7 @@ public class NumericalApertureExperimentController : MonoBehaviour
         selectionController?.SetSelectionUiTemporarilyHidden(true);
         CacheViewState();
         SwitchToExperimentView();
+        RefreshRuntimeCanvasCameras();
         SetExperimentRootVisible(true);
         ApplySliderSettings();
 
@@ -366,6 +380,314 @@ public class NumericalApertureExperimentController : MonoBehaviour
         if (fallbackInputActions == null && interactor != null)
         {
             fallbackInputActions = interactor.inputActionAsset;
+        }
+
+        RefreshRuntimeCanvasCameras();
+    }
+
+    private void EnsureRuntimeFallbackUi()
+    {
+        if (!createRuntimeFallbackUi || runtimeFallbackUiCreated)
+        {
+            return;
+        }
+
+        if (fadeCanvasGroup != null &&
+            experimentRoot != null &&
+            experimentCanvasGroup != null &&
+            exitButton != null &&
+            naSlider != null &&
+            currentNaText != null)
+        {
+            return;
+        }
+
+        CreateRuntimeFadeCanvasIfNeeded();
+        CreateRuntimeExperimentCanvasIfNeeded();
+        runtimeFallbackUiCreated = true;
+    }
+
+    private void CreateRuntimeFadeCanvasIfNeeded()
+    {
+        if (fadeCanvasGroup != null)
+        {
+            return;
+        }
+
+        GameObject fadeRoot = new GameObject("NumericalApertureExperiment_FadeCanvas",
+            typeof(RectTransform),
+            typeof(Canvas),
+            typeof(CanvasScaler),
+            typeof(GraphicRaycaster),
+            typeof(CanvasGroup),
+            typeof(Image));
+        fadeRoot.transform.SetParent(transform, false);
+
+        Canvas canvas = fadeRoot.GetComponent<Canvas>();
+        canvas.sortingOrder = runtimeCanvasSortingOrder + 1;
+        runtimeFadeCanvas = canvas;
+        ConfigureRuntimeCanvas(canvas);
+
+        RectTransform rectTransform = fadeRoot.GetComponent<RectTransform>();
+        StretchToParent(rectTransform);
+
+        Image image = fadeRoot.GetComponent<Image>();
+        image.color = Color.black;
+
+        fadeCanvasGroup = fadeRoot.GetComponent<CanvasGroup>();
+        fadeCanvasGroup.alpha = 0f;
+        fadeCanvasGroup.blocksRaycasts = false;
+        fadeCanvasGroup.interactable = false;
+        fadeRoot.SetActive(false);
+    }
+
+    private void CreateRuntimeExperimentCanvasIfNeeded()
+    {
+        Transform rootTransform;
+        if (experimentRoot == null)
+        {
+            GameObject root = new GameObject("NumericalApertureExperiment_RuntimeCanvas",
+                typeof(RectTransform),
+                typeof(Canvas),
+                typeof(CanvasScaler),
+                typeof(GraphicRaycaster),
+                typeof(CanvasGroup));
+            root.transform.SetParent(transform, false);
+
+            Canvas canvas = root.GetComponent<Canvas>();
+            canvas.sortingOrder = runtimeCanvasSortingOrder;
+            runtimeExperimentCanvas = canvas;
+            ConfigureRuntimeCanvas(canvas);
+
+            CanvasScaler scaler = root.GetComponent<CanvasScaler>();
+            scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
+            scaler.referenceResolution = new Vector2(1920f, 1080f);
+            scaler.matchWidthOrHeight = 0.5f;
+
+            RectTransform rootRect = root.GetComponent<RectTransform>();
+            StretchToParent(rootRect);
+
+            experimentRoot = root;
+            experimentCanvasGroup = root.GetComponent<CanvasGroup>();
+            rootTransform = root.transform;
+        }
+        else
+        {
+            rootTransform = experimentRoot.transform;
+            runtimeExperimentCanvas = experimentRoot.GetComponent<Canvas>();
+            if (experimentCanvasGroup == null)
+            {
+                experimentCanvasGroup = experimentRoot.GetComponent<CanvasGroup>();
+                if (experimentCanvasGroup == null)
+                {
+                    experimentCanvasGroup = experimentRoot.AddComponent<CanvasGroup>();
+                }
+            }
+        }
+
+        Image panel = CreateImage(rootTransform, "RuntimePanel",
+            new Vector2(0.04f, 0.06f),
+            new Vector2(0.96f, 0.94f),
+            runtimePanelColor);
+
+        TextMeshProUGUI title = CreateText(panel.transform, "Title",
+            "Interactive Numerical Aperture Simulation",
+            new Vector2(0.06f, 0.84f),
+            new Vector2(0.62f, 0.93f),
+            44f,
+            TextAlignmentOptions.Left,
+            FontStyles.Bold);
+        title.color = Color.white;
+
+        TextMeshProUGUI explanation = CreateText(panel.transform, "Explanation",
+            "Adjust NA to observe how the collected light cone, angular aperture, brightness, sharpness, and depth tolerance change.",
+            new Vector2(0.06f, 0.73f),
+            new Vector2(0.58f, 0.82f),
+            24f,
+            TextAlignmentOptions.Left,
+            FontStyles.Normal);
+        explanation.color = new Color(0.86f, 0.9f, 0.94f, 1f);
+
+        formulaText = CreateText(panel.transform, "FormulaText",
+            "NA = n * sin(theta)",
+            new Vector2(0.62f, 0.76f),
+            new Vector2(0.92f, 0.86f),
+            28f,
+            TextAlignmentOptions.Left,
+            FontStyles.Bold);
+        formulaText.color = Color.white;
+
+        currentNaText = CreateValueRow(panel.transform, "NA", "0.16", 0.65f);
+        thetaText = CreateValueRow(panel.transform, "Half Angle", "9.2 deg", 0.56f);
+        fullApertureText = CreateValueRow(panel.transform, "Full Aperture", "18.4 deg", 0.47f);
+        magnificationText = CreateValueRow(panel.transform, "Approx. Magnification", "5x", 0.38f);
+        normalizedNaText = CreateValueRow(panel.transform, "normalizedNA", "0.00", 0.29f);
+        depthToleranceText = CreateValueRow(panel.transform, "Depth Tolerance", "0.00", 0.20f);
+
+        naSlider = naSlider == null ? CreateRuntimeSlider(panel.transform) : naSlider;
+        exitButton = exitButton == null ? CreateRuntimeExitButton(panel.transform) : exitButton;
+    }
+
+    private void RefreshRuntimeCanvasCameras()
+    {
+        ConfigureRuntimeCanvas(runtimeFadeCanvas);
+        ConfigureRuntimeCanvas(runtimeExperimentCanvas);
+    }
+
+    private void ConfigureRuntimeCanvas(Canvas canvas)
+    {
+        if (canvas == null)
+        {
+            return;
+        }
+
+        Camera camera = targetCamera != null ? targetCamera : ResolveTargetCamera();
+        if (camera == null)
+        {
+            canvas.renderMode = RenderMode.ScreenSpaceOverlay;
+            return;
+        }
+
+        canvas.renderMode = RenderMode.ScreenSpaceCamera;
+        canvas.worldCamera = camera;
+        canvas.planeDistance = 1.15f;
+    }
+
+    private TextMeshProUGUI CreateValueRow(Transform parent, string label, string initialValue, float centerY)
+    {
+        TextMeshProUGUI labelText = CreateText(parent, label + "Label",
+            label,
+            new Vector2(0.62f, centerY - 0.03f),
+            new Vector2(0.78f, centerY + 0.03f),
+            23f,
+            TextAlignmentOptions.Left,
+            FontStyles.Normal);
+        labelText.color = new Color(0.78f, 0.82f, 0.87f, 1f);
+
+        TextMeshProUGUI valueText = CreateText(parent, label + "Value",
+            initialValue,
+            new Vector2(0.80f, centerY - 0.03f),
+            new Vector2(0.92f, centerY + 0.03f),
+            24f,
+            TextAlignmentOptions.Right,
+            FontStyles.Bold);
+        valueText.color = Color.white;
+        return valueText;
+    }
+
+    private Slider CreateRuntimeSlider(Transform parent)
+    {
+        TextMeshProUGUI sliderLabel = CreateText(parent, "SliderLabel",
+            "Numerical Aperture",
+            new Vector2(0.06f, 0.15f),
+            new Vector2(0.42f, 0.22f),
+            28f,
+            TextAlignmentOptions.Left,
+            FontStyles.Bold);
+        sliderLabel.color = Color.white;
+
+        GameObject sliderObject = new GameObject("NASlider", typeof(RectTransform), typeof(Slider));
+        sliderObject.transform.SetParent(parent, false);
+        RectTransform sliderRect = sliderObject.GetComponent<RectTransform>();
+        SetAnchors(sliderRect, new Vector2(0.06f, 0.08f), new Vector2(0.56f, 0.13f));
+
+        Image background = CreateImage(sliderObject.transform, "Background", Vector2.zero, Vector2.one,
+            new Color(1f, 1f, 1f, 0.18f));
+
+        Image fill = CreateImage(sliderObject.transform, "Fill", new Vector2(0f, 0.35f), new Vector2(1f, 0.65f),
+            runtimeAccentColor);
+        RectTransform fillRect = fill.GetComponent<RectTransform>();
+
+        Image handle = CreateImage(sliderObject.transform, "Handle", new Vector2(0f, 0.5f), new Vector2(0f, 0.5f),
+            Color.white);
+        RectTransform handleRect = handle.GetComponent<RectTransform>();
+        handleRect.sizeDelta = new Vector2(34f, 34f);
+
+        Slider slider = sliderObject.GetComponent<Slider>();
+        slider.targetGraphic = handle;
+        slider.fillRect = fillRect;
+        slider.handleRect = handleRect;
+        slider.direction = Slider.Direction.LeftToRight;
+        slider.transition = Selectable.Transition.ColorTint;
+        background.raycastTarget = true;
+        return slider;
+    }
+
+    private Button CreateRuntimeExitButton(Transform parent)
+    {
+        Image image = CreateImage(parent, "ExitButton", new Vector2(0.86f, 0.86f), new Vector2(0.94f, 0.93f),
+            new Color(0.9f, 0.24f, 0.18f, 0.92f));
+        Button button = image.gameObject.AddComponent<Button>();
+        button.targetGraphic = image;
+
+        TextMeshProUGUI text = CreateText(image.transform, "Text", "Exit",
+            Vector2.zero,
+            Vector2.one,
+            25f,
+            TextAlignmentOptions.Center,
+            FontStyles.Bold);
+        text.color = Color.white;
+        return button;
+    }
+
+    private Image CreateImage(Transform parent, string name, Vector2 anchorMin, Vector2 anchorMax, Color color)
+    {
+        GameObject gameObject = new GameObject(name, typeof(RectTransform), typeof(Image));
+        gameObject.transform.SetParent(parent, false);
+        RectTransform rectTransform = gameObject.GetComponent<RectTransform>();
+        SetAnchors(rectTransform, anchorMin, anchorMax);
+
+        Image image = gameObject.GetComponent<Image>();
+        image.color = color;
+        return image;
+    }
+
+    private TextMeshProUGUI CreateText(
+        Transform parent,
+        string name,
+        string text,
+        Vector2 anchorMin,
+        Vector2 anchorMax,
+        float fontSize,
+        TextAlignmentOptions alignment,
+        FontStyles fontStyle)
+    {
+        GameObject gameObject = new GameObject(name, typeof(RectTransform), typeof(TextMeshProUGUI));
+        gameObject.transform.SetParent(parent, false);
+        RectTransform rectTransform = gameObject.GetComponent<RectTransform>();
+        SetAnchors(rectTransform, anchorMin, anchorMax);
+
+        TextMeshProUGUI textComponent = gameObject.GetComponent<TextMeshProUGUI>();
+        textComponent.text = text;
+        textComponent.fontSize = fontSize;
+        textComponent.alignment = alignment;
+        textComponent.fontStyle = fontStyle;
+        textComponent.enableWordWrapping = true;
+        return textComponent;
+    }
+
+    private void SetAnchors(RectTransform rectTransform, Vector2 anchorMin, Vector2 anchorMax)
+    {
+        if (rectTransform == null)
+        {
+            return;
+        }
+
+        rectTransform.anchorMin = anchorMin;
+        rectTransform.anchorMax = anchorMax;
+        rectTransform.offsetMin = Vector2.zero;
+        rectTransform.offsetMax = Vector2.zero;
+        rectTransform.localScale = Vector3.one;
+        rectTransform.localRotation = Quaternion.identity;
+    }
+
+    private void StretchToParent(RectTransform rectTransform)
+    {
+        SetAnchors(rectTransform, Vector2.zero, Vector2.one);
+        if (rectTransform != null)
+        {
+            rectTransform.anchoredPosition = Vector2.zero;
+            rectTransform.sizeDelta = Vector2.zero;
         }
     }
 
