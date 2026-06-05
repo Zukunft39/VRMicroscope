@@ -351,8 +351,18 @@ public class CameraTryMove : MonoBehaviour
 
     private void HandlePrimaryClick()
     {
-        if (IsPointerOverUi())
+        bool isPointerOverUi = IsPointerOverUi();
+        Ray ray;
+        float maxDistance;
+        bool hasRay = TryBuildPointerRay(out ray, out maxDistance);
+
+        if (isPointerOverUi)
         {
+            if (hasRay && SuperAssemblyPartSelectionController.HasActiveSelection)
+            {
+                SuperAssemblyPartSelectionController.TryHandleDesktopPrimaryClick(ray, maxDistance, true);
+            }
+
             return;
         }
 
@@ -360,11 +370,6 @@ public class CameraTryMove : MonoBehaviour
         {
             return;
         }
-
-        Ray ray;
-        float maxDistance;
-        bool hasRay = TryBuildPointerRay(out ray, out maxDistance);
-        bool isPointerOverUi = IsPointerOverUi();
 
         cachedInteractor.TriggerTakeObjectOrSample(() =>
             hasRay && MicroscopeExploderModeController.TryHandleDesktopPrimaryClick(ray, maxDistance, isPointerOverUi));
