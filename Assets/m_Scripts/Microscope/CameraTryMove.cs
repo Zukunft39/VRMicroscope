@@ -478,6 +478,12 @@ public class CameraTryMove : MonoBehaviour
             return;
         }
 
+        if (MicroscopeExploderModeController.Instance != null &&
+            MicroscopeExploderModeController.Instance.CurrentMode != MicroscopeExploderModeController.AssemblyMode.Normal)
+        {
+            return;
+        }
+
         yaw += rightStick.x * keyboardTurnSpeed * Time.deltaTime;
         transform.rotation = Quaternion.Euler(pitch, yaw, 0f);
     }
