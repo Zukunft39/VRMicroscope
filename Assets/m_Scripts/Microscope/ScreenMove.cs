@@ -13,10 +13,13 @@ public class ScreenMove : MonoBehaviour
             GameObject Object=gameObject.transform.GetChild(0).gameObject;
             if (Object!=null)
             {
-                // 获取水平方向 (A 和 D 或左右箭头)
-                float horizontal = Input.GetAxisRaw("Horizontal");
-                // 获取垂直方向 (W 和 S 或上下箭头)
-                float vertical = Input.GetAxisRaw("Vertical");
+                float horizontal = 0f;
+                if (Input.GetKey(KeyCode.A)) horizontal -= 1f;
+                if (Input.GetKey(KeyCode.D)) horizontal += 1f;
+
+                float vertical = 0f;
+                if (Input.GetKey(KeyCode.S)) vertical -= 1f;
+                if (Input.GetKey(KeyCode.W)) vertical += 1f;
                 // 计算移动方向
                 Vector3 moveDirection = new Vector3(horizontal, vertical, 0f).normalized;
                 // 移动物体

@@ -5478,7 +5478,7 @@ MonoBehaviour:
   m_LookAt: {fileID: 0}
   m_Follow: {fileID: 0}
   m_Lens:
-    FieldOfView: 98.04017
+    FieldOfView: 40
     OrthographicSize: 10
     NearClipPlane: 0.1
     FarClipPlane: 5000
@@ -6310,7 +6310,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7696548426260509612}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: d433a4ebe611ec44d8864a34579f2b62, type: 3}
   m_Name: 
@@ -43087,14 +43087,52 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7696548426260509612}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 9d2ac5bbcce0e48449f8a3b48c966c60, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  moveSpeed: 5
-  rotationSpeed: 2
   canMove: 1
+  moveSpeed: 5
+  fastMoveMultiplier: 2
+  rotationSpeed: 2
+  keyboardTurnSpeed: 75
+  sprintKey: 304
+  moveUpKey: 101
+  moveDownKey: 113
+  lookMouseButton: 1
+  lockCursorWhileLooking: 1
+  hideCursorWhileLooking: 1
+  primaryClickMouseButton: 0
+  desktopRayMaxDistance: 100
+  desktopRaycastMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  teleportSurfaceMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  maxTeleportSurfaceAngle: 60
+  leftPrimaryButtonKey: 120
+  leftSecondaryButtonKey: 121
+  leftTriggerButtonKey: 122
+  leftGripButtonKey: 99
+  rightPrimaryButtonKey: 114
+  rightSecondaryButtonKey: 98
+  rightGripButtonKey: 103
+  leftStickPressKey: 118
+  rightStickPressKey: 9
+  leftStickUpKey: 119
+  leftStickDownKey: 115
+  leftStickLeftKey: 97
+  leftStickRightKey: 100
+  rightStickUpKey: 273
+  rightStickDownKey: 274
+  rightStickLeftKey: 276
+  rightStickRightKey: 275
+  openTutorialKey: 121
+  confirmTutorialKey: 32
+  alternateConfirmTutorialKey: 13
+  quitObserveKey: 27
 --- !u!114 &7873184976552145455
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -44830,11 +44868,15 @@ MonoBehaviour:
   microscopeRoot: {fileID: 831527608}
   microscopeExploderRoot: {fileID: 1062572440}
   modelExploder: {fileID: 1062572441}
+  partSelectionController: {fileID: 0}
   legacyPreAssemblyCameraObject: {fileID: 0}
   disableLocomotionWhileInAssemblyModes: 1
   animateExploderTransitions: 1
   copyFieldOfViewFromCurrentView: 1
   allowMicroscopeAsAssemblyTarget: 1
+  useTrackedPreAssemblyView: 1
+  restorePlayerPoseAfterAssembly: 1
+  lockTrackedPreAssemblyPose: 1
   enableDebugLogs: 1
 --- !u!1 &9014170785400826608
 GameObject:

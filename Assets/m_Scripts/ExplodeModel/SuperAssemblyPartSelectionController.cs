@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using DG.Tweening;
 using TMPro;
@@ -120,8 +121,10 @@ public class SuperAssemblyPartSelectionController : MonoBehaviour
 
     [Header("Debug")]
     [SerializeField] private bool enableDebugLogs = false;
+    [SerializeField] private bool logScenePartSelectionDiagnostics = true;
 
     private readonly List<Transform> cachedParts = new List<Transform>();
+    private readonly List<Transform> screenOrderedParts = new List<Transform>();
     private readonly Dictionary<Renderer, bool> hiddenRendererStates = new Dictionary<Renderer, bool>();
     private readonly Dictionary<Collider, bool> hiddenColliderStates = new Dictionary<Collider, bool>();
     private readonly List<SuperAssemblyPartHoverPulse> disabledHoverPulseComponents = new List<SuperAssemblyPartHoverPulse>();
@@ -149,6 +152,9 @@ public class SuperAssemblyPartSelectionController : MonoBehaviour
     private Tween experimentButtonHoverTween;
     private bool hasExperimentButtonOriginalScale;
     private int lastExperimentRequestFrame = -1;
+    private bool hasAutoSelectedInitialPart;
+    private Coroutine pendingInitialSelectionCoroutine;
+    private float nextInitialSelectionAttemptTime;
 
     public static bool HasActiveSelection => Instance != null && Instance.isSelectionActive;
     public bool IsSelectionActive => isSelectionActive;
@@ -164,7 +170,26 @@ public class SuperAssemblyPartSelectionController : MonoBehaviour
     public static bool TryHandleDesktopPrimaryClick(Ray ray, float maxDistance, bool isPointerOverUi)
     {
         SuperAssemblyPartSelectionController controller = ResolveAvailableInstance();
-        return controller != null && controller.TryHandleDesktopPrimaryClickInternal(ray, maxDistance, isPointerOverUi);
+        if (controller == null)
+        {
+            Debug.LogWarning("[SuperAssemblySelectionDiagnostics] TryHandleDesktopPrimaryClick failed: no active SuperAssemblyPartSelectionController was found.");
+            return false;
+        }
+
+        return controller.TryHandleDesktopPrimaryClickInternal(ray, maxDistance, isPointerOverUi);
+    }
+
+    public static bool TrySelectLeftmostPartWhenReady()
+    {
+        SuperAssemblyPartSelectionController controller = ResolveAvailableInstance();
+        if (controller == null)
+        {
+            Debug.LogWarning("[SuperAssemblySelectionDiagnostics] TrySelectLeftmostPartWhenReady failed: no active SuperAssemblyPartSelectionController was found.");
+            return false;
+        }
+
+        controller.SelectLeftmostPartWhenReady();
+        return true;
     }
 
     private static SuperAssemblyPartSelectionController ResolveAvailableInstance()
@@ -225,7 +250,18 @@ public class SuperAssemblyPartSelectionController : MonoBehaviour
 
     public void ForceExitSelection(bool immediate)
     {
+        StopPendingInitialSelection();
+        hasAutoSelectedInitialPart = false;
+        screenOrderedParts.Clear();
         ExitSelection(immediate);
+    }
+
+    public void SelectLeftmostPartWhenReady()
+    {
+        LogSelectionDiagnostic(
+            $"SelectLeftmostPartWhenReady requested. active={isActiveAndEnabled}, ready={IsInReadySuperAssemblyState()}, {GetReadyStateSummary()}");
+        StopPendingInitialSelection();
+        pendingInitialSelectionCoroutine = StartCoroutine(SelectLeftmostPartWhenReadyRoutine());
     }
 
     public void SetExternalInteractionLocked(bool isLocked)
@@ -307,10 +343,12 @@ public class SuperAssemblyPartSelectionController : MonoBehaviour
         BindExperimentButton();
         RebuildPartCache();
         HideUiImmediate();
+        LogSelectionDiagnostic($"OnEnable. {GetReadyStateSummary()}");
     }
 
     private void OnDisable()
     {
+        StopPendingInitialSelection();
         ExitSelection(true);
         externalInteractionLocked = false;
         selectionUiTemporarilyHidden = false;
@@ -322,16 +360,35 @@ public class SuperAssemblyPartSelectionController : MonoBehaviour
         }
     }
 
-    private void LateUpdate()
+    private void Update()
     {
-        if (!isSelectionActive)
+        if (!IsInReadySuperAssemblyState())
         {
             return;
         }
 
+        HandleKeyboardPartSelection();
+    }
+
+    private void LateUpdate()
+    {
         if (!IsInReadySuperAssemblyState())
         {
-            ExitSelection(true);
+            hasAutoSelectedInitialPart = false;
+            screenOrderedParts.Clear();
+
+            if (isSelectionActive)
+            {
+                ExitSelection(true);
+            }
+
+            return;
+        }
+
+        EnsureInitialPartSelected();
+
+        if (!isSelectionActive)
+        {
             return;
         }
 
@@ -405,6 +462,200 @@ public class SuperAssemblyPartSelectionController : MonoBehaviour
         DebugLog($"Rebuilt part cache. parts={cachedParts.Count}");
     }
 
+    private IEnumerator SelectLeftmostPartWhenReadyRoutine()
+    {
+        LogSelectionDiagnostic($"Waiting for super assembly readiness. {GetReadyStateSummary()}");
+        while (isActiveAndEnabled && !IsInReadySuperAssemblyState())
+        {
+            yield return null;
+        }
+
+        pendingInitialSelectionCoroutine = null;
+        LogSelectionDiagnostic(
+            $"Readiness wait ended. active={isActiveAndEnabled}, isSelectionActive={isSelectionActive}, {GetReadyStateSummary()}");
+
+        if (!isActiveAndEnabled || isSelectionActive)
+        {
+            yield break;
+        }
+
+        SelectLeftmostPart();
+    }
+
+    private void EnsureInitialPartSelected()
+    {
+        if (hasAutoSelectedInitialPart || isSelectionActive || externalInteractionLocked)
+        {
+            return;
+        }
+
+        if (Time.unscaledTime < nextInitialSelectionAttemptTime)
+        {
+            return;
+        }
+
+        SelectLeftmostPart();
+    }
+
+    private void HandleKeyboardPartSelection()
+    {
+        if (externalInteractionLocked || selectionUiTemporarilyHidden)
+        {
+            if (Input.GetKeyDown(KeyCode.LeftArrow) || Input.GetKeyDown(KeyCode.RightArrow))
+            {
+                LogSelectionDiagnostic(
+                    $"Arrow input ignored. externalInteractionLocked={externalInteractionLocked}, selectionUiTemporarilyHidden={selectionUiTemporarilyHidden}");
+            }
+
+            return;
+        }
+
+        if (Input.GetKeyDown(KeyCode.LeftArrow))
+        {
+            LogSelectionDiagnostic("LeftArrow received.");
+            SelectAdjacentPart(-1);
+        }
+        else if (Input.GetKeyDown(KeyCode.RightArrow))
+        {
+            LogSelectionDiagnostic("RightArrow received.");
+            SelectAdjacentPart(1);
+        }
+    }
+
+    private void SelectAdjacentPart(int direction)
+    {
+        if (direction == 0)
+        {
+            return;
+        }
+
+        if (screenOrderedParts.Count == 0)
+        {
+            RebuildScreenOrderedParts();
+        }
+
+        if (screenOrderedParts.Count == 0)
+        {
+            LogSelectionDiagnostic($"SelectAdjacentPart aborted: no screen ordered scene parts. direction={direction}");
+            return;
+        }
+
+        if (!isSelectionActive || selectedPart == null)
+        {
+            LogSelectionDiagnostic(
+                $"SelectAdjacentPart has no active selection. Selecting leftmost instead. direction={direction}, isSelectionActive={isSelectionActive}, selectedPart={GetSafeTransformName(selectedPart)}");
+            SelectLeftmostPart();
+            return;
+        }
+
+        int currentIndex = screenOrderedParts.IndexOf(selectedPart);
+        if (currentIndex < 0)
+        {
+            RebuildScreenOrderedParts();
+            currentIndex = screenOrderedParts.IndexOf(selectedPart);
+            if (currentIndex < 0)
+            {
+                currentIndex = 0;
+            }
+        }
+
+        int nextIndex = (currentIndex + direction + screenOrderedParts.Count) % screenOrderedParts.Count;
+        Transform nextPart = screenOrderedParts[nextIndex];
+        LogSelectionDiagnostic(
+            $"SelectAdjacentPart direction={direction}, currentIndex={currentIndex}, nextIndex={nextIndex}, current={GetSafeTransformName(selectedPart)}, next={GetSafeTransformName(nextPart)}, ordered={GetOrderedPartsSummary()}");
+        if (nextPart == null || nextPart == selectedPart)
+        {
+            return;
+        }
+
+        ExitSelection(true);
+        EnterSelection(nextPart);
+    }
+
+    private void SelectLeftmostPart()
+    {
+        if (externalInteractionLocked)
+        {
+            LogSelectionDiagnostic("SelectLeftmostPart aborted: external interaction is locked.");
+            return;
+        }
+
+        RebuildScreenOrderedParts();
+        if (screenOrderedParts.Count == 0)
+        {
+            nextInitialSelectionAttemptTime = Time.unscaledTime + 0.5f;
+            LogSelectionDiagnostic($"SelectLeftmostPart aborted: no scene parts collected. cachedParts={cachedParts.Count}, {GetReadyStateSummary()}");
+            return;
+        }
+
+        LogSelectionDiagnostic($"Selecting leftmost scene part: {GetSafeTransformName(screenOrderedParts[0])}. ordered={GetOrderedPartsSummary()}");
+        EnterSelection(screenOrderedParts[0]);
+        hasAutoSelectedInitialPart = isSelectionActive;
+        if (!hasAutoSelectedInitialPart)
+        {
+            nextInitialSelectionAttemptTime = Time.unscaledTime + 0.5f;
+        }
+
+        LogSelectionDiagnostic(
+            $"SelectLeftmostPart result. isSelectionActive={isSelectionActive}, selectedPart={GetSafeTransformName(selectedPart)}");
+    }
+
+    private void RebuildScreenOrderedParts()
+    {
+        screenOrderedParts.Clear();
+
+        Camera camera = GetActiveCamera();
+        if (camera == null)
+        {
+            for (int i = 0; i < cachedParts.Count; i++)
+            {
+                AddVisiblePartToScreenOrder(cachedParts[i]);
+            }
+
+            LogSelectionDiagnostic(
+                $"RebuildScreenOrderedParts without camera. cachedParts={cachedParts.Count}, ordered={GetOrderedPartsSummary()}");
+            return;
+        }
+
+        for (int i = 0; i < cachedParts.Count; i++)
+        {
+            AddVisiblePartToScreenOrder(cachedParts[i]);
+        }
+
+        screenOrderedParts.Sort((left, right) =>
+        {
+            Vector3 leftViewport = camera.WorldToViewportPoint(GetPartVisualCenterWorld(left));
+            Vector3 rightViewport = camera.WorldToViewportPoint(GetPartVisualCenterWorld(right));
+            int xComparison = leftViewport.x.CompareTo(rightViewport.x);
+            return xComparison != 0 ? xComparison : leftViewport.y.CompareTo(rightViewport.y);
+        });
+
+        LogSelectionDiagnostic(
+            $"RebuildScreenOrderedParts with camera='{camera.name}'. cachedParts={cachedParts.Count}, ordered={GetOrderedPartsSummaryWithViewport(camera)}");
+    }
+
+    private void AddVisiblePartToScreenOrder(Transform part)
+    {
+        if (part == null || !part.gameObject.activeInHierarchy || screenOrderedParts.Contains(part))
+        {
+            return;
+        }
+
+        screenOrderedParts.Add(part);
+    }
+
+    private void StopPendingInitialSelection()
+    {
+        if (pendingInitialSelectionCoroutine == null)
+        {
+            return;
+        }
+
+        LogSelectionDiagnostic("Stopping pending initial selection coroutine.");
+        StopCoroutine(pendingInitialSelectionCoroutine);
+        pendingInitialSelectionCoroutine = null;
+    }
+
     private bool TryHandleRightTriggerInternal()
     {
         EnsureReferences();
@@ -436,7 +687,9 @@ public class SuperAssemblyPartSelectionController : MonoBehaviour
             return false;
         }
 
+        RebuildScreenOrderedParts();
         EnterSelection(hoveredPart);
+        hasAutoSelectedInitialPart = isSelectionActive;
         return true;
     }
 
@@ -474,22 +727,28 @@ public class SuperAssemblyPartSelectionController : MonoBehaviour
             return false;
         }
 
+        RebuildScreenOrderedParts();
         EnterSelection(hoveredPart);
+        hasAutoSelectedInitialPart = isSelectionActive;
         return true;
     }
 
     private void EnterSelection(Transform part)
     {
+        LogSelectionDiagnostic($"EnterSelection requested for scene part: {GetSafeTransformName(part)}");
         if (part == null)
         {
+            LogSelectionDiagnostic("EnterSelection aborted: part is null.");
             return;
         }
 
         EnsureUi();
-        if (!HasRequiredUiReferences())
+        bool hasRequiredUiReferences = HasRequiredUiReferences();
+        if (!hasRequiredUiReferences)
         {
+            LogSelectionDiagnostic(
+                $"EnterSelection will continue without info panel because references are missing. uiCanvasGroup={uiCanvasGroup != null}, partNameText={partNameText != null}, partDescriptionText={partDescriptionText != null}, experimentButton={experimentButton != null}");
             DebugLogWarning("Selection UI references are missing. Please assign CanvasGroup, Name Text, Description Text, and Experiment Button in the scene.");
-            return;
         }
 
         if (isSelectionActive)
@@ -507,13 +766,22 @@ public class SuperAssemblyPartSelectionController : MonoBehaviour
 
         CacheAndEnableUiInteractionForSelection();
         ApplyOtherPartsVisibility(part, false);
-        UpdateUiContent(part, selectedPartInfo);
-        EnsureUi();
-        UpdateUiPose();
-        ShowUi();
+        if (hasRequiredUiReferences)
+        {
+            UpdateUiContent(part, selectedPartInfo);
+            EnsureUi();
+            UpdateUiPose();
+            ShowUi();
+        }
+        else
+        {
+            HideUiImmediate();
+        }
         AnimateSelectedPartToFocus(part);
 
         onSelectionEntered?.Invoke();
+        LogSelectionDiagnostic(
+            $"Selection entered. selectedScenePart={GetHierarchyPath(part)}, displayName='{(selectedPartInfo != null ? selectedPartInfo.displayName : part.name)}'");
         DebugLog($"Selection entered. part='{part.name}'");
     }
 
@@ -564,6 +832,7 @@ public class SuperAssemblyPartSelectionController : MonoBehaviour
         isSelectionActive = false;
         SetHoverPulseComponentsEnabled(true);
         onSelectionExited?.Invoke();
+        LogSelectionDiagnostic($"Selection exited. restoredScenePart={GetSafeTransformName(partToRestore)}, immediate={immediate}");
         DebugLog("Selection exited.");
     }
 
@@ -1882,6 +2151,69 @@ public class SuperAssemblyPartSelectionController : MonoBehaviour
         }
 
         return path;
+    }
+
+    private string GetReadyStateSummary()
+    {
+        string mode = modeController != null ? modeController.CurrentMode.ToString() : "null";
+        string exploded = modelExploder != null ? modelExploder.IsExploded.ToString() : "null";
+        string animating = modelExploder != null ? modelExploder.IsAnimating.ToString() : "null";
+        return $"mode={mode}, modelExploder={(modelExploder != null)}, isExploded={exploded}, isAnimating={animating}, cachedParts={cachedParts.Count}, selectedPart={GetSafeTransformName(selectedPart)}";
+    }
+
+    private string GetOrderedPartsSummary()
+    {
+        if (screenOrderedParts.Count == 0)
+        {
+            return "<empty>";
+        }
+
+        List<string> names = new List<string>(screenOrderedParts.Count);
+        for (int i = 0; i < screenOrderedParts.Count; i++)
+        {
+            names.Add($"{i}:{GetSafeTransformName(screenOrderedParts[i])}");
+        }
+
+        return string.Join(", ", names);
+    }
+
+    private string GetOrderedPartsSummaryWithViewport(Camera camera)
+    {
+        if (screenOrderedParts.Count == 0)
+        {
+            return "<empty>";
+        }
+
+        List<string> names = new List<string>(screenOrderedParts.Count);
+        for (int i = 0; i < screenOrderedParts.Count; i++)
+        {
+            Transform part = screenOrderedParts[i];
+            if (part == null || camera == null)
+            {
+                names.Add($"{i}:{GetSafeTransformName(part)}");
+                continue;
+            }
+
+            Vector3 viewport = camera.WorldToViewportPoint(GetPartVisualCenterWorld(part));
+            names.Add($"{i}:{GetSafeTransformName(part)}@x={viewport.x:F3},y={viewport.y:F3},z={viewport.z:F3}");
+        }
+
+        return string.Join(", ", names);
+    }
+
+    private static string GetSafeTransformName(Transform target)
+    {
+        return target != null ? target.name : "null";
+    }
+
+    private void LogSelectionDiagnostic(string message)
+    {
+        if (!logScenePartSelectionDiagnostics)
+        {
+            return;
+        }
+
+        Debug.Log($"[SuperAssemblySelectionDiagnostics] {message}", this);
     }
 
     private void DebugLog(string message)
