@@ -284,8 +284,8 @@ public class SuperAssemblyPartSelectionController : MonoBehaviour
 
         if (experimentController != null)
         {
-            experimentController.StartExperiment();
-            startedExperiment = true;
+            experimentController.ConfigureRuntimeContext(this, modelExploder, rightRayInteractor);
+            startedExperiment = experimentController.TryStartExperiment();
         }
 
         selectedPartInfo?.onExperimentButtonClicked?.Invoke();
@@ -451,9 +451,11 @@ public class SuperAssemblyPartSelectionController : MonoBehaviour
 
         if (isSelectionActive)
         {
-            if (isPointerOverUi)
+            if (TryInvokeExperimentButtonFromPointer(allowMousePointer: true) ||
+                IsDesktopRayPointingAtExperimentButton(ray, maxDistance) ||
+                isPointerOverUi ||
+                IsDesktopRayPointingAtSelectionUi(ray, maxDistance))
             {
-                TryInvokeExperimentButtonFromPointer(allowMousePointer: true);
                 return true;
             }
 
@@ -892,11 +894,14 @@ public class SuperAssemblyPartSelectionController : MonoBehaviour
 
         if (controller != null)
         {
+            controller.ConfigureRuntimeContext(this, modelExploder, rightRayInteractor);
             return controller;
         }
 
-        controller = gameObject.AddComponent<NumericalApertureExperimentController>();
-        DebugLog("Created NumericalApertureExperimentController at runtime for AboveMirror.");
+        GameObject runtimeHost = new GameObject("NumericalApertureExperiment_RuntimeHost");
+        controller = runtimeHost.AddComponent<NumericalApertureExperimentController>();
+        controller.ConfigureRuntimeContext(this, modelExploder, rightRayInteractor);
+        DebugLog("Created NumericalApertureExperimentController runtime host for AboveMirror.");
         return controller;
     }
 
@@ -1639,6 +1644,44 @@ public class SuperAssemblyPartSelectionController : MonoBehaviour
         }
 
         return false;
+    }
+
+    private bool IsDesktopRayPointingAtExperimentButton(Ray ray, float maxDistance)
+    {
+        if (experimentButton == null || !experimentButton.interactable || !experimentButton.gameObject.activeInHierarchy)
+        {
+            return false;
+        }
+
+        RectTransform buttonRect = experimentButton.transform as RectTransform;
+        if (buttonRect == null)
+        {
+            buttonRect = experimentButton.GetComponent<RectTransform>();
+        }
+
+        if (!IsRayPointingAtRectTransform(ray, maxDistance, buttonRect))
+        {
+            return false;
+        }
+
+        InvokeCurrentExperiment();
+        return true;
+    }
+
+    private bool IsDesktopRayPointingAtSelectionUi(Ray ray, float maxDistance)
+    {
+        if (uiCanvasGroup == null)
+        {
+            return false;
+        }
+
+        RectTransform uiRect = uiCanvasGroup.transform as RectTransform;
+        if (uiRect == null)
+        {
+            uiRect = uiCanvasGroup.GetComponent<RectTransform>();
+        }
+
+        return IsRayPointingAtRectTransform(ray, maxDistance, uiRect);
     }
 
     private bool IsRayPointingAtRectTransform(Ray ray, float maxDistance, RectTransform rectTransform)

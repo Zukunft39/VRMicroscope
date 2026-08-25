@@ -356,13 +356,14 @@ public class CameraTryMove : MonoBehaviour
         float maxDistance;
         bool hasRay = TryBuildPointerRay(out ray, out maxDistance);
 
+        if (hasRay && SuperAssemblyPartSelectionController.HasActiveSelection)
+        {
+            SuperAssemblyPartSelectionController.TryHandleDesktopPrimaryClick(ray, maxDistance, isPointerOverUi);
+            return;
+        }
+
         if (isPointerOverUi)
         {
-            if (hasRay && SuperAssemblyPartSelectionController.HasActiveSelection)
-            {
-                SuperAssemblyPartSelectionController.TryHandleDesktopPrimaryClick(ray, maxDistance, true);
-            }
-
             return;
         }
 

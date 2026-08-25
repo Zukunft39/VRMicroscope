@@ -19,12 +19,38 @@ public class NumericalApertureExperimentController : MonoBehaviour
     {
     }
 
+    private readonly struct ApertureProfile
+    {
+        public ApertureProfile(float na, float halfAngleDegrees, float magnification)
+        {
+            NA = na;
+            HalfAngleDegrees = halfAngleDegrees;
+            Magnification = magnification;
+        }
+
+        public float NA { get; }
+        public float HalfAngleDegrees { get; }
+        public float Magnification { get; }
+    }
+
+    private static readonly ApertureProfile[] ApertureProfiles =
+    {
+        new ApertureProfile(0.03f, 1.7f, 1.25f),
+        new ApertureProfile(0.085f, 4.9f, 2.5f),
+        new ApertureProfile(0.16f, 9.2f, 5f),
+        new ApertureProfile(0.25f, 14.5f, 10f),
+        new ApertureProfile(0.5f, 30f, 20f),
+        new ApertureProfile(0.75f, 48.6f, 40f),
+        new ApertureProfile(0.95f, 71.8f, 63f)
+    };
+
     [Header("Experiment Entry")]
     [SerializeField] private SuperAssemblyPartSelectionController selectionController;
     [SerializeField] private ModelExploder modelExploder;
     [SerializeField] private Interactor interactor;
     [SerializeField] private Move moveController;
     [SerializeField] private XRRayInteractor rightRayInteractor;
+    [SerializeField] private InteractWithSamples sampleInteraction;
     [SerializeField] private bool blockGlobalInputMaps = true;
     [SerializeField] private string[] globalInputMapsToBlock = { "Global" };
 
@@ -54,10 +80,10 @@ public class NumericalApertureExperimentController : MonoBehaviour
     [SerializeField] private InputActionAsset fallbackInputActions;
     [SerializeField] private string fallbackActionMapName = "Roaming";
     [SerializeField] private string fallbackActionName = "ChangeFocusOrChangeLIght";
-    [Min(0f)]
-    [SerializeField] private float sliderSpeed = 0.35f;
     [Range(0f, 0.95f)]
     [SerializeField] private float joystickDeadZone = 0.2f;
+    [Min(0f)]
+    [SerializeField] private float sliderSpeed = 0.45f;
 
     [Header("NA Formula")]
     [SerializeField] private float minNA = 0.03f;
@@ -69,11 +95,6 @@ public class NumericalApertureExperimentController : MonoBehaviour
     [SerializeField] private float coneHeight = 1.2f;
     [Min(8)]
     [SerializeField] private int coneSegments = 64;
-    [SerializeField] private float minApproxMagnification = 5f;
-    [SerializeField] private float maxApproxMagnification = 100f;
-    [Min(1f)]
-    [SerializeField] private float magnificationRoundStep = 5f;
-
     [Header("Text Output")]
     [SerializeField] private TextMeshProUGUI currentNaText;
     [SerializeField] private TextMeshProUGUI thetaText;
@@ -90,6 +111,7 @@ public class NumericalApertureExperimentController : MonoBehaviour
     [SerializeField] private Color highNaConeColor = new Color(1f, 0.92f, 0.12f, 0.72f);
 
     [Header("Visual Response")]
+    [SerializeField] private NumericalApertureDiagramView diagramView;
     [SerializeField] private Transform objectiveLensVisual;
     [SerializeField] private Vector3 objectiveMovementAxis = Vector3.up;
     [Min(0f)]
@@ -131,6 +153,7 @@ public class NumericalApertureExperimentController : MonoBehaviour
     private bool sliderReadWarningShown;
     private bool runtimeFallbackUiCreated;
     private float currentNA;
+    private int currentProfileIndex;
     private Canvas runtimeFadeCanvas;
     private Canvas runtimeExperimentCanvas;
     private readonly List<InputActionMap> blockedInputMaps = new List<InputActionMap>();
@@ -152,6 +175,9 @@ public class NumericalApertureExperimentController : MonoBehaviour
     private Vector3 cachedCameraPosition;
     private Quaternion cachedCameraRotation;
     private bool hasCachedManualCameraPose;
+    private bool samplePreviewStateCached;
+    private bool samplePreviewWasActive;
+    private GameObject samplePreviewRoot;
 
     private Vector3 objectiveBaseLocalPosition;
     private bool hasObjectiveBaseLocalPosition;
@@ -167,7 +193,10 @@ public class NumericalApertureExperimentController : MonoBehaviour
         EnsureRuntimeFallbackUi();
         BindUi();
         CacheObjectiveBasePose();
-        PrepareConeMesh();
+        if (diagramView == null)
+        {
+            PrepareConeMesh();
+        }
         ApplyInitialUiState();
     }
 
@@ -205,21 +234,49 @@ public class NumericalApertureExperimentController : MonoBehaviour
 
     public void StartExperiment()
     {
+        TryStartExperiment();
+    }
+
+    public bool TryStartExperiment()
+    {
         if (isExperimentActive || isTransitioning)
         {
-            return;
+            DebugLogWarning("Numerical aperture experiment is already active or transitioning.");
+            return false;
         }
 
         EnsureReferences();
         EnsureRuntimeFallbackUi();
         BindUi();
-        if (!CanStartExperiment())
+        if (!CanStartExperiment(out string blockedReason))
         {
-            DebugLogWarning("Numerical aperture experiment can only start from a stable selected super-assembly part.");
-            return;
+            DebugLogWarning($"Numerical aperture experiment cannot start: {blockedReason}");
+            return false;
         }
 
         transitionRoutine = StartCoroutine(StartExperimentRoutine());
+        return true;
+    }
+
+    public void ConfigureRuntimeContext(
+        SuperAssemblyPartSelectionController selection,
+        ModelExploder exploder,
+        XRRayInteractor rayInteractor)
+    {
+        if (selection != null)
+        {
+            selectionController = selection;
+        }
+
+        if (exploder != null)
+        {
+            modelExploder = exploder;
+        }
+
+        if (rayInteractor != null)
+        {
+            rightRayInteractor = rayInteractor;
+        }
     }
 
     public void ExitExperiment()
@@ -243,6 +300,7 @@ public class NumericalApertureExperimentController : MonoBehaviour
         selectionController?.SetExternalInteractionLocked(true);
         SetGameplayInputBlocked(true);
         CacheAndEnableRightRayUiInteraction();
+        CacheAndHideSamplePreview();
         SetFadeCanvas(0f, true);
 
         yield return FadeTo(1f);
@@ -273,6 +331,7 @@ public class NumericalApertureExperimentController : MonoBehaviour
         SetExperimentRootVisible(false);
         RestoreViewState();
         selectionController?.SetSelectionUiTemporarilyHidden(false);
+        RestoreSamplePreview();
 
         yield return FadeTo(0f);
 
@@ -281,18 +340,22 @@ public class NumericalApertureExperimentController : MonoBehaviour
         DebugLog("Numerical aperture experiment ended.");
     }
 
-    private bool CanStartExperiment()
+    private bool CanStartExperiment(out string blockedReason)
     {
         if (selectionController != null && !selectionController.IsSelectionActive)
         {
+            blockedReason = "no super-assembly part is currently selected.";
             return false;
         }
 
         if (modelExploder != null && (!modelExploder.IsExploded || modelExploder.IsAnimating))
         {
+            blockedReason =
+                $"model exploder is not ready. IsExploded={modelExploder.IsExploded}, IsAnimating={modelExploder.IsAnimating}.";
             return false;
         }
 
+        blockedReason = string.Empty;
         return true;
     }
 
@@ -308,6 +371,7 @@ public class NumericalApertureExperimentController : MonoBehaviour
             SetExperimentRootVisible(false);
             RestoreViewState();
             selectionController?.SetSelectionUiTemporarilyHidden(false);
+            RestoreSamplePreview();
             SetFadeCanvas(0f, false);
         }
 
@@ -360,6 +424,11 @@ public class NumericalApertureExperimentController : MonoBehaviour
         if (rightRayInteractor == null)
         {
             rightRayInteractor = FindObjectOfType<XRRayInteractor>();
+        }
+
+        if (sampleInteraction == null)
+        {
+            sampleInteraction = FindObjectOfType<InteractWithSamples>();
         }
 
         if (targetCamera == null)
@@ -475,6 +544,26 @@ public class NumericalApertureExperimentController : MonoBehaviour
         {
             rootTransform = experimentRoot.transform;
             runtimeExperimentCanvas = experimentRoot.GetComponent<Canvas>();
+            if (runtimeExperimentCanvas == null)
+            {
+                runtimeExperimentCanvas = experimentRoot.AddComponent<Canvas>();
+                runtimeExperimentCanvas.sortingOrder = runtimeCanvasSortingOrder;
+                ConfigureRuntimeCanvas(runtimeExperimentCanvas);
+
+                if (experimentRoot.GetComponent<CanvasScaler>() == null)
+                {
+                    CanvasScaler scaler = experimentRoot.AddComponent<CanvasScaler>();
+                    scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
+                    scaler.referenceResolution = new Vector2(1920f, 1080f);
+                    scaler.matchWidthOrHeight = 0.5f;
+                }
+
+                if (experimentRoot.GetComponent<GraphicRaycaster>() == null)
+                {
+                    experimentRoot.AddComponent<GraphicRaycaster>();
+                }
+            }
+
             if (experimentCanvasGroup == null)
             {
                 experimentCanvasGroup = experimentRoot.GetComponent<CanvasGroup>();
@@ -742,11 +831,8 @@ public class NumericalApertureExperimentController : MonoBehaviour
 
     private void ApplySliderSettings()
     {
-        float safeMin = Mathf.Min(minNA, maxNA);
-        float safeMax = Mathf.Max(minNA, maxNA);
-        minNA = safeMin;
-        maxNA = safeMax;
-
+        minNA = ApertureProfiles[0].NA;
+        maxNA = ApertureProfiles[ApertureProfiles.Length - 1].NA;
         if (naSlider != null)
         {
             ignoreSliderCallback = true;
@@ -755,11 +841,11 @@ public class NumericalApertureExperimentController : MonoBehaviour
             naSlider.maxValue = maxNA;
             naSlider.SetValueWithoutNotify(Mathf.Clamp(initialNA, minNA, maxNA));
             ignoreSliderCallback = false;
-            SetNA(naSlider.value);
+            ApplyNA(initialNA, false);
             return;
         }
 
-        SetNA(initialNA);
+        ApplyNA(initialNA, false);
     }
 
     private void HandleSliderValueChanged(float value)
@@ -769,7 +855,7 @@ public class NumericalApertureExperimentController : MonoBehaviour
             return;
         }
 
-        SetNA(value);
+        ApplyNA(value, false);
     }
 
     private void HandleJoystickSliderInput()
@@ -806,8 +892,10 @@ public class NumericalApertureExperimentController : MonoBehaviour
             return;
         }
 
-        float nextValue = naSlider.value + input.x * sliderSpeed * Time.unscaledDeltaTime;
-        naSlider.value = Mathf.Clamp(nextValue, minNA, maxNA);
+        naSlider.value = Mathf.Clamp(
+            naSlider.value + input.x * sliderSpeed * Time.deltaTime,
+            minNA,
+            maxNA);
     }
 
     private InputAction ResolveSliderAction()
@@ -839,9 +927,15 @@ public class NumericalApertureExperimentController : MonoBehaviour
 
     private void SetNA(float value)
     {
-        currentNA = Mathf.Clamp(value, minNA, maxNA);
+        ApplyNA(value, true);
+    }
 
-        if (naSlider != null && !Mathf.Approximately(naSlider.value, currentNA))
+    private void ApplyNA(float value, bool synchronizeSlider)
+    {
+        currentNA = Mathf.Clamp(value, minNA, maxNA);
+        currentProfileIndex = FindNearestProfileIndex(currentNA);
+
+        if (synchronizeSlider && naSlider != null && !Mathf.Approximately(naSlider.value, currentNA))
         {
             ignoreSliderCallback = true;
             naSlider.SetValueWithoutNotify(currentNA);
@@ -854,26 +948,68 @@ public class NumericalApertureExperimentController : MonoBehaviour
         float fullApertureDegrees = thetaDegrees * 2f;
         float radius = coneHeight * Mathf.Tan(thetaRadians);
         float normalized = CalculateNormalizedNA(currentNA);
-        float approximateMagnification = CalculateApproximateMagnification(normalized);
         float depthTolerance = 1f - normalized;
+        float approximateMagnification = CalculateApproximateMagnification(currentNA);
 
         UpdateTexts(thetaDegrees, fullApertureDegrees, approximateMagnification, normalized, depthTolerance);
-        UpdateCone(radius, normalized);
+        if (diagramView != null)
+        {
+            diagramView.ApplyContinuous(normalized, thetaDegrees);
+        }
+        else
+        {
+            UpdateCone(radius, normalized);
+        }
         UpdateVisualResponse(normalized, depthTolerance);
         onNormalizedNAChanged?.Invoke(normalized);
+    }
+
+    private float CalculateApproximateMagnification(float na)
+    {
+        if (na <= ApertureProfiles[0].NA)
+        {
+            return ApertureProfiles[0].Magnification;
+        }
+
+        for (int i = 0; i < ApertureProfiles.Length - 1; i++)
+        {
+            ApertureProfile lower = ApertureProfiles[i];
+            ApertureProfile upper = ApertureProfiles[i + 1];
+            if (na > upper.NA)
+            {
+                continue;
+            }
+
+            float t = Mathf.InverseLerp(lower.NA, upper.NA, na);
+            return Mathf.Lerp(lower.Magnification, upper.Magnification, t);
+        }
+
+        return ApertureProfiles[ApertureProfiles.Length - 1].Magnification;
+    }
+
+    private int FindNearestProfileIndex(float na)
+    {
+        int nearestIndex = 0;
+        float nearestDistance = Mathf.Abs(na - ApertureProfiles[0].NA);
+        for (int i = 1; i < ApertureProfiles.Length; i++)
+        {
+            float distance = Mathf.Abs(na - ApertureProfiles[i].NA);
+            if (distance >= nearestDistance)
+            {
+                continue;
+            }
+
+            nearestDistance = distance;
+            nearestIndex = i;
+        }
+
+        return nearestIndex;
     }
 
     private float CalculateNormalizedNA(float na)
     {
         float range = Mathf.Max(0.0001f, maxNA - minNA);
         return Mathf.Clamp01((na - minNA) / range);
-    }
-
-    private float CalculateApproximateMagnification(float normalized)
-    {
-        float rawMagnification = Mathf.Lerp(minApproxMagnification, maxApproxMagnification, normalized);
-        float safeStep = Mathf.Max(1f, magnificationRoundStep);
-        return Mathf.Round(rawMagnification / safeStep) * safeStep;
     }
 
     private void UpdateTexts(
@@ -885,7 +1021,7 @@ public class NumericalApertureExperimentController : MonoBehaviour
     {
         if (currentNaText != null)
         {
-            currentNaText.text = currentNA.ToString("0.00");
+            currentNaText.text = currentNA.ToString("0.###");
         }
 
         if (thetaText != null)
@@ -900,7 +1036,7 @@ public class NumericalApertureExperimentController : MonoBehaviour
 
         if (magnificationText != null)
         {
-            magnificationText.text = approximateMagnification.ToString("0") + "x";
+            magnificationText.text = approximateMagnification.ToString("0.##") + "x";
         }
 
         if (normalizedNaText != null)
@@ -910,7 +1046,11 @@ public class NumericalApertureExperimentController : MonoBehaviour
 
         if (formulaText != null)
         {
-            formulaText.text = $"NA = n * sin(theta) = {refractiveIndex:0.00} * sin({thetaDegrees:0.0} deg)";
+            formulaText.text =
+                $"NA = n * sin(theta)\n\n" +
+                $"{currentNA:0.###} = {refractiveIndex:0.00} * sin({thetaDegrees:0.0} deg)\n\n" +
+                "n = refractive index (1.00 for air)\n" +
+                "theta = half angular aperture";
         }
 
         if (depthToleranceText != null)
@@ -933,6 +1073,34 @@ public class NumericalApertureExperimentController : MonoBehaviour
         }
 
         lightConeMeshFilter.sharedMesh = coneMesh;
+
+        if (lightConeRenderer != null && lightConeRenderer.sharedMaterial == null)
+        {
+            Shader shader = Shader.Find("Universal Render Pipeline/Unlit");
+            if (shader == null)
+            {
+                shader = Shader.Find("Unlit/Color");
+            }
+
+            if (shader != null)
+            {
+                Material material = new Material(shader)
+                {
+                    name = "Numerical Aperture Cone Material"
+                };
+                if (material.HasProperty("_Surface"))
+                {
+                    material.SetFloat("_Surface", 1f);
+                }
+
+                if (material.HasProperty("_Blend"))
+                {
+                    material.SetFloat("_Blend", 0f);
+                }
+
+                lightConeRenderer.sharedMaterial = material;
+            }
+        }
     }
 
     private void UpdateCone(float radius, float normalized)
@@ -1012,7 +1180,7 @@ public class NumericalApertureExperimentController : MonoBehaviour
     private void UpdateVisualResponse(float normalized, float depthTolerance)
     {
         CacheObjectiveBasePose();
-        if (objectiveLensVisual != null)
+        if (diagramView == null && objectiveLensVisual != null)
         {
             Vector3 axis = objectiveMovementAxis.sqrMagnitude > 0.000001f
                 ? objectiveMovementAxis.normalized
@@ -1042,17 +1210,32 @@ public class NumericalApertureExperimentController : MonoBehaviour
     {
         if (experimentRoot != null && experimentRoot != gameObject)
         {
+            if (visible)
+            {
+                experimentRoot.transform.localScale = Vector3.one;
+            }
+
             experimentRoot.SetActive(visible);
         }
 
         if (experimentCanvasGroup == null)
         {
+            if (diagramView == null && lightConeMeshFilter != null)
+            {
+                lightConeMeshFilter.gameObject.SetActive(visible);
+            }
+
             return;
         }
 
         experimentCanvasGroup.alpha = visible ? 1f : 0f;
         experimentCanvasGroup.blocksRaycasts = visible;
         experimentCanvasGroup.interactable = visible;
+
+        if (diagramView == null && lightConeMeshFilter != null)
+        {
+            lightConeMeshFilter.gameObject.SetActive(visible);
+        }
     }
 
     private void SetFadeCanvas(float alpha, bool blockRaycasts)
@@ -1220,6 +1403,40 @@ public class NumericalApertureExperimentController : MonoBehaviour
 
         rightRayInteractor.enableUIInteraction = originalRightRayUiInteraction;
         rightRayUiInteractionCached = false;
+    }
+
+    private void CacheAndHideSamplePreview()
+    {
+        if (sampleInteraction == null || sampleInteraction.Inventory == null)
+        {
+            return;
+        }
+
+        Transform inventoryTransform = sampleInteraction.Inventory.transform;
+        GameObject previewRoot = inventoryTransform.parent != null
+            ? inventoryTransform.parent.gameObject
+            : inventoryTransform.gameObject;
+
+        if (!samplePreviewStateCached)
+        {
+            samplePreviewRoot = previewRoot;
+            samplePreviewWasActive = previewRoot.activeSelf;
+            samplePreviewStateCached = true;
+        }
+
+        previewRoot.SetActive(false);
+    }
+
+    private void RestoreSamplePreview()
+    {
+        if (!samplePreviewStateCached || samplePreviewRoot == null)
+        {
+            return;
+        }
+
+        samplePreviewRoot.SetActive(samplePreviewWasActive);
+        samplePreviewStateCached = false;
+        samplePreviewRoot = null;
     }
 
     private void CacheViewState()
@@ -1412,6 +1629,7 @@ public class NumericalApertureExperimentController : MonoBehaviour
     {
         if (!enableDebugLogs)
         {
+            Debug.LogWarning($"[NumericalApertureExperiment] {message}", this);
             return;
         }
 
