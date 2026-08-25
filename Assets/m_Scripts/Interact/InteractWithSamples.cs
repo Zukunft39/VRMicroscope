@@ -9,8 +9,15 @@ public class InteractWithSamples:MonoBehaviour
 {
     InputAction PickOrPutSampleAction;
     private InteractableSamples interactableObject;
-    private bool isSampleOnHand = false;
+    [SerializeField, HideInInspector] private bool isSampleOnHand = false;
+    [SerializeField, HideInInspector] private Texture currentSampleTexture;
+    [SerializeField, HideInInspector] private string currentSampleName;
     public RawImage Inventory;
+
+    public Texture CurrentSampleTexture => currentSampleTexture;
+    public string CurrentSampleName => !string.IsNullOrWhiteSpace(currentSampleName)
+        ? currentSampleName
+        : CurrentSampleTexture != null ? CurrentSampleTexture.name : "Teaching grating";
 
     public void PickSample()
     {
@@ -41,7 +48,9 @@ public class InteractWithSamples:MonoBehaviour
             rb.isKinematic = true;
         }
         
-        Inventory.texture = interactableObject.SampleImage;
+        currentSampleTexture = interactableObject.SampleImage;
+        currentSampleName = interactableObject.name;
+        Inventory.texture = currentSampleTexture;
         temp.transform.GetChild(0).GetComponent<Renderer>().material.SetTexture("_MainTexture",interactableObject.SampleImage);
         isSampleOnHand = true;
         SyncSampleStateToForceTutorialPrerequisites();

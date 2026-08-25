@@ -38,8 +38,11 @@ public class Interactor : MonoBehaviour
     {
         if (Instance != null && Instance != this)
         {
-             Destroy(gameObject); // 如果已经有一个实例，销毁重复的
-             return;
+            // Interactor shares Camera Offset with sample and camera components.
+            // Destroying the whole object also destroys the active sample state.
+            enabled = false;
+            Destroy(this);
+            return;
         }
         Instance = this;
         
@@ -66,6 +69,20 @@ public class Interactor : MonoBehaviour
 
     private void Update()
     {
+    }
+
+    private void OnDestroy()
+    {
+        if (_pendingStateApplyCoroutine != null)
+        {
+            StopCoroutine(_pendingStateApplyCoroutine);
+            _pendingStateApplyCoroutine = null;
+        }
+
+        if (Instance == this)
+        {
+            Instance = null;
+        }
     }
 
     public void OnMicroscopeIn(Microscope microscope)
@@ -267,6 +284,11 @@ public class Interactor : MonoBehaviour
 
     public void SetForceTutorialGameplayInputBlocked(bool isBlocked)
     {
+        if (this == null)
+        {
+            return;
+        }
+
         if (_forceTutorialGameplayInputBlocked == isBlocked)
         {
             return;
@@ -278,6 +300,11 @@ public class Interactor : MonoBehaviour
 
     private void QueueStateMapRefresh()
     {
+        if (this == null || !isActiveAndEnabled || !gameObject.activeInHierarchy)
+        {
+            return;
+        }
+
         if (_pendingStateApplyCoroutine != null)
         {
             StopCoroutine(_pendingStateApplyCoroutine);

@@ -250,6 +250,7 @@ public class SuperAssemblyPartHoverPulse : MonoBehaviour
                 {
                     return desktopHitPart;
                 }
+
             }
 
             return useRendererBoundsFallback ? ResolvePartByRendererBounds(desktopRay, desktopMaxDistance) : null;
@@ -267,6 +268,7 @@ public class SuperAssemblyPartHoverPulse : MonoBehaviour
             {
                 return hitPart;
             }
+
         }
 
         return useRendererBoundsFallback ? ResolvePartByRendererBounds() : null;

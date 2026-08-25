@@ -389,9 +389,6 @@ public class MicroscopeExploderModeController : MonoBehaviour
         partSelectionController?.ForceExitSelection(true);
         UpdateModelsVisibility();
         SetExploderState(true, false);
-        bool initialSelectionRequested = SuperAssemblyPartSelectionController.TrySelectLeftmostPartWhenReady();
-        DebugLog(
-            $"SuperAssembly initial selection request result={initialSelectionRequested}. {GetPartSelectionControllerDiagnostics()}");
         DebugLog("Entered SuperAssembly mode.");
     }
 
@@ -541,13 +538,6 @@ public class MicroscopeExploderModeController : MonoBehaviour
         if (partSelectionController == null)
         {
             partSelectionController = GetComponentInChildren<SuperAssemblyPartSelectionController>(true);
-        }
-
-        if (partSelectionController == null && microscopeExploderRoot != null)
-        {
-            partSelectionController = microscopeExploderRoot.AddComponent<SuperAssemblyPartSelectionController>();
-            DebugLogWarning(
-                $"SuperAssemblyPartSelectionController was missing at runtime, so one was added to '{microscopeExploderRoot.name}'.");
         }
 
         if (partSelectionController != null)
@@ -1192,24 +1182,6 @@ public class MicroscopeExploderModeController : MonoBehaviour
         ReturnToNormalOperation();
     }
 
-    private string GetPartSelectionControllerDiagnostics()
-    {
-        SuperAssemblyPartSelectionController[] controllers =
-            FindObjectsOfType<SuperAssemblyPartSelectionController>(true);
-
-        string diagnostics =
-            $"assignedPartSelectionController={GetSafeComponentName(partSelectionController)}, foundControllers={controllers.Length}";
-
-        for (int i = 0; i < controllers.Length; i++)
-        {
-            SuperAssemblyPartSelectionController controller = controllers[i];
-            diagnostics +=
-                $", [{i}] name='{GetSafeComponentName(controller)}', activeInHierarchy={(controller != null && controller.gameObject.activeInHierarchy)}, enabled={(controller != null && controller.enabled)}";
-        }
-
-        return diagnostics;
-    }
-
     private void DebugLog(string message)
     {
         if (!enableDebugLogs)
@@ -1231,11 +1203,6 @@ public class MicroscopeExploderModeController : MonoBehaviour
     }
 
     private string GetSafeObjectName(GameObject target)
-    {
-        return target != null ? target.name : "null";
-    }
-
-    private string GetSafeComponentName(Component target)
     {
         return target != null ? target.name : "null";
     }
