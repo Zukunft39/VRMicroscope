@@ -17,13 +17,27 @@ The experiment visualizes the reciprocal relation between specimen line spacing 
 | --- | ---: | ---: |
 | High | 250 lines/mm | 1 |
 | Middle | 125 lines/mm | 2 |
-| Low | 50 lines/mm | 3 |
+| Low | 62.5 lines/mm | 4 |
 
 The diffraction angle is calculated from a 550 nm teaching wavelength. The order spacing uses an 18 mm objective focal length. These are geometric teaching values rather than a full physical ray-tracing simulation.
 
-## Current specimen
+## CPU Fourier-optics pipeline
 
-When the player has selected a specimen, its texture is reused as a subtle overlay in the circular objective back focal plane. The calculated diffraction maxima remain procedural so the frequency relationship stays readable. If no specimen is available, the experiment uses the line-grating teaching view alone.
+The authoritative result uses a 128 x 128 CPU simulation. It runs only when the experiment starts or when the player changes the frequency or illumination. No FFT is evaluated in `Update`, and no GPU FFT or compute shader is used.
+
+1. The selected specimen or teaching pattern becomes a zero-phase object-plane amplitude field.
+2. A two-dimensional FFT produces the objective back focal-plane spectrum.
+3. A fixed circular objective pupil captures the frequency-dependent diffraction orders.
+4. An inverse FFT reconstructs the pupil-filtered image.
+
+The three cached `Texture2D` outputs are displayed as Object Plane, Fourier Spectrum, and Pupil-Filtered Reconstruction. The ordinary UI renderer only draws these cached textures.
+
+## Illumination and input assumptions
+
+- White Light visualizes wavelength-dependent order separation with representative red, green, and blue wavelengths.
+- Laser Excitation uses one coherent spatial-frequency modulation. For teaching continuity, a selected specimen retains its RGB colour while the reconstructed image shows the coherent grating filtering.
+- The current specimen is used as the object-plane input. If no specimen is selected, the experiment falls back to the teaching line grating.
+- Player interaction is intentionally limited to High, Middle, and Low spatial-frequency states plus the two illumination modes.
 
 ## Scene setup
 

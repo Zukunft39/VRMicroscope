@@ -78,7 +78,7 @@ public static class SpatialFrequencyExperimentSceneSetup
             new Vector2(0.84f, 0.915f), new Vector2(0.965f, 0.972f));
 
         RectTransform opticalPanel = GetOrCreateRect(root, "Optical Path Panel");
-        SetAnchors(opticalPanel, new Vector2(0.025f, 0.11f), new Vector2(0.55f, 0.89f),
+        SetAnchors(opticalPanel, new Vector2(0.025f, 0.11f), new Vector2(0.42f, 0.89f),
             new Vector2(12f, 8f), new Vector2(-12f, -8f));
         Image opticalPanelImage = GetOrAddComponent<Image>(opticalPanel.gameObject);
         opticalPanelImage.color = new Color(1f, 1f, 1f, 0.72f);
@@ -110,7 +110,7 @@ public static class SpatialFrequencyExperimentSceneSetup
             TextAlignmentOptions.Left, InkColor);
 
         RectTransform rightPanel = GetOrCreateRect(root, "Result Panel");
-        SetAnchors(rightPanel, new Vector2(0.565f, 0.08f), new Vector2(0.975f, 0.89f),
+        SetAnchors(rightPanel, new Vector2(0.43f, 0.08f), new Vector2(0.975f, 0.89f),
             Vector2.zero, Vector2.zero);
 
         RectTransform backFocalRoot = GetOrCreateRect(rightPanel, "Objective Back Focal Plane");
@@ -175,22 +175,80 @@ public static class SpatialFrequencyExperimentSceneSetup
             new Vector2(0.06f, 0.225f), new Vector2(0.94f, 0.275f), 16f, FontStyles.Italic,
             TextAlignmentOptions.Center, MutedColor);
 
+        // Keep the previous schematic widgets serialized for comparison, but the
+        // three CPU-generated planes are now the authoritative experiment output.
+        backFocalRoot.gameObject.SetActive(false);
+        diffractionRoot.gameObject.SetActive(false);
+        gratingRoot.gameObject.SetActive(false);
+        backFocalLabel.gameObject.SetActive(false);
+        gratingLabel.gameObject.SetActive(false);
+        sampleSourceLabel.gameObject.SetActive(false);
+
+        FourierOpticsCpuSimulator fourierSimulator =
+            GetOrAddComponent<FourierOpticsCpuSimulator>(rightPanel.gameObject);
+        RawImage objectPlaneView = EnsurePlaneView(
+            rightPanel,
+            "Object Plane View",
+            new Vector2(0.01f, 0.58f),
+            new Vector2(0.32f, 0.93f));
+        RawImage fourierPlaneView = EnsurePlaneView(
+            rightPanel,
+            "Fourier Plane View",
+            new Vector2(0.345f, 0.58f),
+            new Vector2(0.655f, 0.93f));
+        RawImage reconstructionView = EnsurePlaneView(
+            rightPanel,
+            "Reconstruction View",
+            new Vector2(0.68f, 0.58f),
+            new Vector2(0.99f, 0.93f));
+        TextMeshProUGUI objectPlaneLabel = EnsureText(
+            rightPanel, "Object Plane Label", "Object Plane",
+            new Vector2(0.01f, 0.51f), new Vector2(0.32f, 0.575f), 18f,
+            FontStyles.Bold, TextAlignmentOptions.Center, InkColor);
+        TextMeshProUGUI fourierPlaneLabel = EnsureText(
+            rightPanel, "Fourier Plane Label", "Objective Back Focal Plane | Fourier Spectrum",
+            new Vector2(0.335f, 0.51f), new Vector2(0.665f, 0.575f), 16f,
+            FontStyles.Bold, TextAlignmentOptions.Center, InkColor);
+        TextMeshProUGUI reconstructionLabel = EnsureText(
+            rightPanel, "Reconstruction Label", "Pupil-Filtered Reconstruction",
+            new Vector2(0.68f, 0.51f), new Vector2(0.99f, 0.575f), 17f,
+            FontStyles.Bold, TextAlignmentOptions.Center, InkColor);
+
+        RemoveChildIfPresent(rightPanel, "Input Pattern Button");
+        RemoveChildIfPresent(rightPanel, "Numerical Aperture Value");
+        RemoveChildIfPresent(rightPanel, "Numerical Aperture Slider");
+        RemoveChildIfPresent(rightPanel, "DMD Tilt Value");
+        RemoveChildIfPresent(rightPanel, "DMD Tilt Slider");
+
+        Button whiteLightButton = EnsureChoiceButton(
+            rightPanel,
+            "White Light Button",
+            "White Light",
+            new Vector2(0.18f, 0.39f),
+            new Vector2(0.48f, 0.46f));
+        Button laserExcitationButton = EnsureChoiceButton(
+            rightPanel,
+            "Laser Excitation Button",
+            "Laser Excitation",
+            new Vector2(0.52f, 0.39f),
+            new Vector2(0.82f, 0.46f));
+
         EnsureText(rightPanel, "Spatial Frequency Heading", "Spatial Frequency",
-            new Vector2(0.03f, 0.15f), new Vector2(0.48f, 0.22f), 24f, FontStyles.Bold,
+            new Vector2(0.05f, 0.28f), new Vector2(0.4f, 0.35f), 22f, FontStyles.Bold,
             TextAlignmentOptions.Left, InkColor);
         ToggleGroup toggleGroup = GetOrAddComponent<ToggleGroup>(rightPanel.gameObject);
         Toggle highToggle = EnsureToggle(rightPanel, "High Frequency Toggle", "High   250 lines/mm",
-            new Vector2(0.05f, 0.10f), new Vector2(0.95f, 0.15f), toggleGroup);
+            new Vector2(0.35f, 0.25f), new Vector2(0.95f, 0.32f), toggleGroup);
         Toggle middleToggle = EnsureToggle(rightPanel, "Middle Frequency Toggle", "Middle   125 lines/mm",
-            new Vector2(0.05f, 0.05f), new Vector2(0.95f, 0.10f), toggleGroup);
-        Toggle lowToggle = EnsureToggle(rightPanel, "Low Frequency Toggle", "Low   50 lines/mm",
-            new Vector2(0.05f, 0f), new Vector2(0.95f, 0.05f), toggleGroup);
+            new Vector2(0.35f, 0.17f), new Vector2(0.95f, 0.24f), toggleGroup);
+        Toggle lowToggle = EnsureToggle(rightPanel, "Low Frequency Toggle", "Low   62.5 lines/mm",
+            new Vector2(0.35f, 0.09f), new Vector2(0.95f, 0.16f), toggleGroup);
         highToggle.SetIsOnWithoutNotify(true);
         middleToggle.SetIsOnWithoutNotify(false);
         lowToggle.SetIsOnWithoutNotify(false);
 
         RectTransform valuesPanel = GetOrCreateRect(root, "Values Panel");
-        SetAnchors(valuesPanel, new Vector2(0.035f, 0.015f), new Vector2(0.55f, 0.115f),
+        SetAnchors(valuesPanel, new Vector2(0.035f, 0.015f), new Vector2(0.42f, 0.115f),
             Vector2.zero, Vector2.zero);
         TextMeshProUGUI frequencyText = EnsureText(valuesPanel, "Frequency Text", string.Empty,
             new Vector2(0f, 0.52f), new Vector2(0.34f, 1f), 17f, FontStyles.Bold,
@@ -226,6 +284,13 @@ public static class SpatialFrequencyExperimentSceneSetup
         SetReference(diagramView, "backFocalPlaneLabel", backFocalLabel);
         SetReference(diagramView, "gratingLabel", gratingLabel);
         SetReference(diagramView, "sampleSourceLabel", sampleSourceLabel);
+        SetReference(diagramView, "fourierSimulator", fourierSimulator);
+        SetReference(diagramView, "objectPlaneView", objectPlaneView);
+        SetReference(diagramView, "fourierPlaneView", fourierPlaneView);
+        SetReference(diagramView, "reconstructedPlaneView", reconstructionView);
+        SetReference(diagramView, "objectPlaneLabel", objectPlaneLabel);
+        SetReference(diagramView, "fourierPlaneLabel", fourierPlaneLabel);
+        SetReference(diagramView, "reconstructedPlaneLabel", reconstructionLabel);
 
         NumericalApertureExperimentController numericalController =
             FindSceneComponent<NumericalApertureExperimentController>(scene);
@@ -249,6 +314,8 @@ public static class SpatialFrequencyExperimentSceneSetup
         SetReference(controller, "highFrequencyToggle", highToggle);
         SetReference(controller, "middleFrequencyToggle", middleToggle);
         SetReference(controller, "lowFrequencyToggle", lowToggle);
+        SetReference(controller, "whiteLightButton", whiteLightButton);
+        SetReference(controller, "laserExcitationButton", laserExcitationButton);
         SetReference(controller, "diagramView", diagramView);
         SetReference(controller, "frequencyText", frequencyText);
         SetReference(controller, "lineSpacingText", lineSpacingText);
@@ -262,7 +329,7 @@ public static class SpatialFrequencyExperimentSceneSetup
             FindSceneComponent<SuperAssemblyPartSelectionController>(scene);
         ConfigureObjectiveExperimentBinding(selectionController, controller);
 
-        diagramView.ApplyProfile(1f, 250f, 7.9f, 1, null);
+        diagramView.ApplyProfile(1f, 250f, 7.9f, 1, null, false);
         root.gameObject.SetActive(false);
         EditorUtility.SetDirty(controller);
         EditorUtility.SetDirty(selectionController);
@@ -370,6 +437,45 @@ public static class SpatialFrequencyExperimentSceneSetup
         return button;
     }
 
+    private static Button EnsureChoiceButton(
+        Transform parent,
+        string objectName,
+        string label,
+        Vector2 anchorMin,
+        Vector2 anchorMax)
+    {
+        RectTransform rect = GetOrCreateRect(parent, objectName);
+        SetAnchors(rect, anchorMin, anchorMax, Vector2.zero, Vector2.zero);
+        Image image = GetOrAddComponent<Image>(rect.gameObject);
+        image.color = new Color(0.27f, 0.33f, 0.43f, 1f);
+        Button button = GetOrAddComponent<Button>(rect.gameObject);
+        button.targetGraphic = image;
+        EnsureText(rect, "Label", label, Vector2.zero, Vector2.one, 17f, FontStyles.Bold,
+            TextAlignmentOptions.Center, Color.white);
+        return button;
+    }
+
+    private static RawImage EnsurePlaneView(
+        Transform parent,
+        string objectName,
+        Vector2 anchorMin,
+        Vector2 anchorMax)
+    {
+        RectTransform rect = GetOrCreateRect(parent, objectName);
+        SetAnchors(rect, anchorMin, anchorMax, Vector2.zero, Vector2.zero);
+        Image background = GetOrAddComponent<Image>(rect.gameObject);
+        background.color = Color.black;
+        background.raycastTarget = false;
+
+        RectTransform imageRect = GetOrCreateRect(rect, "Texture");
+        SetAnchors(imageRect, Vector2.zero, Vector2.one, new Vector2(3f, 3f), new Vector2(-3f, -3f));
+        RawImage image = GetOrAddComponent<RawImage>(imageRect.gameObject);
+        image.color = Color.white;
+        image.raycastTarget = false;
+        image.uvRect = new Rect(0f, 0f, 1f, 1f);
+        return image;
+    }
+
     private static TextMeshProUGUI EnsureText(
         Transform parent,
         string objectName,
@@ -423,6 +529,15 @@ public static class SpatialFrequencyExperimentSceneSetup
         GameObject target = new GameObject(objectName);
         target.transform.SetParent(parent, false);
         return target.transform;
+    }
+
+    private static void RemoveChildIfPresent(Transform parent, string objectName)
+    {
+        Transform existing = parent.Find(objectName);
+        if (existing != null)
+        {
+            UnityEngine.Object.DestroyImmediate(existing.gameObject);
+        }
     }
 
     private static void Stretch(RectTransform rect)

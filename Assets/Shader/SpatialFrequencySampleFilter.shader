@@ -5,6 +5,9 @@ Shader "UI/Spatial Frequency Sample Filter"
         [PerRendererData] _MainTex ("Sprite Texture", 2D) = "white" {}
         _Color ("Tint", Color) = (1,1,1,1)
         _ResolutionQuality ("Resolution Quality", Range(0,1)) = 1
+        _LaserExcitation ("Laser Excitation", Range(0,1)) = 0
+        _LaserStripeFrequency ("Laser Stripe Frequency", Range(4,40)) = 20
+        _LaserStripeStrength ("Laser Stripe Strength", Range(0,1)) = 0.62
         _StencilComp ("Stencil Comparison", Float) = 8
         _Stencil ("Stencil ID", Float) = 0
         _StencilOp ("Stencil Operation", Float) = 0
@@ -76,6 +79,9 @@ Shader "UI/Spatial Frequency Sample Filter"
             fixed4 _TextureSampleAdd;
             float4 _ClipRect;
             float _ResolutionQuality;
+            float _LaserExcitation;
+            float _LaserStripeFrequency;
+            float _LaserStripeStrength;
 
             v2f vert(appdata_t input)
             {
@@ -118,6 +124,19 @@ Shader "UI/Spatial Frequency Sample Filter"
                 float sourceBrightness = max(source.r, max(source.g, source.b));
                 float preserveBlack = smoothstep(0.012, 0.06, sourceBrightness);
                 filtered *= preserveBlack;
+
+                // This is a teaching approximation of coherent line-grating filtering.
+                // It preserves specimen colour while making the selected periodic
+                // spatial-frequency component visible as vertical intensity bands.
+                float stripePhase = cos(
+                    (input.texcoord.x - 0.5) * 6.2831853 * _LaserStripeFrequency);
+                float stripeBand = smoothstep(-0.28, 0.58, stripePhase);
+                float stripeModulation = lerp(
+                    1.0,
+                    lerp(0.22, 1.0, stripeBand),
+                    saturate(_LaserStripeStrength));
+                fixed3 stripedFiltered = filtered * stripeModulation;
+                filtered = lerp(filtered, stripedFiltered, saturate(_LaserExcitation));
 
                 fixed4 color = fixed4(saturate(filtered), source.a) * input.color;
 

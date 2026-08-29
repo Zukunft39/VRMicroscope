@@ -12,6 +12,12 @@ using UnityEngine.XR.Interaction.Toolkit;
 
 public sealed class SpatialFrequencyExperimentController : MonoBehaviour
 {
+    private enum IlluminationMode
+    {
+        WhiteLight,
+        LaserExcitation
+    }
+
     private readonly struct FrequencyProfile
     {
         public FrequencyProfile(string label, float linesPerMillimeter, int visibleOrderCount)
@@ -65,6 +71,8 @@ public sealed class SpatialFrequencyExperimentController : MonoBehaviour
     [SerializeField] private Toggle highFrequencyToggle;
     [SerializeField] private Toggle middleFrequencyToggle;
     [SerializeField] private Toggle lowFrequencyToggle;
+    [SerializeField] private Button whiteLightButton;
+    [SerializeField] private Button laserExcitationButton;
     [SerializeField] private SpatialFrequencyExperimentDiagramView diagramView;
     [Min(380f)]
     [SerializeField] private float illuminationWavelengthNm = 550f;
@@ -96,6 +104,8 @@ public sealed class SpatialFrequencyExperimentController : MonoBehaviour
     private GameObject samplePreviewRoot;
     private bool samplePreviewWasActive;
     private bool samplePreviewStateCached;
+    private int currentProfileIndex;
+    private IlluminationMode illuminationMode = IlluminationMode.WhiteLight;
 
     private CinemachineVirtualCamera cachedPreviousVirtualCamera;
     private bool cachedWasFreeView;
@@ -261,6 +271,7 @@ public sealed class SpatialFrequencyExperimentController : MonoBehaviour
     private void ApplyProfile(int profileIndex, bool synchronizeToggles)
     {
         int safeIndex = Mathf.Clamp(profileIndex, 0, Profiles.Length - 1);
+        currentProfileIndex = safeIndex;
         FrequencyProfile profile = Profiles[safeIndex];
         float normalizedFrequency = Mathf.InverseLerp(
             Profiles[Profiles.Length - 1].LinesPerMillimeter,
@@ -306,7 +317,8 @@ public sealed class SpatialFrequencyExperimentController : MonoBehaviour
         {
             formulaText.text =
                 "S / f approximately equals lambda / D = sin(psi)\n" +
-                $"lambda = {illuminationWavelengthNm:0} nm, f = {objectiveFocalLengthMm:0.0} mm";
+                $"lambda = {illuminationWavelengthNm:0} nm, f = {objectiveFocalLengthMm:0.0} mm, " +
+                $"source = {(illuminationMode == IlluminationMode.WhiteLight ? "white light" : "laser excitation")}";
         }
 
         if (resolutionText != null)
@@ -323,12 +335,14 @@ public sealed class SpatialFrequencyExperimentController : MonoBehaviour
                 : "Selected specimen: none (teaching grating used)";
         }
 
+        UpdateIlluminationButtonVisuals();
         diagramView?.ApplyProfile(
             normalizedFrequency,
             profile.LinesPerMillimeter,
             diffractionAngleDegrees,
             profile.VisibleOrderCount,
-            sampleTexture);
+            sampleTexture,
+            illuminationMode == IlluminationMode.LaserExcitation);
     }
 
     private void BindControls()
@@ -358,6 +372,9 @@ public sealed class SpatialFrequencyExperimentController : MonoBehaviour
             lowFrequencyToggle.onValueChanged.AddListener(HandleLowFrequencyChanged);
         }
 
+        whiteLightButton?.onClick.AddListener(SelectWhiteLight);
+        laserExcitationButton?.onClick.AddListener(SelectLaserExcitation);
+
         controlsBound = true;
     }
 
@@ -372,6 +389,8 @@ public sealed class SpatialFrequencyExperimentController : MonoBehaviour
         highFrequencyToggle?.onValueChanged.RemoveListener(HandleHighFrequencyChanged);
         middleFrequencyToggle?.onValueChanged.RemoveListener(HandleMiddleFrequencyChanged);
         lowFrequencyToggle?.onValueChanged.RemoveListener(HandleLowFrequencyChanged);
+        whiteLightButton?.onClick.RemoveListener(SelectWhiteLight);
+        laserExcitationButton?.onClick.RemoveListener(SelectLaserExcitation);
         controlsBound = false;
     }
 
@@ -399,6 +418,67 @@ public sealed class SpatialFrequencyExperimentController : MonoBehaviour
         }
     }
 
+    public void SelectWhiteLight()
+    {
+        SetIlluminationMode(IlluminationMode.WhiteLight);
+    }
+
+    public void SelectLaserExcitation()
+    {
+        SetIlluminationMode(IlluminationMode.LaserExcitation);
+    }
+
+    private void SetIlluminationMode(IlluminationMode mode)
+    {
+        illuminationMode = mode;
+        UpdateIlluminationButtonVisuals();
+        ApplyProfile(currentProfileIndex, synchronizeToggles: false);
+    }
+
+    private void UpdateIlluminationButtonVisuals()
+    {
+        SetIlluminationButtonSelected(
+            whiteLightButton,
+            illuminationMode == IlluminationMode.WhiteLight);
+        SetIlluminationButtonSelected(
+            laserExcitationButton,
+            illuminationMode == IlluminationMode.LaserExcitation);
+    }
+
+    private static void SetIlluminationButtonSelected(Button button, bool selected)
+    {
+        if (button == null)
+        {
+            return;
+        }
+
+        Color background = selected
+            ? new Color(0.02f, 0.30f, 0.78f, 1f)
+            : new Color(0.27f, 0.33f, 0.43f, 1f);
+
+        if (button.targetGraphic is Image image)
+        {
+            image.color = Color.white;
+        }
+
+        ColorBlock colors = button.colors;
+        colors.normalColor = background;
+        colors.highlightedColor = Color.Lerp(background, Color.white, 0.16f);
+        colors.pressedColor = Color.Lerp(background, Color.black, 0.22f);
+        colors.selectedColor = background;
+        colors.disabledColor = new Color(background.r, background.g, background.b, 0.45f);
+        colors.colorMultiplier = 1f;
+        button.colors = colors;
+        button.transform.localScale = selected ? Vector3.one * 1.06f : Vector3.one;
+
+        TextMeshProUGUI label = button.GetComponentInChildren<TextMeshProUGUI>(true);
+        if (label != null)
+        {
+            label.color = Color.white;
+            label.fontStyle = selected ? FontStyles.Bold : FontStyles.Normal;
+        }
+    }
+
     private void EnsureReferences()
     {
         selectionController = selectionController != null
@@ -414,6 +494,18 @@ public sealed class SpatialFrequencyExperimentController : MonoBehaviour
         sampleInteraction = sampleInteraction != null
             ? sampleInteraction
             : FindObjectOfType<InteractWithSamples>();
+        Transform rootTransform = experimentRoot != null
+            ? experimentRoot.transform
+            : transform.Find("SpatialFrequencyExperimentRoot");
+        if (rootTransform != null)
+        {
+            whiteLightButton = whiteLightButton != null
+                ? whiteLightButton
+                : rootTransform.Find("Result Panel/White Light Button")?.GetComponent<Button>();
+            laserExcitationButton = laserExcitationButton != null
+                ? laserExcitationButton
+                : rootTransform.Find("Result Panel/Laser Excitation Button")?.GetComponent<Button>();
+        }
         targetCamera = targetCamera != null ? targetCamera : ResolveTargetCamera();
         xrOrigin = xrOrigin != null ? xrOrigin : FindObjectOfType<XROrigin>();
         if (fallbackInputActions == null && interactor != null)
