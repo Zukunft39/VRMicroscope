@@ -33,6 +33,8 @@ public sealed class SpatialFrequencyExperimentDiagramView : MonoBehaviour
         Texture sampleTexture,
         bool useLaserExcitation)
     {
+        RestoreReferenceViews();
+        ApplyHybridLayout();
         opticalPathGraphic?.SetFrequency(
             normalizedFrequency,
             diffractionAngleDegrees,
@@ -44,16 +46,21 @@ public sealed class SpatialFrequencyExperimentDiagramView : MonoBehaviour
             useLaserExcitation);
         lineGratingGraphic?.SetFrequency(normalizedFrequency);
 
-        if (fourierSimulator != null)
+        if (fourierSimulator != null && sampleTexture != null)
         {
             fourierSimulator.Simulate(
                 sampleTexture,
-                useLaserExcitation,
                 normalizedFrequency,
-                visibleOrderCount);
-            SetPlaneTexture(objectPlaneView, fourierSimulator.ObjectPlaneTexture);
-            SetPlaneTexture(fourierPlaneView, fourierSimulator.FourierPlaneTexture);
-            SetPlaneTexture(reconstructedPlaneView, fourierSimulator.ReconstructedImageTexture);
+                3);
+            SetPlaneTexture(objectPlaneView, fourierSimulator.SpecimenSpectrumTexture);
+            SetPlaneTexture(fourierPlaneView, fourierSimulator.MixedSpectrumTexture);
+            SetPlaneTexture(reconstructedPlaneView, fourierSimulator.RecoveredSpectrumTexture);
+        }
+        else
+        {
+            SetPlaneTexture(objectPlaneView, null);
+            SetPlaneTexture(fourierPlaneView, null);
+            SetPlaneTexture(reconstructedPlaneView, null);
         }
 
         if (backFocalSampleOverlay != null)
@@ -98,22 +105,109 @@ public sealed class SpatialFrequencyExperimentDiagramView : MonoBehaviour
         if (objectPlaneLabel != null)
         {
             objectPlaneLabel.text = sampleTexture != null
-                ? "Object Plane | Selected Specimen"
-                : "Object Plane | Teaching Line Grating (No Specimen)";
+                ? "Specimen Fourier Spectrum S(k) | specimen-dependent"
+                : "No specimen selected";
         }
 
         if (fourierPlaneLabel != null)
         {
             fourierPlaneLabel.text = sampleTexture != null
-                ? "Objective Back Focal Plane | Fourier Spectrum"
-                : "Objective Back Focal Plane | Default Diffraction Orders";
+                ? $"Single-Orientation +/-1 Orders | {linesPerMillimeter:0.#} lines/mm"
+                : "Select a specimen to calculate its Fourier spectrum";
         }
 
         if (reconstructedPlaneLabel != null)
         {
             reconstructedPlaneLabel.text = sampleTexture != null
-                ? "Pupil-Filtered Reconstruction"
-                : "Default Grating Reconstruction";
+                ? "Three-Orientation SIM Spectrum"
+                : "Fourier analysis waiting for specimen";
+        }
+    }
+
+    private void RestoreReferenceViews()
+    {
+        SetViewVisible(opticalPathGraphic, true);
+        SetViewVisible(diffractionPatternGraphic, true);
+        SetViewVisible(backFocalPlaneLabel, true);
+        SetViewVisible(gratingLabel, true);
+        SetViewVisible(sampleSourceLabel, true);
+
+        if (backFocalSampleOverlay != null)
+        {
+            backFocalSampleOverlay.transform.parent.gameObject.SetActive(true);
+            backFocalSampleOverlay.gameObject.SetActive(true);
+        }
+
+        if (lineGratingGraphic != null)
+        {
+            lineGratingGraphic.transform.parent.gameObject.SetActive(true);
+            lineGratingGraphic.gameObject.SetActive(true);
+        }
+    }
+
+    private void ApplyHybridLayout()
+    {
+        if (backFocalSampleOverlay != null)
+        {
+            SetRect((RectTransform)backFocalSampleOverlay.transform.parent,
+                new Vector2(0.03f, 0.68f), new Vector2(0.35f, 0.95f));
+        }
+
+        SetComponentRect(diffractionPatternGraphic,
+            new Vector2(0.40f, 0.80f), new Vector2(0.98f, 0.90f));
+        if (lineGratingGraphic != null)
+        {
+            SetRect((RectTransform)lineGratingGraphic.transform.parent,
+                new Vector2(0.40f, 0.65f), new Vector2(0.98f, 0.78f));
+        }
+
+        SetComponentRect(backFocalPlaneLabel,
+            new Vector2(0.03f, 0.62f), new Vector2(0.35f, 0.68f));
+        SetComponentRect(gratingLabel,
+            new Vector2(0.40f, 0.59f), new Vector2(0.98f, 0.65f));
+        SetComponentRect(sampleSourceLabel,
+            new Vector2(0.36f, 0.54f), new Vector2(0.99f, 0.59f));
+
+        SetPlaneRect(objectPlaneView, new Vector2(0.01f, 0.27f), new Vector2(0.32f, 0.51f));
+        SetPlaneRect(fourierPlaneView, new Vector2(0.345f, 0.27f), new Vector2(0.655f, 0.51f));
+        SetPlaneRect(reconstructedPlaneView, new Vector2(0.68f, 0.27f), new Vector2(0.99f, 0.51f));
+        SetComponentRect(objectPlaneLabel,
+            new Vector2(0.01f, 0.21f), new Vector2(0.32f, 0.27f));
+        SetComponentRect(fourierPlaneLabel,
+            new Vector2(0.335f, 0.21f), new Vector2(0.665f, 0.27f));
+        SetComponentRect(reconstructedPlaneLabel,
+            new Vector2(0.68f, 0.21f), new Vector2(0.99f, 0.27f));
+    }
+
+    private static void SetPlaneRect(RawImage view, Vector2 anchorMin, Vector2 anchorMax)
+    {
+        if (view != null)
+        {
+            SetRect((RectTransform)view.transform.parent, anchorMin, anchorMax);
+        }
+    }
+
+    private static void SetComponentRect(Component component, Vector2 anchorMin, Vector2 anchorMax)
+    {
+        if (component != null)
+        {
+            SetRect((RectTransform)component.transform, anchorMin, anchorMax);
+        }
+    }
+
+    private static void SetRect(RectTransform rect, Vector2 anchorMin, Vector2 anchorMax)
+    {
+        rect.anchorMin = anchorMin;
+        rect.anchorMax = anchorMax;
+        rect.offsetMin = Vector2.zero;
+        rect.offsetMax = Vector2.zero;
+    }
+
+    private static void SetViewVisible(Component component, bool visible)
+    {
+        if (component != null)
+        {
+            component.gameObject.SetActive(visible);
         }
     }
 

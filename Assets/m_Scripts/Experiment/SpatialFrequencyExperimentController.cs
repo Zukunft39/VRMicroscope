@@ -127,6 +127,7 @@ public sealed class SpatialFrequencyExperimentController : MonoBehaviour
     private void Awake()
     {
         EnsureReferences();
+        PrepareHybridControls();
         BindControls();
         SetExperimentRootVisible(false);
         SetFadeCanvas(0f, false);
@@ -284,7 +285,12 @@ public sealed class SpatialFrequencyExperimentController : MonoBehaviour
         float diffractionAngleRadians = Mathf.Asin(sinPsi);
         float diffractionAngleDegrees = diffractionAngleRadians * Mathf.Rad2Deg;
         float orderSpacingMm = objectiveFocalLengthMm * Mathf.Tan(diffractionAngleRadians);
-        Texture sampleTexture = sampleInteraction != null ? sampleInteraction.CurrentSampleTexture : null;
+        bool hasSelectedSample = sampleInteraction != null &&
+            sampleInteraction.HasSampleOnHand() &&
+            sampleInteraction.CurrentSampleTexture != null;
+        Texture sampleTexture = hasSelectedSample
+            ? sampleInteraction.CurrentSampleTexture
+            : null;
 
         if (synchronizeToggles)
         {
@@ -292,6 +298,7 @@ public sealed class SpatialFrequencyExperimentController : MonoBehaviour
             middleFrequencyToggle?.SetIsOnWithoutNotify(safeIndex == 1);
             lowFrequencyToggle?.SetIsOnWithoutNotify(safeIndex == 2);
         }
+        UpdateFrequencyToggleVisuals(safeIndex);
 
         if (frequencyText != null)
         {
@@ -374,6 +381,10 @@ public sealed class SpatialFrequencyExperimentController : MonoBehaviour
 
         whiteLightButton?.onClick.AddListener(SelectWhiteLight);
         laserExcitationButton?.onClick.AddListener(SelectLaserExcitation);
+        if (sampleInteraction != null)
+        {
+            sampleInteraction.SampleChanged += HandleSampleChanged;
+        }
 
         controlsBound = true;
     }
@@ -391,6 +402,10 @@ public sealed class SpatialFrequencyExperimentController : MonoBehaviour
         lowFrequencyToggle?.onValueChanged.RemoveListener(HandleLowFrequencyChanged);
         whiteLightButton?.onClick.RemoveListener(SelectWhiteLight);
         laserExcitationButton?.onClick.RemoveListener(SelectLaserExcitation);
+        if (sampleInteraction != null)
+        {
+            sampleInteraction.SampleChanged -= HandleSampleChanged;
+        }
         controlsBound = false;
     }
 
@@ -443,6 +458,120 @@ public sealed class SpatialFrequencyExperimentController : MonoBehaviour
         SetIlluminationButtonSelected(
             laserExcitationButton,
             illuminationMode == IlluminationMode.LaserExcitation);
+    }
+
+    private void HandleSampleChanged()
+    {
+        ApplyProfile(currentProfileIndex, synchronizeToggles: false);
+    }
+
+    private void PrepareHybridControls()
+    {
+        SetControlRect(whiteLightButton, new Vector2(0.05f, 0.12f), new Vector2(0.46f, 0.19f));
+        SetControlRect(laserExcitationButton, new Vector2(0.54f, 0.12f), new Vector2(0.95f, 0.19f));
+        SetControlRect(highFrequencyToggle, new Vector2(0.31f, 0.02f), new Vector2(0.52f, 0.10f));
+        SetControlRect(middleFrequencyToggle, new Vector2(0.54f, 0.02f), new Vector2(0.75f, 0.10f));
+        SetControlRect(lowFrequencyToggle, new Vector2(0.77f, 0.02f), new Vector2(0.98f, 0.10f));
+        SetToggleLabel(highFrequencyToggle, "High  250");
+        SetToggleLabel(middleFrequencyToggle, "Middle  125");
+        SetToggleLabel(lowFrequencyToggle, "Low  62.5");
+
+        Transform rootTransform = experimentRoot != null
+            ? experimentRoot.transform
+            : transform.Find("SpatialFrequencyExperimentRoot");
+        TextMeshProUGUI heading = rootTransform != null
+            ? rootTransform.Find("Result Panel/Spatial Frequency Heading")?.GetComponent<TextMeshProUGUI>()
+            : null;
+        if (heading != null)
+        {
+            heading.text = "Spatial Frequency / Fourier Carrier";
+            SetRect(heading.rectTransform, new Vector2(0.01f, 0.02f), new Vector2(0.30f, 0.10f));
+        }
+    }
+
+    private static void SetControlRect(Component control, Vector2 anchorMin, Vector2 anchorMax)
+    {
+        if (control == null)
+        {
+            return;
+        }
+
+        control.gameObject.SetActive(true);
+        SetRect((RectTransform)control.transform, anchorMin, anchorMax);
+    }
+
+    private static void SetToggleLabel(Toggle toggle, string text)
+    {
+        TextMeshProUGUI label = toggle != null
+            ? toggle.GetComponentInChildren<TextMeshProUGUI>(true)
+            : null;
+        if (label != null)
+        {
+            label.text = text;
+            label.alignment = TextAlignmentOptions.Center;
+            label.fontSize = 17f;
+        }
+    }
+
+    private void UpdateFrequencyToggleVisuals(int selectedIndex)
+    {
+        SetFrequencyToggleVisual(highFrequencyToggle, selectedIndex == 0);
+        SetFrequencyToggleVisual(middleFrequencyToggle, selectedIndex == 1);
+        SetFrequencyToggleVisual(lowFrequencyToggle, selectedIndex == 2);
+    }
+
+    private static void SetFrequencyToggleVisual(Toggle toggle, bool selected)
+    {
+        if (toggle == null)
+        {
+            return;
+        }
+
+        toggle.transition = Selectable.Transition.None;
+        Image background = toggle.GetComponent<Image>();
+        if (background != null)
+        {
+            background.color = selected
+                ? new Color(0.035f, 0.27f, 0.62f, 0.98f)
+                : new Color(0.88f, 0.91f, 0.95f, 0.96f);
+        }
+
+        Outline frame = toggle.GetComponent<Outline>();
+        if (frame == null)
+        {
+            frame = toggle.gameObject.AddComponent<Outline>();
+        }
+
+        frame.effectColor = selected
+            ? new Color(0.12f, 0.78f, 1f, 1f)
+            : new Color(0.36f, 0.43f, 0.52f, 0.75f);
+        frame.effectDistance = selected ? new Vector2(3f, -3f) : new Vector2(1f, -1f);
+        frame.useGraphicAlpha = false;
+
+        TextMeshProUGUI label = toggle.GetComponentInChildren<TextMeshProUGUI>(true);
+        if (label != null)
+        {
+            label.color = selected ? Color.white : new Color(0.12f, 0.16f, 0.22f, 1f);
+            label.fontStyle = selected ? FontStyles.Bold : FontStyles.Normal;
+        }
+
+        Image checkmark = toggle.graphic as Image;
+        if (checkmark != null)
+        {
+            checkmark.color = selected
+                ? new Color(0.18f, 0.86f, 1f, 1f)
+                : Color.clear;
+        }
+
+        toggle.transform.localScale = selected ? Vector3.one * 1.035f : Vector3.one;
+    }
+
+    private static void SetRect(RectTransform rect, Vector2 anchorMin, Vector2 anchorMax)
+    {
+        rect.anchorMin = anchorMin;
+        rect.anchorMax = anchorMax;
+        rect.offsetMin = Vector2.zero;
+        rect.offsetMax = Vector2.zero;
     }
 
     private static void SetIlluminationButtonSelected(Button button, bool selected)

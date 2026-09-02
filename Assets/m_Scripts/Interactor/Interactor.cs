@@ -194,7 +194,9 @@ public class Interactor : MonoBehaviour
 
     public void TriggerTakeObjectOrSample()
     {
-        TriggerTakeObjectOrSample(MicroscopeExploderModeController.TryHandleRightTrigger);
+        TriggerTakeObjectOrSample(() =>
+            SNOMDemonstrationController.TryHandleRightTrigger() ||
+            MicroscopeExploderModeController.TryHandleRightTrigger());
     }
 
     public void TriggerTakeObjectOrSample(Func<bool> assemblyHandler)

@@ -15,6 +15,7 @@ public class InteractWithSamples:MonoBehaviour
     public RawImage Inventory;
 
     public Texture CurrentSampleTexture => currentSampleTexture;
+    public event Action SampleChanged;
     public string CurrentSampleName => !string.IsNullOrWhiteSpace(currentSampleName)
         ? currentSampleName
         : CurrentSampleTexture != null ? CurrentSampleTexture.name : "Teaching grating";
@@ -50,10 +51,14 @@ public class InteractWithSamples:MonoBehaviour
         
         currentSampleTexture = interactableObject.SampleImage;
         currentSampleName = interactableObject.name;
-        Inventory.texture = currentSampleTexture;
-        temp.transform.GetChild(0).GetComponent<Renderer>().material.SetTexture("_MainTexture",interactableObject.SampleImage);
         isSampleOnHand = true;
+        if (Inventory != null)
+        {
+            Inventory.texture = currentSampleTexture;
+        }
+        temp.transform.GetChild(0).GetComponent<Renderer>().material.SetTexture("_MainTexture",interactableObject.SampleImage);
         SyncSampleStateToForceTutorialPrerequisites();
+        SampleChanged?.Invoke();
     }
 
     public bool HasSampleOnHand()

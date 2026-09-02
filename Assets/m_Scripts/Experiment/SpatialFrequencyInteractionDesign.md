@@ -1,44 +1,75 @@
-# Spatial Frequency Experiment Mapping
+# Spatial Frequency and Fourier-Domain Experiment
 
-## Teaching relationship
+## Teaching focus
 
-The experiment visualizes the reciprocal relation between specimen line spacing and diffraction-order spacing in the objective back focal plane:
+This experiment combines the original ZEISS-style Abbe diffraction tutorial
+with the Fourier-domain model described in `ENG5059PReport_3045430W.docx`.
+The ray path, white-light specimen, chromatic diffraction orders, and line
+grating remain visible. A separate three-panel analysis band explains how
+structured illumination moves otherwise inaccessible specimen frequencies into
+the objective passband and how those components are separated and combined.
 
-`S / f approximately equals lambda / D = sin(psi)`
+For a sinusoidal carrier, multiplication in the spatial domain becomes shifted
+copies in the Fourier domain:
 
-- Higher spatial frequency means a smaller specimen line spacing `D`.
-- A smaller `D` produces a larger diffraction angle `psi` and a larger order spacing `S`.
-- Lower spatial frequency places diffraction orders closer together, allowing more orders to fit inside the objective back focal plane.
-- At least the zero and first diffraction orders are required to resolve a line grating.
+`G(k) = H(k) [S(k) + m/2 S(k-k0) + m/2 S(k+k0)]`
 
-## Profiles
+- `S(k)` is the specimen spectrum.
+- `H(k)` is the objective optical transfer function (OTF).
+- `k0` is the structured-light carrier vector.
+- `m` is the modulation depth.
+- Three phase steps conceptually separate the zero and `+/-1` components.
+- Three carrier orientations extend support in two dimensions.
 
-| Selection | Spatial frequency | Visible teaching orders |
-| --- | ---: | ---: |
-| High | 250 lines/mm | 1 |
-| Middle | 125 lines/mm | 2 |
-| Low | 62.5 lines/mm | 4 |
+## Spatial-frequency states
 
-The diffraction angle is calculated from a 550 nm teaching wavelength. The order spacing uses an 18 mm objective focal length. These are geometric teaching values rather than a full physical ray-tracing simulation.
+| Selection | Grating frequency | Website-style result | Fourier result |
+| --- | ---: | --- | --- |
+| High | 250 lines/mm | Fine lines and widely separated diffraction orders | Largest carrier displacement |
+| Middle | 125 lines/mm | Intermediate line and order spacing | Intermediate carrier displacement |
+| Low | 62.5 lines/mm | Coarse lines and closely spaced diffraction orders | Smallest carrier displacement |
 
-## CPU Fourier-optics pipeline
+The active state uses a filled blue selection card, cyan outline, accent bar,
+and bold white label. Inactive states use a light card and grey outline so the
+current High/Middle/Low choice remains readable in desktop and XR views.
 
-The authoritative result uses a 128 x 128 CPU simulation. It runs only when the experiment starts or when the player changes the frequency or illumination. No FFT is evaluated in `Update`, and no GPU FFT or compute shader is used.
+The Fourier panels display a contrast-enhanced specimen spectrum, the
+phase-separated `+/-1` orders for one line-grating orientation inside the
+objective OTF, and the recovered support from three illumination orientations.
+Showing one orientation in the middle panel keeps the `+/-k0` displacement
+readable; the final panel demonstrates the two-dimensional support gained by
+combining three orientations. Brightness and sideband positions come from the
+selected specimen's measured complex spectrum, while the dominant colour is
+estimated from its illuminated pixels.
+Explicit carrier dots and coloured support-circle outlines are intentionally
+omitted.
 
-1. The selected specimen or teaching pattern becomes a zero-phase object-plane amplitude field.
-2. A two-dimensional FFT produces the objective back focal-plane spectrum.
-3. A fixed circular objective pupil captures the frequency-dependent diffraction orders.
-4. An inverse FFT reconstructs the pupil-filtered image.
+The underlying `S(k)` belongs to the specimen and therefore does not physically
+change when only the grating-frequency state changes. High/Middle/Low changes
+the mixed and recovered spectra, while selecting a different specimen re-reads
+the source texture and recomputes all three panels.
 
-The three cached `Texture2D` outputs are displayed as Object Plane, Fourier Spectrum, and Pupil-Filtered Reconstruction. The ordinary UI renderer only draws these cached textures.
+White Light preserves the specimen colour and shows a white zero order with
+wavelength-separated blue, green, and red higher orders. Laser Excitation is
+retained as a monochromatic comparison.
 
-## Illumination and input assumptions
+## Runtime constraints
 
-- White Light visualizes wavelength-dependent order separation with representative red, green, and blue wavelengths.
-- Laser Excitation uses one coherent spatial-frequency modulation. For teaching continuity, a selected specimen retains its RGB colour while the reconstructed image shows the coherent grating filtering.
-- The current specimen is used as the object-plane input. If no specimen is selected, the experiment falls back to the teaching line grating.
-- Player interaction is intentionally limited to High, Middle, and Low spatial-frequency states plus the two illumination modes.
+- The FFT is `128 x 128` and runs on the CPU only when the experiment starts or
+  a state changes.
+- No FFT, texture generation, or reconstruction work runs in `Update`.
+- No compute shader or GPU FFT is used. `Graphics.Blit` is used only to read the
+  selected Unity texture into the CPU-sized input buffer.
+- The visualization uses direct order separation and support fusion rather than
+  the thesis's iterative FISTA reconstruction, keeping the result suitable for
+  VR teaching while preserving the relevant Fourier relationship.
+- If no specimen is selected, the original line grating and diffraction-order
+  teaching graphics remain visible, while the three specimen-derived Fourier
+  panels stay empty until a real specimen is selected.
 
 ## Scene setup
 
-Run `Tools/Experiments/Setup Spatial Frequency Experiment` after Unity compiles the scripts. The setup creates the saved scene UI, wires transition references from the numerical-aperture experiment, and adds the Objective binding to the third selection-panel button.
+Run `Tools/Experiments/Setup Spatial Frequency Experiment` after Unity compiles
+the scripts when the saved scene needs to be rebuilt. Existing scenes are also
+updated at runtime so the restored reference graphics, compact Fourier strip,
+illumination buttons, and High/Middle/Low controls use the combined layout.

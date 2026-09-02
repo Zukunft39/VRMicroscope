@@ -114,7 +114,7 @@ public static class SpatialFrequencyExperimentSceneSetup
             Vector2.zero, Vector2.zero);
 
         RectTransform backFocalRoot = GetOrCreateRect(rightPanel, "Objective Back Focal Plane");
-        SetAnchors(backFocalRoot, new Vector2(0.16f, 0.62f), new Vector2(0.84f, 0.91f),
+        SetAnchors(backFocalRoot, new Vector2(0.03f, 0.68f), new Vector2(0.35f, 0.95f),
             Vector2.zero, Vector2.zero);
         AspectRatioFitter aspect = backFocalRoot.GetComponent<AspectRatioFitter>();
         if (aspect != null)
@@ -145,18 +145,18 @@ public static class SpatialFrequencyExperimentSceneSetup
             diffractionRoot = GetOrCreateRect(rightPanel, "Reference Diffraction Pattern");
         }
 
-        SetAnchors(diffractionRoot, new Vector2(0.12f, 0.47f), new Vector2(0.88f, 0.55f),
+        SetAnchors(diffractionRoot, new Vector2(0.40f, 0.80f), new Vector2(0.98f, 0.90f),
             Vector2.zero, Vector2.zero);
         SpatialFrequencyDiffractionPatternGraphic diffractionPattern =
             GetOrAddComponent<SpatialFrequencyDiffractionPatternGraphic>(diffractionRoot.gameObject);
         diffractionPattern.raycastTarget = false;
 
         TextMeshProUGUI backFocalLabel = EnsureText(rightPanel, "Back Focal Plane Caption",
-            "Objective Back Focal Plane", new Vector2(0.12f, 0.555f), new Vector2(0.88f, 0.61f),
-            25f, FontStyles.Normal, TextAlignmentOptions.Center, InkColor);
+            "White-Light Specimen", new Vector2(0.03f, 0.62f), new Vector2(0.35f, 0.68f),
+            20f, FontStyles.Normal, TextAlignmentOptions.Center, InkColor);
 
         RectTransform gratingRoot = GetOrCreateRect(rightPanel, "Line Grating");
-        SetAnchors(gratingRoot, new Vector2(0.12f, 0.34f), new Vector2(0.88f, 0.46f),
+        SetAnchors(gratingRoot, new Vector2(0.40f, 0.65f), new Vector2(0.98f, 0.78f),
             Vector2.zero, Vector2.zero);
         Image gratingBackground = GetOrAddComponent<Image>(gratingRoot.gameObject);
         gratingBackground.color = Color.white;
@@ -168,50 +168,48 @@ public static class SpatialFrequencyExperimentSceneSetup
         grating.raycastTarget = false;
 
         TextMeshProUGUI gratingLabel = EnsureText(rightPanel, "Grating Caption",
-            "Line grating with 250 lines/mm", new Vector2(0.08f, 0.275f), new Vector2(0.92f, 0.34f),
-            22f, FontStyles.Normal, TextAlignmentOptions.Center, InkColor);
+            "Line grating with 250 lines/mm", new Vector2(0.40f, 0.59f), new Vector2(0.98f, 0.65f),
+            18f, FontStyles.Normal, TextAlignmentOptions.Center, InkColor);
         TextMeshProUGUI sampleSourceLabel = EnsureText(rightPanel, "Sample Source",
             "Reference diffraction orders for the selected spatial frequency",
-            new Vector2(0.06f, 0.225f), new Vector2(0.94f, 0.275f), 16f, FontStyles.Italic,
+            new Vector2(0.36f, 0.54f), new Vector2(0.99f, 0.59f), 13f, FontStyles.Italic,
             TextAlignmentOptions.Center, MutedColor);
 
-        // Keep the previous schematic widgets serialized for comparison, but the
-        // three CPU-generated planes are now the authoritative experiment output.
-        backFocalRoot.gameObject.SetActive(false);
-        diffractionRoot.gameObject.SetActive(false);
-        gratingRoot.gameObject.SetActive(false);
-        backFocalLabel.gameObject.SetActive(false);
-        gratingLabel.gameObject.SetActive(false);
-        sampleSourceLabel.gameObject.SetActive(false);
+        backFocalRoot.gameObject.SetActive(true);
+        diffractionRoot.gameObject.SetActive(true);
+        gratingRoot.gameObject.SetActive(true);
+        backFocalLabel.gameObject.SetActive(true);
+        gratingLabel.gameObject.SetActive(true);
+        sampleSourceLabel.gameObject.SetActive(true);
 
         FourierOpticsCpuSimulator fourierSimulator =
             GetOrAddComponent<FourierOpticsCpuSimulator>(rightPanel.gameObject);
         RawImage objectPlaneView = EnsurePlaneView(
             rightPanel,
             "Object Plane View",
-            new Vector2(0.01f, 0.58f),
-            new Vector2(0.32f, 0.93f));
+            new Vector2(0.01f, 0.27f),
+            new Vector2(0.32f, 0.51f));
         RawImage fourierPlaneView = EnsurePlaneView(
             rightPanel,
             "Fourier Plane View",
-            new Vector2(0.345f, 0.58f),
-            new Vector2(0.655f, 0.93f));
+            new Vector2(0.345f, 0.27f),
+            new Vector2(0.655f, 0.51f));
         RawImage reconstructionView = EnsurePlaneView(
             rightPanel,
             "Reconstruction View",
-            new Vector2(0.68f, 0.58f),
-            new Vector2(0.99f, 0.93f));
+            new Vector2(0.68f, 0.27f),
+            new Vector2(0.99f, 0.51f));
         TextMeshProUGUI objectPlaneLabel = EnsureText(
-            rightPanel, "Object Plane Label", "Object Plane",
-            new Vector2(0.01f, 0.51f), new Vector2(0.32f, 0.575f), 18f,
+            rightPanel, "Object Plane Label", "Specimen Spectrum  S(k)",
+            new Vector2(0.01f, 0.21f), new Vector2(0.32f, 0.27f), 14f,
             FontStyles.Bold, TextAlignmentOptions.Center, InkColor);
         TextMeshProUGUI fourierPlaneLabel = EnsureText(
-            rightPanel, "Fourier Plane Label", "Objective Back Focal Plane | Fourier Spectrum",
-            new Vector2(0.335f, 0.51f), new Vector2(0.665f, 0.575f), 16f,
+            rightPanel, "Fourier Plane Label", "Pattern-Mixed Spectrum inside OTF",
+            new Vector2(0.335f, 0.21f), new Vector2(0.665f, 0.27f), 13f,
             FontStyles.Bold, TextAlignmentOptions.Center, InkColor);
         TextMeshProUGUI reconstructionLabel = EnsureText(
-            rightPanel, "Reconstruction Label", "Pupil-Filtered Reconstruction",
-            new Vector2(0.68f, 0.51f), new Vector2(0.99f, 0.575f), 17f,
+            rightPanel, "Reconstruction Label", "Recovered Frequency Support",
+            new Vector2(0.68f, 0.21f), new Vector2(0.99f, 0.27f), 13f,
             FontStyles.Bold, TextAlignmentOptions.Center, InkColor);
 
         RemoveChildIfPresent(rightPanel, "Input Pattern Button");
@@ -221,28 +219,22 @@ public static class SpatialFrequencyExperimentSceneSetup
         RemoveChildIfPresent(rightPanel, "DMD Tilt Slider");
 
         Button whiteLightButton = EnsureChoiceButton(
-            rightPanel,
-            "White Light Button",
-            "White Light",
-            new Vector2(0.18f, 0.39f),
-            new Vector2(0.48f, 0.46f));
+            rightPanel, "White Light Button", "White Light",
+            new Vector2(0.05f, 0.12f), new Vector2(0.46f, 0.19f));
         Button laserExcitationButton = EnsureChoiceButton(
-            rightPanel,
-            "Laser Excitation Button",
-            "Laser Excitation",
-            new Vector2(0.52f, 0.39f),
-            new Vector2(0.82f, 0.46f));
+            rightPanel, "Laser Excitation Button", "Laser Excitation",
+            new Vector2(0.54f, 0.12f), new Vector2(0.95f, 0.19f));
 
-        EnsureText(rightPanel, "Spatial Frequency Heading", "Spatial Frequency",
-            new Vector2(0.05f, 0.28f), new Vector2(0.4f, 0.35f), 22f, FontStyles.Bold,
+        EnsureText(rightPanel, "Spatial Frequency Heading", "Spatial Frequency / Fourier Carrier",
+            new Vector2(0.01f, 0.02f), new Vector2(0.30f, 0.10f), 16f, FontStyles.Bold,
             TextAlignmentOptions.Left, InkColor);
         ToggleGroup toggleGroup = GetOrAddComponent<ToggleGroup>(rightPanel.gameObject);
-        Toggle highToggle = EnsureToggle(rightPanel, "High Frequency Toggle", "High   250 lines/mm",
-            new Vector2(0.35f, 0.25f), new Vector2(0.95f, 0.32f), toggleGroup);
-        Toggle middleToggle = EnsureToggle(rightPanel, "Middle Frequency Toggle", "Middle   125 lines/mm",
-            new Vector2(0.35f, 0.17f), new Vector2(0.95f, 0.24f), toggleGroup);
-        Toggle lowToggle = EnsureToggle(rightPanel, "Low Frequency Toggle", "Low   62.5 lines/mm",
-            new Vector2(0.35f, 0.09f), new Vector2(0.95f, 0.16f), toggleGroup);
+        Toggle highToggle = EnsureToggle(rightPanel, "High Frequency Toggle", "High  250",
+            new Vector2(0.31f, 0.02f), new Vector2(0.52f, 0.10f), toggleGroup);
+        Toggle middleToggle = EnsureToggle(rightPanel, "Middle Frequency Toggle", "Middle  125",
+            new Vector2(0.54f, 0.02f), new Vector2(0.75f, 0.10f), toggleGroup);
+        Toggle lowToggle = EnsureToggle(rightPanel, "Low Frequency Toggle", "Low  62.5",
+            new Vector2(0.77f, 0.02f), new Vector2(0.98f, 0.10f), toggleGroup);
         highToggle.SetIsOnWithoutNotify(true);
         middleToggle.SetIsOnWithoutNotify(false);
         lowToggle.SetIsOnWithoutNotify(false);
@@ -405,10 +397,15 @@ public static class SpatialFrequencyExperimentSceneSetup
         RectTransform rect = GetOrCreateRect(parent, objectName);
         SetAnchors(rect, anchorMin, anchorMax, Vector2.zero, Vector2.zero);
         Image background = GetOrAddComponent<Image>(rect.gameObject);
-        background.color = new Color(1f, 1f, 1f, 0.01f);
+        background.color = new Color(0.88f, 0.91f, 0.95f, 0.96f);
+        Outline outline = GetOrAddComponent<Outline>(rect.gameObject);
+        outline.effectColor = new Color(0.36f, 0.43f, 0.52f, 0.75f);
+        outline.effectDistance = new Vector2(1f, -1f);
+        outline.useGraphicAlpha = false;
         Toggle toggle = GetOrAddComponent<Toggle>(rect.gameObject);
         toggle.group = group;
         toggle.targetGraphic = background;
+        toggle.transition = Selectable.Transition.None;
 
         Image checkmark = EnsureImage(rect, "Checkmark", AccentColor);
         SetAnchors(checkmark.rectTransform, new Vector2(0.01f, 0.22f), new Vector2(0.055f, 0.78f),

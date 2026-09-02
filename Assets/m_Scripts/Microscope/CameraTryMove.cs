@@ -373,7 +373,10 @@ public class CameraTryMove : MonoBehaviour
         }
 
         cachedInteractor.TriggerTakeObjectOrSample(() =>
-            hasRay && MicroscopeExploderModeController.TryHandleDesktopPrimaryClick(ray, maxDistance, isPointerOverUi));
+            hasRay && (SNOMDemonstrationController.TryHandleDesktopPrimaryClick(
+                           ray, maxDistance, isPointerOverUi) ||
+                       MicroscopeExploderModeController.TryHandleDesktopPrimaryClick(
+                           ray, maxDistance, isPointerOverUi)));
     }
 
     private void HandleContinuousFocusLightInput(StandaloneTutorialUI forceTutorial)
