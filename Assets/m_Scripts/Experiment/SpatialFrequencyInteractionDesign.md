@@ -2,6 +2,10 @@
 
 ## Teaching focus
 
+This is a diffraction and structured-illumination teaching experiment, not a
+confocal pinhole simulation. See [Confocal Component Background](ConfocalComponentBackground.md)
+for the component audit and the distinction from confocal optical sectioning.
+
 This experiment combines the original ZEISS-style Abbe diffraction tutorial
 with the Fourier-domain model described in `ENG5059PReport_3045430W.docx`.
 The ray path, white-light specimen, chromatic diffraction orders, and line
