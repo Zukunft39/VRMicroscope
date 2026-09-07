@@ -1,0 +1,12 @@
+AFMimageRoughGlass20x20.JPG
+Source: https://commons.wikimedia.org/wiki/File:AFMimageRoughGlass20x20.JPG
+Original: https://upload.wikimedia.org/wikipedia/commons/e/e8/AFMimageRoughGlass20x20.JPG
+Author: Chych; derivative work: Materialscientist.
+License: Public domain (PD-self), as stated on the source page.
+Description: Contact-mode AFM glass surface topography, 20 um x 20 um,
+420 nm vertical extent. Veeco di CP-II, CMU Nanorobotics Laboratory.
+Downloaded 2026-09-07. Image pixels unchanged.
+Used as an illustrative surface topography reference, not measured THz
+near-field amplitude, live camera output, or a simulation of the scene sample.
+Progressive reveal is a teaching animation over this existing 3D rendering,
+not a reconstruction from raw raster acquisition data.

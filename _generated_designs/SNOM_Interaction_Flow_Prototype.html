@@ -1,0 +1,440 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SNOM Two-Step Interaction Prototype</title>
+  <style>
+    :root {
+      --bg: #050b0f;
+      --surface: #0b151a;
+      --surface-2: #10232b;
+      --surface-3: #142d37;
+      --line: #224552;
+      --cyan: #16c7ef;
+      --blue: #1058c9;
+      --amber: #f5a01e;
+      --green: #36ca8b;
+      --red: #f25b5b;
+      --text: #edf7fa;
+      --muted: #8fa8b2;
+      --device: #b7c2c1;
+      --device-dark: #8d9b9f;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--text);
+      background:
+        radial-gradient(circle at 85% 12%, rgba(22, 199, 239, .12), transparent 30rem),
+        linear-gradient(145deg, #071116, #030709 65%);
+      font-family: "IBM Plex Sans", "Bahnschrift", "Aptos", sans-serif;
+    }
+
+    button { font: inherit; }
+    .review-shell { width: min(1680px, 100%); margin: 0 auto; padding: 30px; }
+    .review-head { display: grid; grid-template-columns: 1fr auto; gap: 24px; align-items: end; margin-bottom: 22px; }
+    .kicker { color: var(--cyan); font-size: 12px; font-weight: 800; letter-spacing: .15em; }
+    h1 { margin: 8px 0 4px; font-size: clamp(28px, 4vw, 52px); line-height: 1; letter-spacing: -.035em; }
+    .subtitle { margin: 0; color: var(--muted); font-size: 15px; }
+    .reset {
+      border: 1px solid #6c3131;
+      color: #ffb1b1;
+      background: #231213;
+      border-radius: 9px;
+      padding: 12px 18px;
+      cursor: pointer;
+    }
+
+    .flow-nav {
+      display: grid;
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+    .flow-step {
+      min-height: 64px;
+      padding: 10px 12px;
+      color: var(--muted);
+      text-align: left;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: rgba(11, 21, 26, .85);
+      cursor: pointer;
+    }
+    .flow-step strong { display: block; color: var(--text); font-size: 13px; margin-top: 3px; }
+    .flow-step.active { border-color: var(--cyan); background: #0a2932; box-shadow: inset 4px 0 var(--cyan); }
+
+    .viewport {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 16 / 10;
+      min-height: 620px;
+      overflow: hidden;
+      border: 1px solid #29434e;
+      border-radius: 18px;
+      background: var(--surface);
+      box-shadow: 0 30px 80px rgba(0,0,0,.35);
+    }
+    .topbar {
+      position: absolute;
+      z-index: 20;
+      inset: 0 0 auto;
+      height: 9.4%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 2.8%;
+      background: #03090c;
+    }
+    .brand { font-size: clamp(16px, 1.8vw, 25px); font-weight: 700; }
+    .status { display: flex; gap: 12px; align-items: center; color: var(--muted); font-size: clamp(10px, 1.1vw, 14px); font-weight: 800; letter-spacing: .04em; }
+    .status-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--muted); }
+
+    .scene { position: absolute; inset: 9.4% 0 0; overflow: hidden; }
+    .window {
+      position: absolute;
+      left: 4.2%; top: 5.8%; width: 34.7%; height: 36.8%;
+      border: 2px solid #29434b;
+      border-radius: 10px;
+      background: repeating-linear-gradient(90deg, #17282e 0 19.5%, #31474e 19.5% 20%);
+    }
+    .table {
+      position: absolute;
+      left: 13.2%; right: 16%; top: 72.6%; height: 11.2%;
+      border: 2px solid #ced8d6;
+      border-radius: 10px;
+      background:
+        radial-gradient(circle, #59696c 0 3px, transparent 3.5px) 5px 15px/52px 35px,
+        #929fa2;
+    }
+    .tds-base { position: absolute; left: 17.4%; top: 52.2%; width: 25%; height: 20.4%; border-radius: 9px; background: var(--device); }
+    .tds-module { position: absolute; left: 19.9%; top: 42.3%; width: 19.9%; height: 10.4%; border-radius: 9px; background: #c1cac7; color: #4c5e62; font-weight: 800; padding: 2.1% 2%; }
+    .sn-root { position: absolute; left: 47.8%; top: 21%; width: 30%; height: 52%; }
+    .halo { position: absolute; inset: 0; border: 4px solid #123f4b; border-radius: 50%; background: rgba(10, 55, 65, .25); }
+    .pillar { position: absolute; left: 36%; top: 17%; width: 13%; height: 60%; border-radius: 11px; background: #aebdbc; }
+    .bridge { position: absolute; left: 11%; top: 29%; width: 73%; height: 11%; border-radius: 9px; background: #afbfbd; }
+    .head { position: absolute; left: 30%; top: 40%; width: 27%; height: 35%; border-radius: 12px; background: #b5c2c0; }
+    .objective { position: absolute; left: 34%; top: 69%; width: 19%; aspect-ratio: 1.3; border-radius: 50%; background: #819396; }
+    .probe { position: absolute; left: 42.6%; top: 79%; width: 5px; height: 13%; border-radius: 4px; background: #b6902d; }
+    .sample { position: absolute; left: 25%; top: 92%; width: 37%; height: 5%; border-radius: 6px; background: #2e5663; }
+    .optic { position: absolute; width: 12%; aspect-ratio: 1; border: 4px solid #42626e; border-radius: 50%; background: #091419; }
+    .optic.a { left: -5%; top: 64%; } .optic.b { left: 27%; top: 72%; }
+    .optic.c { left: 60%; top: 64%; } .optic.d { left: 91%; top: 72%; }
+
+    .range-badge {
+      position: absolute; z-index: 8; left: 2.8%; top: 3%;
+      padding: 11px 18px; border: 1px solid #12667a; border-radius: 99px;
+      color: var(--cyan); background: #041014; font-size: 13px; font-weight: 800;
+    }
+    .corner-card, .progress-card, .ready-card {
+      position: absolute; z-index: 10; right: 3.8%; bottom: 6.4%; width: min(370px, 28%);
+      padding: 26px 28px; border: 1px solid #12667a; border-radius: 14px; background: #041014;
+    }
+    .eyebrow { color: var(--cyan); font-size: 12px; font-weight: 800; letter-spacing: .08em; }
+    .corner-card h2, .progress-card h2, .ready-card h2 { margin: 12px 0 10px; font-size: clamp(19px, 2vw, 27px); }
+    .helper { color: var(--muted); font-size: 13px; line-height: 1.45; }
+    .primary, .secondary {
+      border-radius: 8px; padding: 14px 18px; font-weight: 750; cursor: pointer;
+    }
+    .primary { border: 1px solid var(--cyan); color: white; background: var(--blue); }
+    .secondary { border: 1px solid var(--line); color: var(--text); background: var(--surface-2); }
+    .full { display: block; width: 100%; margin-top: 18px; }
+
+    .drawer {
+      position: absolute; z-index: 15; top: 0; right: 0; bottom: 0; width: min(430px, 30%);
+      padding: 34px 26px; background: #041014; border-left: 1px solid var(--line);
+    }
+    .drawer h2 { margin: 10px 0 8px; font-size: clamp(21px, 2.2vw, 30px); }
+    .probe-card {
+      position: relative; display: grid; grid-template-columns: 62px 1fr 18px; gap: 16px; align-items: center;
+      margin-top: 14px; min-height: 120px; padding: 16px;
+      border: 1px solid var(--line); border-radius: 12px; background: var(--surface);
+      cursor: pointer;
+    }
+    .probe-card.selected { border-color: var(--cyan); background: #08242c; box-shadow: inset 5px 0 var(--cyan); }
+    .probe-icon { position: relative; width: 62px; height: 62px; border-radius: 50%; border: 1px solid #195464; background: #072028; }
+    .probe-icon:before { content: ""; position: absolute; left: 29px; top: 12px; width: 4px; height: 38px; border-radius: 4px; background: currentColor; }
+    .probe-icon:after { content: ""; position: absolute; left: 23px; top: 45px; border: 8px solid transparent; border-top: 13px solid currentColor; }
+    .probe-card.selected .probe-icon { color: var(--cyan); }
+    .probe-card:not(.selected) .probe-icon { color: var(--muted); }
+    .probe-name { font-weight: 750; font-size: 16px; }
+    .ratio { margin-top: 5px; color: var(--cyan); font-size: 11px; font-weight: 800; }
+    .probe-desc { margin-top: 7px; color: var(--muted); font-size: 12px; }
+    .radio { width: 16px; height: 16px; border: 2px solid var(--line); border-radius: 50%; }
+    .selected .radio { border: 5px solid var(--cyan); }
+
+    .stage-copy { position: absolute; z-index: 8; left: 2.9%; top: 4%; }
+    .stage-copy h2 { margin: 9px 0 8px; font-size: clamp(22px, 2.3vw, 31px); }
+    .travel-probe { position: absolute; z-index: 8; left: 45%; top: 39%; width: 70px; height: 70px; border: 2px solid var(--cyan); border-radius: 50%; animation: travel 2.4s ease-in-out infinite; }
+    .travel-probe:before { content: ""; position: absolute; left: 32px; top: 13px; width: 5px; height: 42px; background: var(--cyan); }
+    .travel-probe:after { content: ""; position: absolute; left: 25px; top: 52px; border: 9px solid transparent; border-top: 15px solid var(--cyan); }
+    .travel-path { position: absolute; z-index: 7; left: 49.5%; top: 44%; width: 14%; border-top: 2px dashed var(--cyan); transform: rotate(28deg); transform-origin: left; }
+    @keyframes travel { 50% { transform: translate(185px, 150px) scale(.75); } }
+    .bar { height: 8px; margin-top: 14px; overflow: hidden; border-radius: 99px; background: #173039; }
+    .bar span { display: block; width: 72%; height: 100%; background: var(--cyan); animation: load 2.4s ease-in-out infinite; }
+    @keyframes load { 0% { width: 15%; } 80%,100% { width: 100%; } }
+
+    .ready-glow .halo { border-color: var(--cyan); box-shadow: 0 0 45px rgba(22,199,239,.18); }
+    .ready-glow .probe { background: var(--cyan); box-shadow: 0 0 12px var(--cyan); }
+    .ready-card .primary { margin-top: 16px; }
+
+    .running .halo { border-color: #166476; }
+    .beam { position: absolute; z-index: 5; height: 4px; border-radius: 99px; transform-origin: left; opacity: .9; }
+    .beam.thz { left: 36%; top: 58%; width: 25%; background: var(--amber); transform: rotate(-8deg); box-shadow: 0 0 12px var(--amber); }
+    .beam.afm { left: 66%; top: 30%; width: 17%; background: var(--green); transform: rotate(63deg); box-shadow: 0 0 12px var(--green); }
+    .beam.scatter { left: 62%; top: 58%; width: 20%; background: var(--cyan); transform: rotate(17deg); box-shadow: 0 0 12px var(--cyan); }
+    .hotspot { position: absolute; z-index: 8; left: 60.4%; top: 66%; width: 28px; height: 28px; border-radius: 50%; background: white; box-shadow: 0 0 8px white, 0 0 30px var(--cyan); animation: pulse 1.2s ease-in-out infinite; }
+    @keyframes pulse { 50% { transform: scale(1.4); opacity: .65; } }
+    .mini-panel {
+      position: absolute; z-index: 12; top: 4%; width: 22%; min-height: 190px;
+      padding: 18px; border: 1px solid var(--line); border-radius: 12px; background: rgba(4,16,20,.94);
+    }
+    .mini-panel.left { left: 2.8%; } .mini-panel.right { right: 2.8%; }
+    .mini-title { font-size: 12px; font-weight: 800; color: var(--muted); }
+    .zoom-viz { position: relative; height: 128px; margin-top: 10px; border-radius: 8px; overflow: hidden; background: radial-gradient(circle at 52% 62%, white 0 2%, var(--cyan) 4%, #052c36 18%, #03090c 42%); }
+    .zoom-viz:after { content: ""; position: absolute; left: 50%; top: 0; bottom: 0; width: 2px; background: var(--cyan); opacity: .65; }
+    .chart { height: 128px; margin-top: 10px; background: repeating-linear-gradient(0deg, transparent 0 30px, #15313a 30px 31px), repeating-linear-gradient(90deg, transparent 0 46px, #15313a 46px 47px); }
+    .chart svg { width: 100%; height: 100%; }
+    .process-rail {
+      position: absolute; z-index: 13; left: 2.8%; right: 2.8%; bottom: 3%;
+      display: grid; grid-template-columns: 210px 1fr auto; gap: 20px; align-items: center;
+      min-height: 112px; padding: 18px 22px; border: 1px solid var(--line); border-radius: 13px; background: rgba(4,16,20,.96);
+    }
+    .process-index { color: var(--cyan); font-size: 12px; font-weight: 800; }
+    .process-title { margin-top: 6px; font-size: 20px; font-weight: 750; }
+    .timeline { display: grid; grid-template-columns: repeat(8, 1fr); gap: 6px; }
+    .tick { height: 7px; border-radius: 99px; background: #1b3741; }
+    .tick.done { background: var(--cyan); } .tick.current { background: white; box-shadow: 0 0 12px var(--cyan); }
+    .controls { display: flex; gap: 8px; }
+    .icon-button { min-width: 72px; border: 1px solid var(--line); border-radius: 8px; padding: 11px 13px; color: var(--text); background: var(--surface-2); cursor: pointer; }
+
+    .detail-drawer { width: min(400px, 28%); }
+    .component-chip { display: inline-flex; gap: 9px; align-items: center; margin: 18px 0; padding: 9px 12px; border: 1px solid #2c765c; border-radius: 99px; color: var(--green); background: #092019; font-size: 12px; font-weight: 800; }
+    .component-dot { width: 9px; height: 9px; border-radius: 50%; background: var(--green); }
+    .detail-list { margin: 0; padding: 0; list-style: none; color: var(--muted); font-size: 13px; line-height: 1.5; }
+    .detail-list li { padding: 12px 0; border-top: 1px solid var(--line); }
+    .callout { position: absolute; z-index: 11; left: 67%; top: 28%; width: 86px; height: 86px; border: 3px solid var(--green); border-radius: 50%; box-shadow: 0 0 26px rgba(54,202,139,.35); }
+    .reset-rule { margin-top: 28px; padding: 14px; border: 1px solid #673738; border-radius: 9px; color: #ffc1c1; background: #211213; font-size: 12px; line-height: 1.45; }
+
+    .state-notes { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 16px; }
+    .note { padding: 18px; border: 1px solid #1f3943; border-radius: 12px; background: rgba(10,21,26,.8); color: var(--muted); font-size: 13px; line-height: 1.5; }
+    .note strong { display: block; margin-bottom: 6px; color: var(--text); }
+    .swatch { display: inline-block; width: 9px; height: 9px; margin-right: 6px; border-radius: 50%; }
+    .hidden { display: none !important; }
+
+    @media (max-width: 900px) {
+      .review-shell { padding: 16px; }
+      .review-head { grid-template-columns: 1fr; }
+      .flow-nav { grid-template-columns: repeat(2, 1fr); }
+      .viewport { min-height: 680px; aspect-ratio: auto; }
+      .drawer, .detail-drawer { width: 44%; }
+      .corner-card, .progress-card, .ready-card { width: 39%; }
+      .mini-panel { width: 28%; }
+      .process-rail { grid-template-columns: 1fr; }
+      .state-notes { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <main class="review-shell">
+    <header class="review-head">
+      <div>
+        <div class="kicker">THZ S-SNOM · VR / PC INTERACTION SPEC</div>
+        <h1>Two actions. One uninterrupted scientific story.</h1>
+        <p class="subtitle">Choose and install a probe, then start the system. Principle stages run automatically and remain inspectable.</p>
+      </div>
+      <button class="reset" id="leaveRange">Simulate leaving 0.7 m range</button>
+    </header>
+
+    <nav class="flow-nav" aria-label="Prototype states">
+      <button class="flow-step active" data-state="0">01<strong>Approach & Select</strong></button>
+      <button class="flow-step" data-state="1">02<strong>Choose Probe</strong></button>
+      <button class="flow-step" data-state="2">03<strong>Install Probe</strong></button>
+      <button class="flow-step" data-state="3">04<strong>Ready to Start</strong></button>
+      <button class="flow-step" data-state="4">05<strong>Auto Processing</strong></button>
+      <button class="flow-step" data-state="5">06<strong>Component Detail</strong></button>
+    </nav>
+
+    <section class="viewport" id="viewport">
+      <div class="topbar">
+        <div class="brand">THz s-SNOM</div>
+        <div class="status"><span class="status-dot"></span><span id="statusText">DEVICE IDLE</span></div>
+      </div>
+
+      <div class="scene">
+        <div class="window"></div>
+        <div class="tds-base"></div>
+        <div class="tds-module">THz TIME-DOMAIN UNIT</div>
+        <div class="table"></div>
+        <div class="sn-root" id="device">
+          <div class="halo"></div><div class="pillar"></div><div class="bridge"></div><div class="head"></div>
+          <div class="objective"></div><div class="probe"></div><div class="sample"></div>
+          <div class="optic a"></div><div class="optic b"></div><div class="optic c"></div><div class="optic d"></div>
+        </div>
+
+        <section class="state" data-panel="0">
+          <div class="range-badge">● &nbsp; WITHIN 0.7 M</div>
+          <div class="corner-card">
+            <div class="eyebrow">DEVICE AVAILABLE</div>
+            <h2>Select the SNOM</h2>
+            <div class="helper">PC: click device &nbsp;·&nbsp; XR: point + trigger</div>
+            <button class="primary full" data-next="1">Select device</button>
+          </div>
+        </section>
+
+        <section class="state hidden" data-panel="1">
+          <aside class="drawer">
+            <div class="eyebrow">OPERATION 1 OF 2</div>
+            <h2>Choose a near-field probe</h2>
+            <p class="helper">Smaller tip radius resolves finer lateral detail.</p>
+            <div id="probeOptions"></div>
+            <button class="primary full" data-next="2">Install selected probe</button>
+            <p class="helper">3x / 2x / 1x means relative spatial detail, not optical magnification.</p>
+          </aside>
+        </section>
+
+        <section class="state hidden" data-panel="2">
+          <div class="stage-copy">
+            <div class="eyebrow">OPERATION 1 OF 2</div>
+            <h2>Installing the <span id="installName">fine probe</span></h2>
+            <div class="helper">Preview motion only. The SNOM root keeps its authored scene position.</div>
+          </div>
+          <div class="travel-path"></div><div class="travel-probe"></div>
+          <div class="progress-card">
+            <div class="eyebrow">PROBE MOUNT</div>
+            <h2>Installing probe...</h2>
+            <div class="bar"><span></span></div>
+            <div class="helper" style="margin-top:10px">Input is locked until placement completes.</div>
+          </div>
+        </section>
+
+        <section class="state hidden ready-glow" data-panel="3">
+          <div class="stage-copy">
+            <div class="eyebrow">OPERATION 2 OF 2</div>
+            <h2>Probe installed</h2>
+            <div class="helper">One action remains before automatic acquisition.</div>
+          </div>
+          <div class="ready-card">
+            <div class="eyebrow" id="readyProbe">FINE METALLIC PROBE</div>
+            <h2>Ready for acquisition</h2>
+            <div class="helper">Probe mounted · system checks passed</div>
+            <button class="primary full" data-next="4">Start System</button>
+            <button class="secondary full" data-next="1">Change probe</button>
+          </div>
+        </section>
+
+        <section class="state hidden running" data-panel="4">
+          <div class="beam thz"></div><div class="beam afm"></div><div class="beam scatter"></div><div class="hotspot"></div>
+          <div class="mini-panel left"><div class="mini-title">PROBE / SAMPLE NEAR FIELD</div><div class="zoom-viz"></div></div>
+          <div class="mini-panel right"><div class="mini-title">DEMODULATED SIGNAL</div><div class="chart"><svg viewBox="0 0 300 120" preserveAspectRatio="none"><polyline points="0,88 28,81 52,92 78,55 102,68 128,31 151,47 176,19 202,48 230,39 258,72 300,61" fill="none" stroke="#16c7ef" stroke-width="4"/></svg></div></div>
+          <div class="process-rail">
+            <div><div class="process-index" id="processIndex">04 / 08 · AUTOMATIC</div><div class="process-title" id="processTitle">Near-field coupling</div></div>
+            <div><div class="timeline" id="timeline"></div><div class="helper" id="processCopy" style="margin-top:12px">The metal tip confines the THz interaction below the free-space wavelength.</div></div>
+            <div class="controls"><button class="icon-button" id="pause">Pause</button><button class="icon-button" id="nextStage">Next</button><button class="icon-button" data-next="5">Components</button></div>
+          </div>
+        </section>
+
+        <section class="state hidden running" data-panel="5">
+          <div class="beam thz"></div><div class="beam afm"></div><div class="beam scatter"></div><div class="hotspot"></div><div class="callout"></div>
+          <aside class="drawer detail-drawer">
+            <div class="eyebrow">COMPONENT DETAIL</div>
+            <h2>AFM readout laser</h2>
+            <div class="component-chip"><span class="component-dot"></span>Stage 04 / 08 · Running</div>
+            <p class="helper">Tracks cantilever motion so probe height can be controlled while the THz near-field signal is collected.</p>
+            <ul class="detail-list">
+              <li><strong style="color:var(--text)">Role</strong> Measures cantilever deflection and supports topography feedback.</li>
+              <li><strong style="color:var(--text)">Important distinction</strong> This laser is not the THz illumination source.</li>
+              <li><strong style="color:var(--text)">Visualization</strong> Green path is intentionally exaggerated for teaching.</li>
+            </ul>
+            <button class="primary full" data-next="4">Close details</button>
+            <div class="reset-rule">Leaving the 0.7 m interaction range closes this UI, restores preview objects, and resets the tutorial to idle.</div>
+          </aside>
+        </section>
+      </div>
+    </section>
+
+    <section class="state-notes">
+      <div class="note"><strong>Operator flow</strong>Only probe selection/installation and Start System are required player actions. Everything after startup is automatic.</div>
+      <div class="note"><strong>Visual hierarchy</strong>The instrument remains 60-70% visible. Detail panels stay at the edges and never cover the probe/sample interaction point.</div>
+      <div class="note"><strong>Scientific color key</strong><span class="swatch" style="background:var(--amber)"></span>THz path &nbsp; <span class="swatch" style="background:var(--green)"></span>AFM readout &nbsp; <span class="swatch" style="background:var(--cyan)"></span>near-field / interaction</div>
+    </section>
+  </main>
+
+  <script>
+    const probes = [
+      {name: "Fine metallic probe", ratio: "3x RELATIVE DETAIL", desc: "Smallest tip radius · fine features"},
+      {name: "Standard metallic probe", ratio: "2x RELATIVE DETAIL", desc: "Balanced detail and stability"},
+      {name: "Robust metallic probe", ratio: "1x RELATIVE DETAIL", desc: "Stable for wider-area scans"}
+    ];
+    const stages = [
+      ["System initialization", "Internal modules start and complete a readiness check."],
+      ["THz pulse generation", "The time-domain source produces broadband THz illumination."],
+      ["Beam delivery", "Mirrors guide the THz field toward the probe and sample."],
+      ["Near-field coupling", "The metal tip confines the THz interaction below the free-space wavelength."],
+      ["Tip oscillation", "The AFM regulates tip height while the probe oscillates above the surface."],
+      ["Scattered-field collection", "Near-field scattering carries local optical response away from the tip."],
+      ["Demodulation", "Higher-harmonic demodulation suppresses far-field background."],
+      ["Map reconstruction", "Topography and near-field amplitude are combined into the final scan."],
+    ];
+    let selectedProbe = 0;
+    let activeState = 0;
+    let stage = 3;
+    let installTimer = null;
+
+    const viewport = document.getElementById("viewport");
+    const statusText = document.getElementById("statusText");
+    const statusDot = document.querySelector(".status-dot");
+    const device = document.getElementById("device");
+
+    function renderProbes() {
+      document.getElementById("probeOptions").innerHTML = probes.map((p, i) => `
+        <article class="probe-card ${i === selectedProbe ? "selected" : ""}" data-probe="${i}">
+          <div class="probe-icon"></div>
+          <div><div class="probe-name">${p.name}</div><div class="ratio">${p.ratio}</div><div class="probe-desc">${p.desc}</div></div>
+          <div class="radio"></div>
+        </article>`).join("");
+      document.querySelectorAll("[data-probe]").forEach(card => card.addEventListener("click", () => {
+        selectedProbe = Number(card.dataset.probe); renderProbes();
+      }));
+    }
+
+    function setState(next) {
+      clearTimeout(installTimer);
+      activeState = Number(next);
+      document.querySelectorAll("[data-panel]").forEach(p => p.classList.toggle("hidden", Number(p.dataset.panel) !== activeState));
+      document.querySelectorAll(".flow-step").forEach(p => p.classList.toggle("active", Number(p.dataset.state) === activeState));
+      const labels = ["DEVICE IDLE", "SELECT PROBE", "INSTALLING PROBE", "READY TO START", "SYSTEM RUNNING", "COMPONENT DETAIL"];
+      const colors = ["var(--muted)", "var(--cyan)", "var(--amber)", "var(--green)", "var(--green)", "var(--green)"];
+      statusText.textContent = labels[activeState]; statusDot.style.background = colors[activeState];
+      device.classList.toggle("ready-glow", activeState === 3);
+      if (activeState === 2) {
+        document.getElementById("installName").textContent = probes[selectedProbe].name.toLowerCase();
+        installTimer = setTimeout(() => setState(3), 2400);
+      }
+      if (activeState === 3) document.getElementById("readyProbe").textContent = probes[selectedProbe].name.toUpperCase();
+      if (activeState >= 4) renderStage();
+    }
+
+    function renderStage() {
+      document.getElementById("processIndex").textContent = `${String(stage + 1).padStart(2,"0")} / 08 · AUTOMATIC`;
+      document.getElementById("processTitle").textContent = stages[stage][0];
+      document.getElementById("processCopy").textContent = stages[stage][1];
+      document.getElementById("timeline").innerHTML = stages.map((_, i) => `<span class="tick ${i < stage ? "done" : ""} ${i === stage ? "current" : ""}"></span>`).join("");
+    }
+
+    document.addEventListener("click", e => {
+      const next = e.target.closest("[data-next]");
+      if (next) setState(next.dataset.next);
+    });
+    document.querySelectorAll(".flow-step").forEach(btn => btn.addEventListener("click", () => setState(btn.dataset.state)));
+    device.addEventListener("click", () => { if (activeState === 0) setState(1); });
+    document.getElementById("nextStage").addEventListener("click", () => { stage = (stage + 1) % stages.length; renderStage(); });
+    document.getElementById("pause").addEventListener("click", e => { e.target.textContent = e.target.textContent === "Pause" ? "Resume" : "Pause"; });
+    document.getElementById("leaveRange").addEventListener("click", () => { selectedProbe = 0; stage = 3; renderProbes(); setState(0); });
+    renderProbes(); renderStage(); setState(0);
+  </script>
+</body>
+</html>

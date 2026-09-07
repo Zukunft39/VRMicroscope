@@ -87,11 +87,47 @@ confirmed visually.
 
 ## 5. Demonstration structure
 
-The sequence has ten stages. Stages can auto-advance, but the user can pause and
-move backward or forward at any time. Only stages 3 and 8 require interaction in
-the recommended guided version.
+The professor-confirmed operator workflow has only two required actions:
 
-### Stage 0 - System overview
+1. Select a suitable probe and install it on the existing SNOM probe mount.
+2. Start the system.
+
+Everything after system start is automatic internal processing. The user may
+pause or inspect the principle explanation, but those navigation controls are
+not additional instrument-operation steps.
+
+The current model contains one installed `探针` asset rather than three separate
+probe prefabs. Runtime selection therefore reuses that real mesh for three
+teaching previews:
+
+| Choice | Intended use | Relative detail |
+| --- | --- | --- |
+| Fine metallic probe | Small local structures; most sensitive approach | `3x` |
+| Standard metallic probe | General measurement; balanced stability/detail | `2x` |
+| Robust metallic probe | Stable wide-area scanning | `1x` |
+
+`3x/2x/1x` are relative spatial-detail labels, not objective magnification.
+SNOM lateral resolution is primarily related to tip radius. Selecting a preview
+and pressing `Install Probe` animates only the runtime preview toward the fixed
+`针尖座`; completion reveals the real installed probe. `Start System` remains
+disabled until this installation finishes.
+
+After startup, eight principle stages auto-advance in this order:
+
+1. Broadband THz pulse generation.
+2. Beam steering and focusing.
+3. AFM distance feedback.
+4. Tapping and near-field coupling.
+5. Weak scattering over background.
+6. Harmonic demodulation.
+7. Raster scanning.
+8. Correlated results and local spectrum.
+
+The old overview is now represented by the launcher and two-step setup panel.
+The old `Identify the AFM probe` stage is folded into probe selection and
+installation, so it is no longer a third mandatory operation.
+
+### Internal content - System overview (launcher/setup only)
 
 **Title:** `THz Scattering-Type Scanning Near-Field Optical Microscope`
 
@@ -108,7 +144,7 @@ point at a time and constructs images while scanning.
   and scan/result processing.
 - Keep every model renderer visible.
 
-**Interaction:** `Start Tour` or `Explore Components`.
+**Interaction:** select SNOM, choose one probe, install it, then start the system.
 
 ### Stage 1 - THz generation and TDS pair
 
@@ -148,7 +184,7 @@ is created by the tip.
 in the Unity Scene view. A straight emitter-to-tip fallback may be labelled
 `schematic path`, but must not be presented as exact hardware alignment.
 
-### Stage 3 - Identify the AFM probe
+### Setup content - Identify and install the AFM probe
 
 **Title:** `Select the Near-Field Probe`
 
@@ -163,10 +199,10 @@ THz wavelength, primarily sets the achievable lateral resolution.
 - Add secondary, dimmer labels for `针尖座` and the positioning block.
 - Show a magnified schematic inset; do not enlarge or move the real mesh.
 
-**Mandatory interaction:** the user points to the probe callout and confirms.
-The physical probe mesh is extremely small, so the selectable target is a
-runtime proxy collider around its renderer bounds, not a collider attached to
-the imported mesh.
+**Mandatory interaction:** the user chooses one of the three probe options and
+presses `Install Probe`. PC uses the UI or keys `1`-`3` followed by `E`; XR uses
+the existing tracked UI ray and trigger. The installed physical mesh remains at
+its authored transform and is never grabbed or reparented.
 
 ### Stage 4 - AFM feedback
 
@@ -311,11 +347,12 @@ Recommended catalogue entries:
 
 ## 7. Interaction and UI layout
 
-Use one world-space panel with three stable regions:
+Use one screen-space panel with three stable regions:
 
 1. Header: stage number, title, and progress rail.
 2. Body: two-to-four sentence explanation plus the active formula or signal.
-3. Footer: `Previous`, `Play/Pause`, `Replay Step`, `Next`, and `Exit`.
+3. Footer: probe choices and one gated action during setup; `Previous`,
+   `Play/Pause`, `Replay Step`, `Next`, and `Exit` during principle playback.
 
 The component name callout should be visually separate from the main panel so
 its leader line can terminate near the highlighted part. Use blue/cyan for
@@ -334,6 +371,7 @@ XR controls:
 Desktop fallback:
 
 - Left click: select.
+- Probe setup: keys `1`-`3` select, `E` installs, and `Space` starts the system.
 - Left/Right Arrow: previous/next.
 - Space: play/pause.
 - R: replay step.
@@ -435,6 +473,9 @@ occur when an experiment tries to access `Interactor` during scene shutdown.
    confirmed.
 10. The flow works with XR ray input and desktop fallback at the project target
     frame rate.
+11. `Start System` cannot run before one probe has been selected and installed.
+12. Leaving proximity during selection, installation, or playback restores the
+    authored probe visibility and transform and resets both operation steps.
 
 ## 12. Recommended implementation order
 
@@ -448,11 +489,38 @@ occur when an experiment tries to access `Interactor` during scene shutdown.
 
 ## 13. Current PC validation entry
 
+### Proximity feedback
+
+Approaching within 0.7 m of the installed system bounds activates a cyan Fresnel
+highlight using the same Highlight shader graph as Confocal. SNOM uses an
+independent intensity of 3.2 while Confocal keeps its existing material behavior.
+A 0.8 m exit margin gives a 1.5 m exit threshold; head height is allowed above the
+instrument. These values are exposed under Proximity Highlight on the SNOM controller.
+
+SNOM caches mesh references once and draws the highlight only while nearby in
+roaming mode. Original materials and model transforms are preserved. Starting
+the tour suppresses the whole-system highlight so local component cues remain
+readable. Proximity alone does not display the launcher. Each visible submesh
+adds one draw while highlighted; check this cost on the target VR headset.
+
+The same proximity state gates both desktop and XR selection. Clicking the SNOM
+outside the range does nothing. If the player leaves the range while the launcher
+or guided panel is visible, the controller immediately hides the entire canvas,
+stops scan and signal animation, restores the cached probe pose, clears component
+selection, and resets the sequence to Stage 1. Re-entering the range requires a
+new explicit click on the SNOM before the launcher appears again.
+
+PC validation: approach, click the system, begin operation, select probes with
+the three buttons (or `1`-`3`), install with the action button (or `E`), and
+verify that `Start System` appears only after installation. Start with the
+button or `Space`, observe automatic principle progression, then leave the
+range and verify that UI, preview meshes, probe pose, and operation state reset.
+
 The runtime implementation automatically detects
 `TDs_edited_UnityVeryLowPoly` after a scene loads. If no persistent controller
 exists, it creates `SNOM_DemonstrationSystem (Runtime)`, but keeps all tutorial
 UI hidden. Point at the SNOM system and use the normal primary interaction
-(PC left click or XR right trigger) to reveal a compact `Start SNOM Tour`
+(PC left click or XR right trigger) to reveal a compact `Begin SNOM Operation`
 launcher. Only pressing that button opens the guided explanation panel. This
 matches the microscope's device-gated interaction flow and prevents tutorial UI
 from obscuring the laboratory before the player deliberately selects SNOM.
@@ -473,7 +541,32 @@ unchanged, and marks only the additive scene setup as dirty.
 PC controls during the tour:
 
 - Mouse: click UI controls or runtime component proxies.
+- Setup: `1`/`2`/`3` selects a probe, `E` installs it, and `Space` starts SNOM.
 - Left/Right Arrow: previous/next stage or component.
-- Space: play/pause; on Stage 9 it starts the raster scan.
+- Space: play/pause after startup; raster scanning starts automatically.
 - R: replay the current stage.
 - Escape: exit to the launcher.
+
+## 14. Edge-anchored runtime UI
+
+The runtime UI follows the reviewed six-state interaction prototype rather than
+using one large central explanation panel:
+
+1. Selecting the nearby SNOM reveals a compact lower-right launcher only.
+2. Probe selection uses a right-side drawer no wider than 28 percent of the
+   reference viewport. The three probe options are stacked vertically and have
+   a high-contrast selected state.
+3. Probe installation hides the option cards and shows only installation
+   status and progress while the runtime preview moves toward the fixed mount.
+4. The ready state keeps only `Start System`, `Change Probe`, and `Exit` actions.
+5. Automatic principle playback uses a top status bar, a small upper-left
+   principle diagram, and a bottom information/control rail. The centre of the
+   screen remains available for the SNOM model and animated optical paths.
+6. Component exploration changes the bottom rail into a right-side detail
+   drawer. Closing it returns to the current principle stage.
+
+The header status colours are cyan for selection, amber for installation, and
+green for ready/running states. Orange remains reserved for the THz path, green
+for AFM readout, and cyan for near-field/scattered-field teaching overlays.
+Moving beyond the 1.5 m exit threshold still closes all UI and restores the
+authored model/probe state.

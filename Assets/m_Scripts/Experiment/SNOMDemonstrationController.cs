@@ -10,6 +10,15 @@ using UnityEngine.XR.Interaction.Toolkit.UI;
 
 public sealed class SNOMDemonstrationController : MonoBehaviour
 {
+    private enum WorkflowPhase
+    {
+        Idle,
+        ProbeSelection,
+        InstallingProbe,
+        ReadyToStart,
+        PrincipleTour
+    }
+
     public enum DemonstrationStage
     {
         Overview,
@@ -41,14 +50,45 @@ public sealed class SNOMDemonstrationController : MonoBehaviour
         public GameObject proxy;
     }
 
+    private sealed class ProbeOption
+    {
+        public string displayName;
+        public string shortLabel;
+        public string description;
+        public string resolutionLabel;
+        public float previewScale;
+        public GameObject preview;
+        public Vector3 previewPosition;
+        public Quaternion previewRotation;
+        public Vector3 previewLocalScale;
+        public Button button;
+        public Image buttonImage;
+    }
+
     private const string ModelRootName = "TDs_edited_UnityVeryLowPoly";
-    private static readonly Color PanelColor = new Color(0.025f, 0.055f, 0.09f, 0.94f);
-    private static readonly Color AccentColor = new Color(0.04f, 0.66f, 0.86f, 1f);
-    private static readonly Color ActiveButtonColor = new Color(0.03f, 0.36f, 0.74f, 1f);
-    private static readonly Color InactiveButtonColor = new Color(0.18f, 0.27f, 0.38f, 1f);
+    private static readonly Color PanelColor = new Color(0.015f, 0.045f, 0.06f, 0.97f);
+    private static readonly Color SurfaceColor = new Color(0.035f, 0.09f, 0.115f, 0.98f);
+    private static readonly Color BorderColor = new Color(0.09f, 0.32f, 0.39f, 1f);
+    private static readonly Color MutedTextColor = new Color(0.56f, 0.66f, 0.70f, 1f);
+    private static readonly Color AccentColor = new Color(0.08f, 0.78f, 0.94f, 1f);
+    private static readonly Color ReadyColor = new Color(0.20f, 0.78f, 0.55f, 1f);
+    private static readonly Color ActiveButtonColor = new Color(0.04f, 0.32f, 0.72f, 1f);
+    private static readonly Color InactiveButtonColor = new Color(0.07f, 0.14f, 0.18f, 1f);
     private static readonly Color IncidentColor = new Color(1f, 0.55f, 0.08f, 1f);
     private static readonly Color ScatteredColor = new Color(0.08f, 0.82f, 0.94f, 1f);
     private static readonly Color AfmColor = new Color(0.18f, 0.92f, 0.49f, 1f);
+    private static readonly Color SelectedProbeColor = new Color(0.02f, 0.48f, 0.76f, 1f);
+    private static readonly DemonstrationStage[] PrincipleStages =
+    {
+        DemonstrationStage.ThzGeneration,
+        DemonstrationStage.BeamSteering,
+        DemonstrationStage.AfmFeedback,
+        DemonstrationStage.NearFieldCoupling,
+        DemonstrationStage.Scattering,
+        DemonstrationStage.HarmonicDemodulation,
+        DemonstrationStage.RasterScan,
+        DemonstrationStage.Results
+    };
     private static TMP_FontAsset cachedInterfaceFont;
 
     [Header("Fixed SNOM Root")]
@@ -76,7 +116,24 @@ public sealed class SNOMDemonstrationController : MonoBehaviour
     [SerializeField, Min(0.0001f)] private float exaggeratedProbeAmplitude = 0.0012f;
     [SerializeField, Min(0.1f)] private float probeFrequency = 2.2f;
     [SerializeField, Min(1f)] private float scanDuration = 8f;
+    [SerializeField, Min(0.25f)] private float probeInstallationDuration = 1.25f;
+    [SerializeField, Min(2f)] private float automaticStageDuration = 8f;
+    [SerializeField] private bool automaticallyAdvancePrinciples = true;
     [SerializeField] private bool enableDebugLogs;
+
+    [Header("Proximity Highlight")]
+    [SerializeField, Min(0.1f)] private float proximityHighlightDistance = 0.7f;
+    [SerializeField, Min(0f)] private float proximityExitHysteresis = 0.8f;
+    [SerializeField, ColorUsage(false, true)] private Color proximityHighlightColor = new Color(0.08f, 0.75f, 1f, 1f);
+    [SerializeField, Min(0f)] private float proximityHighlightIntensity = 3.2f;
+    private MeshFilter[] proximityMeshes;
+    private Renderer[] proximityRenderers;
+    private Bounds proximityBounds;
+    private Material proximityMaterial;
+    private Camera proximityViewer;
+    private bool isPlayerInInteractionRange;
+    private bool proximityHighlighted;
+    private float nextProximityCheck;
 
     private readonly List<ComponentEntry> components = new List<ComponentEntry>();
     private StageContent[] stages;
@@ -85,6 +142,19 @@ public sealed class SNOMDemonstrationController : MonoBehaviour
     private bool isRunning;
     private bool isComponentMode;
     private bool stagePlaying = true;
+    private WorkflowPhase workflowPhase;
+    private readonly List<ProbeOption> probeOptions = new List<ProbeOption>();
+    private readonly List<GameObject> tourControlObjects = new List<GameObject>();
+    private int selectedProbeIndex = -1;
+    private int installedProbeIndex = -1;
+    private float probeInstallationProgress;
+    private float stageElapsed;
+    private float activationPulseUntil;
+    private Vector3 installingProbeStartPosition;
+    private Quaternion installingProbeStartRotation;
+    private Vector3 installingProbeStartScale;
+    private Renderer[] installedProbeRenderers;
+    private bool[] installedProbeRendererStates;
     private bool setupComplete;
     private bool warnedAboutRootPose;
     private float scanProgress;
@@ -116,6 +186,18 @@ public sealed class SNOMDemonstrationController : MonoBehaviour
     private GameObject canvasRoot;
     private GameObject launcherRoot;
     private GameObject panelRoot;
+    private GameObject topBarRoot;
+    private GameObject contentCardRoot;
+    private GameObject diagramCardRoot;
+    private GameObject surfaceCardRoot;
+    private RectTransform surfaceCover;
+    private RectTransform surfaceProbeMarker;
+    private RectTransform surfaceScanLine;
+    private Image surfaceResponse;
+    private TextMeshProUGUI surfaceStatusText;
+    private GameObject tourControlsRoot;
+    private TextMeshProUGUI headerStatusText;
+    private Image headerStatusDot;
     private TextMeshProUGUI stageNumberText;
     private TextMeshProUGUI titleText;
     private TextMeshProUGUI explanationText;
@@ -125,6 +207,11 @@ public sealed class SNOMDemonstrationController : MonoBehaviour
     private TextMeshProUGUI componentButtonText;
     private Image stageProgressFill;
     private SNOMDemonstrationGraphic diagramGraphic;
+    private GameObject probeChoiceControlsRoot;
+    private Button workflowActionButton;
+    private Image workflowActionImage;
+    private TextMeshProUGUI workflowActionText;
+    private GameObject workflowChangeProbeButton;
 
     public Transform SnomRoot => snomRoot;
     public DemonstrationStage CurrentStage => currentStage;
@@ -144,7 +231,8 @@ public sealed class SNOMDemonstrationController : MonoBehaviour
     public static bool TryHandleRightTrigger()
     {
         SNOMDemonstrationController controller = FindObjectOfType<SNOMDemonstrationController>(true);
-        if (controller == null || controller.isRunning || controller.entryInteractionProxy == null ||
+        if (controller == null || !controller.isPlayerInInteractionRange || controller.isRunning ||
+            controller.entryInteractionProxy == null ||
             !controller.entryInteractionProxy.activeInHierarchy)
         {
             return false;
@@ -163,8 +251,7 @@ public sealed class SNOMDemonstrationController : MonoBehaviour
             SNOMEntryInteractionProxy proxy = hit.collider.GetComponentInParent<SNOMEntryInteractionProxy>();
             if (proxy != null && proxy.Controller == controller)
             {
-                controller.RevealLauncherFromInteraction();
-                return true;
+                return controller.RevealLauncherFromInteraction();
             }
         }
 
@@ -203,11 +290,13 @@ public sealed class SNOMDemonstrationController : MonoBehaviour
 
         HandleKeyboardAndMouse();
         UpdateAnimation(Time.unscaledDeltaTime, Time.unscaledTime);
+        UpdateSurfaceObservation();
         ValidateFixedRootPose();
     }
 
     private void LateUpdate()
     {
+        UpdateProximityHighlight();
         if (!isRunning || !setupComplete)
         {
             return;
@@ -218,8 +307,17 @@ public sealed class SNOMDemonstrationController : MonoBehaviour
 
     private void OnDisable()
     {
+        isRunning = false;
+        isComponentMode = false;
+        stagePlaying = false;
+        workflowPhase = WorkflowPhase.Idle;
+        proximityHighlighted = false;
         RestoreProbePose();
+        RestoreInstalledProbeVisibility();
+        SetProbePreviewsActive(false);
         SetOwnedVisualsActive(false);
+        SetProxyObjectsActive(false);
+        SetEntryInteractionActive(true);
         if (canvasRoot != null)
         {
             canvasRoot.SetActive(false);
@@ -229,6 +327,7 @@ public sealed class SNOMDemonstrationController : MonoBehaviour
     private void OnDestroy()
     {
         RestoreProbePose();
+        RestoreInstalledProbeVisibility();
         if (canvasRoot != null)
         {
             Destroy(canvasRoot);
@@ -239,6 +338,7 @@ public sealed class SNOMDemonstrationController : MonoBehaviour
         DestroyOwnedMaterial(afmMaterial);
         DestroyOwnedMaterial(highlightMaterial);
         DestroyOwnedMaterial(darkMaterial);
+        DestroyOwnedMaterial(proximityMaterial);
     }
 
     private void SetupRuntime()
@@ -262,7 +362,9 @@ public sealed class SNOMDemonstrationController : MonoBehaviour
         ResolveComponentReferences();
         BuildStageContent();
         BuildComponentCatalog();
+        BuildProximityHighlight();
         BuildRuntimeVisuals();
+        BuildProbeOptions();
         BuildEntryInteractionProxy();
         BuildUserInterface();
         BuildSelectionProxies();
@@ -279,64 +381,102 @@ public sealed class SNOMDemonstrationController : MonoBehaviour
             SetupRuntime();
         }
 
-        if (!setupComplete)
+        if (!setupComplete || !isPlayerInInteractionRange)
         {
+            HideAllInterface();
             return;
         }
 
         isRunning = true;
         isComponentMode = false;
-        stagePlaying = true;
+        stagePlaying = false;
         warnedAboutRootPose = false;
         canvasRoot.SetActive(true);
         launcherRoot.SetActive(false);
         panelRoot.SetActive(true);
         SetEntryInteractionActive(false);
-        SetProxyObjectsActive(true);
-        EnterStage(DemonstrationStage.Overview);
+        SetProxyObjectsActive(false);
+        BeginProbeSelection();
     }
 
     public void ExitDemonstration()
     {
+        ResetDemonstrationState();
+        ValidateFixedRootPose();
+    }
+
+    private void ResetDemonstrationState()
+    {
         isRunning = false;
         isComponentMode = false;
         stagePlaying = false;
+        workflowPhase = WorkflowPhase.Idle;
+        currentStage = DemonstrationStage.Overview;
+        selectedComponentIndex = 0;
+        selectedProbeIndex = -1;
+        installedProbeIndex = -1;
+        probeInstallationProgress = 0f;
+        stageElapsed = 0f;
+        activationPulseUntil = 0f;
         scanProgress = 0f;
+        beamTravel = 0f;
         RestoreProbePose();
+        RestoreInstalledProbeVisibility();
+        SetProbePreviewsActive(false);
+        ResetStageVisuals();
         SetOwnedVisualsActive(false);
         SetProxyObjectsActive(false);
         HideAllInterface();
         SetEntryInteractionActive(true);
-
-        ValidateFixedRootPose();
+        if (diagramGraphic != null)
+        {
+            diagramGraphic.SetMode(SNOMDemonstrationGraphic.DiagramMode.Overview);
+            diagramGraphic.SetProgress(0f);
+        }
+        SetStageProgress(0f);
     }
 
     public void Next()
     {
+        if (workflowPhase != WorkflowPhase.PrincipleTour)
+        {
+            return;
+        }
+
         if (isComponentMode)
         {
             ShowComponent(selectedComponentIndex + 1);
             return;
         }
 
-        int next = Mathf.Min((int)DemonstrationStage.Results, (int)currentStage + 1);
-        EnterStage((DemonstrationStage)next);
+        int current = GetPrincipleStageIndex(currentStage);
+        EnterStage(PrincipleStages[Mathf.Min(PrincipleStages.Length - 1, current + 1)]);
     }
 
     public void Previous()
     {
+        if (workflowPhase != WorkflowPhase.PrincipleTour)
+        {
+            return;
+        }
+
         if (isComponentMode)
         {
             ShowComponent(selectedComponentIndex - 1);
             return;
         }
 
-        int previous = Mathf.Max(0, (int)currentStage - 1);
-        EnterStage((DemonstrationStage)previous);
+        int current = GetPrincipleStageIndex(currentStage);
+        EnterStage(PrincipleStages[Mathf.Max(0, current - 1)]);
     }
 
     public void ReplayCurrent()
     {
+        if (workflowPhase != WorkflowPhase.PrincipleTour)
+        {
+            return;
+        }
+
         if (isComponentMode)
         {
             ShowComponent(selectedComponentIndex);
@@ -348,6 +488,11 @@ public sealed class SNOMDemonstrationController : MonoBehaviour
 
     public void TogglePlayPause()
     {
+        if (workflowPhase != WorkflowPhase.PrincipleTour || currentStage == DemonstrationStage.Results)
+        {
+            return;
+        }
+
         stagePlaying = !stagePlaying;
         if (currentStage == DemonstrationStage.RasterScan && stagePlaying && scanProgress >= 0.999f)
         {
@@ -359,7 +504,7 @@ public sealed class SNOMDemonstrationController : MonoBehaviour
 
     public void ToggleComponentMode()
     {
-        if (!isRunning)
+        if (!isRunning || workflowPhase != WorkflowPhase.PrincipleTour)
         {
             return;
         }
@@ -399,6 +544,8 @@ public sealed class SNOMDemonstrationController : MonoBehaviour
         diagramGraphic.SetProgress(1f);
         SetStageProgress((selectedComponentIndex + 1f) / components.Count);
         componentButtonText.text = "Back to Tour";
+        ApplyComponentLayout();
+        SetHeaderStatus("COMPONENT DETAIL", ReadyColor);
         RefreshPlayButton();
     }
 
@@ -412,21 +559,28 @@ public sealed class SNOMDemonstrationController : MonoBehaviour
         RestoreProbePose();
         ResetStageVisuals();
         currentStage = stage;
+        workflowPhase = WorkflowPhase.PrincipleTour;
         isComponentMode = false;
-        stagePlaying = stage != DemonstrationStage.RasterScan;
+        stagePlaying = stage != DemonstrationStage.Results;
         scanProgress = stage == DemonstrationStage.RasterScan ? 0f : 1f;
         beamTravel = 0f;
+        stageElapsed = 0f;
 
         StageContent content = stages[(int)stage];
-        stageNumberText.text = $"STAGE {(int)stage + 1:00}/{stages.Length:00}";
+        int principleIndex = GetPrincipleStageIndex(stage);
+        stageNumberText.text = $"PRINCIPLE {principleIndex + 1:00}/{PrincipleStages.Length:00}";
         titleText.text = content.title;
         explanationText.text = content.explanation;
         formulaText.text = content.formula;
         diagramGraphic.SetMode(content.diagram);
         diagramGraphic.SetProgress(scanProgress);
-        SetStageProgress(((int)stage + 1f) / stages.Length);
+        SetStageProgress((principleIndex + 1f) / PrincipleStages.Length);
         componentButtonText.text = "Components";
         statusText.text = GetStageStatus(stage);
+        SetWorkflowControlsVisible(false);
+        SetTourControlsVisible(true);
+        ApplyPrincipleLayout();
+        SetHeaderStatus("SYSTEM RUNNING", ReadyColor);
         ApplyStageVisuals(stage);
         RefreshPlayButton();
     }
@@ -506,6 +660,17 @@ public sealed class SNOMDemonstrationController : MonoBehaviour
 
     private void UpdateAnimation(float deltaTime, float time)
     {
+        if (workflowPhase == WorkflowPhase.InstallingProbe)
+        {
+            UpdateProbeInstallation(deltaTime);
+            return;
+        }
+
+        if (workflowPhase != WorkflowPhase.PrincipleTour)
+        {
+            return;
+        }
+
         if (!stagePlaying || isComponentMode)
         {
             return;
@@ -524,10 +689,26 @@ public sealed class SNOMDemonstrationController : MonoBehaviour
             diagramGraphic.SetProgress(scanProgress);
             if (scanProgress >= 0.999f)
             {
-                stagePlaying = false;
-                statusText.text = "Scan complete: registered height and near-field maps are available.";
-                RefreshPlayButton();
+                if (automaticallyAdvancePrinciples)
+                {
+                    EnterStage(DemonstrationStage.Results);
+                }
+                else
+                {
+                    stagePlaying = false;
+                    statusText.text = "Scan complete: registered height and near-field maps are available.";
+                    RefreshPlayButton();
+                }
             }
+
+            return;
+        }
+
+        stageElapsed += deltaTime;
+        if (automaticallyAdvancePrinciples && currentStage != DemonstrationStage.Results &&
+            stageElapsed >= automaticStageDuration)
+        {
+            Next();
         }
     }
 
@@ -701,6 +882,25 @@ public sealed class SNOMDemonstrationController : MonoBehaviour
 
     private void HandleKeyboardAndMouse()
     {
+        if (workflowPhase == WorkflowPhase.ProbeSelection)
+        {
+            if (Input.GetKeyDown(KeyCode.Alpha1)) SelectProbeOption(0);
+            if (Input.GetKeyDown(KeyCode.Alpha2)) SelectProbeOption(1);
+            if (Input.GetKeyDown(KeyCode.Alpha3)) SelectProbeOption(2);
+            if (Input.GetKeyDown(KeyCode.E)) InstallSelectedProbe();
+        }
+        else if (workflowPhase == WorkflowPhase.ReadyToStart && Input.GetKeyDown(KeyCode.Space))
+        {
+            ActivateSystem();
+            return;
+        }
+
+        if (workflowPhase != WorkflowPhase.PrincipleTour)
+        {
+            if (Input.GetKeyDown(KeyCode.Escape)) ExitDemonstration();
+            return;
+        }
+
         if (Input.GetKeyDown(KeyCode.RightArrow)) Next();
         if (Input.GetKeyDown(KeyCode.LeftArrow)) Previous();
         if (Input.GetKeyDown(KeyCode.Space)) TogglePlayPause();
@@ -738,43 +938,43 @@ public sealed class SNOMDemonstrationController : MonoBehaviour
         stages = new[]
         {
             Stage("THz s-SNOM System Overview",
-                "这套系统把太赫兹时域光谱与振动式 AFM 探针结合。它不是一次拍摄整张图，而是在扫描过程中逐点记录局部响应。",
+                "This system combines THz time-domain spectroscopy with an oscillating AFM probe to map local surface response point by point.",
                 "Output: topography + near-field amplitude + phase + local spectrum",
                 SNOMDemonstrationGraphic.DiagramMode.Overview),
             Stage("Broadband THz Pulse Generation",
-                "飞秒激光激发发射光导天线，产生宽带太赫兹瞬态；接收光导天线采样返回电场。这里的光导天线与 AFM 检测激光承担不同任务。",
+                "Ultrashort laser pulses excite a photoconductive emitter. A receiving antenna samples the returning THz electric field.",
                 "E(t)  --Fourier transform-->  E(f)",
                 SNOMDemonstrationGraphic.DiagramMode.TimeDomain),
             Stage("Beam Steering and Focusing",
-                "反射镜引导太赫兹脉冲，抛物面光学元件把它聚焦到金属针尖附近。远场焦点本身仍不是纳米尺度，真正的局域化由针尖完成。",
+                "Mirrors guide and focus the THz beam onto the tip. The sharp metal apex confines the interaction to a nanoscale region.",
                 "Orange path = schematic incident THz path",
                 SNOMDemonstrationGraphic.DiagramMode.BeamFocus),
             Stage("Identify the Near-Field Probe",
-                "金属探针是空间采样器。针尖半径而不是自由空间太赫兹波长，主要决定横向分辨率。真实探针保持原位，青色标记只是选择辅助。",
+                "The metal tip probes local surface properties. Tip radius strongly influences lateral resolution.",
                 "Resolution is governed primarily by the tip radius",
                 SNOMDemonstrationGraphic.DiagramMode.Probe),
             Stage("AFM Distance Feedback",
-                "绿色 AFM 激光从悬臂反射到四象限探测器。光点偏移形成反馈误差，使探针跟随表面形貌而不撞击样本。它不是太赫兹照明光路。",
+                "A laser reflected from the cantilever reaches a quadrant detector. Feedback controls the tip-sample distance.",
                 "deflection -> feedback error -> height correction",
                 SNOMDemonstrationGraphic.DiagramMode.AfmFeedback),
             Stage("Tapping and Near-Field Coupling",
-                "探针以频率 Omega 振动。靠近样本时，天线效应和避雷针效应把电场限制在针尖间隙，并与样本中的镜像偶极耦合。动画振幅经过夸张。",
+                "The oscillating metal tip concentrates the electric field near the surface. The displayed motion is exaggerated for clarity.",
                 "z(t) = z0 + A cos(Omega t)",
                 SNOMDemonstrationGraphic.DiagramMode.NearField),
             Stage("Weak Scattering over Background",
-                "接收端同时得到针尖近场散射和更强的远场背景。近场信息可能仅占总散射的 10^-3 到 10^-4，因此原始强度不能直接当作近场图像。",
+                "The detector receives both local tip scattering and far-field background. Signal processing separates the near-field contribution.",
                 "measured scattering = background + near field",
                 SNOMDemonstrationGraphic.DiagramMode.Background),
             Stage("Harmonic Demodulation",
-                "近场随针尖距离非线性变化，因此会出现在振动高次谐波中。读取 2 Omega 或 3 Omega 可以抑制远场背景，但不会凭空增加信号能量。",
+                "Demodulation at higher harmonics of the tapping frequency suppresses background and isolates the local response.",
                 "near-field channel: s2 at 2 Omega or s3 at 3 Omega",
                 SNOMDemonstrationGraphic.DiagramMode.Harmonics),
             Stage("Raster Scan",
-                "系统沿蛇形路径逐点记录 AFM 高度和解调后的近场信号，并逐行构建配准图像。按 Play/Start Scan 开始演示。",
+                "The system scans successive rows, recording surface height and near-field response at each position.",
                 "one position -> one measurement -> one image pixel",
                 SNOMDemonstrationGraphic.DiagramMode.Scan),
             Stage("Correlated Results and Local Spectrum",
-                "形貌图描述表面高度，近场幅值和相位描述局部电磁响应。选择像素还可以查看 E(t) 及其傅里叶频谱，从而区分形貌相近但材料不同的区域。",
+                "Topography shows surface height. Near-field amplitude and phase reveal local optical properties; spectra show their frequency dependence.",
                 "E(t) -> amplitude(f) + phase(f)",
                 SNOMDemonstrationGraphic.DiagramMode.Results)
         };
@@ -796,27 +996,27 @@ public sealed class SNOMDemonstrationController : MonoBehaviour
     {
         components.Clear();
         AddComponent(emitterAntenna, "Photoconductive Antenna A",
-            "当前默认作为 TDS 发射端：将超快光脉冲转换为宽带太赫兹瞬态。最终发射/接收方向仍应依据实际光路确认。 ");
+            "Converts ultrashort optical pulses into broadband THz radiation. Assigned as the emitter in this demonstration.");
         AddComponent(receiverAntenna, "Photoconductive Antenna B",
-            "当前默认作为 TDS 接收端：采样返回的太赫兹电场。它与负责 AFM 反馈的四象限探测器不同。 ");
+            "Samples the returning THz electric field. Assigned as the receiver in this demonstration.");
         AddComponent(fastMirrorA, "Fast Steering Mirror",
-            "用于改变太赫兹传播方向并保持宽带脉冲对准。演示光线是低成本示意线，不替代实际光机校准。 ");
+            "Redirects the THz beam along the optical path.");
         AddComponent(parabolicMirror, "Parabolic THz Optic",
-            "对宽带太赫兹波进行聚焦或收集，避免普通透镜可能产生的明显色差。纳米局域化最终发生在针尖间隙。 ");
+            "Focuses incident THz radiation or collects scattered radiation near the probe.");
         AddComponent(probe, "AFM Near-Field Probe",
-            "金属针尖同时承担局域场增强和空间采样。探针振动使近场信息能够在高次谐波中与背景分离。 ");
+            "Concentrates the field at its apex and probes local surface properties during tapping.");
         AddComponent(afmLaser, "AFM Readout Laser",
-            "读取悬臂偏转并服务于距离反馈，不是太赫兹照明源。绿色路径只代表 AFM 读出链路。 ");
+            "Illuminates the cantilever to measure deflection for AFM distance feedback.");
         AddComponent(quadrantDetector, "Quadrant Detector",
-            "检测 AFM 激光光点的位置变化，并把上下/左右偏移转换为反馈误差信号。 ");
+            "Measures displacement of the reflected laser spot and provides the AFM feedback signal.");
         AddComponent(scanStageA, "Scan Stage",
-            "控制探针与样本的相对位置，以蛇形路径逐点构建形貌和近场图像。 ");
+            "Controls relative tip-sample position for surface mapping.");
         AddComponent(preamplifier, "Head Preamplifier",
-            "在解调之前对微弱电信号进行前置调理，减少后续传输和采集中的噪声影响。 ");
+            "Amplifies weak electrical signals before further processing.");
         AddComponent(optionalDetector, "Optional Detector Module",
-            "该节点目前独立于 MX-Thz 主机构，硬件身份未完全确认，因此只作可选接收模块说明，不加入默认 TDS 链路。 ");
+            "Optional detection module. Its specific role is not assigned in this demonstration.");
         AddComponent(optionalConnector, "Optional Connector",
-            "与独立 Detector 相邻的连接或转接组件。在获得装配图之前不把它强行安装到主光路。 ");
+            "Mechanical or electrical interface for the optional detector module.");
     }
 
     private void AddComponent(Transform target, string label, string description)
@@ -889,6 +1089,330 @@ public sealed class SNOMDemonstrationController : MonoBehaviour
         runtimeVisualRoot.SetActive(false);
     }
 
+    private void BuildProbeOptions()
+    {
+        probeOptions.Clear();
+        probeOptions.Add(new ProbeOption
+        {
+            displayName = "Fine Metallic Probe",
+            shortLabel = "1  Fine | 3x detail",
+            resolutionLabel = "Small tip radius | highest relative spatial detail",
+            description = "Small-radius tip for fine surface detail. Requires careful distance control."
+        });
+        probeOptions.Add(new ProbeOption
+        {
+            displayName = "Standard Metallic Probe",
+            shortLabel = "2  Standard | 2x",
+            resolutionLabel = "Medium tip radius | balanced detail and stability",
+            description = "General-purpose tip for balanced spatial detail and stable scanning."
+        });
+        probeOptions.Add(new ProbeOption
+        {
+            displayName = "Robust Metallic Probe",
+            shortLabel = "3  Robust | 1x",
+            resolutionLabel = "Larger tip radius | robust wide-area scanning",
+            description = "Larger-radius tip for robust scanning, with reduced spatial detail."
+        });
+
+        installedProbeRenderers = probe != null ? probe.GetComponentsInChildren<Renderer>(true) : Array.Empty<Renderer>();
+        installedProbeRendererStates = new bool[installedProbeRenderers.Length];
+        for (int i = 0; i < installedProbeRenderers.Length; i++)
+        {
+            installedProbeRendererStates[i] = installedProbeRenderers[i] != null && installedProbeRenderers[i].enabled;
+        }
+
+        if (probe == null)
+        {
+            Debug.LogWarning("[SNOMDemonstration] The installed probe asset could not be resolved; probe selection will remain schematic.", this);
+            return;
+        }
+
+        for (int i = 0; i < probeOptions.Count; i++)
+        {
+            ProbeOption option = probeOptions[i];
+            GameObject preview = Instantiate(probe.gameObject, runtimeVisualRoot.transform);
+            preview.name = $"Probe Choice Preview {i + 1}";
+            PrepareProbePreview(preview);
+            option.preview = preview;
+            option.previewScale = 0.86f + i * 0.14f;
+            preview.SetActive(false);
+        }
+    }
+
+    private static void PrepareProbePreview(GameObject preview)
+    {
+        Collider[] colliders = preview.GetComponentsInChildren<Collider>(true);
+        for (int i = 0; i < colliders.Length; i++)
+        {
+            colliders[i].enabled = false;
+            Destroy(colliders[i]);
+        }
+
+        Rigidbody[] rigidbodies = preview.GetComponentsInChildren<Rigidbody>(true);
+        for (int i = 0; i < rigidbodies.Length; i++)
+        {
+            rigidbodies[i].isKinematic = true;
+            Destroy(rigidbodies[i]);
+        }
+
+        MonoBehaviour[] behaviours = preview.GetComponentsInChildren<MonoBehaviour>(true);
+        for (int i = 0; i < behaviours.Length; i++)
+        {
+            behaviours[i].enabled = false;
+        }
+    }
+
+    private void BeginProbeSelection()
+    {
+        workflowPhase = WorkflowPhase.ProbeSelection;
+        selectedProbeIndex = -1;
+        installedProbeIndex = -1;
+        RestoreProbePose();
+        SetInstalledProbeVisible(false);
+        SetOwnedVisualsActive(true);
+        ResetStageVisuals();
+        PositionProbeChoiceVisuals();
+        SetProbePreviewsActive(true);
+        SetTourControlsVisible(false);
+        SetWorkflowControlsVisible(true);
+        ApplyWorkflowLayout();
+        SetHeaderStatus("SELECT PROBE", AccentColor);
+        stageNumberText.text = "OPERATION 1 OF 2";
+        titleText.text = "Select a Near-Field Probe";
+        explanationText.text = "Choose a probe for the required surface detail. The 3x, 2x and 1x labels indicate relative detail, not optical magnification.";
+        formulaText.text = "smaller tip radius -> finer lateral resolution";
+        statusText.text = "Select 1 / 2 / 3, then press Install Probe (keyboard: 1-3 and E).";
+        diagramGraphic.SetMode(SNOMDemonstrationGraphic.DiagramMode.Probe);
+        diagramGraphic.SetProgress(0f);
+        SetStageProgress(0.15f);
+        RefreshProbeOptionButtons();
+        RefreshWorkflowAction("Install Probe", false);
+        SetHighlightTarget(probeMount != null ? probeMount : probe);
+    }
+
+    public void SelectProbeOption(int index)
+    {
+        if (workflowPhase != WorkflowPhase.ProbeSelection || index < 0 || index >= probeOptions.Count)
+        {
+            return;
+        }
+
+        selectedProbeIndex = index;
+        ProbeOption option = probeOptions[index];
+        titleText.text = option.displayName;
+        explanationText.text = option.description;
+        formulaText.text = option.resolutionLabel;
+        statusText.text = "Probe selected. Press Install Probe to place it on the existing SNOM probe mount.";
+        SetHeaderStatus("PROBE SELECTED", AccentColor);
+        RefreshProbeOptionButtons();
+        RefreshWorkflowAction("Install Selected Probe", true);
+        SetProbePreviewEmphasis(index);
+        DebugLog($"Probe option selected: {option.displayName}.");
+    }
+
+    public void InstallSelectedProbe()
+    {
+        if (workflowPhase != WorkflowPhase.ProbeSelection || selectedProbeIndex < 0 ||
+            selectedProbeIndex >= probeOptions.Count)
+        {
+            return;
+        }
+
+        ProbeOption option = probeOptions[selectedProbeIndex];
+        installedProbeIndex = selectedProbeIndex;
+        workflowPhase = WorkflowPhase.InstallingProbe;
+        SetHeaderStatus("INSTALLING PROBE", IncidentColor);
+        probeInstallationProgress = 0f;
+        if (option.preview != null)
+        {
+            installingProbeStartPosition = option.preview.transform.position;
+            installingProbeStartRotation = option.preview.transform.rotation;
+            installingProbeStartScale = option.preview.transform.localScale;
+        }
+
+        for (int i = 0; i < probeOptions.Count; i++)
+        {
+            if (probeOptions[i].preview != null)
+            {
+                probeOptions[i].preview.SetActive(i == selectedProbeIndex);
+            }
+
+            if (probeOptions[i].button != null)
+            {
+                probeOptions[i].button.interactable = false;
+            }
+        }
+
+        SetHighlightTarget(probeMount != null ? probeMount : probe);
+        stageNumberText.text = "OPERATION 1 OF 2";
+        titleText.text = $"Installing {option.displayName}";
+        explanationText.text = "Only the runtime preview moves toward the fixed mount. The authored SNOM root remains unchanged.";
+        formulaText.text = "preview motion only | fixed instrument transform";
+        statusText.text = "Installing the selected probe on the fixed probe mount...";
+        RefreshWorkflowAction("Installing...", false);
+        RefreshWorkflowPhaseVisuals();
+    }
+
+    private void UpdateProbeInstallation(float deltaTime)
+    {
+        if (installedProbeIndex < 0 || installedProbeIndex >= probeOptions.Count)
+        {
+            CompleteProbeInstallation();
+            return;
+        }
+
+        ProbeOption option = probeOptions[installedProbeIndex];
+        probeInstallationProgress = Mathf.Clamp01(
+            probeInstallationProgress + deltaTime / Mathf.Max(0.25f, probeInstallationDuration));
+        float eased = Mathf.SmoothStep(0f, 1f, probeInstallationProgress);
+        if (option.preview != null && probe != null)
+        {
+            option.preview.transform.position = Vector3.Lerp(installingProbeStartPosition, probe.position, eased);
+            option.preview.transform.rotation = Quaternion.Slerp(installingProbeStartRotation, probe.rotation, eased);
+            option.preview.transform.localScale = Vector3.Lerp(installingProbeStartScale,
+                installingProbeStartScale * 0.35f, eased);
+        }
+
+        SetStageProgress(Mathf.Lerp(0.2f, 0.48f, eased));
+        statusText.text = $"Installing selected probe... {Mathf.RoundToInt(eased * 100f)}%";
+        if (probeInstallationProgress >= 0.999f)
+        {
+            CompleteProbeInstallation();
+        }
+    }
+
+    private void CompleteProbeInstallation()
+    {
+        workflowPhase = WorkflowPhase.ReadyToStart;
+        SetProbePreviewsActive(false);
+        SetInstalledProbeVisible(true);
+        ProbeOption option = installedProbeIndex >= 0 && installedProbeIndex < probeOptions.Count
+            ? probeOptions[installedProbeIndex]
+            : null;
+        ApplyWorkflowLayout();
+        SetHeaderStatus("READY TO START", ReadyColor);
+        stageNumberText.text = "OPERATION 2 OF 2";
+        titleText.text = "Probe Installed";
+        explanationText.text = option == null
+            ? "The probe is installed. Start the system to begin the automatic measurement sequence."
+            : $"{option.displayName} is installed. Start the system to begin the automatic measurement sequence.";
+        formulaText.text = "operator workflow: select probe -> start system";
+        statusText.text = "Press Start System (keyboard: Space). Remaining stages explain automatic internal processing.";
+        SetStageProgress(0.5f);
+        RefreshWorkflowAction("Start System", true);
+        RefreshWorkflowPhaseVisuals();
+        SetHighlightTarget(probe);
+        DebugLog("Probe installation completed; system start is now enabled.");
+    }
+
+    public void ActivateSystem()
+    {
+        if (workflowPhase != WorkflowPhase.ReadyToStart)
+        {
+            return;
+        }
+
+        activationPulseUntil = Time.unscaledTime + 1.4f;
+        SetProbePreviewsActive(false);
+        SetWorkflowControlsVisible(false);
+        SetTourControlsVisible(true);
+        SetProxyObjectsActive(true);
+        EnterStage(DemonstrationStage.ThzGeneration);
+        DebugLog("SNOM system activated; automatic principle sequence started.");
+    }
+
+    private void PositionProbeChoiceVisuals()
+    {
+        Vector3 mount = GetVisualCenter(probeMount != null ? probeMount : probe);
+        Camera viewer = Camera.main;
+        Vector3 right = viewer != null ? viewer.transform.right : Vector3.right;
+        Vector3 forward = viewer != null ? viewer.transform.forward : Vector3.forward;
+        forward.y = 0f;
+        if (forward.sqrMagnitude < 0.001f) forward = Vector3.forward;
+        forward.Normalize();
+        Vector3 center = mount - forward * 0.08f + Vector3.up * 0.09f;
+
+        for (int i = 0; i < probeOptions.Count; i++)
+        {
+            ProbeOption option = probeOptions[i];
+            if (option.preview == null) continue;
+            option.preview.SetActive(true);
+            option.preview.transform.position = center + right * ((i - 1) * 0.065f);
+            option.preview.transform.rotation = probe != null ? probe.rotation : Quaternion.identity;
+            if (TryGetBounds(option.preview.transform, out Bounds bounds))
+            {
+                float largest = Mathf.Max(bounds.size.x, Mathf.Max(bounds.size.y, bounds.size.z));
+                if (largest > 0.0001f)
+                {
+                    option.preview.transform.localScale *= 0.045f / largest;
+                }
+            }
+
+            option.preview.transform.localScale *= option.previewScale;
+            option.previewPosition = option.preview.transform.position;
+            option.previewRotation = option.preview.transform.rotation;
+            option.previewLocalScale = option.preview.transform.localScale;
+        }
+    }
+
+    private void SetProbePreviewEmphasis(int selectedIndex)
+    {
+        for (int i = 0; i < probeOptions.Count; i++)
+        {
+            ProbeOption option = probeOptions[i];
+            if (option.preview == null) continue;
+            option.preview.transform.position = option.previewPosition + (i == selectedIndex ? Vector3.up * 0.012f : Vector3.zero);
+            option.preview.transform.rotation = option.previewRotation;
+            option.preview.transform.localScale = option.previewLocalScale * (i == selectedIndex ? 1.18f : 0.92f);
+        }
+    }
+
+    private void SetProbePreviewsActive(bool active)
+    {
+        for (int i = 0; i < probeOptions.Count; i++)
+        {
+            if (probeOptions[i].preview != null)
+            {
+                probeOptions[i].preview.SetActive(active);
+            }
+        }
+    }
+
+    private void SetInstalledProbeVisible(bool visible)
+    {
+        if (installedProbeRenderers == null) return;
+        for (int i = 0; i < installedProbeRenderers.Length; i++)
+        {
+            if (installedProbeRenderers[i] != null)
+            {
+                installedProbeRenderers[i].enabled = visible &&
+                    (installedProbeRendererStates == null || i >= installedProbeRendererStates.Length || installedProbeRendererStates[i]);
+            }
+        }
+    }
+
+    private void RestoreInstalledProbeVisibility()
+    {
+        if (installedProbeRenderers == null || installedProbeRendererStates == null) return;
+        for (int i = 0; i < installedProbeRenderers.Length && i < installedProbeRendererStates.Length; i++)
+        {
+            if (installedProbeRenderers[i] != null)
+            {
+                installedProbeRenderers[i].enabled = installedProbeRendererStates[i];
+            }
+        }
+    }
+
+    private static int GetPrincipleStageIndex(DemonstrationStage stage)
+    {
+        for (int i = 0; i < PrincipleStages.Length; i++)
+        {
+            if (PrincipleStages[i] == stage) return i;
+        }
+
+        return 0;
+    }
+
     private void BuildSelectionProxies()
     {
         for (int i = 0; i < components.Count; i++)
@@ -947,6 +1471,100 @@ public sealed class SNOMDemonstrationController : MonoBehaviour
         interactable.selectEntered.AddListener(_ => RevealLauncherFromInteraction());
     }
 
+    private void BuildProximityHighlight()
+    {
+        // Cache only the installed model, before any tutorial overlays are created.
+        proximityMeshes = snomRoot.GetComponentsInChildren<MeshFilter>(true);
+        proximityRenderers = new Renderer[proximityMeshes.Length];
+        for (int i = 0; i < proximityMeshes.Length; i++)
+            proximityRenderers[i] = proximityMeshes[i].GetComponent<MeshRenderer>();
+        TryGetBounds(snomRoot, out proximityBounds);
+
+        Material template = Resources.Load<Material>("SNOMProximityHighlight");
+        if (template == null)
+        {
+            Debug.LogWarning("[SNOMDemonstration] Missing SNOMProximityHighlight material.", this);
+            return;
+        }
+
+        proximityMaterial = new Material(template) { name = "SNOM Proximity Highlight (Runtime)" };
+        proximityMaterial.SetColor("_HighlightColor", proximityHighlightColor);
+        proximityMaterial.SetFloat("_Intensity", proximityHighlightIntensity);
+        proximityMaterial.SetFloat("_boolean", 0f);
+    }
+
+    private void UpdateProximityHighlight()
+    {
+        if (!setupComplete || snomRoot == null) return;
+        if (!snomRoot.gameObject.activeInHierarchy)
+        {
+            SetPlayerInInteractionRange(false);
+            return;
+        }
+
+        if (Time.unscaledTime >= nextProximityCheck)
+        {
+            nextProximityCheck = Time.unscaledTime + 0.1f;
+            proximityViewer = Camera.main;
+            if (proximityViewer == null || !proximityViewer.isActiveAndEnabled)
+            {
+                SetPlayerInInteractionRange(false);
+                return;
+            }
+
+            // Allow head height above the instrument; distance is measured from its footprint.
+            Bounds reach = proximityBounds;
+            reach.Expand(new Vector3(0f, 1.6f, 0f));
+            float threshold = proximityHighlightDistance +
+                              (isPlayerInInteractionRange ? proximityExitHysteresis : 0f);
+            SetPlayerInInteractionRange(
+                reach.SqrDistance(proximityViewer.transform.position) <= threshold * threshold);
+        }
+
+        bool roaming = Interactor.Instance == null ||
+                       Interactor.Instance.CurrentState == Interactor.GameState.Roaming;
+        bool activationPulse = Time.unscaledTime < activationPulseUntil;
+        proximityHighlighted = (isPlayerInInteractionRange && !isRunning && roaming) || activationPulse;
+        if (!proximityHighlighted || proximityMaterial == null || proximityViewer == null ||
+            !proximityViewer.isActiveAndEnabled) return;
+        for (int i = 0; i < proximityMeshes.Length; i++)
+        {
+            MeshFilter filter = proximityMeshes[i];
+            Renderer source = proximityRenderers[i];
+            if (filter == null || source == null || !source.enabled || source.forceRenderingOff ||
+                !source.gameObject.activeInHierarchy || filter.sharedMesh == null) continue;
+
+            Mesh mesh = filter.sharedMesh;
+            for (int subMesh = 0; subMesh < mesh.subMeshCount; subMesh++)
+            {
+                Graphics.DrawMesh(mesh, filter.transform.localToWorldMatrix, proximityMaterial,
+                    source.gameObject.layer, proximityViewer, subMesh, null,
+                    UnityEngine.Rendering.ShadowCastingMode.Off, false, null,
+                    UnityEngine.Rendering.LightProbeUsage.Off);
+            }
+        }
+    }
+
+    private void SetPlayerInInteractionRange(bool isInRange)
+    {
+        if (isPlayerInInteractionRange == isInRange) return;
+
+        isPlayerInInteractionRange = isInRange;
+        if (isInRange)
+        {
+            DebugLog("Player entered the SNOM interaction range.");
+            return;
+        }
+
+        proximityHighlighted = false;
+        bool hadVisibleInterface = canvasRoot != null && canvasRoot.activeSelf;
+        if (isRunning || hadVisibleInterface)
+        {
+            ResetDemonstrationState();
+            DebugLog("Player left the SNOM interaction range; tutorial UI and state were reset.");
+        }
+    }
+
     private void BuildUserInterface()
     {
         EnsureEventSystem();
@@ -969,56 +1587,138 @@ public sealed class SNOMDemonstrationController : MonoBehaviour
         scaler.matchWidthOrHeight = 0.5f;
 
         launcherRoot = CreatePanel(canvasRoot.transform, "SNOM Launcher",
-            new Vector2(0.025f, 0.79f), new Vector2(0.285f, 0.93f), PanelColor);
-        CreateText(launcherRoot.transform, "Launcher Title", "THz s-SNOM Explorer",
-            new Vector2(0.08f, 0.61f), new Vector2(0.92f, 0.88f), 24f,
+            new Vector2(0.73f, 0.075f), new Vector2(0.975f, 0.245f), PanelColor);
+        AddBorder(launcherRoot, BorderColor, new Vector2(2f, -2f));
+        CreateText(launcherRoot.transform, "Launcher Eyebrow", "DEVICE AVAILABLE",
+            new Vector2(0.075f, 0.73f), new Vector2(0.92f, 0.90f), 13f,
+            AccentColor, FontStyles.Bold);
+        CreateText(launcherRoot.transform, "Launcher Title", "Select the SNOM",
+            new Vector2(0.075f, 0.48f), new Vector2(0.92f, 0.73f), 25f,
             Color.white, FontStyles.Bold);
         CreateText(launcherRoot.transform, "Launcher Subtitle",
-            "Device selected. Open the guided component and principle tour.",
-            new Vector2(0.08f, 0.38f), new Vector2(0.92f, 0.60f), 15f,
-            new Color(0.72f, 0.82f, 0.89f, 1f), FontStyles.Normal);
-        Button launcher = CreateButton(launcherRoot.transform, "Start Tour", "Start SNOM Tour",
-            new Vector2(0.08f, 0.08f), new Vector2(0.92f, 0.34f), ActiveButtonColor, 18f, out _);
+            "Two operator actions: install a probe, then start the system.",
+            new Vector2(0.075f, 0.31f), new Vector2(0.92f, 0.48f), 14f,
+            MutedTextColor, FontStyles.Normal);
+        Button launcher = CreateButton(launcherRoot.transform, "Start Tour", "Begin Operation",
+            new Vector2(0.075f, 0.07f), new Vector2(0.92f, 0.27f), ActiveButtonColor, 17f, out _);
+        AddBorder(launcher.gameObject, AccentColor, Vector2.zero);
         launcher.onClick.AddListener(BeginTour);
 
         panelRoot = CreatePanel(canvasRoot.transform, "SNOM Explanation Panel",
-            new Vector2(0.025f, 0.285f), new Vector2(0.35f, 0.955f), PanelColor);
-        Image accent = CreateImage(panelRoot.transform, "Accent", new Vector2(0f, 0f), new Vector2(0.014f, 1f), AccentColor);
+            Vector2.zero, Vector2.one, Color.clear);
+        panelRoot.GetComponent<Image>().raycastTarget = false;
+
+        topBarRoot = CreatePanel(panelRoot.transform, "SNOM Status Bar",
+            new Vector2(0.02f, 0.92f), new Vector2(0.98f, 0.985f), PanelColor);
+        topBarRoot.GetComponent<Image>().raycastTarget = false;
+        CreateText(topBarRoot.transform, "Brand", "THz s-SNOM",
+            new Vector2(0.02f, 0.16f), new Vector2(0.35f, 0.84f), 24f,
+            Color.white, FontStyles.Bold);
+        headerStatusDot = CreateImage(topBarRoot.transform, "Status Dot",
+            new Vector2(0.78f, 0.41f), new Vector2(0.788f, 0.59f), AccentColor);
+        headerStatusDot.raycastTarget = false;
+        headerStatusText = CreateText(topBarRoot.transform, "Device Status", "SELECT PROBE",
+            new Vector2(0.80f, 0.20f), new Vector2(0.975f, 0.80f), 14f,
+            MutedTextColor, FontStyles.Bold);
+        headerStatusText.alignment = TextAlignmentOptions.MidlineRight;
+
+        contentCardRoot = CreatePanel(panelRoot.transform, "Context Card",
+            new Vector2(0.70f, 0.08f), new Vector2(0.98f, 0.90f), PanelColor);
+        AddBorder(contentCardRoot, BorderColor, new Vector2(-2f, 0f));
+        Image accent = CreateImage(contentCardRoot.transform, "Accent",
+            new Vector2(0f, 0f), new Vector2(0.012f, 1f), AccentColor);
         accent.raycastTarget = false;
 
-        stageNumberText = CreateText(panelRoot.transform, "Stage Number", "STAGE 01/10",
-            new Vector2(0.06f, 0.94f), new Vector2(0.94f, 0.98f), 17f, AccentColor, FontStyles.Bold);
-        Image progressTrack = CreateImage(panelRoot.transform, "Stage Progress Track",
-            new Vector2(0.06f, 0.915f), new Vector2(0.94f, 0.925f), new Color(0.12f, 0.20f, 0.28f, 1f));
+        stageNumberText = CreateText(contentCardRoot.transform, "Stage Number", "OPERATION 1 OF 2",
+            new Vector2(0.06f, 0.93f), new Vector2(0.94f, 0.975f), 15f, AccentColor, FontStyles.Bold);
+        Image progressTrack = CreateImage(contentCardRoot.transform, "Stage Progress Track",
+            new Vector2(0.06f, 0.905f), new Vector2(0.94f, 0.914f), SurfaceColor);
         progressTrack.raycastTarget = false;
         stageProgressFill = CreateImage(progressTrack.transform, "Fill", Vector2.zero, Vector2.one, AccentColor);
         stageProgressFill.raycastTarget = false;
         stageProgressFill.type = Image.Type.Filled;
         stageProgressFill.fillMethod = Image.FillMethod.Horizontal;
         stageProgressFill.fillOrigin = 0;
-        titleText = CreateText(panelRoot.transform, "Title", "THz s-SNOM",
-            new Vector2(0.06f, 0.835f), new Vector2(0.94f, 0.905f), 29f, Color.white, FontStyles.Bold);
-        diagramGraphic = CreateDiagram(panelRoot.transform, new Vector2(0.06f, 0.50f), new Vector2(0.94f, 0.815f));
-        explanationText = CreateText(panelRoot.transform, "Explanation", string.Empty,
-            new Vector2(0.06f, 0.275f), new Vector2(0.94f, 0.475f), 22f, new Color(0.88f, 0.93f, 0.97f, 1f), FontStyles.Normal);
+        titleText = CreateText(contentCardRoot.transform, "Title", "THz s-SNOM",
+            new Vector2(0.06f, 0.82f), new Vector2(0.94f, 0.90f), 29f, Color.white, FontStyles.Bold);
+        explanationText = CreateText(contentCardRoot.transform, "Explanation", string.Empty,
+            new Vector2(0.06f, 0.67f), new Vector2(0.94f, 0.81f), 20f,
+            new Color(0.88f, 0.93f, 0.97f, 1f), FontStyles.Normal);
         explanationText.alignment = TextAlignmentOptions.TopLeft;
-        formulaText = CreateText(panelRoot.transform, "Formula", string.Empty,
-            new Vector2(0.06f, 0.205f), new Vector2(0.94f, 0.265f), 18f, new Color(0.47f, 0.86f, 0.96f, 1f), FontStyles.Italic);
-        statusText = CreateText(panelRoot.transform, "Status", string.Empty,
-            new Vector2(0.06f, 0.145f), new Vector2(0.94f, 0.198f), 15f, new Color(0.65f, 0.73f, 0.80f, 1f), FontStyles.Normal);
+        formulaText = CreateText(contentCardRoot.transform, "Formula", string.Empty,
+            new Vector2(0.06f, 0.60f), new Vector2(0.94f, 0.66f), 16f,
+            AccentColor, FontStyles.Italic);
+        statusText = CreateText(contentCardRoot.transform, "Status", string.Empty,
+            new Vector2(0.06f, 0.54f), new Vector2(0.94f, 0.59f), 14f,
+            MutedTextColor, FontStyles.Normal);
 
-        Button previous = CreateButton(panelRoot.transform, "Previous", "Previous",
-            new Vector2(0.06f, 0.065f), new Vector2(0.225f, 0.13f), InactiveButtonColor, 16f, out _);
-        Button play = CreateButton(panelRoot.transform, "Play", "Pause",
-            new Vector2(0.235f, 0.065f), new Vector2(0.40f, 0.13f), ActiveButtonColor, 16f, out playButtonText);
-        Button replay = CreateButton(panelRoot.transform, "Replay", "Replay",
-            new Vector2(0.41f, 0.065f), new Vector2(0.575f, 0.13f), InactiveButtonColor, 16f, out _);
-        Button next = CreateButton(panelRoot.transform, "Next", "Next",
-            new Vector2(0.585f, 0.065f), new Vector2(0.75f, 0.13f), ActiveButtonColor, 16f, out _);
-        Button exit = CreateButton(panelRoot.transform, "Exit", "Exit",
-            new Vector2(0.76f, 0.065f), new Vector2(0.94f, 0.13f), new Color(0.70f, 0.14f, 0.12f, 1f), 16f, out _);
-        Button componentsButton = CreateButton(panelRoot.transform, "Components", "Components",
-            new Vector2(0.06f, 0.012f), new Vector2(0.94f, 0.052f), new Color(0.10f, 0.43f, 0.48f, 1f), 15f, out componentButtonText);
+        diagramCardRoot = CreatePanel(panelRoot.transform, "Principle Diagram Card",
+            new Vector2(0.03f, 0.62f), new Vector2(0.25f, 0.89f), PanelColor);
+        AddBorder(diagramCardRoot, BorderColor, Vector2.zero);
+        CreateText(diagramCardRoot.transform, "Diagram Label", "PRINCIPLE VIEW",
+            new Vector2(0.06f, 0.88f), new Vector2(0.94f, 0.97f), 12f,
+            MutedTextColor, FontStyles.Bold);
+        diagramGraphic = CreateDiagram(diagramCardRoot.transform,
+            new Vector2(0.06f, 0.08f), new Vector2(0.94f, 0.86f));
+
+        BuildSurfaceObservation();
+        tourControlsRoot = new GameObject("Principle Tour Controls", typeof(RectTransform));
+        tourControlsRoot.transform.SetParent(contentCardRoot.transform, false);
+        ConfigureRect(tourControlsRoot.GetComponent<RectTransform>(),
+            new Vector2(0.67f, 0.06f), new Vector2(0.98f, 0.88f));
+        Button previous = CreateButton(tourControlsRoot.transform, "Previous", "Previous",
+            new Vector2(0f, 0.54f), new Vector2(0.19f, 1f), InactiveButtonColor, 14f, out _);
+        Button play = CreateButton(tourControlsRoot.transform, "Play", "Pause",
+            new Vector2(0.205f, 0.54f), new Vector2(0.395f, 1f), ActiveButtonColor, 14f, out playButtonText);
+        Button replay = CreateButton(tourControlsRoot.transform, "Replay", "Replay",
+            new Vector2(0.41f, 0.54f), new Vector2(0.60f, 1f), InactiveButtonColor, 14f, out _);
+        Button next = CreateButton(tourControlsRoot.transform, "Next", "Next",
+            new Vector2(0.615f, 0.54f), new Vector2(0.805f, 1f), ActiveButtonColor, 14f, out _);
+        Button exit = CreateButton(tourControlsRoot.transform, "Exit", "Exit",
+            new Vector2(0.82f, 0.54f), new Vector2(1f, 1f), new Color(0.55f, 0.10f, 0.10f, 1f), 14f, out _);
+        Button componentsButton = CreateButton(tourControlsRoot.transform, "Components", "Components",
+            new Vector2(0f, 0f), new Vector2(0.60f, 0.42f), new Color(0.06f, 0.36f, 0.42f, 1f), 14f,
+            out componentButtonText);
+
+        tourControlObjects.Add(previous.gameObject);
+        tourControlObjects.Add(play.gameObject);
+        tourControlObjects.Add(replay.gameObject);
+        tourControlObjects.Add(next.gameObject);
+        tourControlObjects.Add(exit.gameObject);
+        tourControlObjects.Add(componentsButton.gameObject);
+
+        probeChoiceControlsRoot = new GameObject("Probe Workflow Controls", typeof(RectTransform));
+        probeChoiceControlsRoot.transform.SetParent(contentCardRoot.transform, false);
+        ConfigureRect(probeChoiceControlsRoot.GetComponent<RectTransform>(), Vector2.zero, Vector2.one);
+        for (int i = 0; i < probeOptions.Count; i++)
+        {
+            int capturedIndex = i;
+            float minY = 0.40f - i * 0.13f;
+            Button choice = CreateButton(probeChoiceControlsRoot.transform, $"Probe Option {i + 1}",
+                probeOptions[i].shortLabel, new Vector2(0.06f, minY), new Vector2(0.94f, minY + 0.11f),
+                InactiveButtonColor, 15f, out _);
+            AddBorder(choice.gameObject, BorderColor, Vector2.zero);
+            choice.onClick.AddListener(() => SelectProbeOption(capturedIndex));
+            probeOptions[i].button = choice;
+            probeOptions[i].buttonImage = choice.targetGraphic as Image;
+        }
+
+        workflowActionButton = CreateButton(probeChoiceControlsRoot.transform, "Workflow Action",
+            "Install Probe", new Vector2(0.06f, 0.055f), new Vector2(0.72f, 0.125f),
+            ActiveButtonColor, 17f, out workflowActionText);
+        AddBorder(workflowActionButton.gameObject, AccentColor, Vector2.zero);
+        workflowActionImage = workflowActionButton.targetGraphic as Image;
+        workflowActionButton.onClick.AddListener(HandleWorkflowAction);
+        Button workflowExit = CreateButton(probeChoiceControlsRoot.transform, "Workflow Exit", "Exit",
+            new Vector2(0.74f, 0.055f), new Vector2(0.94f, 0.125f),
+            new Color(0.70f, 0.14f, 0.12f, 1f), 16f, out _);
+        workflowExit.onClick.AddListener(ExitDemonstration);
+        Button changeProbe = CreateButton(probeChoiceControlsRoot.transform, "Change Probe", "Change Probe",
+            new Vector2(0.06f, 0.15f), new Vector2(0.94f, 0.215f),
+            InactiveButtonColor, 15f, out _);
+        changeProbe.onClick.AddListener(BeginProbeSelection);
+        workflowChangeProbeButton = changeProbe.gameObject;
+        workflowChangeProbeButton.SetActive(false);
 
         previous.onClick.AddListener(Previous);
         play.onClick.AddListener(TogglePlayPause);
@@ -1026,6 +1726,9 @@ public sealed class SNOMDemonstrationController : MonoBehaviour
         next.onClick.AddListener(Next);
         exit.onClick.AddListener(ExitDemonstration);
         componentsButton.onClick.AddListener(ToggleComponentMode);
+        probeChoiceControlsRoot.SetActive(false);
+        tourControlsRoot.SetActive(false);
+        diagramCardRoot.SetActive(false);
         panelRoot.SetActive(false);
         launcherRoot.SetActive(false);
     }
@@ -1061,6 +1764,317 @@ public sealed class SNOMDemonstrationController : MonoBehaviour
         if (canvasRoot != null) canvasRoot.SetActive(false);
     }
 
+    private void HandleWorkflowAction()
+    {
+        if (workflowPhase == WorkflowPhase.ProbeSelection)
+        {
+            InstallSelectedProbe();
+        }
+        else if (workflowPhase == WorkflowPhase.ReadyToStart)
+        {
+            ActivateSystem();
+        }
+    }
+
+    private void SetWorkflowControlsVisible(bool visible)
+    {
+        if (probeChoiceControlsRoot != null)
+        {
+            probeChoiceControlsRoot.SetActive(visible);
+            if (visible)
+            {
+                RefreshWorkflowPhaseVisuals();
+            }
+        }
+    }
+
+    private void SetTourControlsVisible(bool visible)
+    {
+        if (tourControlsRoot != null)
+        {
+            tourControlsRoot.SetActive(visible);
+        }
+
+        for (int i = 0; i < tourControlObjects.Count; i++)
+        {
+            if (tourControlObjects[i] != null)
+            {
+                tourControlObjects[i].SetActive(visible);
+            }
+        }
+    }
+
+    private void BuildSurfaceObservation()
+    {
+        surfaceCardRoot = CreatePanel(panelRoot.transform, "Surface Observation",
+            new Vector2(0.73f, 0.57f), new Vector2(0.97f, 0.89f), PanelColor);
+        AddBorder(surfaceCardRoot, BorderColor, Vector2.zero);
+        CreateText(surfaceCardRoot.transform, "Heading", "PROBE / SURFACE OBSERVATION",
+            new Vector2(0.05f, 0.87f), new Vector2(0.95f, 0.98f), 15f, AccentColor, FontStyles.Bold);
+
+        GameObject imageArea = new GameObject("Surface Image", typeof(RectTransform), typeof(RawImage),
+            typeof(AspectRatioFitter));
+        imageArea.transform.SetParent(surfaceCardRoot.transform, false);
+        ConfigureRect(imageArea.GetComponent<RectTransform>(),
+            new Vector2(0.05f, 0.22f), new Vector2(0.95f, 0.85f));
+        RawImage image = imageArea.GetComponent<RawImage>();
+        image.texture = Resources.Load<Texture2D>("SNOM/GlassSurface");
+        image.raycastTarget = false;
+        AspectRatioFitter fitter = imageArea.GetComponent<AspectRatioFitter>();
+        fitter.aspectMode = AspectRatioFitter.AspectMode.FitInParent;
+        fitter.aspectRatio = image.texture != null ? (float)image.texture.width / image.texture.height : 1.29f;
+        // Fit within a dedicated holder so aspect correction cannot expand over captions.
+        GameObject holder = new GameObject("Surface Image Bounds", typeof(RectTransform));
+        holder.transform.SetParent(surfaceCardRoot.transform, false);
+        ConfigureRect(holder.GetComponent<RectTransform>(),
+            new Vector2(0.05f, 0.22f), new Vector2(0.95f, 0.85f));
+        imageArea.transform.SetParent(holder.transform, false);
+        Image cover = CreateImage(imageArea.transform, "Unscanned Area", Vector2.zero, Vector2.one, PanelColor);
+        cover.raycastTarget = false;
+        surfaceCover = cover.rectTransform;
+        cover.color = new Color(0.015f, 0.045f, 0.06f, 1f);
+        surfaceResponse = CreateImage(imageArea.transform, "Local Response (Schematic)",
+            Vector2.zero, Vector2.zero, AccentColor);
+        surfaceResponse.raycastTarget = false;
+        surfaceScanLine = CreateImage(imageArea.transform, "Scan Line", Vector2.zero,
+            Vector2.zero, AccentColor).rectTransform;
+        surfaceScanLine.GetComponent<Image>().raycastTarget = false;
+        surfaceProbeMarker = CreateImage(imageArea.transform, "Probe Position (Schematic)",
+            Vector2.zero, Vector2.zero, Color.white).rectTransform;
+        surfaceProbeMarker.GetComponent<Image>().raycastTarget = false;
+        surfaceStatusText = CreateText(surfaceCardRoot.transform, "Scan Status", "Reference preview",
+            new Vector2(0.05f, 0.11f), new Vector2(0.95f, 0.21f), 14f, Color.white, FontStyles.Normal);
+        CreateText(surfaceCardRoot.transform, "Attribution", "AFM glass topography example | Chych / Materialscientist | PD",
+            new Vector2(0.05f, 0.01f), new Vector2(0.95f, 0.10f), 11f, MutedTextColor, FontStyles.Normal);
+        if (image.texture == null)
+            Debug.LogWarning("[SNOMDemonstration] Missing SNOM/GlassSurface observation image.", this);
+        surfaceCardRoot.SetActive(false);
+    }
+
+    private void UpdateSurfaceObservation()
+    {
+        if (surfaceCardRoot == null || !surfaceCardRoot.activeInHierarchy) return;
+        bool scanning = currentStage == DemonstrationStage.RasterScan;
+        float revealed = scanning ? Mathf.Clamp01(scanProgress) : 1f;
+        surfaceCover.gameObject.SetActive(revealed < 1f);
+        surfaceCover.anchorMax = new Vector2(1f, 1f - revealed);
+        bool complete = currentStage == DemonstrationStage.Results;
+        surfaceProbeMarker.gameObject.SetActive(!complete);
+        surfaceResponse.gameObject.SetActive(!complete);
+        surfaceScanLine.gameObject.SetActive(scanning && revealed < 1f);
+        // Use the stage clock, which stops on pause and resets on replay.
+        float pulse = 0.5f + 0.5f * Mathf.Sin(stageElapsed * probeFrequency * Mathf.PI * 2f);
+        Vector2 position = new Vector2(0.5f, 0.5f);
+        string activity;
+        if (scanning)
+        {
+            const int rows = 9; // Match the world-space scan cursor.
+            float rowValue = Mathf.Min(revealed, 0.99999f) * rows;
+            int row = Mathf.FloorToInt(rowValue);
+            float along = Mathf.Repeat(rowValue, 1f);
+            position = new Vector2(row % 2 == 0 ? along : 1f - along, 1f - revealed);
+            ConfigureRect(surfaceScanLine, new Vector2(0f, position.y), new Vector2(1f, position.y));
+            surfaceScanLine.sizeDelta = new Vector2(0f, 2f);
+            activity = $"Teaching scan: {Mathf.RoundToInt(revealed * 100f)}%";
+        }
+        else if (complete) activity = "Scan complete | Surface topography example";
+        else if (currentStage == DemonstrationStage.AfmFeedback || currentStage == DemonstrationStage.NearFieldCoupling)
+        {
+            position.y += 0.07f * pulse;
+            activity = "Schematic: probe tapping / local response";
+        }
+        else
+        {
+            position.x = Mathf.Lerp(0.15f, 0.85f, beamTravel);
+            activity = "Schematic: " + stages[(int)currentStage].title;
+        }
+        ConfigureRect(surfaceProbeMarker, position, position);
+        surfaceProbeMarker.sizeDelta = new Vector2(5f, 22f);
+        ConfigureRect(surfaceResponse.rectTransform, position, position);
+        surfaceResponse.rectTransform.sizeDelta = Vector2.one * (18f + pulse * 20f);
+        Color responseColor = currentStage == DemonstrationStage.AfmFeedback ? AfmColor : AccentColor;
+        responseColor.a = 0.18f + 0.22f * pulse;
+        surfaceResponse.color = responseColor;
+        surfaceStatusText.text = activity + (!stagePlaying && !complete ? " | Paused" : "");
+    }
+
+    private void ApplyWorkflowLayout()
+    {
+        if (contentCardRoot == null)
+        {
+            return;
+        }
+
+        ConfigureRect(contentCardRoot.GetComponent<RectTransform>(),
+            new Vector2(0.70f, 0.08f), new Vector2(0.98f, 0.90f));
+        if (diagramCardRoot != null) diagramCardRoot.SetActive(false);
+        if (surfaceCardRoot != null) surfaceCardRoot.SetActive(false);
+
+        ConfigureRect(stageNumberText.rectTransform,
+            new Vector2(0.06f, 0.93f), new Vector2(0.94f, 0.975f));
+        ConfigureProgressTrack(new Vector2(0.06f, 0.905f), new Vector2(0.94f, 0.914f));
+        ConfigureRect(titleText.rectTransform,
+            new Vector2(0.06f, 0.82f), new Vector2(0.94f, 0.90f));
+        ConfigureRect(explanationText.rectTransform,
+            new Vector2(0.06f, 0.67f), new Vector2(0.94f, 0.81f));
+        ConfigureRect(formulaText.rectTransform,
+            new Vector2(0.06f, 0.60f), new Vector2(0.94f, 0.66f));
+        ConfigureRect(statusText.rectTransform,
+            new Vector2(0.06f, 0.54f), new Vector2(0.94f, 0.59f));
+        explanationText.fontSizeMax = 20f;
+        titleText.fontSizeMax = 29f;
+        RefreshWorkflowPhaseVisuals();
+    }
+
+    private void ApplyPrincipleLayout()
+    {
+        if (contentCardRoot == null)
+        {
+            return;
+        }
+
+        ConfigureRect(contentCardRoot.GetComponent<RectTransform>(),
+            new Vector2(0.03f, 0.03f), new Vector2(0.97f, 0.235f));
+        if (diagramCardRoot != null) diagramCardRoot.SetActive(true);
+        if (surfaceCardRoot != null) surfaceCardRoot.SetActive(true);
+
+        ConfigureRect(stageNumberText.rectTransform,
+            new Vector2(0.02f, 0.68f), new Vector2(0.20f, 0.90f));
+        ConfigureProgressTrack(new Vector2(0.02f, 0.92f), new Vector2(0.98f, 0.955f));
+        ConfigureRect(titleText.rectTransform,
+            new Vector2(0.02f, 0.12f), new Vector2(0.20f, 0.66f));
+        ConfigureRect(explanationText.rectTransform,
+            new Vector2(0.22f, 0.40f), new Vector2(0.64f, 0.88f));
+        ConfigureRect(formulaText.rectTransform,
+            new Vector2(0.22f, 0.22f), new Vector2(0.64f, 0.39f));
+        ConfigureRect(statusText.rectTransform,
+            new Vector2(0.22f, 0.04f), new Vector2(0.64f, 0.21f));
+        ConfigureRect(tourControlsRoot.GetComponent<RectTransform>(),
+            new Vector2(0.67f, 0.08f), new Vector2(0.98f, 0.88f));
+        explanationText.fontSizeMax = 18f;
+        titleText.fontSizeMax = 24f;
+    }
+
+    private void ApplyComponentLayout()
+    {
+        if (contentCardRoot == null)
+        {
+            return;
+        }
+
+        ConfigureRect(contentCardRoot.GetComponent<RectTransform>(),
+            new Vector2(0.70f, 0.08f), new Vector2(0.98f, 0.90f));
+        if (diagramCardRoot != null) diagramCardRoot.SetActive(true);
+        if (surfaceCardRoot != null) surfaceCardRoot.SetActive(false);
+
+        ConfigureRect(stageNumberText.rectTransform,
+            new Vector2(0.06f, 0.91f), new Vector2(0.94f, 0.97f));
+        ConfigureProgressTrack(new Vector2(0.06f, 0.885f), new Vector2(0.94f, 0.895f));
+        ConfigureRect(titleText.rectTransform,
+            new Vector2(0.06f, 0.79f), new Vector2(0.94f, 0.88f));
+        ConfigureRect(explanationText.rectTransform,
+            new Vector2(0.06f, 0.49f), new Vector2(0.94f, 0.77f));
+        ConfigureRect(formulaText.rectTransform,
+            new Vector2(0.06f, 0.40f), new Vector2(0.94f, 0.48f));
+        ConfigureRect(statusText.rectTransform,
+            new Vector2(0.06f, 0.32f), new Vector2(0.94f, 0.39f));
+        ConfigureRect(tourControlsRoot.GetComponent<RectTransform>(),
+            new Vector2(0.06f, 0.04f), new Vector2(0.94f, 0.26f));
+        explanationText.fontSizeMax = 20f;
+        titleText.fontSizeMax = 27f;
+    }
+
+    private void ConfigureProgressTrack(Vector2 anchorMin, Vector2 anchorMax)
+    {
+        if (stageProgressFill == null || stageProgressFill.transform.parent == null)
+        {
+            return;
+        }
+
+        RectTransform track = stageProgressFill.transform.parent.GetComponent<RectTransform>();
+        if (track != null)
+        {
+            ConfigureRect(track, anchorMin, anchorMax);
+        }
+    }
+
+    private void RefreshWorkflowPhaseVisuals()
+    {
+        bool selecting = workflowPhase == WorkflowPhase.ProbeSelection;
+        for (int i = 0; i < probeOptions.Count; i++)
+        {
+            if (probeOptions[i].button != null)
+            {
+                probeOptions[i].button.gameObject.SetActive(selecting);
+            }
+        }
+
+        if (workflowChangeProbeButton != null)
+        {
+            workflowChangeProbeButton.SetActive(workflowPhase == WorkflowPhase.ReadyToStart);
+        }
+    }
+
+    private void SetHeaderStatus(string label, Color dotColor)
+    {
+        if (headerStatusText != null)
+        {
+            headerStatusText.text = label;
+        }
+
+        if (headerStatusDot != null)
+        {
+            headerStatusDot.color = dotColor;
+        }
+    }
+
+    private void RefreshProbeOptionButtons()
+    {
+        for (int i = 0; i < probeOptions.Count; i++)
+        {
+            ProbeOption option = probeOptions[i];
+            if (option.buttonImage != null)
+            {
+                option.buttonImage.color = i == selectedProbeIndex ? SelectedProbeColor : InactiveButtonColor;
+            }
+
+            if (option.button != null)
+            {
+                Outline outline = option.button.GetComponent<Outline>();
+                if (outline != null)
+                {
+                    outline.effectColor = i == selectedProbeIndex ? AccentColor : BorderColor;
+                    outline.effectDistance = i == selectedProbeIndex
+                        ? new Vector2(2f, -2f)
+                        : new Vector2(1f, -1f);
+                }
+            }
+
+            if (option.button != null)
+            {
+                option.button.interactable = workflowPhase == WorkflowPhase.ProbeSelection;
+            }
+        }
+    }
+
+    private void RefreshWorkflowAction(string label, bool interactable)
+    {
+        if (workflowActionText != null)
+        {
+            workflowActionText.text = label;
+        }
+
+        if (workflowActionButton != null)
+        {
+            workflowActionButton.interactable = interactable;
+        }
+
+        if (workflowActionImage != null)
+        {
+            workflowActionImage.color = interactable ? ActiveButtonColor : InactiveButtonColor;
+        }
+    }
+
     private void SetEntryInteractionActive(bool active)
     {
         if (entryInteractionProxy != null)
@@ -1069,20 +2083,21 @@ public sealed class SNOMDemonstrationController : MonoBehaviour
         }
     }
 
-    private void RevealLauncherFromInteraction()
+    private bool RevealLauncherFromInteraction()
     {
-        if (!setupComplete || isRunning)
+        if (!setupComplete || !isPlayerInInteractionRange || isRunning)
         {
-            return;
+            return false;
         }
 
         ShowLauncher();
         DebugLog("SNOM selected; tour launcher revealed.");
+        return true;
     }
 
     private bool TryRevealLauncher(Ray ray, float maxDistance)
     {
-        if (!setupComplete || isRunning || entryInteractionProxy == null ||
+        if (!setupComplete || !isPlayerInInteractionRange || isRunning || entryInteractionProxy == null ||
             !entryInteractionProxy.activeInHierarchy)
         {
             return false;
@@ -1094,8 +2109,7 @@ public sealed class SNOMDemonstrationController : MonoBehaviour
             SNOMEntryInteractionProxy proxy = hits[i].collider.GetComponentInParent<SNOMEntryInteractionProxy>();
             if (proxy != null && proxy.Controller == this)
             {
-                RevealLauncherFromInteraction();
-                return true;
+                return RevealLauncherFromInteraction();
             }
         }
 
@@ -1112,6 +2126,10 @@ public sealed class SNOMDemonstrationController : MonoBehaviour
         if (isComponentMode)
         {
             playButtonText.text = "Fixed";
+        }
+        else if (currentStage == DemonstrationStage.Results)
+        {
+            playButtonText.text = "Complete";
         }
         else if (currentStage == DemonstrationStage.RasterScan && scanProgress <= 0.001f && !stagePlaying)
         {
@@ -1440,6 +2458,24 @@ public sealed class SNOMDemonstrationController : MonoBehaviour
         ConfigureRect(panel.GetComponent<RectTransform>(), anchorMin, anchorMax);
         panel.GetComponent<Image>().color = color;
         return panel;
+    }
+
+    private static void AddBorder(GameObject target, Color color, Vector2 distance)
+    {
+        if (target == null)
+        {
+            return;
+        }
+
+        Outline outline = target.GetComponent<Outline>();
+        if (outline == null)
+        {
+            outline = target.AddComponent<Outline>();
+        }
+
+        outline.effectColor = color;
+        outline.effectDistance = distance == Vector2.zero ? new Vector2(1f, -1f) : distance;
+        outline.useGraphicAlpha = true;
     }
 
     private static Image CreateImage(Transform parent, string name, Vector2 anchorMin, Vector2 anchorMax, Color color)

@@ -577,7 +577,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "\u8D85\u7EA7\u62FC\u88C5"
+  m_text: "Advanced Assembly"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 4458abc7175d8a44d9ec354a1ed1b293, type: 2}
   m_sharedMaterial: {fileID: -3397416590922239334, guid: 4458abc7175d8a44d9ec354a1ed1b293, type: 2}
