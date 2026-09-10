@@ -1921,7 +1921,7 @@ public sealed class SNOMDemonstrationController : MonoBehaviour
             new Vector2(0.06f, 0.60f), new Vector2(0.94f, 0.66f));
         ConfigureRect(statusText.rectTransform,
             new Vector2(0.06f, 0.54f), new Vector2(0.94f, 0.59f));
-        explanationText.fontSizeMax = 20f;
+        explanationText.fontSizeMax = 22f;
         titleText.fontSizeMax = 29f;
         RefreshWorkflowPhaseVisuals();
     }
@@ -1951,7 +1951,7 @@ public sealed class SNOMDemonstrationController : MonoBehaviour
             new Vector2(0.22f, 0.04f), new Vector2(0.64f, 0.21f));
         ConfigureRect(tourControlsRoot.GetComponent<RectTransform>(),
             new Vector2(0.67f, 0.08f), new Vector2(0.98f, 0.88f));
-        explanationText.fontSizeMax = 18f;
+        explanationText.fontSizeMax = 22f;
         titleText.fontSizeMax = 24f;
     }
 
@@ -1980,7 +1980,7 @@ public sealed class SNOMDemonstrationController : MonoBehaviour
             new Vector2(0.06f, 0.32f), new Vector2(0.94f, 0.39f));
         ConfigureRect(tourControlsRoot.GetComponent<RectTransform>(),
             new Vector2(0.06f, 0.04f), new Vector2(0.94f, 0.26f));
-        explanationText.fontSizeMax = 20f;
+        explanationText.fontSizeMax = 22f;
         titleText.fontSizeMax = 27f;
     }
 
@@ -2497,13 +2497,14 @@ public sealed class SNOMDemonstrationController : MonoBehaviour
         TextMeshProUGUI text = textObject.GetComponent<TextMeshProUGUI>();
         text.font = ResolveInterfaceFont();
         text.text = value;
+        fontSize = Mathf.Max(18f, fontSize);
         text.fontSize = fontSize;
         text.color = color;
         text.fontStyle = style;
         text.alignment = TextAlignmentOptions.Left;
         text.enableWordWrapping = true;
         text.enableAutoSizing = true;
-        text.fontSizeMin = Mathf.Max(11f, fontSize * 0.68f);
+        text.fontSizeMin = Mathf.Max(16f, fontSize * 0.85f);
         text.fontSizeMax = fontSize;
         text.overflowMode = TextOverflowModes.Truncate;
         text.raycastTarget = false;
@@ -2553,17 +2554,7 @@ public sealed class SNOMDemonstrationController : MonoBehaviour
             return cachedInterfaceFont;
         }
 
-        TMP_FontAsset[] loadedFonts = Resources.FindObjectsOfTypeAll<TMP_FontAsset>();
-        for (int i = 0; i < loadedFonts.Length; i++)
-        {
-            TMP_FontAsset candidate = loadedFonts[i];
-            if (candidate != null && candidate.name.IndexOf("simfang", StringComparison.OrdinalIgnoreCase) >= 0)
-            {
-                cachedInterfaceFont = candidate;
-                return cachedInterfaceFont;
-            }
-        }
-
+        // The project default references Inter, including its atlas material and fallbacks.
         cachedInterfaceFont = TMP_Settings.defaultFontAsset;
         return cachedInterfaceFont;
     }

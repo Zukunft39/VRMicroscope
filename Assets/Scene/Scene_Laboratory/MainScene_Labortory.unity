@@ -24892,38 +24892,39 @@ MonoBehaviour:
   - partTransform: {fileID: 52920580}
     displayName: Objective Lens
     description: Focuses excitation light and collects fluorescence from the specimen.
-      Numerical aperture controls the light cone and influences resolution and signal collection.
-      Magnification alone does not determine resolution.
+      Numerical aperture controls the light cone and influences resolution and signal
+      collection. Magnification alone does not determine resolution.
     onExperimentButtonClicked:
       m_PersistentCalls:
         m_Calls: []
   - partTransform: {fileID: 52920579}
     displayName: Upper Optical Assembly
-    description: Represents the upper optical assembly in this teaching model.
-      Use the linked experiment to explore numerical aperture and the light cone.
-      Its internal optical components are not individually identified.
+    description: Represents the upper optical assembly in this teaching model. Use
+      the linked experiment to explore numerical aperture and the light cone. Its
+      internal optical components are not individually identified.
     onExperimentButtonClicked:
       m_PersistentCalls:
         m_Calls: []
   - partTransform: {fileID: 52920578}
     displayName: Stage Position Control
-    description: Moves the specimen in X and Y to select the field of view.
-      This positioning control is distinct from the beam scanner used to acquire a confocal image.
+    description: Moves the specimen in X and Y to select the field of view. This
+      positioning control is distinct from the beam scanner used to acquire a confocal
+      image.
     onExperimentButtonClicked:
       m_PersistentCalls:
         m_Calls: []
   - partTransform: {fileID: 52920577}
     displayName: Optical Breadboard
-    description: Provides a rigid, vibration-damping platform for mounting and
-      aligning optical components.
+    description: Provides a rigid, vibration-damping platform for mounting and aligning
+      optical components.
     onExperimentButtonClicked:
       m_PersistentCalls:
         m_Calls: []
   - partTransform: {fileID: 52920575}
     displayName: Focus Adjustment
     description: Changes the axial position of the specimen relative to the objective
-      to select the focal plane. Stepping through depth enables a Z-stack;
-      focusing does not change the objective focal length.
+      to select the focal plane. Stepping through depth enables a Z-stack; focusing
+      does not change the objective focal length.
     onExperimentButtonClicked:
       m_PersistentCalls:
         m_Calls: []
