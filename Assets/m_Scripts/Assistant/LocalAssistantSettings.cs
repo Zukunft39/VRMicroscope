@@ -16,6 +16,11 @@ namespace VRMicroscope.Assistant
         [Header("Knowledge chat (key stays on the backend)")]
         public string chatEndpoint = "http://127.0.0.1:8765/assistant";
         [Range(5,90)] public int chatTimeoutSeconds = 50;
+        [Header("Learning location markers")]
+        public bool navigationEnabled = true;
+        [Min(.1f)] public float arrivalDistanceMeters = 1.2f;
+        [Min(.01f)] public float worldUnitsPerMeter = 1f;
+        [Min(10f)] public float markerLifetimeSeconds = 120f;
         [Header("Typewriter / Terminal style output")]
         public bool typewriterEnabled = true;
         [Range(10, 120)] public float charactersPerSecond = 45f;

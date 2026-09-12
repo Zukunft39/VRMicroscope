@@ -1,0 +1,65 @@
+{
+  "scene": "Assets/Scene/Scene_Laboratory/MainScene_Labortory.unity",
+  "scene_sha256": "c6ba9a780ce3bccacae67211432947638a40d391c930c70a91074024c4cdf9db",
+  "verification": "static_asset_audit_not_playmode",
+  "units": "Unity world units; runtime assumes 1 unit/metre unless configured",
+  "note": "These are transform origins, not renderer bounds centres or live player coordinates.",
+  "microscope": {
+    "scene_gameobject_file_id": "831527608",
+    "prefab": "Assets/FBX/TEMP/Microscope Variant.prefab",
+    "local_origin": [
+      -1.005,
+      1.187,
+      -1.7920003
+    ],
+    "world_origin": [
+      -7.005,
+      1.187,
+      4.208
+    ],
+    "navigation_ids": [
+      "parts",
+      "na_experiment",
+      "spatial_frequency"
+    ]
+  },
+  "upper_optical_assembly": {
+    "scene_transform_file_id": "52920579",
+    "world_origin": [
+      -7.1211,
+      1.187,
+      4.208
+    ],
+    "button": "Start Numerical Aperture Experiment",
+    "target_id": "na_experiment"
+  },
+  "objective_lens": {
+    "scene_transform_file_id": "52920580",
+    "world_origin": [
+      -7.02231,
+      1.05083,
+      4.20788
+    ],
+    "button": "Start Spatial Frequency Experiment",
+    "target_id": "spatial_frequency"
+  },
+  "snom": {
+    "scene_transform_file_id": "543450651668294328",
+    "world_origin": [
+      -4.699,
+      0.0,
+      7.357
+    ],
+    "name": "TDs_edited_UnityVeryLowPoly",
+    "target_id": "snom_entry"
+  },
+  "serialized_camera": {
+    "scene_transform_file_id": "9014170785400826611",
+    "world_origin": [
+      -5.662,
+      1.07144,
+      5.849
+    ],
+    "note": "Runtime uses Camera.main; XR tracking and locomotion replace this pose."
+  }
+}

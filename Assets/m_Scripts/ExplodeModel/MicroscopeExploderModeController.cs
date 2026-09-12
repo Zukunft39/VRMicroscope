@@ -42,6 +42,7 @@ public class MicroscopeExploderModeController : MonoBehaviour
     [SerializeField] private bool enableDebugLogs = true;
 
     public AssemblyMode CurrentMode => currentMode;
+    public Transform LearningStationRoot => microscopeRoot != null ? microscopeRoot.transform : null;
     public static bool IsTutorialModeLocked => tutorialModeLockCount > 0;
 
     private AssemblyMode currentMode = AssemblyMode.Normal;

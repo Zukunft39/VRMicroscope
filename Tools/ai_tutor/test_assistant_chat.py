@@ -160,6 +160,22 @@ class HttpIntegration(unittest.TestCase):
         self.assertEqual(r["source"], "mock")
         self.assertEqual(r["kind"], "explain")
 
+    def test_navigation_http_roundtrip(self):
+        from test_navigation import request as navigation_request
+        p = navigation_request()
+        with self.post(p) as response:
+            r = json.load(response)
+        self.assertEqual(r["kind"], "guide")
+        self.assertEqual(r["suggested_action_ids"], ["highlight:na_experiment"])
+        self.assertEqual(r["navigationSnapshotId"], p["navigation"]["snapshotId"])
+
+    def test_invalid_navigation_is_400(self):
+        from test_navigation import request as navigation_request
+        p = navigation_request(); p["navigation"]["targets"][0]["id"] = "unavailable_pinhole"
+        with self.assertRaises(urllib.error.HTTPError) as error:
+            self.post(p)
+        self.assertEqual(error.exception.code, 400)
+
     def test_removed_tutor_route_returns_404(self):
         self.url = self.url.replace('/assistant', '/tutor')
         with self.assertRaises(urllib.error.HTTPError) as error:

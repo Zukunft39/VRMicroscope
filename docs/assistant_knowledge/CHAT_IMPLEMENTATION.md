@@ -1,5 +1,7 @@
 # 第二批：DeepSeek 项目知识问答
 
+后续更新：当前已启用第三批的学习区域定位，协议版本为 `assistant-chat-v2-navigation`。下文的“本批”描述保留第二批范围；当前定位能力、请求新增字段和验收方式以 [NAVIGATION_IMPLEMENTATION.md](NAVIGATION_IMPLEMENTATION.md) 为准。
+
 ## 当前流程
 
 运行主实验场景 → H 或点击小球 → 本地问候 → 点击「问点什么」→ 输入问题 → 点击「发送」→ 本地后端加载项目资料并调用 DeepSeek → 检查回复 → 在问答窗口显示。

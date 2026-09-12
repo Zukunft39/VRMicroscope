@@ -39,6 +39,7 @@ namespace VRMicroscope.Assistant
         private Vector3 lastMouse;
         private Rect lastSafeArea;
         private RectTransform safeRoot;
+        public AssistantNavigation Navigation { get; private set; }
         private bool pointerReading;
         private AssistantChatPanel chat;
 
@@ -205,7 +206,11 @@ namespace VRMicroscope.Assistant
             orb.raycastTarget=true;
             var button=sphere.gameObject.AddComponent<Button>();
             button.targetGraphic=orb; button.transition=Selectable.Transition.None; button.onClick.AddListener(Activate);
-            hint=Label("Activation Hint",safeRoot,new Vector2(12,-132),new Vector2(132,30),17,new Color(.66f,.9f,.95f),TextAnchor.MiddleCenter);
+            hint=Label("Activation Hint",safeRoot,new Vector2(12,-132),new Vector2(132,30),17,new Color(.94f,.98f,1f),TextAnchor.MiddleCenter);
+            var hintOutline=hint.gameObject.AddComponent<Outline>();
+            hintOutline.effectColor=new Color(0,0,0,.9f);
+            hintOutline.effectDistance=new Vector2(1,-1);
+            hintOutline.useGraphicAlpha=true;
             var body=Rect("Message",safeRoot,new Vector2(154,-28),new Vector2(650,168));
             bubble=body.gameObject;
             bubble.AddComponent<AssistantReadingSurface>().owner=this;
@@ -223,6 +228,8 @@ namespace VRMicroscope.Assistant
             Label("Companion",body,new Vector2(22,-126),new Vector2(260,25),15,new Color(.54f,.67f,.77f)).text="微观世界 · 一起慢慢探索";
             chat=new GameObject("Knowledge Chat",typeof(RectTransform)).AddComponent<AssistantChatPanel>();
             chat.Build(safeRoot,this,settings);
+            Navigation = gameObject.AddComponent<AssistantNavigation>();
+            Navigation.Build(safeRoot, settings);
             bubble.SetActive(false);
             UpdateCanvas();
         }
@@ -284,6 +291,7 @@ namespace VRMicroscope.Assistant
         private void OnApplicationFocus(bool value) { focused=value; ReportActivity(); }
         private void OnDisable()
         {
+            if (Navigation != null) Navigation.Clear();
             if (chat != null) chat.Close();
             if (canvas != null) canvas.enabled=false;
             ReportActivity();

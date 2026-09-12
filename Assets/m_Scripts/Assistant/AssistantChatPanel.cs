@@ -60,7 +60,7 @@ namespace VRMicroscope.Assistant
             scroll.horizontal=false; scroll.movementType=ScrollRect.MovementType.Clamped;
             scroll.scrollSensitivity=30; scroll.viewport=viewport;
             transcript=Label(viewport,"Conversation",new Vector2(12,-8),new Vector2(782,221),21,
-                "可以询问显微镜、NA、空间频率、共聚焦背景和 THz s-SNOM。\n\n我会依据项目资料解释；具体操作引导稍后开放。");
+                "可以询问显微镜、NA、空间频率、共聚焦背景和 THz s-SNOM。\n\n想亲手学习时，可以问我相关区域在哪里，我会标记当前可前往的学习区域。");
             transcript.gameObject.AddComponent<ContentSizeFitter>().verticalFit=ContentSizeFitter.FitMode.PreferredSize;
             scroll.content=transcript.rectTransform;
             status=Label(root,"Status",new Vector2(22,-341),new Vector2(810,28),17,"准备好后输入问题，再点击发送。");
@@ -99,6 +99,7 @@ namespace VRMicroscope.Assistant
         }
         private void NewConversation()
         {
+            owner.Navigation.Clear();
             CancelPending(); history.Clear(); session=Guid.NewGuid().ToString("N");
             input.text=""; transcript.text="新的对话开始了。你想了解什么？";
             status.text="仅保留当前会话最近四轮问答。";
@@ -132,7 +133,7 @@ namespace VRMicroscope.Assistant
             var cts=new CancellationTokenSource(); pending=cts;
             int ticket=++generation;
             var request=new AssistantChatRequest {sessionId=session,requestId=Guid.NewGuid().ToString("N"),
-                question=question,history=history.ToArray()};
+                question=question,history=history.ToArray(),navigation=owner.Navigation.Capture()};
             status.text="正在查阅项目资料并检查回答…";
             keyboard.SetActive(false);
             RefreshButtons();
@@ -140,6 +141,7 @@ namespace VRMicroscope.Assistant
             {
                 var response=await AssistantChatClient.Request(request,settings,cts.Token);
                 if (this==null || !gameObject.activeInHierarchy || ticket!=generation || pending!=cts) return;
+                response.answer=owner.Navigation.Apply(response,request.navigation);
                 history.Add(new AssistantChatTurn {role="user",content=question});
                 history.Add(new AssistantChatTurn {role="assistant",content=response.answer});
                 while(history.Count>8) history.RemoveRange(0,2);

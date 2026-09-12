@@ -12,11 +12,13 @@ namespace VRMicroscope.Assistant
     {
         public string sessionId, requestId, question;
         public AssistantChatTurn[] history;
+        public NavigationSnapshot navigation;
     }
     [Serializable] public sealed class AssistantChatResponse
     {
         public string sessionId, requestId, kind, answer, source, model, promptVersion, knowledgeVersion;
         public string[] interaction_ids, suggested_action_ids, knowledge_topics;
+        public string navigationSnapshotId;
     }
     public sealed class AssistantConnectionException : Exception
     {
@@ -56,11 +58,25 @@ namespace VRMicroscope.Assistant
         {
             if (r==null || r.sessionId!=q.sessionId || r.requestId!=q.requestId ||
                 string.IsNullOrWhiteSpace(r.answer) || r.answer.Length>650 ||
-                r.interaction_ids==null || r.interaction_ids.Length!=0 ||
-                r.suggested_action_ids==null || r.suggested_action_ids.Length!=0 || r.knowledge_topics==null ||
+                r.interaction_ids==null ||
+                r.suggested_action_ids==null || r.knowledge_topics==null ||
                 !(r.source=="mock" || r.source=="model") || string.IsNullOrEmpty(r.knowledgeVersion) ||
-                r.promptVersion!="assistant-chat-v1-stage2" ||
-                !(r.kind=="explain" || r.kind=="clarify" || r.kind=="refuse")) return false;
+                r.promptVersion!="assistant-chat-v2-navigation" ||
+                !(r.kind=="guide" || r.kind=="explain" || r.kind=="clarify" || r.kind=="refuse")) return false;
+            if (r.kind=="guide")
+            {
+                if (q.navigation==null || q.navigation.targets==null || r.navigationSnapshotId!=q.navigation.snapshotId ||
+                    r.interaction_ids.Length!=1 || r.suggested_action_ids.Length!=1 ||
+                    r.suggested_action_ids[0]!="highlight:"+r.interaction_ids[0]) return false;
+                string id=r.interaction_ids[0];
+                string topic=id=="parts" ? "microscope_basics" : id=="na_experiment" ? "numerical_aperture" :
+                    id=="spatial_frequency" ? "spatial_frequency" : id=="snom_entry" ? "snom" : null;
+                if(topic==null || r.knowledge_topics.Length!=1 || r.knowledge_topics[0]!=topic) return false;
+                bool offered=false;
+                foreach(var target in q.navigation.targets) if(target.id==id) offered=true;
+                if(!offered) return false;
+            }
+            else if(r.interaction_ids.Length!=0 || r.suggested_action_ids.Length!=0) return false;
             if (r.kind=="explain" && r.knowledge_topics.Length==0) return false;
             if (r.kind=="refuse" && r.knowledge_topics.Length!=0) return false;
             foreach(var topic in r.knowledge_topics)

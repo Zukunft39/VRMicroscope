@@ -20,6 +20,10 @@ MonoBehaviour:
   reducedMotion: 0
   chatEndpoint: http://127.0.0.1:8765/assistant
   chatTimeoutSeconds: 50
+  navigationEnabled: 1
+  arrivalDistanceMeters: 1.2
+  worldUnitsPerMeter: 1
+  markerLifetimeSeconds: 120
   typewriterEnabled: 1
   charactersPerSecond: 45
   chineseFont: {fileID: 12800000, guid: 6c8615c170a02d74ebe30e1df4b61ede, type: 3}
