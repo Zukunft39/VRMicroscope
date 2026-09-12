@@ -109,6 +109,11 @@ public class CameraTryMove : MonoBehaviour
 
     private void Update()
     {
+        if (VRMicroscope.Assistant.AssistantChatPanel.BlocksGameplay)
+        {
+            SetCursorLookMode(false);
+            return;
+        }
         CacheReferences();
 
         StandaloneTutorialUI forceTutorial = GetVisibleForceTutorial();

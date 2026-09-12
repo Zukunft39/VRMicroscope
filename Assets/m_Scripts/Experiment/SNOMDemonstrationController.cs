@@ -216,6 +216,9 @@ public sealed class SNOMDemonstrationController : MonoBehaviour
     public Transform SnomRoot => snomRoot;
     public DemonstrationStage CurrentStage => currentStage;
     public bool IsRunning => isRunning;
+    public bool SuppressAssistantReminders => isRunning &&
+        (isComponentMode || workflowPhase == WorkflowPhase.InstallingProbe ||
+         workflowPhase == WorkflowPhase.PrincipleTour && stagePlaying && !isComponentMode);
 
     public static bool TryHandleDesktopPrimaryClick(Ray ray, float maxDistance, bool isPointerOverUi)
     {
@@ -882,6 +885,7 @@ public sealed class SNOMDemonstrationController : MonoBehaviour
 
     private void HandleKeyboardAndMouse()
     {
+        if (VRMicroscope.Assistant.AssistantChatPanel.BlocksGameplay) return;
         if (workflowPhase == WorkflowPhase.ProbeSelection)
         {
             if (Input.GetKeyDown(KeyCode.Alpha1)) SelectProbeOption(0);

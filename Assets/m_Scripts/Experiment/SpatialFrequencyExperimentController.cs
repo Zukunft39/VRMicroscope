@@ -123,7 +123,7 @@ public sealed class SpatialFrequencyExperimentController : MonoBehaviour
     private bool hasCachedOriginPose;
 
     public bool IsExperimentActive => isExperimentActive;
-
+    public bool IsTransitioning => isTransitioning;
     private void Awake()
     {
         EnsureReferences();

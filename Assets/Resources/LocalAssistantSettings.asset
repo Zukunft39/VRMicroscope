@@ -1,0 +1,51 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0f341cbc4926f5d45ab896084072fecf, type: 3}
+  m_Name: LocalAssistantSettings
+  m_EditorClassIdentifier:
+  assistantEnabled: 1
+  activationKey: 104
+  idleSeconds: 30
+  messageSeconds: 10
+  maxRemindersPerIdlePeriod: 0
+  reducedMotion: 0
+  chatEndpoint: http://127.0.0.1:8765/assistant
+  chatTimeoutSeconds: 50
+  typewriterEnabled: 1
+  charactersPerSecond: 45
+  chineseFont: {fileID: 12800000, guid: 6c8615c170a02d74ebe30e1df4b61ede, type: 3}
+  greetings:
+  - "你好，我在这里。今天想从显微世界的哪一部分开始探索？"
+  - "欢迎回来！不必着急，按自己的节奏观察就好。"
+  - "嗨，今天探索得怎么样？有困惑时，可以先把问题记下来。"
+  - "你好！一个小小的观察，也可能带来新的发现。"
+  - "我在这里陪你探索。先看看眼前最让你好奇的部分吧。"
+  - "欢迎来到微观世界。今天想关注光，还是关注样本？"
+  - "你好，今天状态怎么样？累了也可以停下来休息一下。"
+  - "嗨！不需要一次理解所有原理，我们可以一点一点来。"
+  - "很高兴再次见到你。试着留意实验画面里发生了什么变化。"
+  - "你好！观察现象、提出问题，都是学习的一部分。"
+  - "我收到你的呼唤啦。今天有什么让你好奇的现象？"
+  - "嗨，探索者！不同的显微方法，会带来不同的观察视角。"
+  - "你好！可以先认识部件，再慢慢理解它们之间的联系。"
+  - "欢迎继续探索。看不懂的地方，可以先停下来仔细观察。"
+  - "我在这里。把注意力放在一个现象上，也是一种不错的开始。"
+  - "你好！今天可以从一个简单的问题开始：这个变化意味着什么？"
+  reminderTemplates:
+  - "也许我们可以把目光放到{0}上。"
+  - "对{0}感到好奇吗？可以先留意相关的演示与说明。"
+  - "接下来，不妨探索一下{0}。"
+  - "如果想换一个观察角度，可以关注{0}。"
+  - "想继续探索的话，{0}是一个可以关注的主题。"
+  - "不必着急。准备好时，可以再看看{0}。"
+  - "也许{0}能带来一个新的观察问题。"
+  - "休息一下也没关系，之后可以继续了解{0}。"

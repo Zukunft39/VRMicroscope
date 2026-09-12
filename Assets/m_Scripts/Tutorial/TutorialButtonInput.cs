@@ -79,6 +79,7 @@ public class TutorialButtonInput : MonoBehaviour
     /// </summary>
     private bool CanInput()
     {
+        if (VRMicroscope.Assistant.AssistantChatPanel.BlocksGameplay) return false;
         // 级别检查 (-1 不执行，必须是 1 或 2)
         if (tutorialButton.currentUILevel == -1 || 
            (tutorialButton.currentUILevel != 1 && tutorialButton.currentUILevel != 2))

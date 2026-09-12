@@ -1,0 +1,748 @@
+{
+  "review_date": "2026-09-12",
+  "scene": "Assets/Scene/Scene_Laboratory/MainScene_Labortory.unity",
+  "scene_sha256": "c6ba9a780ce3bccacae67211432947638a40d391c930c70a91074024c4cdf9db",
+  "limits": "仅统计主场景直接脚本引用；不等于完整 Prefab 展开或 activeInHierarchy。未运行 Unity/头显。",
+  "scripts": [
+    {
+      "script": "Assets/m_Scripts/AITutor/AITutorClient.cs",
+      "guid": "dc84c2254bb54ed0b762675ab3d9d84e",
+      "direct_scene_components": 0,
+      "component_enabled": [],
+      "sha256": "cb88021c79dce8390f791a279d3c28f549f0284d3a462a5fbcb9b71d3a629aa4"
+    },
+    {
+      "script": "Assets/m_Scripts/AITutor/AITutorPanel.cs",
+      "guid": "69031aa89e90481299584cfe0f13d7d5",
+      "direct_scene_components": 0,
+      "component_enabled": [],
+      "sha256": "d8684d29bd040ddee9fc8f717b234d781736699d19f4c16af3a7fe323ebe887c"
+    },
+    {
+      "script": "Assets/m_Scripts/AITutor/AITutorRuntime.cs",
+      "guid": "477ed4aec03a4cce98d0bc0c08858725",
+      "direct_scene_components": 0,
+      "component_enabled": [],
+      "sha256": "e0b06c451fc635c01ba6868ee5ccef568142d3e1a9235a4644821cda3a6080d0"
+    },
+    {
+      "script": "Assets/m_Scripts/AITutor/AITutorSettings.cs",
+      "guid": "0a06709be2fb46d0a7623025ee78045a",
+      "direct_scene_components": 0,
+      "component_enabled": [],
+      "sha256": "2911682e680724a0c40c23461aeb397ad8a586066c5014dd2ce3baf48648e4c7"
+    },
+    {
+      "script": "Assets/m_Scripts/Editor/AITutorSetup.cs",
+      "guid": "9f42eb1821074d6d837af55c31033855",
+      "direct_scene_components": 0,
+      "component_enabled": [],
+      "sha256": "f6a21dbbe6d1b9ba7f8e281925e406be4a5dafb2ea19d6c801bb525b3727a793"
+    },
+    {
+      "script": "Assets/m_Scripts/TaskSystem/TaskCompleteJudger/AndTaskCompleteJudger.cs",
+      "guid": "4a981916d71a4496b3b413e54a185e16",
+      "direct_scene_components": 0,
+      "component_enabled": [],
+      "sha256": "f84cfbf42b34f76fadb461ea46fb240f00b10ecd55eedbf47797457e140d2958"
+    },
+    {
+      "script": "Assets/m_Scripts/Editor/AutoSaveTool.cs",
+      "guid": "7a79f5cf4b11fdf4aac9becc6cbf3bdb",
+      "direct_scene_components": 0,
+      "component_enabled": [],
+      "sha256": "2de7fee5d730981cf7e6aac20ac07c7f4da96300eaeca107554a1e4146ee30da"
+    },
+    {
+      "script": "Assets/m_Scripts/PCDesktop/Items/BaseItem.cs",
+      "guid": "6b4fb93bd73ff20489f893f007a9c858",
+      "direct_scene_components": 0,
+      "component_enabled": [],
+      "sha256": "2b18d07140b68169a66d34c401ee72e3bec5b6cebf27829b7fe225c93c0d9bb3"
+    },
+    {
+      "script": "Assets/m_Scripts/TaskSystem/TaskConditionSO/BaseTaskCondition.cs",
+      "guid": "4522d93bd6e04968bc2a7c7258520638",
+      "direct_scene_components": 0,
+      "component_enabled": [],
+      "sha256": "793bfa3da221b29b55968064808abbdd0467abbefc905b8491c6fd0f4967f889"
+    },
+    {
+      "script": "Assets/m_Scripts/Microscope/CameraTryMove.cs",
+      "guid": "9d2ac5bbcce0e48449f8a3b48c966c60",
+      "direct_scene_components": 1,
+      "component_enabled": [
+        true
+      ],
+      "sha256": "8495e66032fc600dd55fd86511915695cc1a8dcf70ccd1e19e6bcdf3e38824ae"
+    },
+    {
+      "script": "Assets/m_Scripts/TaskSystem/TaskConditionSO/DebugButtonCondition.cs",
+      "guid": "18d377c95fdc4221989933779ec27ad5",
+      "direct_scene_components": 0,
+      "component_enabled": [],
+      "sha256": "a48de211a60f4e6903343b164f31dcdb4aaea398abbbb3ff2193cdae9cea8661"
+    },
+    {
+      "script": "Assets/m_Scripts/SceneInteraction/DebugInteractEvent.cs",
+      "guid": "34435883a25d451aa056b7e757503c52",
+      "direct_scene_components": 0,
+      "component_enabled": [],
+      "sha256": "ff4e1e31e0df6661ad84945e75a10d1c7eeeea890ad92f99bcbfc779304f2006"
+    },
+    {
+      "script": "Assets/m_Scripts/SceneInteraction/DebugKeyMousePlayerController.cs",
+      "guid": "412f8030cd7339d47b1ef84c778cbb9e",
+      "direct_scene_components": 0,
+      "component_enabled": [],
+      "sha256": "14d0c96bcf99d090a990f8eee134a2aabf478a86b7d52dc10ffb489bdbc01e11"
+    },
+    {
+      "script": "Assets/m_Scripts/TaskSystem/DebugTaskStarter.cs",
+      "guid": "06e2c60d79664027a09abdc7fceb078b",
+      "direct_scene_components": 0,
+      "component_enabled": [],
+      "sha256": "125fffc3b46b3a4c18ab92750d1193f8867fa73e2368f3ad5988c5ce8a597b2b"
+    },
+    {
+      "script": "Assets/m_Scripts/PCDesktop/Items/DichroicMirror.cs",
+      "guid": "f3d9dec05da4ec448891aff67a79ca45",
+      "direct_scene_components": 2,
+      "component_enabled": [
+        true,
+        true
+      ],
+      "sha256": "782f476fcf10991dc9280ede98bba736d811fe8e2d676080c42b80da47835739"
+    },
+    {
+      "script": "Assets/m_Scripts/Microscope/UI/Distance.cs",
+      "guid": "7b0a89ca53fee504c863c1d8ea532e8e",
+      "direct_scene_components": 0,
+      "component_enabled": [],
+      "sha256": "cbf55f94d7158c1a9e2e29556f97319a909d337eafff22ee29897b49b1c45038"
+    },
+    {
+      "script": "Assets/m_Scripts/AITutor/ExperimentContextProvider.cs",
+      "guid": "9c203f543b3c4043b5ce26a31cdf0a35",
+      "direct_scene_components": 0,
+      "component_enabled": [],
+      "sha256": "d4a4ace15f306804fd119d152b9d00cd1e69170832631f53cf7ec0ea33c6f1cc"
+    },
+    {
+      "script": "Assets/m_Scripts/PCDesktop/Items/Filter.cs",
+      "guid": "641d0ee5a30c81343a27fdf13512a5d9",
+      "direct_scene_components": 0,
+      "component_enabled": [],
+      "sha256": "3df64696d0072fada687a86fdb4a3eb34e627947c7aee3f8d0fbdba040f3d578"
+    },
+    {
+      "script": "Assets/m_Scripts/Tutorial/ForceTutorial/ForceTutorialSequenceController.cs",
+      "guid": "6ace5bc5fc317f14d818177d08f5b15b",
+      "direct_scene_components": 1,
+      "component_enabled": [
+        true
+      ],
+      "sha256": "98ad0d557dd0e26a364ac5897e3d874d5b7ee23c751713dcd9144ea3daaef2c7"
+    },
+    {
+      "script": "Assets/m_Scripts/Experiment/FourierOpticsCpuSimulator.cs",
+      "guid": "6dc333525ad14b559e430647aa2688a8",
+      "direct_scene_components": 1,
+      "component_enabled": [
+        true
+      ],
+      "sha256": "4eb81684a2a0dad4966629c0c5b2449a4fb28d18b504334a5a3ab1b04f4e2489"
+    },
+    {
+      "script": "Assets/m_Scripts/TaskSystem/GameEventManager.cs",
+      "guid": "88087ca786084313a5c3ba71942209b8",
+      "direct_scene_components": 0,
+      "component_enabled": [],
+      "sha256": "95c8365c29fea1a86e792b141f9882d226ebf9a7e442f98561d3959a6391f87e"
+    },
+    {
+      "script": "Assets/m_Scripts/Interact/Highlight.cs",
+      "guid": "612c31c9e70845118f0d8c3bd228ff7f",
+      "direct_scene_components": 4,
+      "component_enabled": [
+        true,
+        true,
+        true,
+        true
+      ],
+      "sha256": "5299b6df98be4aabca6d0bbd4d0e467d25f98d0b1197e2f4f28a34156cd95ac9"
+    },
+    {
+      "script": "Assets/m_Scripts/TaskSystem/TaskCompleteJudger/ITaskCompleteJudger.cs",
+      "guid": "c4ddfb2c74ec413883972c6fcf147a5e",
+      "direct_scene_components": 0,
+      "component_enabled": [],
+      "sha256": "c2d97421507bb0ea8f241135e0edbd385771b93be89bb0d409457a71ccdb9402"
+    },
+    {
+      "script": "Assets/m_Scripts/TaskSystem/TaskConditionSO/ITaskCondition.cs",
+      "guid": "8867a03f76b88cc46b5dfbaeb42eb4fb",
+      "direct_scene_components": 0,
+      "component_enabled": [],
+      "sha256": "34bac8c04fbacec2903499d4227650380e1c0f51e3ecb0fe087eb77bd633a6ae"
+    },
+    {
+      "script": "Assets/m_Scripts/Interact/InteractWithSamples.cs",
+      "guid": "5acdefebb10f4ded8213f75e4d2bb031",
+      "direct_scene_components": 1,
+      "component_enabled": [
+        true
+      ],
+      "sha256": "987955e7f8c7baa5016de920b07ef98b254acb830ae95233594371fd3a37fa12"
+    },
+    {
+      "script": "Assets/m_Scripts/SceneInteraction/InteractableObjViewer.cs",
+      "guid": "fe0929c83f423914e93fe88ebe29a165",
+      "direct_scene_components": 0,
+      "component_enabled": [],
+      "sha256": "b412206336a4f4a747769569b861ac3b384bc3786fa904b59e133018a762dfba"
+    },
+    {
+      "script": "Assets/m_Scripts/SceneInteraction/InteractableObject.cs",
+      "guid": "51aea4808d3125f4097c5b952bb4bc8b",
+      "direct_scene_components": 0,
+      "component_enabled": [],
+      "sha256": "fbba84ff52e872af2901a11f89a840215793dd0a4d5b3f77e4e7fbb509b62ec9"
+    },
+    {
+      "script": "Assets/m_Scripts/Interact/InteractableSamples.cs",
+      "guid": "d30c8e5655375f644949554a1ff04c77",
+      "direct_scene_components": 4,
+      "component_enabled": [
+        true,
+        true,
+        true,
+        true
+      ],
+      "sha256": "7102fd50e0af5ec4c728f32bacd03e9dd0155744d4a007acea528d50ae607bf4"
+    },
+    {
+      "script": "Assets/m_Scripts/Interactor/Interactor.cs",
+      "guid": "7ec48de5691989e4399215470367e8eb",
+      "direct_scene_components": 1,
+      "component_enabled": [
+        true
+      ],
+      "sha256": "75e39655e3f8fc85b2b09cfad4f02e3a68e9d2e8463d7b2d78893fc8b0012d5a"
+    },
+    {
+      "script": "Assets/m_Scripts/TaskSystem/TaskConditionSO/ItemCollectedCondition.cs",
+      "guid": "208929fb1adb45c5a58b28c916b24382",
+      "direct_scene_components": 0,
+      "component_enabled": [],
+      "sha256": "9fa2170d28871a0a377098d74981f95bcc15eaeb4cac5fa1dc1ca901423c6ed3"
+    },
+    {
+      "script": "Assets/m_Scripts/TaskSystem/TaskCompleteJudger/JudgerFactory.cs",
+      "guid": "68339d216fc648659d199807439e1734",
+      "direct_scene_components": 0,
+      "component_enabled": [],
+      "sha256": "1cb95c5e7ad6411ba50244c1920876c434c0430ff1198e4cb4a26bd661ca40de"
+    },
+    {
+      "script": "Assets/m_Scripts/AITutor/LearningEventLogger.cs",
+      "guid": "61982013d8634ba0b467beaafdbd687b",
+      "direct_scene_components": 0,
+      "component_enabled": [],
+      "sha256": "995acfbd3f19862e03aa098adb58bbb10789aac2673ac66d7954c19290e7dec8"
+    },
+    {
+      "script": "Assets/m_Scripts/AITutor/LearningSessionController.cs",
+      "guid": "2cc74ef477e048219f0aa6b1a05b8285",
+      "direct_scene_components": 0,
+      "component_enabled": [],
+      "sha256": "0adaf5030920ac010aa83a4f3b9427468bee871f89a14e9b4be31872281daa89"
+    },
+    {
+      "script": "Assets/m_Scripts/PCDesktop/LightLine/LightLine.cs",
+      "guid": "279c081642d18fd43b5a2b463c95f680",
+      "direct_scene_components": 0,
+      "component_enabled": [],
+      "sha256": "ca41f3d8507567eb53a1b367e82595d0fad7309abcad19ad15a47d68525e7254"
+    },
+    {
+      "script": "Assets/m_Scripts/PCDesktop/LightLine/LightLineMgr.cs",
+      "guid": "f69483c59a50ccd4f8776de16366456a",
+      "direct_scene_components": 0,
+      "component_enabled": [],
+      "sha256": "9ffd77c7cb187f9216259f4f6a2ec3abcc0b44057fe8f24666a94dacd73c6c8e"
+    },
+    {
+      "script": "Assets/m_Scripts/Editor/LightLineMgrEditor.cs",
+      "guid": "77237f0f7a345b640a7fc9aee3cb6c33",
+      "direct_scene_components": 0,
+      "component_enabled": [],
+      "sha256": "30d7af24fa03017a657c1bda1c40e3f947824bea881aea7e0f34c654f973b38a"
+    },
+    {
+      "script": "Assets/m_Scripts/Microscope/UI/LinearScale.cs",
+      "guid": "328ee7583d8750c49ba3b910d3944ccf",
+      "direct_scene_components": 0,
+      "component_enabled": [],
+      "sha256": "7f6d6c093de335e0a19221696db2ac3bbf3790fd13ee8920fafeacb72765636f"
+    },
+    {
+      "script": "Assets/m_Scripts/Microscope/LookOperation.cs",
+      "guid": "0ff12748d144bc34ea28ad52d54ffc26",
+      "direct_scene_components": 0,
+      "component_enabled": [],
+      "sha256": "041e3c57cf0990e4328a20f5f9abbc23f0162ff7343d7343f3f613e7f347d8ac"
+    },
+    {
+      "script": "Assets/m_Scripts/Tutorial/ForceTutorial/MandatoryTutorialTrigger.cs",
+      "guid": "560992e7a6cc4f8449f394d5879fcc9c",
+      "direct_scene_components": 4,
+      "component_enabled": [
+        true,
+        true,
+        true,
+        true
+      ],
+      "sha256": "42def1f005bd83690caa024497ccd78d5bbd8ce0096328c0f3b62db1af4442d8"
+    },
+    {
+      "script": "Assets/m_Scripts/Microscope/UI/MicroBlack.cs",
+      "guid": "c2471935fa40c274a937c17175b8b7a8",
+      "direct_scene_components": 0,
+      "component_enabled": [],
+      "sha256": "7e967a8659333182c785cae33763a4a1d668f78ae41fe211549a9c79a7dcc67c"
+    },
+    {
+      "script": "Assets/m_Scripts/Microscope/UI/MicroUI.cs",
+      "guid": "94b7a074c94cdb549848c9127e397d4a",
+      "direct_scene_components": 0,
+      "component_enabled": [],
+      "sha256": "5b82389546dd7730d3e81cdd60335808262a59eb591ce58cc8aaa09e3afc548a"
+    },
+    {
+      "script": "Assets/m_Scripts/Microscope/Microscope.cs",
+      "guid": "97adbc9544e39834d9af4d7e4b506a3b",
+      "direct_scene_components": 1,
+      "component_enabled": [
+        true
+      ],
+      "sha256": "acc744cac4283473cc9cfcc6955f131b1aa2f821ca5747378bcdfed05e8e8e58"
+    },
+    {
+      "script": "Assets/m_Scripts/ExplodeModel/MicroscopeExploderModeController.cs",
+      "guid": "f023dc072662f8a4f8de98575372139f",
+      "direct_scene_components": 1,
+      "component_enabled": [
+        true
+      ],
+      "sha256": "82d4a8cce78b33fe6a1014968b96d008580540462fe7ffea1d049684120d0460"
+    },
+    {
+      "script": "Assets/m_Scripts/Editor/MicroscopeModelSwapTool.cs",
+      "guid": "868e6ae945c83a04083007b90f208e98",
+      "direct_scene_components": 0,
+      "component_enabled": [],
+      "sha256": "8fdbe59cdc098c6420a149ececb91960c391d176cf5f92a7dbab63639ee3569b"
+    },
+    {
+      "script": "Assets/m_Scripts/ExplodeModel/ModelExploder.cs",
+      "guid": "bd498af370d076145bcc74dd20f73302",
+      "direct_scene_components": 1,
+      "component_enabled": [
+        true
+      ],
+      "sha256": "1ba5324d58596301b1b9ed87b9efb4d402c8266370ae0370ccad8b75844cfedf"
+    },
+    {
+      "script": "Assets/m_Scripts/Move.cs",
+      "guid": "d433a4ebe611ec44d8864a34579f2b62",
+      "direct_scene_components": 1,
+      "component_enabled": [
+        false
+      ],
+      "sha256": "2b16d339aee34768407f4af3c7193d26783a605a03bc1ef585eeb1eea6927460"
+    },
+    {
+      "script": "Assets/m_Scripts/MoveTest.cs",
+      "guid": "725637fe630b7d444bb2839a532dc4e7",
+      "direct_scene_components": 1,
+      "component_enabled": [
+        true
+      ],
+      "sha256": "d89dbe097743fcc88551683baf16f714594e68570c07c164a075e5f34761c916"
+    },
+    {
+      "script": "Assets/m_Scripts/PCDesktop/LightLine/MyLightSource.cs",
+      "guid": "d04a2afc2710c6f4c87036eb5eb07699",
+      "direct_scene_components": 0,
+      "component_enabled": [],
+      "sha256": "c2e00275283a2658bc6a4c61fd32e097068e323c3f01d5561f9db75a48389b3d"
+    },
+    {
+      "script": "Assets/m_Scripts/Experiment/NumericalApertureDiagramView.cs",
+      "guid": "082c7606e85b146428e01d41abc6020e",
+      "direct_scene_components": 1,
+      "component_enabled": [
+        true
+      ],
+      "sha256": "c55433e132c11e6a2caabc26ebecab5b645c2ee5ce9522c927381e4e09b34030"
+    },
+    {
+      "script": "Assets/m_Scripts/Experiment/NumericalApertureExperimentController.cs",
+      "guid": "fc4f49e053c54b0e82871ca470dd943d",
+      "direct_scene_components": 1,
+      "component_enabled": [
+        true
+      ],
+      "sha256": "7cdaed7d6b91373617a0c192fd902fb17c704319226d6672b697682fc85ceb9b"
+    },
+    {
+      "script": "Assets/m_Scripts/Experiment/NumericalApertureSceneSetup.cs",
+      "guid": "6e4a9d23b8e14c8d9f4b1a7c2d5e6f80",
+      "direct_scene_components": 1,
+      "component_enabled": [
+        true
+      ],
+      "sha256": "cbe12db36bbcc52a7a52745d193791330f368273ab3b495cd028534d43d39370"
+    },
+    {
+      "script": "Assets/m_Scripts/TaskSystem/TaskCompleteJudger/OrTaskCompleteJudger.cs",
+      "guid": "0149b71412d0444eb4384e92252a3704",
+      "direct_scene_components": 0,
+      "component_enabled": [],
+      "sha256": "521b5b03d92c4c9a351fca2aa7b404c4e337165c1a6b339c3e1d8260879e59de"
+    },
+    {
+      "script": "Assets/m_Scripts/PCDesktop/PC_CanvasMgr.cs",
+      "guid": "6b642c58d698b1b41847d22f99622e14",
+      "direct_scene_components": 0,
+      "component_enabled": [],
+      "sha256": "936f427b264cd5481a83c1ad4495f0d87678a29cf1c0b9b3d982a2208877a5c0"
+    },
+    {
+      "script": "Assets/m_Scripts/Tutorial/ForceTutorial/PlayerInputBlocker.cs",
+      "guid": "705870eccf4285f418edb2aeb6e78ee4",
+      "direct_scene_components": 1,
+      "component_enabled": [
+        true
+      ],
+      "sha256": "272fd267e93265898e62120cfc1858a6093813fd48848656071e8be72871360a"
+    },
+    {
+      "script": "Assets/m_Scripts/SceneInteraction/PlayerInteractManager.cs",
+      "guid": "739879dac9504e1b9eef1dc49eb32ae3",
+      "direct_scene_components": 0,
+      "component_enabled": [],
+      "sha256": "27e09f42a71fde46d8eac30512d6ff79d60d2d693cc35f38072d9034f41e7a8c"
+    },
+    {
+      "script": "Assets/m_Scripts/Progress.cs",
+      "guid": "158f78490b32396459c07ca62c8bb536",
+      "direct_scene_components": 1,
+      "component_enabled": [
+        true
+      ],
+      "sha256": "8412e5644c4c6b89b0b93baaa32dbb55becf15d855e9aae39a08f6df2ecd0b50"
+    },
+    {
+      "script": "Assets/m_Scripts/ProgressControl.cs",
+      "guid": "49907bacce575114797b950820a88a4c",
+      "direct_scene_components": 1,
+      "component_enabled": [
+        true
+      ],
+      "sha256": "e9b79cc9e0065cd167281ba7aca9aba6517f1a0b401a171b97f9937c376c4d5b"
+    },
+    {
+      "script": "Assets/m_Scripts/Editor/ProgressControl_Editor.cs",
+      "guid": "6db5b534412e30945bbc7851b1e8b557",
+      "direct_scene_components": 0,
+      "component_enabled": [],
+      "sha256": "7094f87e23fa750850f707720718835d3b3315800962a08c8d1aa6d1b296f239"
+    },
+    {
+      "script": "Assets/m_Scripts/ProgressEvents.cs",
+      "guid": "829722010d1589e45917631e1ef14cd4",
+      "direct_scene_components": 1,
+      "component_enabled": [
+        true
+      ],
+      "sha256": "0e6e51a0fed1d0b677d12ebec7fc935a56cb5f5ea9757787cc398612ea919df4"
+    },
+    {
+      "script": "Assets/m_Scripts/Editor/RemoveMissingScripts.cs",
+      "guid": "d3f339c75beaf8042932c4651f7cd511",
+      "direct_scene_components": 0,
+      "component_enabled": [],
+      "sha256": "9e766e5528df792f2356b97ebec0eacba1633b20b6d909fa7e2cd6b10f4d9241"
+    },
+    {
+      "script": "Assets/m_Scripts/Experiment/SNOMDemonstrationController.cs",
+      "guid": "481f26a14fe94063a8b4853f655c303d",
+      "direct_scene_components": 0,
+      "component_enabled": [],
+      "sha256": "783c16518bc890b43ec33751dd8bc3f7bbfe78a9881098378f2b8281357e66b3"
+    },
+    {
+      "script": "Assets/m_Scripts/Experiment/SNOMDemonstrationGraphic.cs",
+      "guid": "f5c6383aa50e4bd1a8f9ab084989bf24",
+      "direct_scene_components": 0,
+      "component_enabled": [],
+      "sha256": "3f3b54a5d7a8d7ced3d0c598d6014090cfc654bfa3c5d156acff32e4cd607424"
+    },
+    {
+      "script": "Assets/m_Scripts/Editor/SNOMDemonstrationSceneSetup.cs",
+      "guid": "30760302986142a58c791191526d66b9",
+      "direct_scene_components": 0,
+      "component_enabled": [],
+      "sha256": "9c6e8f564936b5eb68ddb26a3d639e38c0d74a2ad0dcf45dc78557efbea7630c"
+    },
+    {
+      "script": "Assets/m_Scripts/Microscope/ScreenMove.cs",
+      "guid": "d19edfae32b28bd4a9ea0fc2370814d9",
+      "direct_scene_components": 0,
+      "component_enabled": [],
+      "sha256": "2a969dedeeb42c313c852c78c06d3b9779c5d2db395dcbf48e36720c6986327a"
+    },
+    {
+      "script": "Assets/m_Scripts/Microscope/ShowObject.cs",
+      "guid": "476f798530fa0824981a780f348787c0",
+      "direct_scene_components": 0,
+      "component_enabled": [],
+      "sha256": "d1c980006437da15bc1076047ac4dff70aa1aabb023515cb6227649a7341d779"
+    },
+    {
+      "script": "Assets/m_Scripts/PCDesktop/Slot.cs",
+      "guid": "545565fdc6aea2c41a9db736e1a2f04b",
+      "direct_scene_components": 0,
+      "component_enabled": [],
+      "sha256": "56b8d08b0eea5bfa220cf0ba2054b004a81f807387b0e2b0fa1e6a9362942e76"
+    },
+    {
+      "script": "Assets/m_Scripts/Experiment/SpatialFrequencyCircleGraphic.cs",
+      "guid": "4d6ed0e6fe304727a2fd8266d2c74fc1",
+      "direct_scene_components": 1,
+      "component_enabled": [
+        true
+      ],
+      "sha256": "2e61435aaf0d88bc01bfb9af572dfb117a176604031091b70d3bdd30a6dba28c"
+    },
+    {
+      "script": "Assets/m_Scripts/Experiment/SpatialFrequencyDiffractionPatternGraphic.cs",
+      "guid": "9a2f13deed98463eab7ac8bb9356b7c2",
+      "direct_scene_components": 1,
+      "component_enabled": [
+        true
+      ],
+      "sha256": "756aabd9493e8cb4ddb0b706b395f3d62f87730d8fbd409e7760b0c324acee25"
+    },
+    {
+      "script": "Assets/m_Scripts/Experiment/SpatialFrequencyExperimentController.cs",
+      "guid": "0782c125747c9764cbbed0cf4001d670",
+      "direct_scene_components": 1,
+      "component_enabled": [
+        true
+      ],
+      "sha256": "281171b7b97a487475b04af57e1d03cbb62c4d3d4ead8c3f7e93a3aa3c11411e"
+    },
+    {
+      "script": "Assets/m_Scripts/Experiment/SpatialFrequencyExperimentDiagramView.cs",
+      "guid": "5b5271219db6b7643a772656acb58337",
+      "direct_scene_components": 1,
+      "component_enabled": [
+        true
+      ],
+      "sha256": "e04462f879cd1a309b6fd6f834def45277264c68f83065716905fe30cf787559"
+    },
+    {
+      "script": "Assets/m_Scripts/Editor/SpatialFrequencyExperimentSceneSetup.cs",
+      "guid": "52e6090abbbfe7846a8002afda0dd002",
+      "direct_scene_components": 0,
+      "component_enabled": [],
+      "sha256": "aebb9d90871ebd6583d73ae036c8558d98965b64235c087f33c60c5e925d4afa"
+    },
+    {
+      "script": "Assets/m_Scripts/Experiment/SpatialFrequencyLineGratingGraphic.cs",
+      "guid": "3e14470b15964d6d8c20f9d86c2e8a03",
+      "direct_scene_components": 1,
+      "component_enabled": [
+        true
+      ],
+      "sha256": "aaf03727db8c02149148a51902b65e171c1af2ec29d9db6a60b5896d6512880a"
+    },
+    {
+      "script": "Assets/m_Scripts/Experiment/SpatialFrequencyOpticalPathGraphic.cs",
+      "guid": "7b8b7cc63a1a43e49c0fc8c70b9d5f28",
+      "direct_scene_components": 1,
+      "component_enabled": [
+        true
+      ],
+      "sha256": "b748e9de49a27b40ae575ddb8a5a4a4fe1407eef4ea4e147a304bd7264a0badb"
+    },
+    {
+      "script": "Assets/m_Scripts/PCDesktop/LightLine/SquareLightSource.cs",
+      "guid": "6c3438e4553562b48bcceebeb57e8d37",
+      "direct_scene_components": 1,
+      "component_enabled": [
+        true
+      ],
+      "sha256": "da00d005b16c20db0fb82c2e0436351af6315409db34115852a2359eb952234f"
+    },
+    {
+      "script": "Assets/m_Scripts/Tutorial/ForceTutorial/StandaloneTutorialUI.cs",
+      "guid": "49d2628479ebcbb48aa622ef735ee465",
+      "direct_scene_components": 4,
+      "component_enabled": [
+        true,
+        true,
+        true,
+        true
+      ],
+      "sha256": "b15c8a3173a3ac5c381f72b041d9c0a26ce354cdca5c1a649d374fb8a494a1d2"
+    },
+    {
+      "script": "Assets/m_Scripts/Microscope/Static.cs",
+      "guid": "f45222bc8b3cac943a282c4709264a9e",
+      "direct_scene_components": 0,
+      "component_enabled": [],
+      "sha256": "228f21e07b832025b93387f296649967ee84a4433f034962928cb37b42cc36f4"
+    },
+    {
+      "script": "Assets/m_Scripts/ExplodeModel/SuperAssemblyPartHoverPulse.cs",
+      "guid": "0bb6ffb46337cc849a35e346f992d91e",
+      "direct_scene_components": 1,
+      "component_enabled": [
+        true
+      ],
+      "sha256": "0faa7c34c68b1fa9b00b72441391daf75ea3c7d4408155b3b8df7d786ad00ef2"
+    },
+    {
+      "script": "Assets/m_Scripts/ExplodeModel/SuperAssemblyPartSelectionController.cs",
+      "guid": "86df10019f3919a4ebbce6a2e03e76bd",
+      "direct_scene_components": 1,
+      "component_enabled": [
+        true
+      ],
+      "sha256": "66376e19f27ac1b6aafc20b53f4bd6b876ae8cfb940f172b907b72bc81146141"
+    },
+    {
+      "script": "Assets/m_Scripts/Editor/SuperAssemblySelectionSceneSetup.cs",
+      "guid": "e95f773ca25b55f4cb389bc05a5e62c1",
+      "direct_scene_components": 0,
+      "component_enabled": [],
+      "sha256": "4f8b08a72a0c7a7ce3f2d9ac33536884b5ec7442907501f0cb01d0e6753d9324"
+    },
+    {
+      "script": "Assets/m_Scripts/TInstance.cs",
+      "guid": "3fdff35a826fccf4f8d64745b8e26988",
+      "direct_scene_components": 0,
+      "component_enabled": [],
+      "sha256": "fe6417055ad751dc70f920a45a8657f90e93642b0816e5e26e8b00beab11d814"
+    },
+    {
+      "script": "Assets/m_Scripts/TaskSystem/Task.cs",
+      "guid": "40c0856553d04682a06047b5f0e678d3",
+      "direct_scene_components": 0,
+      "component_enabled": [],
+      "sha256": "8be2f9f1869da757d048fe924cf594b28f95080533f76cb6ae1f4925d182d011"
+    },
+    {
+      "script": "Assets/m_Scripts/TaskSystem/TaskManager.cs",
+      "guid": "f83b522c176c46ad87199721c2572655",
+      "direct_scene_components": 0,
+      "component_enabled": [],
+      "sha256": "1ca527ad370327f6a65a3c4259df1b7a6e471afd78dd964050fa1b3fa8e5c10f"
+    },
+    {
+      "script": "Assets/m_Scripts/TaskSystem/TaskSO.cs",
+      "guid": "44990453545f494fad2c68d1a87aae65",
+      "direct_scene_components": 0,
+      "component_enabled": [],
+      "sha256": "2bda7d894b49fcf5951ebd0026951044f064512881edfb03d9d7813bba2373fc"
+    },
+    {
+      "script": "Assets/m_Scripts/AITutor/TeachingActivitySO.cs",
+      "guid": "5ba3d8209744488db70c756ece001853",
+      "direct_scene_components": 0,
+      "component_enabled": [],
+      "sha256": "70db54f8c585de5123c4c4135032022c4e36f325fd22b2ef95f00771635a14bc"
+    },
+    {
+      "script": "Assets/m_Scripts/AITutor/TutorProtocol.cs",
+      "guid": "255d3fe1aa054dd994b7de8878758a8f",
+      "direct_scene_components": 0,
+      "component_enabled": [],
+      "sha256": "c7e6cf2a7e2b3fd6a8846d9045df96710e3981208c4cdb750c4900398a7ee8ac"
+    },
+    {
+      "script": "Assets/m_Scripts/Tutorial/Tutorial.cs",
+      "guid": "7516c255de7673b4f9b992bd2ddcb2ba",
+      "direct_scene_components": 0,
+      "component_enabled": [],
+      "sha256": "7c1faecba5fc3fa868c01012ea13067874a05e34bfa6bfd052f8404544433bdf"
+    },
+    {
+      "script": "Assets/m_Scripts/Tutorial/TutorialButton.cs",
+      "guid": "f0d349eaed9faac4e87d7b6aea6cea65",
+      "direct_scene_components": 0,
+      "component_enabled": [],
+      "sha256": "e4897159b49dcef7761738044528c6b51762c823cae05c8d9ca8cb7db1e0e842"
+    },
+    {
+      "script": "Assets/m_Scripts/Tutorial/TutorialButtonInput.cs",
+      "guid": "1e9b9000e78bae9449b6d822a95a4288",
+      "direct_scene_components": 0,
+      "component_enabled": [],
+      "sha256": "04600fed9ad22f1c88864b7af9a40fd73f3a7b9be43550fe945f50b34cecc85c"
+    },
+    {
+      "script": "Assets/m_Scripts/Tutorial/ForceTutorial/TutorialButtonListener.cs",
+      "guid": "cfaf93ec7608fb846b160e6eb9ae86d0",
+      "direct_scene_components": 4,
+      "component_enabled": [
+        true,
+        true,
+        true,
+        true
+      ],
+      "sha256": "14b0d3b688c20a3f4a24280adecf986072907ab6deefb36472bc2a9623ecc198"
+    },
+    {
+      "script": "Assets/m_Scripts/Microscope/UI/UIFit.cs",
+      "guid": "270a29dc5cf500340a67f08669eeb2fb",
+      "direct_scene_components": 1,
+      "component_enabled": [
+        true
+      ],
+      "sha256": "19c4fac8024f46cbcee7628ed72e3e9f36186bd60bf548d4676c2eb31f3fd0e0"
+    },
+    {
+      "script": "Assets/m_Scripts/Editor/UnityVersionControlGuard.cs",
+      "guid": "0a9e72b07c7a412438461995334703a8",
+      "direct_scene_components": 0,
+      "component_enabled": [],
+      "sha256": "dad0f81cabe42054f1c9cc37dda809b281c44fb355f6306a4dc31366c6f50257"
+    },
+    {
+      "script": "Assets/m_Scripts/PCDesktop/UpdateDate.cs",
+      "guid": "cf22347b4a4873543a63779813e723ad",
+      "direct_scene_components": 0,
+      "component_enabled": [],
+      "sha256": "63c2419d9893615fcfd51fed0f6f364f6a6ce781345b0d02f6004e26de7c74aa"
+    },
+    {
+      "script": "Assets/m_Scripts/Microscope/UI/VideoController.cs",
+      "guid": "ba9619c643949d64eb5ef8e9892e06c8",
+      "direct_scene_components": 0,
+      "component_enabled": [],
+      "sha256": "380c95cdae63f64bf434da7fcefe04be39689d54449190291115367943bc144b"
+    },
+    {
+      "script": "Assets/m_Scripts/Interactor/XRActionReferenceGuard.cs",
+      "guid": "270979c7c17067946bdbc51975b3ac4b",
+      "direct_scene_components": 0,
+      "component_enabled": [],
+      "sha256": "75e9972d40db0cf0944b26800dfca59e44da8387466ca73da3990e65371c84bf"
+    }
+  ]
+}

@@ -1,0 +1,840 @@
+{
+  "schema_version": "1.0",
+  "review_date": "2026-09-12",
+  "scope": "Assets/Scene/Scene_Laboratory/MainScene_Labortory.unity",
+  "review_level": "source_and_scene_static_audit",
+  "runtime_test_performed": false,
+  "approval_policy": "所有条目均待局外确认。static_confirmed 只说明源码和直接场景/运行时入口有证据，不等于实机验证。正式自动指引只使用 approved_for_guidance=true 的条目。",
+  "entries": [
+    {
+      "id": "navigation",
+      "title": "漫游与视角",
+      "module": "navigation",
+      "keywords": [
+        "移动",
+        "前往",
+        "转身",
+        "漫游"
+      ],
+      "verification": "static_confirmed",
+      "runtime_verified": false,
+      "approved_for_guidance": false,
+      "location": "主实验室；未确认从出生点到各仪器的固定左右路线。",
+      "prerequisites": [
+        "处于允许自由移动的状态；未被强制教程或实验锁定。"
+      ],
+      "desktop_steps": [
+        "W/A/S/D 移动；按住鼠标右键并移动鼠标调整视角。",
+        "E/Q 是该桌面控制器的上/下移动；LeftShift 加速。"
+      ],
+      "xr_steps": [
+        "输入资源包含左摇杆移动；具体头显 locomotion 组件启用状态须实测。"
+      ],
+      "observation": "观察玩家位置与视角变化。",
+      "completion_evidence": "需要新增当前区域/位置上报；不能根据对话认定已到达。",
+      "exit_steps": [],
+      "limitations": [
+        "当前主场景 CameraTryMove 启用；Move 组件禁用。不要把桌面调试上下移动解释成真实步行。"
+      ],
+      "sources": [
+        "Assets/m_Scripts/Microscope/CameraTryMove.cs",
+        "Assets/m_Scripts/Move.cs",
+        "Assets/m_Scripts/ProgressControl.cs"
+      ]
+    },
+    {
+      "id": "teleport",
+      "title": "指向目标移动",
+      "module": "navigation",
+      "keywords": [
+        "瞬移",
+        "传送",
+        "快速移动"
+      ],
+      "verification": "conditional",
+      "runtime_verified": false,
+      "approved_for_guidance": false,
+      "location": "主实验室允许通行的表面",
+      "prerequisites": [
+        "自由移动未锁定；目标通过射线及坡度等检查。"
+      ],
+      "desktop_steps": [
+        "鼠标指向可到达地面后按 G。"
+      ],
+      "xr_steps": [
+        "Roaming/AutoMove 绑定左右 gripButton，但 Move 组件在主场景禁用，暂不作为确定可用指引。"
+      ],
+      "observation": "到达目标位置；可能受碰撞/可达性限制。",
+      "completion_evidence": "需运行时位置变化确认。",
+      "exit_steps": [],
+      "limitations": [
+        "XR 路径待验证；不可承诺任何点击位置都能到达。"
+      ],
+      "sources": [
+        "Assets/m_Scripts/Microscope/CameraTryMove.cs",
+        "Assets/m_Scripts/Move.cs"
+      ]
+    },
+    {
+      "id": "sample_pick",
+      "title": "样本选择与拾取",
+      "module": "microscope",
+      "keywords": [
+        "样本",
+        "标本",
+        "载玻片",
+        "拾取"
+      ],
+      "verification": "static_confirmed",
+      "runtime_verified": false,
+      "approved_for_guidance": false,
+      "location": "主场景带 InteractableSamples 的样本对象；样本桌相对方位未确认。",
+      "prerequisites": [
+        "进入样本交互范围并被注册为当前可交互样本。",
+        "没有优先处理的 SNOM/拆解交互；若载物台已有样本，取下样本优先。"
+      ],
+      "desktop_steps": [
+        "靠近可交互样本，鼠标左键触发拾取。"
+      ],
+      "xr_steps": [
+        "靠近可交互样本，按右手扳机。"
+      ],
+      "observation": "样本实例与物品栏贴图更新。",
+      "completion_evidence": "HasSampleOnHand、CurrentSampleTexture、SampleChanged（已有代码接口，未来助手需接入）。",
+      "exit_steps": [
+        "可选择其他样本；不要声称存在通用丢弃键。"
+      ],
+      "limitations": [
+        "命中射线不等于样本已注册；不是旧说明中的 R 拾取。"
+      ],
+      "sources": [
+        "Assets/m_Scripts/Interact/InteractWithSamples.cs",
+        "Assets/m_Scripts/Interact/InteractableSamples.cs",
+        "Assets/m_Scripts/Interactor/Interactor.cs",
+        "Assets/m_Scripts/Microscope/CameraTryMove.cs"
+      ]
+    },
+    {
+      "id": "sample_place_observe",
+      "title": "放置样本并进入观察",
+      "module": "microscope",
+      "keywords": [
+        "放置",
+        "观察",
+        "目镜",
+        "载物台"
+      ],
+      "verification": "static_confirmed",
+      "runtime_verified": false,
+      "approved_for_guidance": false,
+      "location": "主实验室的可操作显微镜；进入其交互触发范围。",
+      "prerequisites": [
+        "已持有 ObserveObjects 样本；isNear 与 MicroUI.setTrue 条件满足。"
+      ],
+      "desktop_steps": [
+        "按 Z 放置样本。",
+        "样本已在载物台时继续按 Z 推进观察视点，直到进入 Observing。"
+      ],
+      "xr_steps": [
+        "按左手扳机放置样本；随后按相同按钮推进观察视点。"
+      ],
+      "observation": "样本放上载物台，视角进入观察相机。",
+      "completion_evidence": "HasPlacedSample 与 Interactor.CurrentState=Observing；需要助手采集。",
+      "exit_steps": [
+        "Observing 中按 Z 或 Esc；XR 用左手扳机退出。"
+      ],
+      "limitations": [
+        "PutAndObserve 的放置与 pointer 视点推进分开，不承诺一次按键完成全部过程。"
+      ],
+      "sources": [
+        "Assets/m_Scripts/Microscope/Microscope.cs",
+        "Assets/m_Scripts/Interactor/Interactor.cs",
+        "Assets/m_Scripts/Microscope/CameraTryMove.cs"
+      ]
+    },
+    {
+      "id": "sample_remove",
+      "title": "取下载物台样本",
+      "module": "microscope",
+      "keywords": [
+        "取下",
+        "换样本"
+      ],
+      "verification": "static_confirmed",
+      "runtime_verified": false,
+      "approved_for_guidance": false,
+      "location": "可操作显微镜交互范围",
+      "prerequisites": [
+        "先退出内部观察；载物台有样本。"
+      ],
+      "desktop_steps": [
+        "在显微镜交互范围内鼠标左键触发取样。"
+      ],
+      "xr_steps": [
+        "按右手扳机触发取样。"
+      ],
+      "observation": "样本从显微镜移回玩家侧。",
+      "completion_evidence": "HasPlacedSample 变化；不要仅检查物品栏图标。",
+      "exit_steps": [],
+      "limitations": [
+        "同一输入还处理部件/SNOM 选择，须确保处于正确模式。"
+      ],
+      "sources": [
+        "Assets/m_Scripts/Microscope/Microscope.cs",
+        "Assets/m_Scripts/Interactor/Interactor.cs",
+        "Assets/m_Scripts/Microscope/CameraTryMove.cs"
+      ]
+    },
+    {
+      "id": "illumination",
+      "title": "显微镜照明与光圈",
+      "module": "microscope",
+      "keywords": [
+        "灯光",
+        "照明",
+        "光圈",
+        "亮度"
+      ],
+      "verification": "static_confirmed",
+      "runtime_verified": false,
+      "approved_for_guidance": false,
+      "location": "可操作显微镜及观察界面",
+      "prerequisites": [
+        "光源开关要求靠近仪器且外部交互可用。"
+      ],
+      "desktop_steps": [
+        "在外部交互状态按 B 切换光源。",
+        "按住 X，使用上/下方向键提供照明调节输入。"
+      ],
+      "xr_steps": [
+        "外部交互时按右手 secondaryButton 切换光源。",
+        "按住左手 primaryButton 并上下推动右摇杆提供照明调节输入。"
+      ],
+      "observation": "观察光源/光圈示意及观察画面变化。",
+      "completion_evidence": "现有 GetLight 等状态可供后续采集；不能从按键直接推断光源状态。",
+      "exit_steps": [],
+      "limitations": [
+        "不要沿用旧说明的 Q 开灯；Q 在当前桌面控制器中用于下降。内部 Observing 不绑定 LightSwitch 动作。"
+      ],
+      "sources": [
+        "Assets/m_Scripts/Microscope/Microscope.cs",
+        "Assets/m_Scripts/Interactor/Interactor.cs",
+        "Assets/m_Scripts/Microscope/CameraTryMove.cs"
+      ]
+    },
+    {
+      "id": "objective_switch",
+      "title": "切换物镜",
+      "module": "microscope",
+      "keywords": [
+        "物镜",
+        "倍率",
+        "放大"
+      ],
+      "verification": "static_confirmed",
+      "runtime_verified": false,
+      "approved_for_guidance": false,
+      "location": "可操作显微镜或内部观察状态",
+      "prerequisites": [
+        "进入显微镜可交互状态，等待旋转动画完成。"
+      ],
+      "desktop_steps": [
+        "按 R 触发物镜切换。"
+      ],
+      "xr_steps": [
+        "按右手 primaryButton 触发物镜切换。"
+      ],
+      "observation": "观察物镜盘或对应观察倍率变化。",
+      "completion_evidence": "物镜档位/相机状态需新增上报。",
+      "exit_steps": [],
+      "limitations": [
+        "R 在 SNOM 原理演示中是 Replay，必须按模块区分；倍率不是 NA 的同义词。"
+      ],
+      "sources": [
+        "Assets/m_Scripts/Microscope/Microscope.cs",
+        "Assets/m_Scripts/Interactor/Interactor.cs",
+        "Assets/m_Scripts/Microscope/CameraTryMove.cs"
+      ]
+    },
+    {
+      "id": "focus",
+      "title": "粗细调焦",
+      "module": "microscope",
+      "keywords": [
+        "调焦",
+        "粗调",
+        "细调",
+        "模糊",
+        "清晰"
+      ],
+      "verification": "static_confirmed",
+      "runtime_verified": false,
+      "approved_for_guidance": false,
+      "location": "显微镜观察界面",
+      "prerequisites": [
+        "已进入 Observing。"
+      ],
+      "desktop_steps": [
+        "按 Tab 切换粗/细调模式。",
+        "按住 X，使用左/右方向键调焦。"
+      ],
+      "xr_steps": [
+        "按右摇杆按压切换粗/细调。",
+        "按住左手 primaryButton，左右推动右摇杆调焦。"
+      ],
+      "observation": "观察焦点清晰程度和粗细调状态的变化。",
+      "completion_evidence": "调焦参数与模式需要后续助手采集。",
+      "exit_steps": [
+        "Z 或 Esc 退出观察；XR 左手扳机退出。"
+      ],
+      "limitations": [
+        "依据当前输入链路，不使用旧 M/B/N 调焦说明。视觉反馈不是标定成像。"
+      ],
+      "sources": [
+        "Assets/m_Scripts/Microscope/Microscope.cs",
+        "Assets/m_Scripts/Interactor/Interactor.cs",
+        "Assets/m_Scripts/Microscope/CameraTryMove.cs"
+      ]
+    },
+    {
+      "id": "assembly",
+      "title": "进入拆解、展开与复原",
+      "module": "structure",
+      "keywords": [
+        "拆解",
+        "展开",
+        "复原",
+        "结构"
+      ],
+      "verification": "static_confirmed",
+      "runtime_verified": false,
+      "approved_for_guidance": false,
+      "location": "主场景显微镜装配模型；以整体模型为目标。",
+      "prerequisites": [
+        "教程未锁定模式；没有实验转场或独立实验锁定。"
+      ],
+      "desktop_steps": [
+        "鼠标左键点击整体装配目标进入 PreAssembly。",
+        "再次点击装配目标进入 SuperAssembly，等待展开动画结束。"
+      ],
+      "xr_steps": [
+        "右手射线指向装配目标，按右手扳机进入 PreAssembly。",
+        "再次指向目标并按扳机进入 SuperAssembly。"
+      ],
+      "observation": "模型从整体展示变为展开结构。",
+      "completion_evidence": "CurrentMode 与 ModelExploder.IsExploded/IsAnimating。",
+      "exit_steps": [
+        "先退出部件选择；在 SuperAssembly 点击/指向模型外区域退出到 PreAssembly；再在模型外操作返回 Normal。"
+      ],
+      "limitations": [
+        "输入按状态逐步处理，不能承诺一次点击空白区就完成所有返回。"
+      ],
+      "sources": [
+        "Assets/m_Scripts/ExplodeModel/MicroscopeExploderModeController.cs",
+        "Assets/m_Scripts/ExplodeModel/ModelExploder.cs",
+        "Assets/m_Scripts/Microscope/CameraTryMove.cs"
+      ]
+    },
+    {
+      "id": "parts",
+      "title": "部件查看",
+      "module": "structure",
+      "keywords": [
+        "部件",
+        "上部光学组件",
+        "物镜",
+        "光学平台",
+        "调焦部件"
+      ],
+      "verification": "static_confirmed",
+      "runtime_verified": false,
+      "approved_for_guidance": false,
+      "location": "SuperAssembly 展开的显微镜部件",
+      "prerequisites": [
+        "展开结束；未被其他实验锁定。"
+      ],
+      "desktop_steps": [
+        "鼠标左键选择部件，阅读右侧名称与说明。",
+        "在说明面板外点击，结束当前部件查看，再选其他部件。"
+      ],
+      "xr_steps": [
+        "右手射线选择部件并按扳机；在选择 UI 外再次按扳机退出当前选择。"
+      ],
+      "observation": "已配置名称：Objective Lens、Upper Optical Assembly、Stage Position Control、Optical Breadboard、Focus Adjustment。",
+      "completion_evidence": "IsSelectionActive、选中部件；需要完整上下文接口。",
+      "exit_steps": [
+        "退出选择后按 assembly 条目返回。"
+      ],
+      "limitations": [
+        "Upper Optical Assembly 的内部光学元件未逐个确认；不可随意叫作二色镜/针孔。后三项没有已配置独立实验按钮。"
+      ],
+      "sources": [
+        "Assets/m_Scripts/ExplodeModel/SuperAssemblyPartSelectionController.cs"
+      ]
+    },
+    {
+      "id": "na_experiment",
+      "title": "数值孔径交互实验",
+      "module": "numerical_aperture",
+      "keywords": [
+        "NA",
+        "数值孔径",
+        "光锥",
+        "半角",
+        "NA与倍率"
+      ],
+      "verification": "static_confirmed",
+      "runtime_verified": false,
+      "approved_for_guidance": false,
+      "location": "展开模型中的 Upper Optical Assembly（内部节点 AboveMirror）",
+      "prerequisites": [
+        "完成 assembly 并选中 Upper Optical Assembly。"
+      ],
+      "desktop_steps": [
+        "点击 Start Numerical Aperture Experiment，等待转场。",
+        "鼠标拖动 NA 滑块，比较角度、光锥与近似倍率显示。"
+      ],
+      "xr_steps": [
+        "用射线操作同名按钮与 NA 滑块。",
+        "备用摇杆路径读取 Roaming/ChangeFocusOrChangeLIght 的 x 轴；通常需左 primary 修饰，实际设备须验证。"
+      ],
+      "observation": "NA 连续范围 0.03–0.95；观察 theta、全角和光锥变化。",
+      "completion_evidence": "IsExperimentActive、IsTransitioning、CurrentNA、CaptureTeachingState 已有。",
+      "exit_steps": [
+        "点击 Exit 返回部件查看；再按 parts/assembly 返回。"
+      ],
+      "limitations": [
+        "NA=n sin(theta)；倍率是参考档位插值，亮度/清晰度/景深反馈为教学映射。"
+      ],
+      "sources": [
+        "Assets/m_Scripts/Experiment/NumericalApertureExperimentController.cs",
+        "Assets/m_Scripts/ExplodeModel/SuperAssemblyPartSelectionController.cs"
+      ]
+    },
+    {
+      "id": "spatial_frequency",
+      "title": "空间频率与衍射实验",
+      "module": "spatial_frequency",
+      "keywords": [
+        "光栅",
+        "衍射",
+        "空间频率",
+        "频谱",
+        "结构光",
+        "SIM"
+      ],
+      "verification": "static_confirmed",
+      "runtime_verified": false,
+      "approved_for_guidance": false,
+      "location": "展开模型中的 Objective Lens（内部节点 ObjectLen）",
+      "prerequisites": [
+        "完成 assembly 并选中 Objective Lens；若要看样本频谱，先选择样本。"
+      ],
+      "desktop_steps": [
+        "点击 Start Spatial Frequency Experiment，等待转场。",
+        "点击 High/Middle/Low，分别对应 250/125/62.5 lines/mm。",
+        "点击 White Light / Laser Excitation 比较照明；做控制变量比较时保持照明与样本不变。"
+      ],
+      "xr_steps": [
+        "右手 UI 射线操作相同按钮和频率选项。"
+      ],
+      "observation": "观察光栅、衍射级次间距，以及样本频谱、侧带和多方向支持域。",
+      "completion_evidence": "IsExperimentActive、CaptureTeachingState、SampleChanged 可用于后续采集。",
+      "exit_steps": [
+        "点击 Exit 返回部件查看。"
+      ],
+      "limitations": [
+        "无样本时三幅样本派生频谱为空；不等于共聚焦针孔仿真，也没有完整 SIM 图像重建。"
+      ],
+      "sources": [
+        "Assets/m_Scripts/Experiment/SpatialFrequencyExperimentController.cs",
+        "Assets/m_Scripts/Experiment/SpatialFrequencyExperimentDiagramView.cs",
+        "Assets/m_Scripts/Experiment/FourierOpticsCpuSimulator.cs",
+        "Assets/m_Scripts/ExplodeModel/SuperAssemblyPartSelectionController.cs"
+      ]
+    },
+    {
+      "id": "snom_entry",
+      "title": "进入 SNOM 操作演示",
+      "module": "snom",
+      "keywords": [
+        "SNOM",
+        "s-SNOM",
+        "THz",
+        "太赫兹",
+        "近场显微镜"
+      ],
+      "verification": "static_confirmed",
+      "runtime_verified": false,
+      "approved_for_guidance": false,
+      "location": "主场景模型 TDs_edited_UnityVeryLowPoly；空间方位须现场确认。",
+      "prerequisites": [
+        "靠近 SNOM 系统；运行时控制器已成功找到模型并创建入口。"
+      ],
+      "desktop_steps": [
+        "鼠标点击 SNOM 交互目标，显示入口。",
+        "点击 Begin Operation。"
+      ],
+      "xr_steps": [
+        "右手射线指向 SNOM 入口目标并按扳机；点击 Begin Operation。"
+      ],
+      "observation": "出现探针选择及安装界面。",
+      "completion_evidence": "CurrentStage/工作流阶段存在于控制器，未来助手需扩展状态采集。",
+      "exit_steps": [
+        "点击 Exit；桌面 Esc。"
+      ],
+      "limitations": [
+        "此模块由 RuntimeBootstrap 动态创建，不能只凭场景没有直接挂脚本判断不存在。"
+      ],
+      "sources": [
+        "Assets/m_Scripts/Experiment/SNOMDemonstrationController.cs"
+      ]
+    },
+    {
+      "id": "snom_probe",
+      "title": "探针选择与安装",
+      "module": "snom",
+      "keywords": [
+        "探针",
+        "安装",
+        "金属探针",
+        "分辨率"
+      ],
+      "verification": "static_confirmed",
+      "runtime_verified": false,
+      "approved_for_guidance": false,
+      "location": "SNOM 操作面板 ProbeSelection 阶段",
+      "prerequisites": [
+        "已进入 Begin Operation。"
+      ],
+      "desktop_steps": [
+        "点击 Fine / Standard / Robust 探针选项，或按 1/2/3。",
+        "点击 Install Probe，或按 E；等待安装结束。"
+      ],
+      "xr_steps": [
+        "用 UI 射线选择探针卡片，再点击 Install Probe。"
+      ],
+      "observation": "运行时探针预览移动到安装位置，完成后显示 Start System。",
+      "completion_evidence": "ReadyToStart 工作流状态；不要把点击安装等同于动画已完成。",
+      "exit_steps": [
+        "点击 Exit 或桌面 Esc。"
+      ],
+      "limitations": [
+        "3x/2x/1x 是相对细节教学标签，不是物镜倍率；复用模型网格，不是三个已校准物理探针。"
+      ],
+      "sources": [
+        "Assets/m_Scripts/Experiment/SNOMDemonstrationController.cs"
+      ]
+    },
+    {
+      "id": "snom_start",
+      "title": "启动 SNOM 并观察原理",
+      "module": "snom",
+      "keywords": [
+        "启动",
+        "扫描流程",
+        "工作原理"
+      ],
+      "verification": "static_confirmed",
+      "runtime_verified": false,
+      "approved_for_guidance": false,
+      "location": "SNOM ReadyToStart 面板",
+      "prerequisites": [
+        "探针安装结束；Start System 已可用。"
+      ],
+      "desktop_steps": [
+        "点击 Start System 或按 Space。"
+      ],
+      "xr_steps": [
+        "点击 Start System。"
+      ],
+      "observation": "八阶段自动演示：THz 产生、光束引导、AFM 反馈、近场耦合、散射背景、谐波解调、逐点扫描、结果与局部光谱。",
+      "completion_evidence": "CurrentStage；还需采集播放/暂停与扫描进度。",
+      "exit_steps": [
+        "Exit 或桌面 Esc。"
+      ],
+      "limitations": [
+        "安装探针与启动是用户操作；后续八阶段是内部过程讲解，不是八项额外仪器操作。"
+      ],
+      "sources": [
+        "Assets/m_Scripts/Experiment/SNOMDemonstrationController.cs",
+        "Assets/m_Scripts/Experiment/SNOMDemonstrationGraphic.cs"
+      ]
+    },
+    {
+      "id": "snom_controls",
+      "title": "SNOM 导航与部件说明",
+      "module": "snom",
+      "keywords": [
+        "暂停",
+        "重播",
+        "回看",
+        "AFM",
+        "谐波",
+        "扫描",
+        "光谱"
+      ],
+      "verification": "static_confirmed",
+      "runtime_verified": false,
+      "approved_for_guidance": false,
+      "location": "SNOM PrincipleTour 演示控制栏",
+      "prerequisites": [
+        "已启动系统进入原理讲解。"
+      ],
+      "desktop_steps": [
+        "Previous/Next 或左/右方向键切换讲解。",
+        "播放/暂停按钮或 Space；Replay 或 R 重播当前阶段。",
+        "点击 Components 进入部件说明，并选择高亮部件。",
+        "Change Probe 仅在该按钮实际显示的阶段使用。"
+      ],
+      "xr_steps": [
+        "使用 UI 射线操作 Previous、Next、播放/暂停、Replay、Components；按当前可见按钮操作。"
+      ],
+      "observation": "动画、图示和说明随阶段/部件变化。",
+      "completion_evidence": "CurrentStage 与当前选择/播放状态；需新增完整上报。",
+      "exit_steps": [
+        "Exit；桌面 Esc。"
+      ],
+      "limitations": [
+        "不要承诺 Raw/2Ω/3Ω 独立按钮：设计说明曾提出，但本轮没有确认实际控制按钮。图谱为合成示意。"
+      ],
+      "sources": [
+        "Assets/m_Scripts/Experiment/SNOMDemonstrationController.cs",
+        "Assets/m_Scripts/Experiment/SNOMDemonstrationGraphic.cs"
+      ]
+    },
+    {
+      "id": "forced_tutorial",
+      "title": "强制交互教程",
+      "module": "tutorial",
+      "keywords": [
+        "新手",
+        "教程",
+        "不能移动",
+        "下一步"
+      ],
+      "verification": "static_confirmed",
+      "runtime_verified": false,
+      "approved_for_guidance": false,
+      "location": "场景中的 MandatoryTutorialTrigger 与 StandaloneTutorialUI 面板",
+      "prerequisites": [
+        "触发区域/顺序/样本等前置条件满足。"
+      ],
+      "desktop_steps": [
+        "按当前教程显示的目标输入完成步骤；不要把所有步骤都理解为按空格。"
+      ],
+      "xr_steps": [
+        "按教程指定的手柄动作；组合动作可能需要持续按住修饰键。"
+      ],
+      "observation": "步骤在匹配输入或事件后推进；某些展示步骤会自动推进。",
+      "completion_evidence": "教程完成事件与触发器状态；需接入助手上下文。",
+      "exit_steps": [
+        "按教程自身流程完成；未确认存在通用跳过按钮。"
+      ],
+      "limitations": [
+        "教程可能锁定移动、拆解或全局输入；闲置提醒应暂停。"
+      ],
+      "sources": [
+        "Assets/m_Scripts/Tutorial/ForceTutorial/MandatoryTutorialTrigger.cs",
+        "Assets/m_Scripts/Tutorial/ForceTutorial/StandaloneTutorialUI.cs",
+        "Assets/m_Scripts/Tutorial/ForceTutorial/ForceTutorialSequenceController.cs",
+        "Assets/m_Scripts/Tutorial/ForceTutorial/PlayerInputBlocker.cs",
+        "Assets/m_Scripts/Microscope/CameraTryMove.cs"
+      ]
+    },
+    {
+      "id": "optional_tutorial",
+      "title": "旧自由教程入口",
+      "module": "tutorial",
+      "keywords": [
+        "教程菜单",
+        "帮助菜单",
+        "Y键"
+      ],
+      "verification": "conditional",
+      "runtime_verified": false,
+      "approved_for_guidance": false,
+      "location": "Interactor.currentTutorial 对应面板；当前主场景直接引用为 null。",
+      "prerequisites": [
+        "必须确认运行时存在 Tutorial 实例并注册 currentTutorial。"
+      ],
+      "desktop_steps": [
+        "代码映射 Y 打开；已打开时方向/WASD 导航，Space/Enter 确认。"
+      ],
+      "xr_steps": [
+        "Global/OpenTutorial 为左 secondaryButton；教程内右摇杆导航、右 primaryButton 确认。"
+      ],
+      "observation": "若正确注册，应显示教程列表或观察教程。",
+      "completion_evidence": "缺少主场景直接挂载证据，不能承诺。",
+      "exit_steps": [],
+      "limitations": [
+        "不要作为助手唤醒键；旧 H 文档不等于当前绑定；注册失败存在空引用风险。"
+      ],
+      "sources": [
+        "Assets/m_Scripts/Tutorial/Tutorial.cs",
+        "Assets/m_Scripts/Tutorial/TutorialButtonInput.cs",
+        "Assets/m_Scripts/Interactor/Interactor.cs",
+        "Assets/m_Scripts/Microscope/CameraTryMove.cs"
+      ]
+    },
+    {
+      "id": "stage_translation",
+      "title": "视野平移候选功能",
+      "module": "microscope",
+      "keywords": [
+        "XY",
+        "平移",
+        "移动载物台"
+      ],
+      "verification": "conditional",
+      "runtime_verified": false,
+      "approved_for_guidance": false,
+      "location": "ScreenMove 需要挂到有样本子对象的目标上。",
+      "prerequisites": [
+        "确认 ScreenMove 实际实例及启用状态。"
+      ],
+      "desktop_steps": [
+        "代码读取 Horizontal/Vertical 即 WASD/方向轴；尚未确认当前场景可用。"
+      ],
+      "xr_steps": [],
+      "observation": "样本在局部 XY 平面平移。",
+      "completion_evidence": "未确认运行时挂载。",
+      "exit_steps": [],
+      "limitations": [
+        "主场景无直接引用；可能位于 Prefab，不能仅凭脚本存在给玩家操作指令。"
+      ],
+      "sources": [
+        "Assets/m_Scripts/Microscope/ScreenMove.cs"
+      ]
+    },
+    {
+      "id": "filter_prototype",
+      "title": "滤光片与二色镜候选原型",
+      "module": "optics_prototype",
+      "keywords": [
+        "滤光片",
+        "二色镜",
+        "光路搭建"
+      ],
+      "verification": "unavailable",
+      "runtime_verified": false,
+      "approved_for_guidance": false,
+      "location": "PCDesktop 脚本与光线示意资源；无完整入口证明。",
+      "prerequisites": [
+        "需验证实际 UI、拖放与槽位绑定。"
+      ],
+      "desktop_steps": [],
+      "xr_steps": [],
+      "observation": "存在 Filter/DichroicMirror、Slot 和光线组件代码。",
+      "completion_evidence": "未确认可完成的学习流程。",
+      "exit_steps": [],
+      "limitations": [
+        "PC_CanvasMgr.OpenApp 对应分支为空；不能指引玩家打开一个未确认存在的应用。"
+      ],
+      "sources": [
+        "Assets/m_Scripts/PCDesktop/PC_CanvasMgr.cs",
+        "Assets/m_Scripts/PCDesktop/Slot.cs",
+        "Assets/m_Scripts/PCDesktop/Items/BaseItem.cs",
+        "Assets/m_Scripts/PCDesktop/Items/Filter.cs",
+        "Assets/m_Scripts/PCDesktop/Items/DichroicMirror.cs",
+        "Assets/m_Scripts/PCDesktop/LightLine/LightLineMgr.cs"
+      ]
+    },
+    {
+      "id": "confocal_background",
+      "title": "共聚焦原理说明",
+      "module": "confocal",
+      "keywords": [
+        "Confocal microscopy",
+        "共聚焦",
+        "针孔",
+        "光学切片",
+        "Z-stack"
+      ],
+      "verification": "knowledge_only",
+      "runtime_verified": false,
+      "approved_for_guidance": false,
+      "location": "知识讲解；可关联已验证的显微镜结构、NA 与空间频率内容，但没有完整共聚焦交互流程。",
+      "prerequisites": [],
+      "desktop_steps": [],
+      "xr_steps": [],
+      "observation": "仅说明激发、收集、针孔抑制离焦信号与扫描成像的概念。",
+      "completion_evidence": "无可执行完成判据。",
+      "exit_steps": [],
+      "limitations": [
+        "不指引调针孔、采集 Z-stack、控制探测器或真实扫描参数；不把 NA/频谱实验说成共聚焦切片。"
+      ],
+      "sources": [
+        "Assets/m_Scripts/Microscope/Microscope.cs",
+        "Assets/m_Scripts/Experiment/FourierOpticsCpuSimulator.cs"
+      ]
+    },
+    {
+      "id": "legacy_tutor",
+      "title": "上一版固定题目 Tutor（已删除）",
+      "module": "legacy",
+      "keywords": [
+        "Tutor",
+        "固定题目",
+        "预测题"
+      ],
+      "verification": "deprecated",
+      "runtime_verified": false,
+      "approved_for_guidance": false,
+      "location": "已从 NA/空间频率实验中删除。",
+      "prerequisites": [],
+      "desktop_steps": [],
+      "xr_steps": [],
+      "observation": "旧面板和固定题目不再可用，当前仅保留极光小助手。",
+      "completion_evidence": "源码、专用资源、编辑器菜单及旧 /tutor 路由已删除。",
+      "exit_steps": [],
+      "limitations": [
+        "历史条目，仅用于防止模型推荐已经删除的入口。"
+      ],
+      "sources": [
+        "docs/assistant_knowledge/CHAT_IMPLEMENTATION.md"
+      ]
+    },
+    {
+      "id": "aurora_assistant",
+      "title": "极光小球助手（本地第一批）",
+      "module": "assistant",
+      "keywords": [
+        "小助手",
+        "唤醒",
+        "极光",
+        "闲置提醒"
+      ],
+      "verification": "static_confirmed",
+      "runtime_verified": false,
+      "approved_for_guidance": false,
+      "location": "主实验场景左上角；运行时自动创建 Local Aurora Assistant，XR 使用跟随相机的世界空间 Canvas。",
+      "prerequisites": [
+        "主场景运行且 LocalAssistantSettings.assistantEnabled=true；实际显示与输入仍待实测。"
+      ],
+      "desktop_steps": [
+        "默认 H 或点击小球触发随机本地问候；输入框编辑时忽略 H。",
+        "问候框的 问点什么 打开问答；输入问题或选择主题示例后点击 发送。"
+      ],
+      "xr_steps": [
+        "现有 XR UI 射线点击小球；不新增实验手柄按键绑定，头显显示与射线命中待实测。"
+      ],
+      "observation": "程序绘制极光球体、本地问候与闲置提醒。第二批新增自由知识问答，提交问题后通过后端调用 DeepSeek；没有实时实验操作导航。",
+      "completion_evidence": "消息显示/隐藏与闲置计时状态；已通过编译和纯计时检查，主场景运行检查被已有 Unity 实例占用阻止。",
+      "exit_steps": [
+        "点击 × 关闭消息；点击 安静 5 分钟 暂停自动提醒；主动唤醒仍可用。"
+      ],
+      "limitations": [
+        "本地助手源码已实现，PC/XR 运行验证及批准仍未完成。",
+        "第二批已实现自由知识问答，使用要求后端可用；第三批实时状态和操作导航尚未接入。"
+      ],
+      "sources": [
+        "Assets/m_Scripts/Assistant/LocalAssistantController.cs",
+        "Assets/m_Scripts/Assistant/LocalAssistantSettings.cs",
+        "Assets/Resources/LocalAssistantSettings.asset",
+        "Assets/m_Scripts/Assistant/AssistantChatPanel.cs",
+        "Tools/ai_tutor/assistant_chat.py"
+      ]
+    }
+  ]
+}

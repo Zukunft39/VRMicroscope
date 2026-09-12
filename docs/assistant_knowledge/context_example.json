@@ -1,0 +1,22 @@
+{
+  "example_only": true,
+  "session_id": null,
+  "request_id": null,
+  "state_version": null,
+  "captured_at": null,
+  "context_valid": false,
+  "knowledge_version": "2026-09-12",
+  "device": "unknown",
+  "current_module": "unknown",
+  "interaction_mode": "unknown",
+  "selected_part_id": null,
+  "sample_selected": null,
+  "experiment_active": null,
+  "transitioning": null,
+  "mandatory_tutorial_active": null,
+  "snom_stage": null,
+  "snom_workflow_phase": null,
+  "allowed_actions": [],
+  "completed_step_ids": [],
+  "note": "后续由 Unity 上报真实状态；不得把此模板作为玩家状态直接发送。"
+}

@@ -170,6 +170,7 @@ public class Interactor : MonoBehaviour
 
     public void TriggerOpenTutorial()
     {
+        if (VRMicroscope.Assistant.AssistantChatPanel.BlocksGameplay) return;
         if (CurrentState == GameState.Roaming)
         {
             currentTutorial.ReturnToFirstLevel();
@@ -184,11 +185,13 @@ public class Interactor : MonoBehaviour
 
     public void TriggerLightSwitch()
     {
+        if (VRMicroscope.Assistant.AssistantChatPanel.BlocksGameplay) return;
         _currentMicroscope?.LightSwitch();
     }
 
     public void TriggerPutAndObserve()
     {
+        if (VRMicroscope.Assistant.AssistantChatPanel.BlocksGameplay) return;
         _currentMicroscope?.PutAndObserve();
     }
 
@@ -201,6 +204,7 @@ public class Interactor : MonoBehaviour
 
     public void TriggerTakeObjectOrSample(Func<bool> assemblyHandler)
     {
+        if (VRMicroscope.Assistant.AssistantChatPanel.BlocksGameplay) return;
         bool handledByExploderMode = assemblyHandler != null && assemblyHandler.Invoke();
         Debug.Log(
             $"[Interactor] TakeObj triggered. handledByExploderMode={handledByExploderMode}, currentMicroscope='{_currentMicroscope?.name ?? "null"}', hasPlacedSample={(_currentMicroscope != null && _currentMicroscope.HasPlacedSample())}");
@@ -224,23 +228,27 @@ public class Interactor : MonoBehaviour
 
     public void TriggerChangeGlass()
     {
+        if (VRMicroscope.Assistant.AssistantChatPanel.BlocksGameplay) return;
         _currentMicroscope?.RotateGlass();
         _currentMicroscope?.RotateGlassOnObserving();
     }
 
     public void TriggerChangeFocusMode()
     {
+        if (VRMicroscope.Assistant.AssistantChatPanel.BlocksGameplay) return;
         _currentMicroscope?.SwitchModeOfChange();
     }
 
     public void TriggerQuitObserve()
     {
+        if (VRMicroscope.Assistant.AssistantChatPanel.BlocksGameplay) return;
         _currentMicroscope?.QuitObserve();
         ChangeState(GameState.Roaming);
     }
 
     public void ApplyRoamingFocusLightInput(Vector2 input)
     {
+        if (VRMicroscope.Assistant.AssistantChatPanel.BlocksGameplay) return;
         if (_currentMicroscope == null)
         {
             return;
@@ -252,6 +260,7 @@ public class Interactor : MonoBehaviour
 
     public void ApplyObservingFocusLightInput(Vector2 input, float deltaTime)
     {
+        if (VRMicroscope.Assistant.AssistantChatPanel.BlocksGameplay) return;
         if (_currentMicroscope == null)
         {
             return;

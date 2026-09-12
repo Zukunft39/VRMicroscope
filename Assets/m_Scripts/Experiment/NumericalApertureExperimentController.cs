@@ -186,7 +186,6 @@ public class NumericalApertureExperimentController : MonoBehaviour
     public bool IsTransitioning => isTransitioning;
     public float CurrentNA => currentNA;
     public float NormalizedNA => CalculateNormalizedNA(currentNA);
-
     private void Awake()
     {
         EnsureReferences();
@@ -860,6 +859,7 @@ public class NumericalApertureExperimentController : MonoBehaviour
 
     private void HandleJoystickSliderInput()
     {
+        if (VRMicroscope.Assistant.AssistantChatPanel.BlocksGameplay) return;
         InputAction action = ResolveSliderAction();
         if (action == null || naSlider == null)
         {

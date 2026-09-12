@@ -154,6 +154,7 @@ namespace VRMicroscope.Tutorial
 
         private void Update()
         {
+            if (VRMicroscope.Assistant.AssistantChatPanel.BlocksGameplay) return;
             if (tutorialUI == null || !isInputActive) return;
 
             RefreshStepInputStateIfNeeded();
