@@ -1,6 +1,6 @@
 # 小助手知识目录
 
-审阅日期：2026-09-12。第一批本地助手、第二批知识问答，以及第三批的学习区域定位与标记已实现。当前区域定位协议及测试见 NAVIGATION_IMPLEMENTATION.md；仪器操作步骤尚未启用，交互目录的运行验证状态未改变。
+审阅日期：2026-09-13。三批代码已接通：本地助手、知识问答、区域定位与当前操作说明。第三批完整使用方式见 GUIDANCE_IMPLEMENTATION.md，区域标记细节见 NAVIGATION_IMPLEMENTATION.md。实机运行验证状态未改为通过。
 
 ## 文件用途
 
@@ -14,7 +14,9 @@
 | PROMPT_DESIGN_REVIEW.md | 第三部分提示词设计依据、上下文与输出契约、28 个待执行验收用例 |
 | LOCAL_ASSISTANT_IMPLEMENTATION.md | 第一批本地助手的使用、配置、暂停规则、验证结果与待实测项目 |
 | CHAT_IMPLEMENTATION.md | 第二批自由知识问答的启动、输入、密钥配置、复核、联调与范围边界 |
+| VOICE_IMPLEMENTATION.md | Groq 中英文原语言转写：默认麦克风、密钥配置、语音按钮、取消与测试 |
 | NAVIGATION_IMPLEMENTATION.md | 第三批区域定位、坐标输入、标记效果、到达消失与测试流程 |
+| GUIDANCE_IMPLEMENTATION.md | 第三批剩余部分：38 个动作、实时状态、操作卡、下一步/退出与完整验收 |
 | navigation_scene_audit.json | 当前场景的区域/部件世界原点与实验入口关联，静态审计而非实时位置 |
 | deepseek_reference_pack.md | 本次版本的合并文本，可供本地后端读取后加入 messages |
 | context_example.json | 未来 Unity 上下文结构示例，全部为示例值，不代表玩家实际状态 |

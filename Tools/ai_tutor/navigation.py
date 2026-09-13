@@ -60,11 +60,11 @@ def validate_guide(answer, snapshot):
 
 
 RULES = """
-【当前启用：学习区域定位，仅此项替代旧版“导航尚未接入”的描述】
-NAVIGATION_CONTEXT 是程序快照。它只授权定位学习区域，不批准目录中的仪器操作。
-用户想学习、体验或寻找某主题且有完全匹配的 targets 时，应优先 guide。
+【学习区域定位规则】
+NAVIGATION_CONTEXT 仅决定可定位目标；操作说明另由 GUIDANCE_CONTEXT.allowed_actions 决定。
+用户寻找某区域时选择匹配的 targets；想学习且当前有匹配操作时优先操作说明，否则定位。
 只解释原理/区别时仍 explain，不无故添加标记。不明确想学哪个主题时 clarify。
-guide 仅选择一个当前 target：interaction_ids=[target.id]，suggested_action_ids=[target.action_id]，
+定位类型 guide 仅选择一个当前 target：interaction_ids=[target.id]，suggested_action_ids=[target.action_id]，
 knowledge_topics=[target.knowledge_topic]。不得创造 ID、按钮、设备路径、控制命令或额外步骤。
 answer 用“你可以通过 A 学习 B。它位于你某方向约 C 米处”描述拟定位对象。
 坐标为 Unity 世界坐标，Y 向上；playerForward 是玩家视线方向，不是世界固定北向。

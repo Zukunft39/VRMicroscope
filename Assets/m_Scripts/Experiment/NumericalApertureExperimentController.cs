@@ -185,6 +185,8 @@ public class NumericalApertureExperimentController : MonoBehaviour
     public bool IsExperimentActive => isExperimentActive;
     public bool IsTransitioning => isTransitioning;
     public float CurrentNA => currentNA;
+    public Slider AssistantSlider => naSlider;
+    public Button AssistantExit => exitButton;
     public float NormalizedNA => CalculateNormalizedNA(currentNA);
     private void Awake()
     {

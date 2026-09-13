@@ -13,12 +13,14 @@ namespace VRMicroscope.Assistant
         public string sessionId, requestId, question;
         public AssistantChatTurn[] history;
         public NavigationSnapshot navigation;
+        public GuidanceSnapshot guidance;
     }
     [Serializable] public sealed class AssistantChatResponse
     {
         public string sessionId, requestId, kind, answer, source, model, promptVersion, knowledgeVersion;
         public string[] interaction_ids, suggested_action_ids, knowledge_topics;
         public string navigationSnapshotId;
+        public string guidanceSnapshotId;
     }
     public sealed class AssistantConnectionException : Exception
     {
@@ -61,20 +63,29 @@ namespace VRMicroscope.Assistant
                 r.interaction_ids==null ||
                 r.suggested_action_ids==null || r.knowledge_topics==null ||
                 !(r.source=="mock" || r.source=="model") || string.IsNullOrEmpty(r.knowledgeVersion) ||
-                r.promptVersion!="assistant-chat-v2-navigation" ||
+                r.promptVersion!="assistant-chat-v3-guidance" ||
                 !(r.kind=="guide" || r.kind=="explain" || r.kind=="clarify" || r.kind=="refuse")) return false;
             if (r.kind=="guide")
             {
-                if (q.navigation==null || q.navigation.targets==null || r.navigationSnapshotId!=q.navigation.snapshotId ||
-                    r.interaction_ids.Length!=1 || r.suggested_action_ids.Length!=1 ||
-                    r.suggested_action_ids[0]!="highlight:"+r.interaction_ids[0]) return false;
-                string id=r.interaction_ids[0];
-                string topic=id=="parts" ? "microscope_basics" : id=="na_experiment" ? "numerical_aperture" :
-                    id=="spatial_frequency" ? "spatial_frequency" : id=="snom_entry" ? "snom" : null;
-                if(topic==null || r.knowledge_topics.Length!=1 || r.knowledge_topics[0]!=topic) return false;
-                bool offered=false;
-                foreach(var target in q.navigation.targets) if(target.id==id) offered=true;
-                if(!offered) return false;
+                if (r.suggested_action_ids.Length==1 && r.suggested_action_ids[0]!=null && r.suggested_action_ids[0].StartsWith("learn:", StringComparison.Ordinal))
+                {
+                    if(q.guidance==null || q.guidance.blocked || q.guidance.allowedActionIds==null ||
+                        r.guidanceSnapshotId!=q.guidance.snapshotId || r.interaction_ids.Length!=1 ||
+                        r.knowledge_topics.Length!=1 || Array.IndexOf(q.guidance.allowedActionIds,r.suggested_action_ids[0])<0) return false;
+                }
+                else
+                {
+                    if (q.navigation==null || q.navigation.targets==null || r.navigationSnapshotId!=q.navigation.snapshotId ||
+                        r.interaction_ids.Length!=1 || r.suggested_action_ids.Length!=1 ||
+                        r.suggested_action_ids[0]!="highlight:"+r.interaction_ids[0]) return false;
+                    string id=r.interaction_ids[0];
+                    string topic=id=="parts" ? "microscope_basics" : id=="na_experiment" ? "numerical_aperture" :
+                        id=="spatial_frequency" ? "spatial_frequency" : id=="snom_entry" ? "snom" : null;
+                    if(topic==null || r.knowledge_topics.Length!=1 || r.knowledge_topics[0]!=topic) return false;
+                    bool offered=false;
+                    foreach(var target in q.navigation.targets) if(target.id==id) offered=true;
+                    if(!offered) return false;
+                }
             }
             else if(r.interaction_ids.Length!=0 || r.suggested_action_ids.Length!=0) return false;
             if (r.kind=="explain" && r.knowledge_topics.Length==0) return false;

@@ -157,6 +157,16 @@ public class SuperAssemblyPartSelectionController : MonoBehaviour
     public bool IsSelectionActive => isSelectionActive;
     public bool CanSelectParts => IsInReadySuperAssemblyState();
     public Transform CurrentSelectedPart => selectedPart;
+    public Button AssistantExperimentButton => experimentButton;
+    public string AssistantPartName => partNameText != null ? partNameText.text : selectedPart != null ? selectedPart.name : "";
+    public string AssistantPartDescription => selectedPartInfo != null ? selectedPartInfo.description ?? "" : "";
+    // This panel also supports direct rectangle ray hits, without a parent Canvas.
+    public bool AssistantCanStartExperiment => isSelectionActive && !externalInteractionLocked && !selectionUiTemporarilyHidden &&
+        experimentButton != null && experimentButton.gameObject.activeInHierarchy && experimentButton.interactable &&
+        uiCanvasGroup != null && uiCanvasGroup.gameObject.activeInHierarchy && uiCanvasGroup.alpha > .01f && uiCanvasGroup.interactable;
+    public string AssistantExperimentId => selectedExperimentBinding == null ? "" :
+        selectedExperimentBinding.spatialFrequencyExperiment != null ? "sf_start" :
+        selectedExperimentBinding.numericalApertureExperiment != null ? "na_start" : "";
 
     public static bool TryHandleRightTrigger()
     {

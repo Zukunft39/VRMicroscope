@@ -216,6 +216,44 @@ public sealed class SNOMDemonstrationController : MonoBehaviour
     public Transform SnomRoot => snomRoot;
     public DemonstrationStage CurrentStage => currentStage;
     public bool IsRunning => isRunning;
+    public string AssistantPhase => workflowPhase.ToString();
+    public int AssistantSelectedProbe => selectedProbeIndex;
+    public int AssistantInstalledProbe => installedProbeIndex;
+    public bool AssistantPlaying => stagePlaying;
+    public bool AssistantComponentMode => isComponentMode;
+    public bool AssistantInRange => isPlayerInInteractionRange;
+    public void AppendAssistantActions(List<string> actions)
+    {
+        if (!setupComplete || canvasRoot == null) return;
+        if (!isRunning && isPlayerInInteractionRange && entryInteractionProxy != null && entryInteractionProxy.activeInHierarchy &&
+            (launcherRoot == null || !launcherRoot.activeInHierarchy)) actions.Add("learn:snom_open");
+        foreach (var button in canvasRoot.GetComponentsInChildren<Button>())
+        {
+            if (!VRMicroscope.Assistant.AssistantGuidance.Usable(button)) continue;
+            string id = null;
+            if (!isRunning && isPlayerInInteractionRange && button.name == "Start Tour") id = "snom_begin";
+            if (isRunning && (button.name == "Exit" || button.name == "Workflow Exit")) id = "snom_exit";
+            if (isRunning && workflowPhase == WorkflowPhase.ProbeSelection)
+            {
+                for (int i = 0; i < probeOptions.Count; i++) if (probeOptions[i].button == button) id = "snom_probe_" + i;
+                if (button == workflowActionButton && selectedProbeIndex >= 0) id = "snom_install";
+            }
+            if (isRunning && workflowPhase == WorkflowPhase.ReadyToStart)
+            {
+                if (button == workflowActionButton) id = "snom_start";
+                if (button.name == "Change Probe") id = "snom_change";
+            }
+            if (isRunning && workflowPhase == WorkflowPhase.PrincipleTour)
+            {
+                if (button.name == "Next" && (isComponentMode ? selectedComponentIndex < components.Count - 1 : GetPrincipleStageIndex(currentStage) < PrincipleStages.Length - 1)) id = "snom_next";
+                if (button.name == "Previous" && (isComponentMode ? selectedComponentIndex > 0 : GetPrincipleStageIndex(currentStage) > 0)) id = "snom_previous";
+                if (button.name == "Replay") id = "snom_replay";
+                if (button.name == "Components") id = "snom_components";
+                if (button.name == "Play" && currentStage != DemonstrationStage.Results) id = "snom_play";
+            }
+            if (id != null && !actions.Contains("learn:" + id)) actions.Add("learn:" + id);
+        }
+    }
     public bool SuppressAssistantReminders => isRunning &&
         (isComponentMode || workflowPhase == WorkflowPhase.InstallingProbe ||
          workflowPhase == WorkflowPhase.PrincipleTour && stagePlaying && !isComponentMode);

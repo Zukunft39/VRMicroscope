@@ -56,6 +56,7 @@ public class CameraTryMove : MonoBehaviour
     private const float TutorialLookupInterval = 0.25f;
 
     private static CameraTryMove activeDesktopController;
+    public static CameraTryMove AssistantDesktop => activeDesktopController;
 
     private float pitch;
     private float yaw;

@@ -40,7 +40,7 @@ namespace VRMicroscope.Assistant
             hudRoot.GetComponent<Image>().color = new Color(.025f, .055f, .095f, .9f);
             var textObject = new GameObject("Location", typeof(RectTransform), typeof(CanvasRenderer), typeof(Text));
             textObject.transform.SetParent(rect, false);
-            hud = textObject.GetComponent<Text>(); hud.font = config.chineseFont; hud.fontSize = 20;
+            hud = textObject.GetComponent<Text>(); hud.font = TMPro.TMP_Settings.defaultFontAsset.sourceFontFile; hud.fontSize = 20;
             hud.color = Color.white; hud.supportRichText = false; hud.raycastTarget = false;
             hud.alignment = TextAnchor.MiddleLeft;
             hud.rectTransform.anchorMin = Vector2.zero; hud.rectTransform.anchorMax = Vector2.one;
@@ -52,7 +52,7 @@ namespace VRMicroscope.Assistant
             cancel.GetComponent<Button>().onClick.AddListener(Clear);
             var label = new GameObject("Label", typeof(RectTransform), typeof(CanvasRenderer), typeof(Text));
             label.transform.SetParent(cr, false);
-            var t = label.GetComponent<Text>(); t.font = config.chineseFont; t.text = "取消标记"; t.fontSize = 17; t.alignment = TextAnchor.MiddleCenter; t.raycastTarget = false;
+            var t = label.GetComponent<Text>(); t.font = TMPro.TMP_Settings.defaultFontAsset.sourceFontFile; t.text = "取消标记"; t.fontSize = 17; t.alignment = TextAnchor.MiddleCenter; t.raycastTarget = false;
             t.rectTransform.anchorMin = Vector2.zero; t.rectTransform.anchorMax = Vector2.one; t.rectTransform.offsetMin = t.rectTransform.offsetMax = Vector2.zero;
             hudRoot.SetActive(false);
         }
@@ -66,6 +66,13 @@ namespace VRMicroscope.Assistant
             foreach (var tutorial in FindObjectsOfType<StandaloneTutorialUI>()) if (tutorial.IsPlaying) return false;
             foreach (var snom in FindObjectsOfType<SNOMDemonstrationController>()) if (snom.IsRunning) return false;
             return true;
+        }
+
+        public bool NearMicroscope()
+        {
+            var mode = MicroscopeExploderModeController.Instance;
+            return Camera.main != null && mode != null && mode.LearningStationRoot != null &&
+                TryBounds(mode.LearningStationRoot, out var b) && EdgeDistance(b) <= Mathf.Max(.1f, settings.arrivalDistanceMeters);
         }
 
         public NavigationSnapshot Capture()

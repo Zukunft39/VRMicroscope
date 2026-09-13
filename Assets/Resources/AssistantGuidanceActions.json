@@ -1,0 +1,309 @@
+{
+  "version": "guidance-actions-v1",
+  "actions": [
+    {
+      "id": "learn:assembly_enter",
+      "interaction_id": "assembly",
+      "knowledge_topic": "microscope_basics",
+      "desktop": "鼠标左键点击显微镜整体，进入预装配查看。",
+      "xr": "右手射线指向显微镜整体，按右手扳机进入预装配查看。",
+      "observation": "观察整体模型与查看视角。"
+    },
+    {
+      "id": "learn:assembly_expand",
+      "interaction_id": "assembly",
+      "knowledge_topic": "microscope_basics",
+      "desktop": "再次点击整体模型，等待展开动画结束。",
+      "xr": "右手射线指向整体模型，再按扳机，等待展开结束。",
+      "observation": "观察各个部件分离后的结构。"
+    },
+    {
+      "id": "learn:assembly_exit",
+      "interaction_id": "assembly",
+      "knowledge_topic": "microscope_basics",
+      "desktop": "点击模型外的空白区域，返回上一层装配视图；返回 Normal 后可继续漫游。",
+      "xr": "右手射线指向模型外空白处并按扳机，返回上一层装配视图。",
+      "observation": "退出是逐层返回，不是一次退出所有模式。"
+    },
+    {
+      "id": "learn:parts_select",
+      "interaction_id": "parts",
+      "knowledge_topic": "microscope_basics",
+      "desktop": "点击想了解的部件，阅读右侧名称和说明；NA 对应上部光学组件，空间频率对应物镜。",
+      "xr": "用右手射线指向部件并按扳机，阅读右侧说明；NA 对应上部光学组件，空间频率对应物镜。",
+      "observation": "比较部件名称、功能和实验入口。"
+    },
+    {
+      "id": "learn:parts_exit",
+      "interaction_id": "parts",
+      "knowledge_topic": "microscope_basics",
+      "desktop": "点击说明面板与当前部件以外的空白处，结束当前部件查看。",
+      "xr": "将右手射线指向选择 UI 与部件以外区域，再按扳机退出当前选择。",
+      "observation": "返回可以选择其他部件的视图。"
+    },
+    {
+      "id": "learn:na_start",
+      "interaction_id": "na_experiment",
+      "knowledge_topic": "numerical_aperture",
+      "desktop": "点击 Start Numerical Aperture Experiment，等待转场。",
+      "xr": "使用右手 UI 射线操作：点击 Start Numerical Aperture Experiment，等待转场。",
+      "observation": "进入 NA 面板后再调节滑块。"
+    },
+    {
+      "id": "learn:na_adjust",
+      "interaction_id": "na_experiment",
+      "knowledge_topic": "numerical_aperture",
+      "desktop": "拖动 NA 滑块，一次只改变 NA。",
+      "xr": "使用右手 UI 射线操作：拖动 NA 滑块，一次只改变 NA。",
+      "observation": "比较半角、收集光锥和显示变化；近似倍率与成像变化属于教学映射，不能将 NA 等同于倍率。"
+    },
+    {
+      "id": "learn:na_exit",
+      "interaction_id": "na_experiment",
+      "knowledge_topic": "numerical_aperture",
+      "desktop": "点击 Exit，等待返回部件查看。",
+      "xr": "使用右手 UI 射线操作：点击 Exit，等待返回部件查看。",
+      "observation": "回到上部光学组件说明。"
+    },
+    {
+      "id": "learn:sf_start",
+      "interaction_id": "spatial_frequency",
+      "knowledge_topic": "spatial_frequency",
+      "desktop": "点击 Start Spatial Frequency Experiment，等待转场。",
+      "xr": "使用右手 UI 射线操作：点击 Start Spatial Frequency Experiment，等待转场。",
+      "observation": "进入空间频率实验面板。"
+    },
+    {
+      "id": "learn:sf_high",
+      "interaction_id": "spatial_frequency",
+      "knowledge_topic": "spatial_frequency",
+      "desktop": "点击 High 频率选项。",
+      "xr": "使用右手 UI 射线操作：点击 High 频率选项。",
+      "observation": "该档对应 250 lines/mm。保持样本与照明不变，比较光栅、频谱和侧带。"
+    },
+    {
+      "id": "learn:sf_middle",
+      "interaction_id": "spatial_frequency",
+      "knowledge_topic": "spatial_frequency",
+      "desktop": "点击 Middle 频率选项。",
+      "xr": "使用右手 UI 射线操作：点击 Middle 频率选项。",
+      "observation": "该档对应 125 lines/mm。保持样本与照明不变，比较光栅、频谱和侧带。"
+    },
+    {
+      "id": "learn:sf_low",
+      "interaction_id": "spatial_frequency",
+      "knowledge_topic": "spatial_frequency",
+      "desktop": "点击 Low 频率选项。",
+      "xr": "使用右手 UI 射线操作：点击 Low 频率选项。",
+      "observation": "该档对应 62.5 lines/mm。保持样本与照明不变，比较光栅、频谱和侧带。"
+    },
+    {
+      "id": "learn:sf_white",
+      "interaction_id": "spatial_frequency",
+      "knowledge_topic": "spatial_frequency",
+      "desktop": "点击 White Light。",
+      "xr": "使用右手 UI 射线操作：点击 White Light。",
+      "observation": "保持频率和样本不变，比较照明条件下的示意变化。"
+    },
+    {
+      "id": "learn:sf_laser",
+      "interaction_id": "spatial_frequency",
+      "knowledge_topic": "spatial_frequency",
+      "desktop": "点击 Laser Excitation。",
+      "xr": "使用右手 UI 射线操作：点击 Laser Excitation。",
+      "observation": "保持频率和样本不变，比较照明条件下的示意变化。"
+    },
+    {
+      "id": "learn:sf_exit",
+      "interaction_id": "spatial_frequency",
+      "knowledge_topic": "spatial_frequency",
+      "desktop": "点击 Exit，等待返回物镜部件查看。",
+      "xr": "使用右手 UI 射线操作：点击 Exit，等待返回物镜部件查看。",
+      "observation": "回到物镜说明。"
+    },
+    {
+      "id": "learn:snom_begin",
+      "interaction_id": "snom_entry",
+      "knowledge_topic": "snom",
+      "desktop": "点击 Begin Operation。",
+      "xr": "使用右手 UI 射线操作：点击 Begin Operation。",
+      "observation": "进入探针选择准备流程。"
+    },
+    {
+      "id": "learn:snom_probe_0",
+      "interaction_id": "snom_probe",
+      "knowledge_topic": "snom",
+      "desktop": "点击 Fine 探针选项。",
+      "xr": "使用右手 UI 射线操作：点击 Fine 探针选项。",
+      "observation": "比较探针示意说明；选中后需要另行安装。"
+    },
+    {
+      "id": "learn:snom_probe_1",
+      "interaction_id": "snom_probe",
+      "knowledge_topic": "snom",
+      "desktop": "点击 Standard 探针选项。",
+      "xr": "使用右手 UI 射线操作：点击 Standard 探针选项。",
+      "observation": "比较探针示意说明；选中后需要另行安装。"
+    },
+    {
+      "id": "learn:snom_probe_2",
+      "interaction_id": "snom_probe",
+      "knowledge_topic": "snom",
+      "desktop": "点击 Robust 探针选项。",
+      "xr": "使用右手 UI 射线操作：点击 Robust 探针选项。",
+      "observation": "比较探针示意说明；选中后需要另行安装。"
+    },
+    {
+      "id": "learn:snom_install",
+      "interaction_id": "snom_probe",
+      "knowledge_topic": "snom",
+      "desktop": "点击 Install Probe，等待安装结束。",
+      "xr": "使用右手 UI 射线操作：点击 Install Probe，等待安装结束。",
+      "observation": "观察安装进度，安装期间不要重复触发。"
+    },
+    {
+      "id": "learn:snom_start",
+      "interaction_id": "snom_start",
+      "knowledge_topic": "snom",
+      "desktop": "点击 Start System。",
+      "xr": "使用右手 UI 射线操作：点击 Start System。",
+      "observation": "开始原理演示；不是真实仪器测量。"
+    },
+    {
+      "id": "learn:snom_change",
+      "interaction_id": "snom_probe",
+      "knowledge_topic": "snom",
+      "desktop": "点击 Change Probe。",
+      "xr": "使用右手 UI 射线操作：点击 Change Probe。",
+      "observation": "返回探针选择，重新选择和安装。"
+    },
+    {
+      "id": "learn:snom_next",
+      "interaction_id": "snom_controls",
+      "knowledge_topic": "snom",
+      "desktop": "点击 Next。",
+      "xr": "使用右手 UI 射线操作：点击 Next。",
+      "observation": "查看下一段讲解；部件模式下查看下一个部件。"
+    },
+    {
+      "id": "learn:snom_previous",
+      "interaction_id": "snom_controls",
+      "knowledge_topic": "snom",
+      "desktop": "点击 Previous。",
+      "xr": "使用右手 UI 射线操作：点击 Previous。",
+      "observation": "回看上一段讲解；部件模式下查看上一个部件。"
+    },
+    {
+      "id": "learn:snom_replay",
+      "interaction_id": "snom_controls",
+      "knowledge_topic": "snom",
+      "desktop": "点击 Replay。",
+      "xr": "使用右手 UI 射线操作：点击 Replay。",
+      "observation": "重新观看当前阶段；部件模式下重新查看当前部件。"
+    },
+    {
+      "id": "learn:snom_play",
+      "interaction_id": "snom_controls",
+      "knowledge_topic": "snom",
+      "desktop": "点击播放/暂停按钮。",
+      "xr": "使用右手 UI 射线操作：点击播放/暂停按钮。",
+      "observation": "暂停观察细节或恢复演示。"
+    },
+    {
+      "id": "learn:snom_components",
+      "interaction_id": "snom_controls",
+      "knowledge_topic": "snom",
+      "desktop": "点击 Components / Back to Tour 切换部件说明与原理演示。",
+      "xr": "使用右手 UI 射线操作：点击 Components / Back to Tour 切换部件说明与原理演示。",
+      "observation": "部件模式中可以选择高亮部件，阅读名称和作用。"
+    },
+    {
+      "id": "learn:snom_exit",
+      "interaction_id": "snom_entry",
+      "knowledge_topic": "snom",
+      "desktop": "点击 Exit。",
+      "xr": "使用右手 UI 射线操作：点击 Exit。",
+      "observation": "结束当前 SNOM 流程并返回实验室。"
+    },
+    {
+      "id": "learn:sample_pick",
+      "interaction_id": "sample_pick",
+      "knowledge_topic": "microscope_basics",
+      "desktop": "鼠标左键拾取当前范围内的样本。",
+      "xr": "按右手扳机拾取当前范围内的样本。",
+      "observation": "观察样本预览，拾取不等于已经放置。"
+    },
+    {
+      "id": "learn:sample_place",
+      "interaction_id": "sample_place_observe",
+      "knowledge_topic": "microscope_basics",
+      "desktop": "按 Z 放置手持样本。",
+      "xr": "按左手扳机放置手持样本。",
+      "observation": "确认样本出现在载物台上。"
+    },
+    {
+      "id": "learn:sample_observe",
+      "interaction_id": "sample_place_observe",
+      "knowledge_topic": "microscope_basics",
+      "desktop": "按 Z 推进当前观察视点。",
+      "xr": "按左手扳机推进当前观察视点。",
+      "observation": "等待视角变化；可能需要再次输入才能进入观察状态。"
+    },
+    {
+      "id": "learn:sample_remove",
+      "interaction_id": "sample_remove",
+      "knowledge_topic": "microscope_basics",
+      "desktop": "鼠标左键取下载物台上的样本；避开 SNOM 和拆解点击目标。",
+      "xr": "按右手扳机取下载物台样本；射线避开 SNOM 和拆解目标。",
+      "observation": "观察样本离开载物台。"
+    },
+    {
+      "id": "learn:light",
+      "interaction_id": "illumination",
+      "knowledge_topic": "microscope_basics",
+      "desktop": "按 B 切换光源。",
+      "xr": "按右手 secondaryButton 切换光源。",
+      "observation": "观察照明开关变化。"
+    },
+    {
+      "id": "learn:objective",
+      "interaction_id": "objective_switch",
+      "knowledge_topic": "microscope_basics",
+      "desktop": "按 R 切换物镜。",
+      "xr": "按右手 primaryButton 切换物镜。",
+      "observation": "观察物镜位置和倍率显示变化。"
+    },
+    {
+      "id": "learn:focus",
+      "interaction_id": "focus",
+      "knowledge_topic": "microscope_basics",
+      "desktop": "按 Tab 切换粗/细调；按住 X 并使用左右方向键调焦。",
+      "xr": "按右摇杆切换粗/细调；按住左手 primaryButton 并左右推动右摇杆调焦。",
+      "observation": "观察清晰度变化；调焦不等于改变物镜固有焦距。"
+    },
+    {
+      "id": "learn:brightness",
+      "interaction_id": "illumination",
+      "knowledge_topic": "microscope_basics",
+      "desktop": "按住 X 并使用上下方向键调节照明。",
+      "xr": "按住左手 primaryButton 并上下推动右摇杆调节照明。",
+      "observation": "比较亮度变化，不据此认定样本结构改变。"
+    },
+    {
+      "id": "learn:observe_exit",
+      "interaction_id": "sample_place_observe",
+      "knowledge_topic": "microscope_basics",
+      "desktop": "按 Z 退出观察。",
+      "xr": "按左手扳机退出观察。",
+      "observation": "回到外部视角。"
+    },
+    {
+      "id": "learn:snom_open",
+      "interaction_id": "snom_entry",
+      "knowledge_topic": "snom",
+      "desktop": "鼠标左键点击 SNOM 交互目标，显示入口面板。",
+      "xr": "右手射线指向 SNOM 入口目标并按扳机，显示入口面板。",
+      "observation": "确认出现 Begin Operation 按钮。"
+    }
+  ]
+}

@@ -11,6 +11,7 @@ internal static class IdleClockChecks
     }
     public static void Main()
     {
+        WavChecks.Run();
         var clock = new AssistantIdleClock();
         Check(!clock.Tick(29.9f,false,30,0),"Early reminder");
         Check(clock.Tick(.2f,false,30,0),"First reminder missing");

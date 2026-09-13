@@ -19,6 +19,10 @@ namespace VRMicroscope.Assistant
         private InputField input;
         private Text transcript, status, sendLabel, cancelLabel;
         private Button send, cancel;
+        private Button voiceButton;
+        private Text voiceLabel;
+        private AssistantVoiceInput voice;
+        private bool VoiceBusy => voice != null && voice.Busy;
         private ScrollRect scroll;
         private CancellationTokenSource pending;
         private readonly List<AssistantChatTurn> history=new List<AssistantChatTurn>();
@@ -33,6 +37,21 @@ namespace VRMicroscope.Assistant
         public void Build(Transform parent,LocalAssistantController controller,LocalAssistantSettings config)
         {
             owner=controller; settings=config;
+            voice=gameObject.AddComponent<AssistantVoiceInput>();
+            voice.StatusChanged += message => { if(status!=null && gameObject.activeInHierarchy) status.text=message; };
+            voice.Transcribed += (text, mock) =>
+            {
+                if (!gameObject.activeInHierarchy) return;
+                string draft=string.IsNullOrWhiteSpace(input.text) ? text : input.text.TrimEnd()+"\n"+text;
+                if (draft.Length>input.characterLimit)
+                    status.text="草稿加上转写超过 1000 字，请先精简草稿后重新录制。原有文字已保留。";
+                else
+                {
+                    input.text=draft;
+                    status.text=mock ? "模拟转写（固定测试句，非语音识别）。" : "语音已转为文字，请检查后点击发送。";
+                }
+                owner.ReportActivity();
+            };
             var root=(RectTransform)transform;
             root.SetParent(parent,false); root.anchorMin=root.anchorMax=root.pivot=new Vector2(0,1);
             root.anchoredPosition=new Vector2(154,-28); root.sizeDelta=new Vector2(860,540);
@@ -51,7 +70,7 @@ namespace VRMicroscope.Assistant
             {
                 string question=questions[i];
                 ButtonAt(root,titles[i],new Vector2(22+i*163,-53),new Vector2(151,30),()=>
-                { if(pending==null && !isTyping) { input.text=question; owner.ReportActivity(); } });
+                { if(pending==null && !isTyping && !VoiceBusy) { input.text=question; owner.ReportActivity(); } });
             }
             var viewport=Rect(root,"Reading Area",new Vector2(22,-95),new Vector2(812,237));
             viewport.gameObject.AddComponent<Image>().color=new Color(.08f,.16f,.23f,.30f);
@@ -63,7 +82,14 @@ namespace VRMicroscope.Assistant
                 "可以询问显微镜、NA、空间频率、共聚焦背景和 THz s-SNOM。\n\n想亲手学习时，可以问我相关区域在哪里，我会标记当前可前往的学习区域。");
             transcript.gameObject.AddComponent<ContentSizeFitter>().verticalFit=ContentSizeFitter.FitMode.PreferredSize;
             scroll.content=transcript.rectTransform;
-            status=Label(root,"Status",new Vector2(22,-341),new Vector2(810,28),17,"准备好后输入问题，再点击发送。");
+            status=Label(root,"Status",new Vector2(22,-337),new Vector2(636,38),17,"可输入文字或录音转写，确认后点击发送。");
+            voiceButton=ButtonAt(root,"语音输入",new Vector2(674,-337),new Vector2(160,36),()=>
+            {
+                if(pending!=null || isTyping) return;
+                keyboard.SetActive(false); input.DeactivateInputField();
+                owner.ReportActivity(); voice.Toggle(settings); RefreshButtons();
+            });
+            voiceLabel=voiceButton.GetComponentInChildren<Text>();
             var field=Rect(root,"Question Input",new Vector2(22,-380),new Vector2(812,82));
             field.gameObject.AddComponent<Image>().color=new Color(.12f,.23f,.30f,.7f);
             input=field.gameObject.AddComponent<InputField>();
@@ -73,7 +99,11 @@ namespace VRMicroscope.Assistant
             input.lineType=InputField.LineType.MultiLineNewline; input.characterLimit=1000;
             input.onValueChanged.AddListener(_=>{ owner.ReportActivity(); RefreshButtons(); });
             ButtonAt(root,"新对话",new Vector2(22,-483),new Vector2(108,36),NewConversation);
-            ButtonAt(root,"屏幕键盘",new Vector2(142,-483),new Vector2(126,36),()=>keyboard.SetActive(!keyboard.activeSelf));
+            ButtonAt(root,"下一步",new Vector2(282,-483),new Vector2(118,36),()=>
+            { if(pending==null && !isTyping && !VoiceBusy) { input.text="根据我当前的实验状态，接下来应该怎么操作？"; owner.ReportActivity(); } });
+            ButtonAt(root,"如何退出",new Vector2(410,-483),new Vector2(142,36),()=>
+            { if(pending==null && !isTyping && !VoiceBusy) { input.text="当前实验应该如何退出？"; owner.ReportActivity(); } });
+            ButtonAt(root,"屏幕键盘",new Vector2(142,-483),new Vector2(126,36),()=>{ if(!VoiceBusy) keyboard.SetActive(!keyboard.activeSelf); });
             cancel=ButtonAt(root,"取消请求",new Vector2(575,-483),new Vector2(126,36),CancelOrSkip);
             cancelLabel=cancel.GetComponentInChildren<Text>();
             send=ButtonAt(root,"发送",new Vector2(711,-483),new Vector2(123,36),Send);
@@ -88,9 +118,20 @@ namespace VRMicroscope.Assistant
             owner.Dismiss();
             gameObject.SetActive(true); active=this; owner.ReadingOrTyping=true; owner.ReportActivity();
             shield.SetActive(true);
+            BringToFront();
             // Do not select the field automatically: XR users can first choose a question or keyboard.
         }
         public void Close() { CancelPending(); gameObject.SetActive(false); }
+        private void BringToFront()
+        {
+            // The shield must cover sibling HUD controls while remaining behind the dialog.
+            if (shield != null) shield.transform.SetAsLastSibling();
+            transform.SetAsLastSibling();
+        }
+        private void LateUpdate()
+        {
+            if (active == this) BringToFront();
+        }
         private void Update()
         {
             if (Input.GetKeyDown(KeyCode.Escape) && string.IsNullOrEmpty(Input.compositionString)) Close();
@@ -100,6 +141,7 @@ namespace VRMicroscope.Assistant
         private void NewConversation()
         {
             owner.Navigation.Clear();
+            owner.Guidance.Clear();
             CancelPending(); history.Clear(); session=Guid.NewGuid().ToString("N");
             input.text=""; transcript.text="新的对话开始了。你想了解什么？";
             status.text="仅保留当前会话最近四轮问答。";
@@ -116,11 +158,11 @@ namespace VRMicroscope.Assistant
                 {
                     string character=rows[row][col].ToString();
                     ButtonAt(rect,character,new Vector2(8+col*79,-8-row*44),new Vector2(72,37),()=>
-                    { if(pending==null && input.text.Length<1000) { input.text+=character; owner.ReportActivity(); } });
+                    { if(pending==null && !VoiceBusy && input.text.Length<1000) { input.text+=character; owner.ReportActivity(); } });
                 }
-            ButtonAt(rect,"空格",new Vector2(8,-188),new Vector2(300,38),()=>{ if(pending==null && input.text.Length<1000) input.text+=" "; });
+            ButtonAt(rect,"空格",new Vector2(8,-188),new Vector2(300,38),()=>{ if(pending==null && !VoiceBusy && input.text.Length<1000) input.text+=" "; });
             ButtonAt(rect,"退格",new Vector2(318,-188),new Vector2(150,38),()=>
-            { if(pending==null && input.text.Length>0) input.text=input.text.Substring(0,input.text.Length-1); });
+            { if(pending==null && !VoiceBusy && input.text.Length>0) input.text=input.text.Substring(0,input.text.Length-1); });
             ButtonAt(rect,"收起键盘",new Vector2(478,-188),new Vector2(318,38),()=>keyboard.SetActive(false));
             keyboard.SetActive(false);
         }
@@ -128,12 +170,12 @@ namespace VRMicroscope.Assistant
         {
             if (isTyping) { FinishTypingImmediately(); return; }
             string question=input.text.Trim();
-            if (pending!=null || question.Length==0 || Time.unscaledTime<nextSend) return;
+            if (pending!=null || VoiceBusy || question.Length==0 || Time.unscaledTime<nextSend) return;
             owner.ReportActivity(); nextSend=Time.unscaledTime+2;
             var cts=new CancellationTokenSource(); pending=cts;
             int ticket=++generation;
             var request=new AssistantChatRequest {sessionId=session,requestId=Guid.NewGuid().ToString("N"),
-                question=question,history=history.ToArray(),navigation=owner.Navigation.Capture()};
+                question=question,history=history.ToArray(),navigation=owner.Navigation.Capture(),guidance=owner.Guidance.Capture()};
             status.text="正在查阅项目资料并检查回答…";
             keyboard.SetActive(false);
             RefreshButtons();
@@ -141,7 +183,13 @@ namespace VRMicroscope.Assistant
             {
                 var response=await AssistantChatClient.Request(request,settings,cts.Token);
                 if (this==null || !gameObject.activeInHierarchy || ticket!=generation || pending!=cts) return;
-                response.answer=owner.Navigation.Apply(response,request.navigation);
+                if(response.kind=="guide" && response.suggested_action_ids[0].StartsWith("learn:",StringComparison.Ordinal))
+                    response.answer=owner.Guidance.Apply(response,request.guidance);
+                else
+                {
+                    if(response.kind=="guide") owner.Guidance.Clear();
+                    response.answer=owner.Navigation.Apply(response,request.navigation);
+                }
                 history.Add(new AssistantChatTurn {role="user",content=question});
                 history.Add(new AssistantChatTurn {role="assistant",content=response.answer});
                 while(history.Count>8) history.RemoveRange(0,2);
@@ -275,6 +323,8 @@ namespace VRMicroscope.Assistant
         }
         private void CancelPending()
         {
+            if(VoiceBusy && status!=null) status.text="语音已取消，原有草稿已保留。";
+            if(voice!=null) voice.Cancel();
             generation++;
             var cancellation=pending; pending=null;
             cancellation?.Cancel();
@@ -286,15 +336,17 @@ namespace VRMicroscope.Assistant
         }
         private void RefreshButtons()
         {
-            if(send!=null) send.interactable=pending==null && !isTyping && !string.IsNullOrWhiteSpace(input.text) && Time.unscaledTime>=nextSend;
-            if(cancel!=null) cancel.interactable=pending!=null || isTyping;
-            if(cancelLabel!=null) cancelLabel.text=isTyping ? "跳过打字" : "取消请求";
+            if(send!=null) send.interactable=pending==null && !isTyping && !VoiceBusy && !string.IsNullOrWhiteSpace(input.text) && Time.unscaledTime>=nextSend;
+            if(cancel!=null) cancel.interactable=pending!=null || isTyping || VoiceBusy;
+            if(cancelLabel!=null) cancelLabel.text=VoiceBusy ? "取消语音" : isTyping ? "跳过打字" : "取消请求";
             if(sendLabel!=null) sendLabel.text=pending!=null ? "等待回答" : isTyping ? "正在输出" : "发送";
-            if(input!=null) input.interactable=pending==null && !isTyping;
+            if(input!=null) input.interactable=pending==null && !isTyping && !VoiceBusy;
+            if(voiceButton!=null) voiceButton.interactable=pending==null && !isTyping && (!VoiceBusy || voice.Recording);
+            if(voiceLabel!=null) voiceLabel.text=voice.Recording ? $"停止 {voice.Seconds:00}/30" : VoiceBusy ? "处理中…" : "语音输入";
         }
         private void OnDisable()
         {
-            if(pending!=null && status!=null) status.text="已取消，问题仍保留在输入框中。";
+            if((pending!=null || VoiceBusy) && status!=null) status.text="已取消，问题仍保留在输入框中。";
             CancelPending();
             if(active==this) { active=null; closedFrame=Time.frameCount; }
             if(shield!=null) shield.SetActive(false);
@@ -311,7 +363,7 @@ namespace VRMicroscope.Assistant
         private Text Label(Transform parent,string name,Vector2 pos,Vector2 size,int fontSize,string value)
         {
             var text=Rect(parent,name,pos,size).gameObject.AddComponent<Text>();
-            text.font=settings.chineseFont; text.fontSize=fontSize; text.text=value;
+            text.font=TMPro.TMP_Settings.defaultFontAsset.sourceFontFile; text.fontSize=fontSize; text.text=value;
             text.color=new Color(.88f,.95f,1); text.raycastTarget=false; text.supportRichText=false;
             text.alignment=TextAnchor.UpperLeft; text.horizontalOverflow=HorizontalWrapMode.Wrap;
             text.verticalOverflow=VerticalWrapMode.Truncate; return text;

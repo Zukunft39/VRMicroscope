@@ -1,5 +1,7 @@
 # 第三批（部分）：学习区域定位与视觉标记
 
+2026-09-13 更新：第三批操作说明已接通，当前协议为 `assistant-chat-v3-guidance`。本文保留区域标记的设计细节；完整操作流程和新增状态字段见 [GUIDANCE_IMPLEMENTATION.md](GUIDANCE_IMPLEMENTATION.md)。
+
 实现版本：`assistant-chat-v2-navigation`。本次覆盖“想学什么 → 去哪个区域 → 相对方位和距离 → 标记 → 靠近消失”。具体仪器操作步骤、自动控制和行走路径规划不在本次实现中。
 
 ## 已核对的区域与功能

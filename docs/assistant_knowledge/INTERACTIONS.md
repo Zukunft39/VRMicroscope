@@ -1,5 +1,7 @@
 # VRMicroscope 交互目录（局外确认稿）
 
+2026-09-13 实现更新：当前操作说明使用 AssistantGuidanceActions.json 中的动作级白名单及实时状态，见 GUIDANCE_IMPLEMENTATION.md。下文的交互验证标记仍表示静态审计，不能推导实机测试通过；当前按键/状态限制以实时白名单为准。
+
 审阅日期：2026-09-12。范围：当前主场景与自定义运行时脚本。未运行 Unity/头显；所有条目待最终确认。
 
 本 Markdown 由 interaction_catalog.json 同步生成，JSON 为结构化主目录。不要把 static_confirmed 理解成实机已验证。

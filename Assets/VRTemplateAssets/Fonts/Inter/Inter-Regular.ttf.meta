@@ -11,7 +11,8 @@ TrueTypeFontImporter:
   fontName: Inter
   fontNames:
   - Inter
-  fallbackFontReferences: []
+  fallbackFontReferences:
+  - {fileID: 12800000, guid: 6c8615c170a02d74ebe30e1df4b61ede, type: 3}
   customCharacters: 
   fontRenderingMode: 0
   ascentCalculationMode: 1

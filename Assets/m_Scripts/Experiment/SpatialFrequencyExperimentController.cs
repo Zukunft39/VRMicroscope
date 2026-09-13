@@ -124,6 +124,9 @@ public sealed class SpatialFrequencyExperimentController : MonoBehaviour
 
     public bool IsExperimentActive => isExperimentActive;
     public bool IsTransitioning => isTransitioning;
+    public Selectable[] AssistantControls => new Selectable[] {highFrequencyToggle, middleFrequencyToggle, lowFrequencyToggle, whiteLightButton, laserExcitationButton, exitButton};
+    public int AssistantProfile => currentProfileIndex;
+    public string AssistantIllumination => illuminationMode.ToString();
     private void Awake()
     {
         EnsureReferences();

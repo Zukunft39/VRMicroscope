@@ -48,6 +48,7 @@ def check_clock():
     lines = ['-target:exe', '-out:"%s"' % (OUT / 'IdleClockChecks.dll')]
     lines += ['-r:"%s"' % p for p in refs.glob('*.dll')]
     lines += ['"%s"' % (ROOT / 'Assets/m_Scripts/Assistant/AssistantIdleClock.cs'), '"%s"' % Path(__file__).with_name('IdleClockChecks.cs')]
+    lines += ['"%s"' % (ROOT / 'Assets/m_Scripts/Assistant/AssistantWavEncoder.cs'), '"%s"' % Path(__file__).with_name('WavChecks.cs')]
     target = OUT / 'clock.rsp'
     target.write_text('\n'.join(lines), encoding='utf-8')
     subprocess.run([str(dotnet), str(sdk / 'Roslyn/bincore/csc.dll'), '/nologo', '@' + str(target)], check=True)

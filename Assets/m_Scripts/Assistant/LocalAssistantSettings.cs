@@ -16,6 +16,9 @@ namespace VRMicroscope.Assistant
         [Header("Knowledge chat (key stays on the backend)")]
         public string chatEndpoint = "http://127.0.0.1:8765/assistant";
         [Range(5,90)] public int chatTimeoutSeconds = 50;
+        [Header("Voice input (Groq key stays on the backend)")]
+        public string speechEndpoint = "http://127.0.0.1:8765/speech";
+        [Range(10,90)] public int speechTimeoutSeconds = 50;
         [Header("Learning location markers")]
         public bool navigationEnabled = true;
         [Min(.1f)] public float arrivalDistanceMeters = 1.2f;

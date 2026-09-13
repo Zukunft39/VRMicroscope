@@ -1,5 +1,7 @@
 # 输入核查与待确认项
 
+2026-09-13 更新：已实现动作级运行时检查。调焦说明只在观察相机激活时提供；固定桌面键位与当前配置不符时不推荐该动作。详见 GUIDANCE_IMPLEMENTATION.md；下表保留源码映射信息，映射存在不代表在所有状态生效。
+
 依据：主场景中 CameraTryMove 的序列化键值、Interactor 的回调、Assets/Config/XRI Default Input Actions.inputactions。该输入资产 GUID 为 c348712bda248c246b8c49b3db54643f，与主场景 Interactor 引用一致。键位不是由旧 txt 文档推定。
 
 ## 当前桌面映射

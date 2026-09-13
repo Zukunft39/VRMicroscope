@@ -15,6 +15,16 @@ public class InteractWithSamples:MonoBehaviour
     public RawImage Inventory;
 
     public Texture CurrentSampleTexture => currentSampleTexture;
+    public bool AssistantCanPick => interactableObject != null && interactableObject.Sample != null;
+    public bool AssistantHasHandSample
+    {
+        get
+        {
+            if (transform.childCount == 0) return false;
+            foreach (Transform child in transform.GetChild(0)) if (child.CompareTag("ObserveObjects")) return true;
+            return false;
+        }
+    }
     public event Action SampleChanged;
     public string CurrentSampleName => !string.IsNullOrWhiteSpace(currentSampleName)
         ? currentSampleName

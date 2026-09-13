@@ -20,6 +20,8 @@ MonoBehaviour:
   reducedMotion: 0
   chatEndpoint: http://127.0.0.1:8765/assistant
   chatTimeoutSeconds: 50
+  speechEndpoint: http://127.0.0.1:8765/speech
+  speechTimeoutSeconds: 50
   navigationEnabled: 1
   arrivalDistanceMeters: 1.2
   worldUnitsPerMeter: 1

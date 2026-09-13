@@ -19,6 +19,7 @@ public class Interactor : MonoBehaviour
     public LocomotionSystem xrLocomotionSys;
     
     public GameState CurrentState { get; private set; }
+    public Microscope AssistantMicroscope => _currentMicroscope;
     private Microscope _currentMicroscope;
     private InteractableSamples _sample;
     private InputActionMap _roamingMap;

@@ -475,6 +475,19 @@ public class Microscope : MonoBehaviour
         }
         
     }
+
+    public bool AssistantCanInteract => MicroUI.setTrue && isNear;
+    public bool AssistantObserving => lookCamera != null && lookCamera.activeInHierarchy;
+    public bool AssistantObjectiveMoving => isRotating;
+    public bool AssistantHasHandObject
+    {
+        get
+        {
+            if (player == null) return false;
+            foreach (Transform child in player.transform) if (child.CompareTag("ObserveObjects")) return true;
+            return false;
+        }
+    }
     // 焦距调整方法
     private void AdjustFocal(int direction)
     {

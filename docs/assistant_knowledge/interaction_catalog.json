@@ -4,7 +4,7 @@
   "scope": "Assets/Scene/Scene_Laboratory/MainScene_Labortory.unity",
   "review_level": "source_and_scene_static_audit",
   "runtime_test_performed": false,
-  "approval_policy": "所有条目均待局外确认。static_confirmed 只说明源码和直接场景/运行时入口有证据，不等于实机验证。正式自动指引只使用 approved_for_guidance=true 的条目。",
+  "approval_policy": "交互条目保留静态审计和待实机验证标记。2026-09-13 起，操作说明采用 AssistantGuidanceActions.json 的动作级白名单与 GUIDANCE_CONTEXT 实时准入；不将整条交互或 static_confirmed 视为实机验证通过。",
   "entries": [
     {
       "id": "navigation",

@@ -40,6 +40,7 @@ namespace VRMicroscope.Assistant
         private Rect lastSafeArea;
         private RectTransform safeRoot;
         public AssistantNavigation Navigation { get; private set; }
+        public AssistantGuidance Guidance { get; private set; }
         private bool pointerReading;
         private AssistantChatPanel chat;
 
@@ -190,7 +191,11 @@ namespace VRMicroscope.Assistant
         {
             var go = new GameObject("Assistant Canvas", typeof(RectTransform), typeof(Canvas), typeof(CanvasScaler), typeof(GraphicRaycaster));
             go.transform.SetParent(transform,false);
-            canvas = go.GetComponent<Canvas>(); canvas.sortingOrder = 180;
+            canvas = go.GetComponent<Canvas>();
+            // Reserve the front UI layer for the assistant, above experiment and tutorial canvases.
+            canvas.sortingLayerID = SortingLayer.NameToID("Front");
+            canvas.sortingOrder = short.MaxValue;
+            canvas.overrideSorting = true;
             canvasRect = (RectTransform)go.transform;
             scaler = go.GetComponent<CanvasScaler>();
             scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
@@ -230,6 +235,8 @@ namespace VRMicroscope.Assistant
             chat.Build(safeRoot,this,settings);
             Navigation = gameObject.AddComponent<AssistantNavigation>();
             Navigation.Build(safeRoot, settings);
+            Guidance = gameObject.AddComponent<AssistantGuidance>();
+            Guidance.Build(safeRoot, this, settings);
             bubble.SetActive(false);
             UpdateCanvas();
         }
@@ -242,7 +249,7 @@ namespace VRMicroscope.Assistant
         private Text Label(string name,Transform parent,Vector2 pos,Vector2 size,int fontSize,Color color,TextAnchor align=TextAnchor.UpperLeft)
         {
             var text=Rect(name,parent,pos,size).gameObject.AddComponent<Text>();
-            text.font=settings.chineseFont != null ? settings.chineseFont : Resources.GetBuiltinResource<Font>("Arial.ttf");
+            text.font=TMPro.TMP_Settings.defaultFontAsset.sourceFontFile;
             text.fontSize=fontSize; text.color=color; text.alignment=align;
             text.raycastTarget=false; text.supportRichText=false;
             text.horizontalOverflow=HorizontalWrapMode.Wrap; text.verticalOverflow=VerticalWrapMode.Truncate;
@@ -292,6 +299,7 @@ namespace VRMicroscope.Assistant
         private void OnDisable()
         {
             if (Navigation != null) Navigation.Clear();
+            if (Guidance != null) Guidance.Clear();
             if (chat != null) chat.Close();
             if (canvas != null) canvas.enabled=false;
             ReportActivity();
