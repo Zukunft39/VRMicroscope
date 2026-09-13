@@ -83,12 +83,16 @@
         "样本",
         "标本",
         "载玻片",
-        "拾取"
+        "拾取",
+        "红色样本",
+        "绿色样本",
+        "蓝色样本",
+        "黄色样本"
       ],
       "verification": "static_confirmed",
       "runtime_verified": false,
       "approved_for_guidance": false,
-      "location": "主场景带 InteractableSamples 的样本对象；样本桌相对方位未确认。",
+      "location": "主场景带 InteractableSamples 的 4 处样本培养皿：红色样本（超声清洗仪旁）、绿色样本（离心机旁）、蓝色与黄色样本（显微镜正前方操作台）。",
       "prerequisites": [
         "进入样本交互范围并被注册为当前可交互样本。",
         "没有优先处理的 SNOM/拆解交互；若载物台已有样本，取下样本优先。"

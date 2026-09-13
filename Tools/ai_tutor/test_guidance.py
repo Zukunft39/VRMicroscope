@@ -28,6 +28,48 @@ def answer(key="learn:na_adjust"):
 
 
 class GuidanceContracts(unittest.TestCase):
+    def test_discarded_operating_prose_does_not_reject_valid_action(self):
+        verdict = {"in_scope": True, "supported": True, "contains_action_instructions": True}
+        for prose in ("Select -> start", "x" * 651, ""):
+            a = answer(); a["answer"] = prose
+            with patch.object(chat, "completion", side_effect=[a, verdict]) as call:
+                result = chat.generate(request())
+            self.assertEqual(call.call_count, 2)
+            self.assertEqual(result["answer"], g.render(answer(), state()))
+
+    def test_invalid_action_gets_one_repair_then_semantic_review(self):
+        wrong = answer("learn:sf_high")
+        verdict = {"in_scope": True, "supported": True, "contains_action_instructions": True}
+        with patch.object(chat, "completion", side_effect=[wrong, answer(), verdict]) as call:
+            result = chat.generate(request())
+        self.assertEqual(call.call_count, 3)
+        self.assertEqual(result["suggested_action_ids"], ["learn:na_adjust"])
+        self.assertIn(chat.runtime_context(request()), call.call_args_list[1].args[0][0]["content"])
+
+    def test_repair_cannot_authorize_unavailable_action(self):
+        with patch.object(chat, "completion", return_value=answer("learn:sf_high")) as call:
+            with self.assertRaises(chat.ChatError) as error:
+                chat.generate(request())
+        self.assertEqual(error.exception.code, "answer_format")
+        self.assertEqual(call.call_count, 2)
+
+    def test_invalid_json_can_be_repaired_but_review_format_is_distinct(self):
+        verdict = {"in_scope": True, "supported": True, "contains_action_instructions": True}
+        with patch.object(chat, "completion", side_effect=[json.JSONDecodeError("bad", "", 0), answer(), verdict]):
+            self.assertEqual(chat.generate(request())["kind"], "guide")
+        with patch.object(chat, "completion", side_effect=[answer(), {"supported": True}]):
+            with self.assertRaises(chat.ChatError) as error:
+                chat.generate(request())
+        self.assertEqual(error.exception.code, "review_format")
+
+    def test_timeout_is_not_retried_as_format_failure(self):
+        with patch.object(chat, "completion", side_effect=TimeoutError()) as call:
+            with self.assertRaises(chat.ChatError) as error:
+                chat.generate(request())
+        self.assertEqual(error.exception.code, "model_timeout")
+        self.assertEqual(error.exception.status, 504)
+        self.assertEqual(call.call_count, 1)
+
     def test_shared_catalog_is_complete_and_unique(self):
         self.assertEqual(len(g.ACTIONS), len(g.CATALOG["actions"]))
         for a in g.ACTIONS.values():

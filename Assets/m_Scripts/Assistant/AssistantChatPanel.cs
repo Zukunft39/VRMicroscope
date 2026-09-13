@@ -213,10 +213,9 @@ namespace VRMicroscope.Assistant
             {
                 if (this!=null && ticket==generation && pending==cts)
                 {
-                    long code=exception is AssistantConnectionException connection ? connection.Status : 0;
-                    status.text=code==429 ? "请求较多，请稍后点击发送重试。" :
-                        code==502 ? "回答未能完成或通过检查，请点击发送重试。" :
-                        "暂时无法连接问答服务，请确认后端已启动，再点击发送重试。";
+                    status.text=exception is AssistantConnectionException connection
+                        ? AssistantChatClient.ErrorMessage(connection)
+                        : "问答处理异常，请重新提问；问题草稿已保留。";
                     // Keep the draft and prior answers; never present service errors as knowledge refusal.
                 }
             }

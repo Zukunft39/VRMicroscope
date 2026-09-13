@@ -113,12 +113,14 @@ class ChatContracts(unittest.TestCase):
 
     def test_invalid_review_is_service_error_not_knowledge_refusal(self):
         verdict = {"in_scope": "true", "supported": True, "contains_action_instructions": False}
-        with patch.object(chat, "completion", side_effect=[answer(), verdict]), self.assertRaises(ValueError):
+        with patch.object(chat, "completion", side_effect=[answer(), verdict]), self.assertRaises(chat.ChatError) as error:
             chat.generate(request(), False, self.bundle)
+        self.assertEqual(error.exception.code, "review_format")
 
     def test_upstream_error_is_not_swallowed(self):
-        with patch.object(chat, "completion", side_effect=TimeoutError), self.assertRaises(TimeoutError):
+        with patch.object(chat, "completion", side_effect=TimeoutError), self.assertRaises(chat.ChatError) as error:
             chat.generate(request(), False, self.bundle)
+        self.assertEqual(error.exception.code, "model_timeout")
 
     def test_upstream_json_request_and_final_content_only(self):
         envelope = {"choices": [{"finish_reason": "stop", "message": {"content": json.dumps(answer()), "reasoning_content": "private reasoning"}}]}
@@ -201,6 +203,14 @@ class HttpIntegration(unittest.TestCase):
         with patch.object(self.gateway, "allow_request", return_value=False):
             with self.assertRaises(urllib.error.HTTPError) as error: self.post(request())
         self.assertEqual(error.exception.code, 429)
+
+    def test_typed_failures_reach_client_without_provider_details(self):
+        for code, status in (("model_timeout", 504), ("answer_format", 502), ("review_format", 502), ("model_rate_limit", 429)):
+            with patch.object(chat, "generate", side_effect=chat.ChatError(code, status)):
+                with self.assertRaises(urllib.error.HTTPError) as error:
+                    self.post(request())
+            self.assertEqual(error.exception.code, status)
+            self.assertEqual(json.load(error.exception), {"error": code})
 
 
 if __name__ == "__main__":

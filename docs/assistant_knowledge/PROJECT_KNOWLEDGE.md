@@ -16,7 +16,14 @@
 
 物镜用于聚焦与光收集；NA 与倍率是不同属性。调焦表达轴向相对定位，不应解释为玩家改变了物镜固有焦距。载物台定位不是共聚焦扫描器。Upper Optical Assembly 的内部元件未逐个辨认，不得随意指定为针孔或二色镜。
 
-依据：`Assets/m_Scripts/Experiment/ConfocalComponentBackground.md`、主场景部件说明、`Microscope.cs`。
+实验室桌面放置了 4 种不同颜色的荧光显微镜观察样本（带培养皿与载玻片）：
+- 红色样本（`sample_red`）：位于超声清洗仪旁的实验台上；
+- 绿色样本（`sample_green`）：位于离心机旁的实验台上；
+- 蓝色样本（`sample_blue`）：位于显微镜正前方的操作台左侧；
+- 黄色样本（`sample_yellow`）：位于显微镜正前方的操作台右侧。
+玩家可向小助手询问各样本位置，小助手会通过三维空间轮廓和发光光柱将其标明；靠近后可拾取并放置在显微镜载物台上进行观察。
+
+依据：`Assets/m_Scripts/Experiment/ConfocalComponentBackground.md`、主场景部件与样本对象配置、`Microscope.cs`、`InteractableSamples.cs`。
 
 ## NA
 

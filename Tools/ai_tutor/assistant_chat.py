@@ -5,6 +5,7 @@ import os
 from pathlib import Path
 import re
 import urllib.request
+import urllib.error
 import navigation
 import guidance
 
@@ -13,6 +14,26 @@ TOPICS = {"microscope_basics", "numerical_aperture", "spatial_frequency", "confo
 FIELDS = {"kind", "answer", "interaction_ids", "suggested_action_ids", "knowledge_topics"}
 PROMPT_VERSION = "assistant-chat-v3-guidance"
 ENDPOINT = "https://api.deepseek.com/chat/completions"
+
+
+class ChatError(Exception):
+    def __init__(self, code, status=502):
+        super().__init__(code)
+        self.code, self.status = code, status
+
+
+def model_call(messages, model):
+    try:
+        return completion(messages, model)
+    except urllib.error.HTTPError as error:
+        code = "model_credentials" if error.code in (401, 403) else "model_rate_limit" if error.code == 429 else "model_unavailable"
+        raise ChatError(code, 429 if error.code == 429 else 502) from None
+    except TimeoutError:
+        raise ChatError("model_timeout", 504) from None
+    except urllib.error.URLError as error:
+        raise ChatError("model_timeout" if isinstance(error.reason, TimeoutError) else "model_unavailable", 504 if isinstance(error.reason, TimeoutError) else 502) from None
+    except RuntimeError:
+        raise ChatError("model_configuration") from None
 
 
 def require(value, message="Invalid assistant data"):
@@ -69,6 +90,10 @@ def refusal():
 def validate_answer(answer, snapshot=None, operation_state=None):
     require(isinstance(answer, dict) and set(answer) == FIELDS, "Invalid response schema")
     require(answer["kind"] in ("explain", "guide", "clarify", "refuse"), "Unknown response kind")
+    # Operating prose is discarded, but IDs and state permissions are never repaired locally.
+    if guidance.is_operation(answer):
+        guidance.validate(answer, operation_state)
+        answer = {**answer, "answer": guidance.render(answer, operation_state)}
     require(isinstance(answer["answer"], str) and 0 < len(answer["answer"].strip()) <= 650)
     require("<" not in answer["answer"] and ">" not in answer["answer"])
     if answer["kind"] == "guide":
@@ -147,7 +172,7 @@ def verify_semantics(payload, answer, bundle, model):
     ) + bundle.facts + navigation.RULES + guidance.RULES + runtime_context(payload)
     system += ("\n【本次仅做审核】上面的五字段回答格式只适用于待审助手，不适用于你。"
                "你只输出 in_scope、supported、contains_action_instructions 三个布尔字段的 JSON，不生成玩家回答或动作。")
-    result = completion([{"role": "system", "content": system}, {"role": "user", "content": json.dumps(
+    result = model_call([{"role": "system", "content": system}, {"role": "user", "content": json.dumps(
         {"question": payload["question"], "history": payload["history"], "candidate": answer}, ensure_ascii=False)}], model)
     require(isinstance(result, dict) and set(result) == {"in_scope", "supported", "contains_action_instructions"})
     require(all(type(v) is bool for v in result.values()))
@@ -176,13 +201,30 @@ def generate(payload, mock=False, bundle=None):
     operation_state = payload.get("guidance")
     if mock:
         candidate = guidance.mock_answer(payload["question"], operation_state) or navigation.mock_guide(payload["question"], payload.get("navigation")) or mock_answer(payload["question"])
+        answer = validate_answer(candidate, payload.get("navigation"), operation_state)
     else:
-        candidate = completion(model_messages(payload, bundle), model)
-    answer = validate_answer(candidate, payload.get("navigation"), operation_state)
-    if guidance.is_operation(answer):
-        answer["answer"] = guidance.render(answer, operation_state)
-    if not mock and answer["kind"] != "refuse" and not verify_semantics(payload, answer, bundle, model):
-        answer = refusal()
+        messages = model_messages(payload, bundle)
+        for attempt in range(2):
+            try:
+                candidate = model_call(messages, model)
+                answer = validate_answer(candidate, payload.get("navigation"), operation_state)
+                break
+            except (ValueError, TypeError, KeyError):
+                if attempt:
+                    raise ChatError("answer_format") from None
+                # Regenerate from the same trusted snapshot; do not invent capabilities
+                # or put malformed model text into a trusted system message.
+                messages = [*messages, {"role": "system", "content":
+                    "上次输出未通过结构校验。请按原问题和同一当前快照重新回答，仅输出规定的五字段 JSON。"
+                    "guide 只能选一个当前允许动作，逐字复制该动作的 id、interaction_id、knowledge_topic，分别放入对应数组。"
+                    "不要混淆动作 ID 和交互 ID，不新增或绕过动作。无法确定时提出项目相关澄清，非 guide 的动作数组为空。"}]
+        if answer["kind"] != "refuse":
+            try:
+                accepted = verify_semantics(payload, answer, bundle, model)
+            except (ValueError, TypeError, KeyError):
+                raise ChatError("review_format") from None
+            if not accepted:
+                answer = refusal()
     return {**answer, "sessionId": payload["sessionId"], "requestId": payload["requestId"],
             "source": "mock" if mock else "model", "model": "mock" if mock else model,
             "promptVersion": PROMPT_VERSION, "knowledgeVersion": bundle.version,

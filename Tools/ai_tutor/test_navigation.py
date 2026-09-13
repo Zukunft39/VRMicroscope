@@ -97,6 +97,40 @@ class NavigationContracts(unittest.TestCase):
                 self.assertEqual(call.call_count, 2)
                 self.assertEqual(result["kind"], "guide" if approved else "refuse")
 
+    def test_sample_navigation_targets_and_queries(self):
+        s = {
+            "snapshotId": "d" * 32, "playerPosition": {"x": 0, "y": 1.7, "z": 0},
+            "playerForward": {"x": 0, "y": 0, "z": 1}, "worldUnitsPerMeter": 1,
+            "targets": [
+                {"id": "sample_red", "worldPosition": {"x": 1.45, "y": 0.75, "z": -1.89}},
+                {"id": "sample_green", "worldPosition": {"x": -0.61, "y": 0.75, "z": 1.11}},
+                {"id": "sample_blue", "worldPosition": {"x": -1.44, "y": 0.75, "z": -0.75}},
+                {"id": "sample_yellow", "worldPosition": {"x": -1.44, "y": 0.75, "z": -1.05}},
+            ]
+        }
+        ctx = nav.context(s)
+        self.assertEqual(len(ctx["targets"]), 4)
+        for t in ctx["targets"]:
+            self.assertEqual(t["knowledge_topic"], "microscope_basics")
+            self.assertTrue(t["action_id"].startswith("highlight:sample_"))
+
+        # Test queries
+        queries = [
+            ("我应该在哪获取到红色样本", "sample_red"),
+            ("我想拿取绿色样本，它在哪里？", "sample_green"),
+            ("蓝色样本在什么位置？", "sample_blue"),
+            ("黄色标本在哪里获取？", "sample_yellow"),
+            ("Where can I find the red sample?", "sample_red"),
+        ]
+        for q, expected_id in queries:
+            guide = nav.mock_guide(q, s)
+            self.assertIsNotNone(guide, f"Failed for query: {q}")
+            self.assertEqual(guide["kind"], "guide")
+            self.assertEqual(guide["interaction_ids"], [expected_id])
+            self.assertEqual(guide["suggested_action_ids"], ["highlight:" + expected_id])
+            self.assertEqual(guide["knowledge_topics"], ["microscope_basics"])
+            self.assertEqual(chat.validate_answer(guide, s), guide)
+
 
 if __name__ == "__main__":
     unittest.main()

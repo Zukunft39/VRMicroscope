@@ -7,6 +7,10 @@ TARGETS = {
     "na_experiment": ("显微镜学习区域", "数值孔径，入口关联上部光学组件", "numerical_aperture"),
     "spatial_frequency": ("显微镜学习区域", "空间频率，入口关联物镜", "spatial_frequency"),
     "snom_entry": ("THz s-SNOM 装置", "探针敲击、近场耦合与扫描的教学演示", "snom"),
+    "sample_red": ("红色样本", "拾取红色荧光样本并在显微镜下观察", "microscope_basics"),
+    "sample_green": ("绿色样本", "拾取绿色荧光样本并在显微镜下观察", "microscope_basics"),
+    "sample_blue": ("蓝色样本", "拾取蓝色荧光样本并在显微镜下观察", "microscope_basics"),
+    "sample_yellow": ("黄色样本", "拾取黄色荧光样本并在显微镜下观察", "microscope_basics"),
 }
 
 
@@ -62,8 +66,14 @@ def validate_guide(answer, snapshot):
 RULES = """
 【学习区域定位规则】
 NAVIGATION_CONTEXT 仅决定可定位目标；操作说明另由 GUIDANCE_CONTEXT.allowed_actions 决定。
-用户寻找某区域时选择匹配的 targets；想学习且当前有匹配操作时优先操作说明，否则定位。
-只解释原理/区别时仍 explain，不无故添加标记。不明确想学哪个主题时 clarify。
+用户寻找某区域或样本时选择匹配的 targets；想学习且当前有匹配操作时优先操作说明，否则定位。
+包含实验仪器目标（parts、na_experiment、spatial_frequency、snom_entry）以及实验室桌面上的荧光样本目标：
+- sample_red（红色样本，位于超声清洗仪旁实验台）
+- sample_green（绿色样本，位于离心机旁实验台）
+- sample_blue（蓝色样本，位于显微镜正前方操作台）
+- sample_yellow（黄色样本，位于显微镜正前方操作台）
+用户询问获取或寻找特定颜色样本（如“我应该在哪获取到红色样本”、“绿色样本在哪里”）时，匹配对应 sample_* target 进行定位。
+只解释原理/区别时仍 explain，不无故添加标记。不明确想学哪个主题或寻找哪种样本时 clarify。
 定位类型 guide 仅选择一个当前 target：interaction_ids=[target.id]，suggested_action_ids=[target.action_id]，
 knowledge_topics=[target.knowledge_topic]。不得创造 ID、按钮、设备路径、控制命令或额外步骤。
 answer 用“你可以通过 A 学习 B。它位于你某方向约 C 米处”描述拟定位对象。
@@ -82,17 +92,26 @@ targets 为空或没有匹配目标时，解释已知知识并说明暂不能定
 
 def mock_guide(question, snapshot):
     q = question.lower()
-    if not any(w in q for w in ("哪里", "在哪", "想学", "学习", "带我", "体验", "where", "learn")):
+    if not any(w in q for w in ("哪里", "在哪", "想学", "学习", "带我", "体验", "where", "learn", "获取", "拿", "找", "取", "样本", "标本", "切片", "载玻片")):
         return None
     # Deliberately narrow fixtures, not an AI or a production intent classifier.
     if any(w in q for w in ("共聚焦", "confocal", "针孔", "z-stack")):
         return None
-    words = {"na_experiment": ("数值孔径", "na"), "spatial_frequency": ("空间频率", "频谱"),
-             "snom_entry": ("snom", "近场", "探针"), "parts": ("显微镜", "部件", "物镜")}
+    words = {
+        "sample_red": ("红色样本", "红样本", "红色标本", "红色切片", "红色载玻片", "红载玻片", "红色", "red sample", "red"),
+        "sample_green": ("绿色样本", "绿样本", "绿色标本", "绿色切片", "绿色载玻片", "绿载玻片", "绿色", "green sample", "green"),
+        "sample_blue": ("蓝色样本", "蓝样本", "蓝色标本", "蓝色切片", "蓝色载玻片", "蓝载玻片", "蓝色", "blue sample", "blue"),
+        "sample_yellow": ("黄色样本", "黄样本", "黄色标本", "黄色切片", "黄色载玻片", "黄载玻片", "黄色", "yellow sample", "yellow"),
+        "na_experiment": ("数值孔径", "na"),
+        "spatial_frequency": ("空间频率", "频谱"),
+        "snom_entry": ("snom", "近场", "探针"),
+        "parts": ("显微镜", "部件", "物镜"),
+    }
     available = {t["id"] for t in context(snapshot)["targets"]}
     for target_id, keywords in words.items():
         if target_id in available and any(w in q for w in keywords):
-            return {"kind": "guide", "answer": "可以前往对应学习区域了解这一主题。",
+            msg = "可以前往对应样本位置拾取并观察该样本。" if target_id.startswith("sample_") else "可以前往对应学习区域了解这一主题。"
+            return {"kind": "guide", "answer": msg,
                     "interaction_ids": [target_id], "suggested_action_ids": ["highlight:" + target_id],
                     "knowledge_topics": [TARGETS[target_id][2]]}
     return None

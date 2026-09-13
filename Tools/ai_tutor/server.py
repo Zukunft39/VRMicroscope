@@ -9,7 +9,6 @@ import os
 import sys
 import threading
 import time
-import traceback
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 import assistant_chat
 import speech
@@ -86,8 +85,11 @@ class Handler(BaseHTTPRequestHandler):
             self.send_json(429, {"error": "busy"}); return
         try:
             result = assistant_chat.generate(payload, self.server.mock, self.server.assistant_knowledge)
-        except Exception as e:
-            traceback.print_exc()
+        except assistant_chat.ChatError as error:
+            print("Assistant failure: " + error.code, file=sys.stderr)
+            self.send_json(error.status, {"error": error.code})
+        except Exception:
+            print("Assistant failure: internal_error", file=sys.stderr)
             self.send_json(502, {"error": "guidance_unavailable"})
         else:
             self.send_json(200, result)

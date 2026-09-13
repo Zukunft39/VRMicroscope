@@ -90,6 +90,18 @@ namespace VRMicroscope.Assistant
                 Add("na_experiment", microscope, list);
                 Add("spatial_frequency", microscope, list);
                 Add("snom_entry", SNOMDemonstrationController.FindSnomRoot(), list);
+
+                var sampleComponents = FindObjectsOfType<InteractableSamples>(true);
+                for (int i = 0; i < sampleComponents.Length; i++)
+                {
+                    var s = sampleComponents[i];
+                    if (s == null || !s.gameObject.activeInHierarchy) continue;
+                    string key = s.SampleTargetId;
+                    if (!string.IsNullOrEmpty(key) && !offered.ContainsKey(key))
+                    {
+                        Add(key, s.transform, list);
+                    }
+                }
             }
             result.targets = list.ToArray(); return result;
         }
@@ -177,12 +189,38 @@ namespace VRMicroscope.Assistant
                 if (!found) result = renderer.bounds; else result.Encapsulate(renderer.bounds);
                 found = true;
             }
+            if (!found)
+            {
+                foreach (var col in root.GetComponentsInChildren<Collider>())
+                {
+                    if (!col.enabled) continue;
+                    if (!found) result = col.bounds; else result.Encapsulate(col.bounds);
+                    found = true;
+                }
+            }
+            if (!found && root != null)
+            {
+                result = new Bounds(root.position, Vector3.one * 0.2f);
+                found = true;
+            }
             return found;
         }
-        private static string Name(string id) => id == "snom_entry" ? "THz s-SNOM 装置" : "显微镜学习区域";
-        private static string Topic(string id) => id == "snom_entry" ? "探针敲击、近场耦合和扫描的教学演示" :
+        private static string Name(string id) =>
+            id == "snom_entry" ? "THz s-SNOM 装置" :
+            id == "sample_red" ? "红色样本（载玻片）" :
+            id == "sample_green" ? "绿色样本（载玻片）" :
+            id == "sample_blue" ? "蓝色样本（载玻片）" :
+            id == "sample_yellow" ? "黄色样本（载玻片）" :
+            "显微镜学习区域";
+        private static string Topic(string id) =>
+            id == "snom_entry" ? "探针敲击、近场耦合和扫描的教学演示" :
             id == "na_experiment" ? "数值孔径（实验入口关联上部光学组件）" :
-            id == "spatial_frequency" ? "空间频率（实验入口关联物镜）" : "显微镜结构和部件功能";
+            id == "spatial_frequency" ? "空间频率（实验入口关联物镜）" :
+            id == "sample_red" ? "拾取用于显微镜观察的红色荧光样本" :
+            id == "sample_green" ? "拾取用于显微镜观察的绿色荧光样本" :
+            id == "sample_blue" ? "拾取用于显微镜观察的蓝色荧光样本" :
+            id == "sample_yellow" ? "拾取用于显微镜观察的黄色荧光样本" :
+            "显微镜结构和部件功能";
         public void Clear()
         {
             target = null;
