@@ -42,6 +42,7 @@ namespace VRMicroscope.Assistant
             textObject.transform.SetParent(rect, false);
             hud = textObject.GetComponent<Text>(); hud.font = TMPro.TMP_Settings.defaultFontAsset.sourceFontFile; hud.fontSize = 20;
             hud.color = Color.white; hud.supportRichText = false; hud.raycastTarget = false;
+            hud.resizeTextForBestFit = true; hud.resizeTextMinSize = 16; hud.resizeTextMaxSize = 20;
             hud.alignment = TextAnchor.MiddleLeft;
             hud.rectTransform.anchorMin = Vector2.zero; hud.rectTransform.anchorMax = Vector2.one;
             hud.rectTransform.offsetMin = new Vector2(12, 4); hud.rectTransform.offsetMax = new Vector2(-100, -4);
@@ -52,7 +53,7 @@ namespace VRMicroscope.Assistant
             cancel.GetComponent<Button>().onClick.AddListener(Clear);
             var label = new GameObject("Label", typeof(RectTransform), typeof(CanvasRenderer), typeof(Text));
             label.transform.SetParent(cr, false);
-            var t = label.GetComponent<Text>(); t.font = TMPro.TMP_Settings.defaultFontAsset.sourceFontFile; t.text = "取消标记"; t.fontSize = 17; t.alignment = TextAnchor.MiddleCenter; t.raycastTarget = false;
+            var t = label.GetComponent<Text>(); t.font = TMPro.TMP_Settings.defaultFontAsset.sourceFontFile; t.text = "Clear Marker"; t.fontSize = 17; t.alignment = TextAnchor.MiddleCenter; t.raycastTarget = false;
             t.rectTransform.anchorMin = Vector2.zero; t.rectTransform.anchorMax = Vector2.one; t.rectTransform.offsetMin = t.rectTransform.offsetMax = Vector2.zero;
             hudRoot.SetActive(false);
         }
@@ -119,18 +120,18 @@ namespace VRMicroscope.Assistant
             string id = response.interaction_ids[0];
             if (request == null || request.snapshotId != snapshotId || response.navigationSnapshotId != snapshotId || !Available() ||
                 !offered.TryGetValue(id, out var root) || root == null || !root.gameObject.activeInHierarchy || !TryBounds(root, out bounds))
-                return "当前场景或学习状态已变化，暂时无法标记这个位置。回到实验室自由观察状态后，可以重新询问我。";
+                return "The scene or learning state has changed. Return to free exploration in the laboratory and ask again to mark this location.";
             if (EdgeDistance(bounds) <= Mathf.Max(.1f, settings.arrivalDistanceMeters))
-                return "你已经靠近" + Name(id) + "，可以在这里学习" + Topic(id) + "。无需添加远处定位标记。";
+                return "You are already near " + Name(id) + ". Here you can learn about " + Topic(id) + ". No distant marker is needed.";
             var shader = Resources.Load<Shader>("AssistantNavigationHighlight");
-            if (shader == null || !shader.isSupported) return "你可以通过" + Name(id) + "学习" + Topic(id) + "。它位于你" + Relation(bounds.center) + "；定位效果暂时不可用。";
+            if (shader == null || !shader.isSupported) return "You can use " + Name(id) + " to learn about " + Topic(id) + ". It is " + Relation(bounds.center) + "; the marker effect is currently unavailable.";
             material = new Material(shader);
             marker = new GameObject("Assistant Learning Marker");
             outline = Line("Instrument bounds", 16); beam = Line("Location beacon", 2);
             target = root; targetId = id; expires = Time.unscaledTime + Mathf.Max(10f, settings.markerLifetimeSeconds);
             RefreshMarker(); hudRoot.SetActive(true);
-            return "你可以通过" + Name(id) + "学习" + Topic(id) + "。它位于你" + Relation(bounds.center) +
-                "，已经为它添加了轮廓和光柱标记；靠近后标记会自动消失。这里显示的是直线方位，请沿可通行区域前往。";
+            return "You can use " + Name(id) + " to learn about " + Topic(id) + ". It is " + Relation(bounds.center) +
+                ". An outline and light column now mark it and will disappear as you approach. This is a straight-line direction; follow an accessible route.";
         }
 
         private LineRenderer Line(string name, int count)
@@ -163,7 +164,7 @@ namespace VRMicroscope.Assistant
             beam.SetPosition(0, top); beam.SetPosition(1, top + Vector3.up * .65f * Units);
             float alpha = settings.reducedMotion ? .85f : .72f + .18f * Mathf.Sin(Time.unscaledTime * 3f);
             material.SetColor("_Color", new Color(.4f, 1f, 1f, alpha));
-            hud.text = Name(targetId) + " · " + Relation(bounds.center) + "\n靠近后自动取消 · 直线方位提示";
+            hud.text = Name(targetId) + " · " + Relation(bounds.center) + "\nClears on approach - straight-line direction";
         }
 
         private float EdgeDistance(Bounds b)
@@ -177,8 +178,8 @@ namespace VRMicroscope.Assistant
             var forward = Vector3.ProjectOnPlane(camera.forward, Vector3.up);
             if (forward.sqrMagnitude > .0001f) lastHorizontalForward = forward.normalized;
             float angle = Vector3.SignedAngle(lastHorizontalForward, delta, Vector3.up);
-            string direction = Mathf.Abs(angle) <= 45 ? "前方" : Mathf.Abs(angle) >= 135 ? "后方" : angle > 0 ? "右侧" : "左侧";
-            return direction + "约 " + (delta.magnitude / Units).ToString("F1") + " 米处";
+            string direction = Mathf.Abs(angle) <= 45 ? "ahead" : Mathf.Abs(angle) >= 135 ? "behind you" : angle > 0 ? "to your right" : "to your left";
+            return direction + " about " + (delta.magnitude / Units).ToString("F1") + " m away";
         }
         private static bool TryBounds(Transform root, out Bounds result)
         {
@@ -206,21 +207,21 @@ namespace VRMicroscope.Assistant
             return found;
         }
         private static string Name(string id) =>
-            id == "snom_entry" ? "THz s-SNOM 装置" :
-            id == "sample_red" ? "红色样本（载玻片）" :
-            id == "sample_green" ? "绿色样本（载玻片）" :
-            id == "sample_blue" ? "蓝色样本（载玻片）" :
-            id == "sample_yellow" ? "黄色样本（载玻片）" :
-            "显微镜学习区域";
+            id == "snom_entry" ? "the THz s-SNOM instrument" :
+            id == "sample_red" ? "the red specimen slide" :
+            id == "sample_green" ? "the green specimen slide" :
+            id == "sample_blue" ? "the blue specimen slide" :
+            id == "sample_yellow" ? "the yellow specimen slide" :
+            "the microscope learning area";
         private static string Topic(string id) =>
-            id == "snom_entry" ? "探针敲击、近场耦合和扫描的教学演示" :
-            id == "na_experiment" ? "数值孔径（实验入口关联上部光学组件）" :
-            id == "spatial_frequency" ? "空间频率（实验入口关联物镜）" :
-            id == "sample_red" ? "拾取用于显微镜观察的红色荧光样本" :
-            id == "sample_green" ? "拾取用于显微镜观察的绿色荧光样本" :
-            id == "sample_blue" ? "拾取用于显微镜观察的蓝色荧光样本" :
-            id == "sample_yellow" ? "拾取用于显微镜观察的黄色荧光样本" :
-            "显微镜结构和部件功能";
+            id == "snom_entry" ? "the demonstration of probe tapping, near-field coupling, and scanning" :
+            id == "na_experiment" ? "numerical aperture (experiment linked to Upper Optical Assembly)" :
+            id == "spatial_frequency" ? "spatial frequency (experiment linked to Objective Lens)" :
+            id == "sample_red" ? "handling the red fluorescence specimen for microscope observation" :
+            id == "sample_green" ? "handling the green fluorescence specimen for microscope observation" :
+            id == "sample_blue" ? "handling the blue fluorescence specimen for microscope observation" :
+            id == "sample_yellow" ? "handling the yellow fluorescence specimen for microscope observation" :
+            "microscope structure and component functions";
         public void Clear()
         {
             target = null;

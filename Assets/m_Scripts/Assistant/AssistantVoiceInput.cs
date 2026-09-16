@@ -26,26 +26,26 @@ namespace VRMicroscope.Assistant
             pending = cts; stopRequested = false; Seconds = 0;
             try
             {
-                StatusChanged?.Invoke("正在请求麦克风权限…");
+                StatusChanged?.Invoke("Requesting microphone permission...");
                 await RequestPermission(cts.Token);
                 cts.Token.ThrowIfCancellationRequested();
-                if (Microphone.devices.Length == 0) throw new VoiceException("没有检测到麦克风，请连接默认音频输入设备。");
-                if (Microphone.IsRecording(null)) throw new VoiceException("默认麦克风正在被项目中的其他录音功能使用。");
+                if (Microphone.devices.Length == 0) throw new VoiceException("No microphone found. Connect a default audio input device.");
+                if (Microphone.IsRecording(null)) throw new VoiceException("The default microphone is already in use by another recording feature.");
                 Microphone.GetDeviceCaps(null, out int min, out int max);
                 int frequency = min == 0 && max == 0 ? 16000 : Mathf.Clamp(16000, min, max);
-                if (frequency < 8000 || frequency > 48000) throw new VoiceException("默认麦克风采样率不受支持，请更换输入设备。");
+                if (frequency < 8000 || frequency > 48000) throw new VoiceException("The default microphone sample rate is unsupported. Try another input device.");
                 // Null selects the OS default device, not the first enumerated device.
                 clip = Microphone.Start(null, false, 31, frequency);
                 ownsMicrophone = clip != null;
-                if (clip == null) throw new VoiceException("麦克风启动失败，请检查系统麦克风权限。");
+                if (clip == null) throw new VoiceException("The microphone could not start. Check system microphone permissions.");
                 float deadline = Time.realtimeSinceStartup + 5;
                 while (Microphone.GetPosition(null) <= 0)
                 {
-                    if (Time.realtimeSinceStartup > deadline) throw new VoiceException("没有收到麦克风数据，请检查默认输入设备。");
+                    if (Time.realtimeSinceStartup > deadline) throw new VoiceException("No microphone data received. Check the default input device.");
                     await UniTask.Yield(PlayerLoopTiming.Update, cts.Token);
                 }
                 Recording = true;
-                StatusChanged?.Invoke("正在录音…再次点击停止，最多 30 秒。取消可丢弃录音。");
+                StatusChanged?.Invoke("Recording... Select again to stop (up to 30 seconds). Cancel discards the recording.");
                 float started = Time.realtimeSinceStartup;
                 int frames = 0;
                 while (!stopRequested)
@@ -55,7 +55,7 @@ namespace VRMicroscope.Assistant
                     if (!Microphone.IsRecording(null))
                     {
                         if (Time.realtimeSinceStartup - started < 30)
-                            throw new VoiceException("麦克风录音已中断，请检查设备后重试。");
+                            throw new VoiceException("Recording was interrupted. Check the microphone and try again.");
                         frames = clip.samples;
                         break;
                     }
@@ -65,19 +65,19 @@ namespace VRMicroscope.Assistant
                 cts.Token.ThrowIfCancellationRequested();
                 if (Microphone.IsRecording(null)) frames = Microphone.GetPosition(null);
                 frames = Mathf.Min(frames, clip.frequency * 30);
-                if (frames < clip.frequency / 2) throw new VoiceException("录音太短，请说完一个问题后再停止。");
+                if (frames < clip.frequency / 2) throw new VoiceException("The recording is too short. Finish your question before stopping.");
                 var samples = new float[frames * clip.channels];
-                if (!clip.GetData(samples, 0)) throw new VoiceException("无法读取录音，请重试。");
+                if (!clip.GetData(samples, 0)) throw new VoiceException("Unable to read the recording. Please try again.");
                 byte[] wav = AssistantWavEncoder.Encode(samples, frames, clip.channels, clip.frequency);
                 ReleaseMicrophone();
-                StatusChanged?.Invoke("正在识别语音…结果将填入输入框，由你确认后发送。");
+                StatusChanged?.Invoke("Transcribing speech... Review the text in the input field before sending.");
                 Response response = await Transcribe(wav, settings, cts.Token);
                 cts.Token.ThrowIfCancellationRequested();
                 Transcribed?.Invoke(response.text, response.source == "mock");
             }
             catch (OperationCanceledException) { }
             catch (VoiceException error) { if (pending == cts) StatusChanged?.Invoke(error.Message); }
-            catch (Exception) { if (pending == cts) StatusChanged?.Invoke("语音输入失败，请检查麦克风和后端连接后重试。"); }
+            catch (Exception) { if (pending == cts) StatusChanged?.Invoke("Voice input failed. Check the microphone and backend connection, then try again."); }
             finally
             {
                 if (pending == cts) { ReleaseMicrophone(); pending = null; }
@@ -97,7 +97,7 @@ namespace VRMicroscope.Assistant
             UnityEngine.Android.Permission.RequestUserPermission(UnityEngine.Android.Permission.Microphone, callbacks);
             float deadline = Time.realtimeSinceStartup + 30;
             while (!finished && Time.realtimeSinceStartup < deadline) await UniTask.Yield(PlayerLoopTiming.Update, token);
-            if (!granted) throw new VoiceException("未获得麦克风权限，请在系统设置中允许后重试。");
+            if (!granted) throw new VoiceException("Microphone permission was denied. Enable it in system settings and try again.");
 #else
             if (!Application.HasUserAuthorization(UserAuthorization.Microphone))
             {
@@ -106,7 +106,7 @@ namespace VRMicroscope.Assistant
                 while (!operation.isDone && Time.realtimeSinceStartup < deadline)
                     await UniTask.Yield(PlayerLoopTiming.Update, token);
                 if (!operation.isDone || !Application.HasUserAuthorization(UserAuthorization.Microphone))
-                    throw new VoiceException("未获得麦克风权限，请在系统设置中允许后重试。");
+                    throw new VoiceException("Microphone permission was denied. Enable it in system settings and try again.");
             }
 #endif
         }
@@ -115,7 +115,7 @@ namespace VRMicroscope.Assistant
         {
             if (!Uri.TryCreate(settings.speechEndpoint, UriKind.Absolute, out var uri) ||
                 !(uri.Scheme == "https" || uri.Scheme == "http" && uri.IsLoopback))
-                throw new VoiceException("语音服务地址无效，请使用 HTTPS 或本机后端地址。");
+                throw new VoiceException("Invalid speech service address. Use HTTPS or a local backend address.");
             using (var request = new UnityWebRequest(uri, "POST"))
             {
                 request.uploadHandler = new UploadHandlerRaw(wav);
@@ -136,7 +136,7 @@ namespace VRMicroscope.Assistant
                     throw new VoiceException(ErrorMessage(response?.error, request.responseCode));
                 if (response == null || string.IsNullOrWhiteSpace(response.text) || response.text.Length > 1000 ||
                     !(response.source == "model" || response.source == "mock"))
-                    throw new VoiceException("未收到有效转写文本，请重试。");
+                    throw new VoiceException("No valid transcript received. Please try again.");
                 return response;
             }
         }
@@ -145,15 +145,15 @@ namespace VRMicroscope.Assistant
         {
             switch (code)
             {
-                case "speech_not_configured": return "后端尚未配置 Groq 密钥，请使用 --prompt-groq-key 启动后端。";
-                case "speech_key_rejected": return "Groq 密钥或模型访问权限无效，请检查后端配置。";
-                case "no_speech": return "没有识别到语音，请靠近麦克风并重新录制。";
-                case "transcript_too_long": return "转写超过 1000 字，请分成更短的问题重新录制。";
-                case "invalid_audio": return "录音格式或时长不受支持，请重新录制。";
+                case "speech_not_configured": return "No Groq key is configured. Start the backend with --prompt-groq-key.";
+                case "speech_key_rejected": return "The Groq key or model permissions are invalid. Check the backend configuration.";
+                case "no_speech": return "No speech detected. Move closer to the microphone and record again.";
+                case "transcript_too_long": return "The transcript exceeds 1,000 characters. Record a shorter question.";
+                case "invalid_audio": return "Unsupported recording format or duration. Please record again.";
             }
-            if (status == 429) return "语音请求已达限额或服务繁忙，请稍后重试。";
-            if (status == 504 || status == 0) return "语音服务连接失败或超时，请检查网络和本地后端。";
-            return "语音识别服务暂不可用，请稍后重试；原有草稿已保留。";
+            if (status == 429) return "The speech service is busy or rate-limited. Please try again later.";
+            if (status == 504 || status == 0) return "The speech service could not connect or timed out. Check the network and local backend.";
+            return "Speech recognition is unavailable. Try again later; your draft is saved.";
         }
 
         public void Cancel()
@@ -171,11 +171,11 @@ namespace VRMicroscope.Assistant
         }
         private void OnApplicationFocus(bool focused)
         {
-            if (!focused && ownsMicrophone) { Cancel(); StatusChanged?.Invoke("录音因窗口失去焦点而取消，草稿已保留。"); }
+            if (!focused && ownsMicrophone) { Cancel(); StatusChanged?.Invoke("Recording cancelled because the window lost focus. Your draft is saved."); }
         }
         private void OnApplicationPause(bool paused)
         {
-            if (paused && ownsMicrophone) { Cancel(); StatusChanged?.Invoke("录音已暂停并丢弃，请重新点击语音输入。"); }
+            if (paused && ownsMicrophone) { Cancel(); StatusChanged?.Invoke("Recording was paused and discarded. Select Voice Input to start again."); }
         }
         private void OnDisable() { Cancel(); }
         private sealed class VoiceException : Exception { public VoiceException(string message) : base(message) { } }

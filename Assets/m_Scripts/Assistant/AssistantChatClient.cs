@@ -35,21 +35,21 @@ namespace VRMicroscope.Assistant
         {
             switch (error.Code)
             {
-                case "answer_format": return "AI 回答格式未通过检查，已自动修复一次。请重新发送问题。";
-                case "review_format": return "回答审核服务返回格式异常，请重新发送问题。";
-                case "model_timeout": return "AI 服务响应超时，请稍后重试；问题草稿已保留。";
-                case "model_credentials": return "AI 服务密钥或访问权限异常，请检查后端配置。";
-                case "model_configuration": return "AI 服务尚未正确配置，请检查后端模型和密钥设置。";
-                case "model_unavailable": return "后端暂时无法连接 AI 服务，请检查网络后重试。";
-                case "invalid_request": return "当前状态数据与后端不匹配，请确认后端和 Unity 已更新并重新启动。";
-                case "response_invalid": return "回答与本次请求或客户端协议不匹配，请重新提问。";
+                case "answer_format": return "The AI response format is invalid after one repair attempt. Please resend your question.";
+                case "review_format": return "The answer review returned an invalid format. Please resend your question.";
+                case "model_timeout": return "The AI service timed out. Try again later; your draft is saved.";
+                case "model_credentials": return "The AI service credentials or permissions are invalid. Check the backend configuration.";
+                case "model_configuration": return "The AI service is not configured. Check the backend model and key settings.";
+                case "model_unavailable": return "The backend cannot reach the AI service. Check the connection and try again.";
+                case "invalid_request": return "State data does not match the backend. Update and restart both the backend and Unity.";
+                case "response_invalid": return "The response does not match this request or client protocol. Please try again.";
             }
-            if (error.Status == 429) return "请求较多或 AI 服务达到限额，请稍后重试。";
-            if (error.Status == 504) return "AI 服务响应超时，请稍后重试。";
-            if (error.Status == 502) return "问答服务处理异常，请查看后端错误提示后重试。";
-            return "问答连接中断或等待超时，请检查后端和网络后重试。";
+            if (error.Status == 429) return "The AI service is busy or rate-limited. Please try again later.";
+            if (error.Status == 504) return "The AI service timed out. Please try again later.";
+            if (error.Status == 502) return "The chat service failed. Check the backend error and try again.";
+            return "The chat connection was interrupted or timed out. Check the backend and network.";
         }
-        public const string Refusal = "这个问题我暂时不知道哦，问问看别的吧";
+        public const string Refusal = "I do not know the answer to that yet. Please ask me something else.";
         public static async UniTask<AssistantChatResponse> Request(AssistantChatRequest payload,
             LocalAssistantSettings settings, CancellationToken token)
         {

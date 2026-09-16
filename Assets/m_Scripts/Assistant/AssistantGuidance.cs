@@ -42,6 +42,7 @@ namespace VRMicroscope.Assistant
             var label = new GameObject("Instruction", typeof(RectTransform), typeof(CanvasRenderer), typeof(Text));
             label.transform.SetParent(r, false); text = label.GetComponent<Text>();
             text.font = TMPro.TMP_Settings.defaultFontAsset.sourceFontFile; text.fontSize = 20; text.supportRichText = false; text.raycastTarget = false;
+            text.resizeTextForBestFit = true; text.resizeTextMinSize = 16; text.resizeTextMaxSize = 20;
             text.rectTransform.anchorMin = Vector2.zero; text.rectTransform.anchorMax = Vector2.one;
             text.rectTransform.offsetMin = new Vector2(14, 12); text.rectTransform.offsetMax = new Vector2(-50, -12);
             card.GetComponent<Image>().raycastTarget = false;
@@ -186,15 +187,15 @@ namespace VRMicroscope.Assistant
             Clear();
             var current = Read(); string signature = JsonUtility.ToJson(current);
             if (request == null || request.snapshotId != snapshotId || response.guidanceSnapshotId != snapshotId || signature != pendingSignature)
-                return "实验状态已经变化。请重新问我下一步，我会按当前面板提供操作说明。";
+                return "The experiment state has changed. Ask for the next step again for guidance on the current panel.";
             string id = response.suggested_action_ids[0]; var action = Find(id);
             if (action == null || Array.IndexOf(current.allowedActionIds, id) < 0 ||
                 response.interaction_ids[0] != action.interaction_id || response.knowledge_topics[0] != action.knowledge_topic)
-                return "这个操作当前不可用，请根据面板状态重新询问。";
+                return "This action is currently unavailable. Ask again using the current panel state.";
             string instruction = current.device == "xr" ? action.xr : action.desktop;
-            string result = "关闭问答窗口后，" + instruction + "\n观察：" + action.observation;
+            string result = "After closing the chat window, " + instruction + "\nObserve: " + action.observation;
             owner.Navigation.Clear(); cardSignature = signature; expires = Time.unscaledTime + 120f;
-            text.text = "当前操作提示\n" + instruction + "\n观察：" + action.observation;
+            text.text = "Current step\n" + instruction + "\nObserve: " + action.observation;
             return result;
         }
         private void Update()

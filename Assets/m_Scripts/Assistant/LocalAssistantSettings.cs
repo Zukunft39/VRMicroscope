@@ -28,32 +28,32 @@ namespace VRMicroscope.Assistant
         public bool typewriterEnabled = true;
         [Range(10, 120)] public float charactersPerSecond = 45f;
         [TextArea(2, 4)] public string[] greetings = {
-            "你好，我在这里。今天想从显微世界的哪一部分开始探索？",
-            "欢迎回来！不必着急，按自己的节奏观察就好。",
-            "嗨，今天探索得怎么样？有困惑时，可以先把问题记下来。",
-            "你好！一个小小的观察，也可能带来新的发现。",
-            "我在这里陪你探索。先看看眼前最让你好奇的部分吧。",
-            "欢迎来到微观世界。今天想关注光，还是关注样本？",
-            "你好，今天状态怎么样？累了也可以停下来休息一下。",
-            "嗨！不需要一次理解所有原理，我们可以一点一点来。",
-            "很高兴再次见到你。试着留意实验画面里发生了什么变化。",
-            "你好！观察现象、提出问题，都是学习的一部分。",
-            "我收到你的呼唤啦。今天有什么让你好奇的现象？",
-            "嗨，探索者！不同的显微方法，会带来不同的观察视角。",
-            "你好！可以先认识部件，再慢慢理解它们之间的联系。",
-            "欢迎继续探索。看不懂的地方，可以先停下来仔细观察。",
-            "我在这里。把注意力放在一个现象上，也是一种不错的开始。",
-            "你好！今天可以从一个简单的问题开始：这个变化意味着什么？"
+            "Hello! Which part of the microscopic world would you like to explore today?",
+            "Welcome back! Take your time and explore at your own pace.",
+            "Hi! How is your exploration going? Feel free to note down any questions.",
+            "Hello! Even a small observation can lead to a new discovery.",
+            "I am here to help you explore. Start with whatever catches your curiosity.",
+            "Welcome to the microscopic world. Shall we explore light or specimens today?",
+            "Hello! How are you feeling today? Take a break whenever you need one.",
+            "Hi! We can explore the principles one step at a time.",
+            "Good to see you again. Try noticing what changes in the experiment view.",
+            "Hello! Observing and asking questions are both part of learning.",
+            "I am here! What has caught your curiosity today?",
+            "Hi, explorer! Different microscopy methods offer different perspectives.",
+            "Hello! Get to know the components, then explore how they work together.",
+            "Welcome back to exploring. Pause for a closer look whenever something is unclear.",
+            "I am here. Focusing on one observation is a good place to start.",
+            "Hello! Start with a simple question: what does this change mean?"
         };
         [TextArea(1, 3)] public string[] reminderTemplates = {
-            "也许我们可以把目光放到{0}上。",
-            "对{0}感到好奇吗？可以先留意相关的演示与说明。",
-            "接下来，不妨探索一下{0}。",
-            "如果想换一个观察角度，可以关注{0}。",
-            "想继续探索的话，{0}是一个可以关注的主题。",
-            "不必着急。准备好时，可以再看看{0}。",
-            "也许{0}能带来一个新的观察问题。",
-            "休息一下也没关系，之后可以继续了解{0}。"
+            "Perhaps we could explore {0}.",
+            "Curious about {0}? Take a look at the related demonstrations and explanations.",
+            "Next, you could take a closer look at {0}.",
+            "For a different perspective, try exploring {0}.",
+            "If you would like to continue, {0} is a topic worth exploring.",
+            "Take your time. When you are ready, you can explore {0}.",
+            "Perhaps {0} will inspire a new question.",
+            "Feel free to take a break, then come back to {0}."
         };
     }
 }

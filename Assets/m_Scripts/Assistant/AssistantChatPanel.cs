@@ -44,11 +44,11 @@ namespace VRMicroscope.Assistant
                 if (!gameObject.activeInHierarchy) return;
                 string draft=string.IsNullOrWhiteSpace(input.text) ? text : input.text.TrimEnd()+"\n"+text;
                 if (draft.Length>input.characterLimit)
-                    status.text="草稿加上转写超过 1000 字，请先精简草稿后重新录制。原有文字已保留。";
+                    status.text="The draft and transcript exceed 1,000 characters. Shorten the draft and record again. Your text is saved.";
                 else
                 {
                     input.text=draft;
-                    status.text=mock ? "模拟转写（固定测试句，非语音识别）。" : "语音已转为文字，请检查后点击发送。";
+                    status.text=mock ? "Mock transcript: a fixed test sentence, not speech recognition." : "Speech transcribed. Check the text, then select Send.";
                 }
                 owner.ReportActivity();
             };
@@ -62,10 +62,10 @@ namespace VRMicroscope.Assistant
             backdrop.GetComponent<Image>().color=new Color(.015f,.03f,.055f,.12f);
             shield=backdrop; shield.SetActive(false); root.SetAsLastSibling();
             var image=gameObject.AddComponent<Image>(); image.color=new Color(.025f,.055f,.095f,.82f);
-            Label(root,"Header",new Vector2(22,-15),new Vector2(720,30),24,"微观问答");
-            ButtonAt(root,"关闭",new Vector2(782,-12),new Vector2(60,32),Close);
-            string[] titles={"显微镜", "NA", "空间频率", "共聚焦", "SNOM"};
-            string[] questions={"显微镜的物镜有什么作用？", "NA 和倍率有什么区别？", "空间频率模块展示了什么？", "共聚焦针孔为什么能抑制离焦信号？", "THz s-SNOM 的近场耦合是什么？"};
+            Label(root,"Header",new Vector2(22,-15),new Vector2(720,30),24,"Microscopy Assistant");
+            ButtonAt(root,"Close",new Vector2(782,-12),new Vector2(60,32),Close);
+            string[] titles={"Microscope", "NA", "Spatial Frequency", "Confocal", "SNOM"};
+            string[] questions={"What does the microscope objective do?", "How does NA differ from magnification?", "What does the spatial-frequency module show?", "Why does a confocal pinhole suppress out-of-focus signals?", "What is near-field coupling in THz s-SNOM?"};
             for(int i=0;i<titles.Length;i++)
             {
                 string question=questions[i];
@@ -79,11 +79,11 @@ namespace VRMicroscope.Assistant
             scroll.horizontal=false; scroll.movementType=ScrollRect.MovementType.Clamped;
             scroll.scrollSensitivity=30; scroll.viewport=viewport;
             transcript=Label(viewport,"Conversation",new Vector2(12,-8),new Vector2(782,221),21,
-                "可以询问显微镜、NA、空间频率、共聚焦背景和 THz s-SNOM。\n\n想亲手学习时，可以问我相关区域在哪里，我会标记当前可前往的学习区域。");
+                "Ask about microscopes, NA, spatial frequency, confocal principles, or THz s-SNOM.\n\nFor hands-on learning, ask where to go. I can mark learning areas that are currently available.");
             transcript.gameObject.AddComponent<ContentSizeFitter>().verticalFit=ContentSizeFitter.FitMode.PreferredSize;
             scroll.content=transcript.rectTransform;
-            status=Label(root,"Status",new Vector2(22,-337),new Vector2(636,38),17,"可输入文字或录音转写，确认后点击发送。");
-            voiceButton=ButtonAt(root,"语音输入",new Vector2(674,-337),new Vector2(160,36),()=>
+            status=Label(root,"Status",new Vector2(22,-337),new Vector2(636,38),17,"Type or record a question. Review it, then select Send.");
+            voiceButton=ButtonAt(root,"Voice Input",new Vector2(674,-337),new Vector2(160,36),()=>
             {
                 if(pending!=null || isTyping) return;
                 keyboard.SetActive(false); input.DeactivateInputField();
@@ -94,19 +94,19 @@ namespace VRMicroscope.Assistant
             field.gameObject.AddComponent<Image>().color=new Color(.12f,.23f,.30f,.7f);
             input=field.gameObject.AddComponent<InputField>();
             input.textComponent=Label(field,"Input Text",new Vector2(12,-8),new Vector2(788,65),21,"");
-            var placeholder=Label(field,"Placeholder",new Vector2(12,-8),new Vector2(788,65),21,"例如：NA 和倍率有什么区别？");
+            var placeholder=Label(field,"Placeholder",new Vector2(12,-8),new Vector2(788,65),21,"Example: How does NA differ from magnification?");
             placeholder.color=new Color(.60f,.73f,.79f,.85f); input.placeholder=placeholder;
             input.lineType=InputField.LineType.MultiLineNewline; input.characterLimit=1000;
             input.onValueChanged.AddListener(_=>{ owner.ReportActivity(); RefreshButtons(); });
-            ButtonAt(root,"新对话",new Vector2(22,-483),new Vector2(108,36),NewConversation);
-            ButtonAt(root,"下一步",new Vector2(282,-483),new Vector2(118,36),()=>
-            { if(pending==null && !isTyping && !VoiceBusy) { input.text="根据我当前的实验状态，接下来应该怎么操作？"; owner.ReportActivity(); } });
-            ButtonAt(root,"如何退出",new Vector2(410,-483),new Vector2(142,36),()=>
-            { if(pending==null && !isTyping && !VoiceBusy) { input.text="当前实验应该如何退出？"; owner.ReportActivity(); } });
-            ButtonAt(root,"屏幕键盘",new Vector2(142,-483),new Vector2(126,36),()=>{ if(!VoiceBusy) keyboard.SetActive(!keyboard.activeSelf); });
-            cancel=ButtonAt(root,"取消请求",new Vector2(575,-483),new Vector2(126,36),CancelOrSkip);
+            ButtonAt(root,"New Chat",new Vector2(22,-483),new Vector2(108,36),NewConversation);
+            ButtonAt(root,"Next Step",new Vector2(282,-483),new Vector2(118,36),()=>
+            { if(pending==null && !isTyping && !VoiceBusy) { input.text="What should I do next in the current experiment state?"; owner.ReportActivity(); } });
+            ButtonAt(root,"How to Exit",new Vector2(410,-483),new Vector2(142,36),()=>
+            { if(pending==null && !isTyping && !VoiceBusy) { input.text="How do I exit the current experiment?"; owner.ReportActivity(); } });
+            ButtonAt(root,"Keyboard",new Vector2(142,-483),new Vector2(126,36),()=>{ if(!VoiceBusy) keyboard.SetActive(!keyboard.activeSelf); });
+            cancel=ButtonAt(root,"Cancel",new Vector2(575,-483),new Vector2(126,36),CancelOrSkip);
             cancelLabel=cancel.GetComponentInChildren<Text>();
-            send=ButtonAt(root,"发送",new Vector2(711,-483),new Vector2(123,36),Send);
+            send=ButtonAt(root,"Send",new Vector2(711,-483),new Vector2(123,36),Send);
             sendLabel=send.GetComponentInChildren<Text>();
             BuildKeyboard(root);
             RefreshButtons();
@@ -143,8 +143,8 @@ namespace VRMicroscope.Assistant
             owner.Navigation.Clear();
             owner.Guidance.Clear();
             CancelPending(); history.Clear(); session=Guid.NewGuid().ToString("N");
-            input.text=""; transcript.text="新的对话开始了。你想了解什么？";
-            status.text="仅保留当前会话最近四轮问答。";
+            input.text=""; transcript.text="A new conversation has started. What would you like to explore?";
+            status.text="Only the last four exchanges are retained in this session.";
             owner.ReportActivity();
         }
         private void BuildKeyboard(RectTransform parent)
@@ -160,10 +160,10 @@ namespace VRMicroscope.Assistant
                     ButtonAt(rect,character,new Vector2(8+col*79,-8-row*44),new Vector2(72,37),()=>
                     { if(pending==null && !VoiceBusy && input.text.Length<1000) { input.text+=character; owner.ReportActivity(); } });
                 }
-            ButtonAt(rect,"空格",new Vector2(8,-188),new Vector2(300,38),()=>{ if(pending==null && !VoiceBusy && input.text.Length<1000) input.text+=" "; });
-            ButtonAt(rect,"退格",new Vector2(318,-188),new Vector2(150,38),()=>
+            ButtonAt(rect,"Space",new Vector2(8,-188),new Vector2(300,38),()=>{ if(pending==null && !VoiceBusy && input.text.Length<1000) input.text+=" "; });
+            ButtonAt(rect,"Backspace",new Vector2(318,-188),new Vector2(150,38),()=>
             { if(pending==null && !VoiceBusy && input.text.Length>0) input.text=input.text.Substring(0,input.text.Length-1); });
-            ButtonAt(rect,"收起键盘",new Vector2(478,-188),new Vector2(318,38),()=>keyboard.SetActive(false));
+            ButtonAt(rect,"Hide Keyboard",new Vector2(478,-188),new Vector2(318,38),()=>keyboard.SetActive(false));
             keyboard.SetActive(false);
         }
         private async void Send()
@@ -176,7 +176,7 @@ namespace VRMicroscope.Assistant
             int ticket=++generation;
             var request=new AssistantChatRequest {sessionId=session,requestId=Guid.NewGuid().ToString("N"),
                 question=question,history=history.ToArray(),navigation=owner.Navigation.Capture(),guidance=owner.Guidance.Capture()};
-            status.text="正在查阅项目资料并检查回答…";
+            status.text="Checking project knowledge and reviewing the answer...";
             keyboard.SetActive(false);
             RefreshButtons();
             try
@@ -198,7 +198,7 @@ namespace VRMicroscope.Assistant
                 if (settings != null && (!settings.typewriterEnabled || settings.reducedMotion))
                 {
                     transcript.text=BuildTranscriptText(response.answer, false);
-                    status.text=response.source=="mock" ? "联调模拟 · 非 AI 回答" : "DeepSeek · 项目知识问答";
+                    status.text=response.source=="mock" ? "Mock mode - not an AI response" : "DeepSeek - Project Knowledge";
                     Canvas.ForceUpdateCanvases(); scroll.verticalNormalizedPosition=0;
                 }
                 else
@@ -215,7 +215,7 @@ namespace VRMicroscope.Assistant
                 {
                     status.text=exception is AssistantConnectionException connection
                         ? AssistantChatClient.ErrorMessage(connection)
-                        : "问答处理异常，请重新提问；问题草稿已保留。";
+                        : "The request could not be processed. Try again; your draft is saved.";
                     // Keep the draft and prior answers; never present service errors as knowledge refusal.
                 }
             }
@@ -238,7 +238,7 @@ namespace VRMicroscope.Assistant
             if (!string.IsNullOrEmpty(fullAnswerToType))
             {
                 transcript.text = BuildTranscriptText(fullAnswerToType, false);
-                status.text = fullAnswerSource == "mock" ? "联调模拟 · 非 AI 回答" : "DeepSeek · 项目知识问答";
+                status.text = fullAnswerSource == "mock" ? "Mock mode - not an AI response" : "DeepSeek - Project Knowledge";
                 Canvas.ForceUpdateCanvases(); scroll.verticalNormalizedPosition = 0;
             }
             fullAnswerToType = null;
@@ -249,12 +249,12 @@ namespace VRMicroscope.Assistant
         {
             var lines = new List<string>();
             for (int i = 0; i < history.Count - 2; i += 2)
-                lines.Add("你：" + history[i].content + "\n\n助手：" + history[i + 1].content);
+                lines.Add("You: " + history[i].content + "\n\nAssistant: " + history[i + 1].content);
             if (history.Count >= 2)
             {
                 string userMsg = history[history.Count - 2].content;
                 string cursor = showCursor ? " _" : "";
-                lines.Add("你：" + userMsg + "\n\n助手：" + currentAssistantText + cursor);
+                lines.Add("You: " + userMsg + "\n\nAssistant: " + currentAssistantText + cursor);
             }
             return string.Join("\n\n────────────\n\n", lines);
         }
@@ -262,7 +262,7 @@ namespace VRMicroscope.Assistant
         {
             isTyping = true;
             fullAnswerToType = targetAnswer;
-            status.text = (source == "mock" ? "联调模拟 · 正在输出回答…" : "DeepSeek · 正在逐字输出…") + " (可按空格或点击「跳过打字」立即显示)";
+            status.text = (source == "mock" ? "Mock mode - displaying answer..." : "DeepSeek - displaying answer...") + " (Press Space or select Skip to show the full answer)";
             RefreshButtons();
 
             float cps = (settings != null && settings.charactersPerSecond > 0) ? settings.charactersPerSecond : 45f;
@@ -306,7 +306,7 @@ namespace VRMicroscope.Assistant
             }
 
             transcript.text = BuildTranscriptText(targetAnswer, false);
-            status.text = source == "mock" ? "联调模拟 · 非 AI 回答" : "DeepSeek · 项目知识问答";
+            status.text = source == "mock" ? "Mock mode - not an AI response" : "DeepSeek - Project Knowledge";
             Canvas.ForceUpdateCanvases();
             scroll.verticalNormalizedPosition = 0;
 
@@ -318,11 +318,11 @@ namespace VRMicroscope.Assistant
         }
         private void CancelByUser()
         {
-            CancelPending(); status.text="已取消，问题仍保留在输入框中。"; owner.ReportActivity();
+            CancelPending(); status.text="Cancelled. Your question is still in the input field."; owner.ReportActivity();
         }
         private void CancelPending()
         {
-            if(VoiceBusy && status!=null) status.text="语音已取消，原有草稿已保留。";
+            if(VoiceBusy && status!=null) status.text="Voice input cancelled. Your draft is saved.";
             if(voice!=null) voice.Cancel();
             generation++;
             var cancellation=pending; pending=null;
@@ -337,15 +337,15 @@ namespace VRMicroscope.Assistant
         {
             if(send!=null) send.interactable=pending==null && !isTyping && !VoiceBusy && !string.IsNullOrWhiteSpace(input.text) && Time.unscaledTime>=nextSend;
             if(cancel!=null) cancel.interactable=pending!=null || isTyping || VoiceBusy;
-            if(cancelLabel!=null) cancelLabel.text=VoiceBusy ? "取消语音" : isTyping ? "跳过打字" : "取消请求";
-            if(sendLabel!=null) sendLabel.text=pending!=null ? "等待回答" : isTyping ? "正在输出" : "发送";
+            if(cancelLabel!=null) cancelLabel.text=VoiceBusy ? "Cancel Voice" : isTyping ? "Skip" : "Cancel";
+            if(sendLabel!=null) sendLabel.text=pending!=null ? "Waiting" : isTyping ? "Displaying" : "Send";
             if(input!=null) input.interactable=pending==null && !isTyping && !VoiceBusy;
             if(voiceButton!=null) voiceButton.interactable=pending==null && !isTyping && (!VoiceBusy || voice.Recording);
-            if(voiceLabel!=null) voiceLabel.text=voice.Recording ? $"停止 {voice.Seconds:00}/30" : VoiceBusy ? "处理中…" : "语音输入";
+            if(voiceLabel!=null) voiceLabel.text=voice.Recording ? $"Stop {voice.Seconds:00}/30" : VoiceBusy ? "Processing..." : "Voice Input";
         }
         private void OnDisable()
         {
-            if((pending!=null || VoiceBusy) && status!=null) status.text="已取消，问题仍保留在输入框中。";
+            if((pending!=null || VoiceBusy) && status!=null) status.text="Cancelled. Your question is still in the input field.";
             CancelPending();
             if(active==this) { active=null; closedFrame=Time.frameCount; }
             if(shield!=null) shield.SetActive(false);
@@ -374,7 +374,11 @@ namespace VRMicroscope.Assistant
             var button=r.gameObject.AddComponent<Button>(); button.targetGraphic=image;
             button.navigation=new Navigation {mode=Navigation.Mode.None};
             button.onClick.AddListener(action);
-            Label(r,"Label",Vector2.zero,size,19,title).alignment=TextAnchor.MiddleCenter;
+            var label = Label(r,"Label",new Vector2(4,0),new Vector2(size.x-8,size.y),19,title);
+            label.alignment=TextAnchor.MiddleCenter;
+            label.resizeTextForBestFit=true;
+            label.resizeTextMinSize=13;
+            label.resizeTextMaxSize=19;
             return button;
         }
     }

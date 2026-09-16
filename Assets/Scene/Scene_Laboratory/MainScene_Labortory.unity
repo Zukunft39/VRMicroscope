@@ -84403,6 +84403,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9d2ac5bbcce0e48449f8a3b48c966c60, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  disableWhenXRDeviceActive: 1
+  disableWhenSimulatorActive: 1
   canMove: 1
   moveSpeed: 5
   fastMoveMultiplier: 2

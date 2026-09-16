@@ -76,8 +76,8 @@ namespace VRMicroscope.Assistant
             activateAt = Time.unscaledTime + .6f;
             ClearSelection();
             ReportActivity();
-            string greeting = Pick(settings.greetings, ref lastGreeting, "你好，我在这里陪你探索。");
-            Show(greeting, "你好 · 很高兴见到你");
+            string greeting = Pick(settings.greetings, ref lastGreeting, "Hello! I am here to help you explore.");
+            Show(greeting, "Hello - good to see you");
             if (chat != null && chat.gameObject.activeSelf) chat.Close();
             Activated?.Invoke();
         }
@@ -112,9 +112,9 @@ namespace VRMicroscope.Assistant
             if (idle.Tick(Time.unscaledDeltaTime, suppressed, Mathf.Max(5,settings.idleSeconds),
                 Mathf.Max(0,settings.maxRemindersPerIdlePeriod)))
             {
-                string topic = Pick(Topics(module), ref lastTopic, "显微镜的结构");
-                string template = Pick(settings.reminderTemplates, ref lastTemplate, "也许可以关注一下{0}。");
-                Show(template.Replace("{0}", topic), "探索灵感 · 按自己的节奏来");
+                string topic = Pick(Topics(module), ref lastTopic, "microscope structure");
+                string template = Pick(settings.reminderTemplates, ref lastTemplate, "Perhaps you could explore {0}.");
+                Show(template.Replace("{0}", topic), "Ideas to explore - at your own pace");
             }
         }
         private bool TeachingBusy()
@@ -181,10 +181,10 @@ namespace VRMicroscope.Assistant
             previous = index;
             return string.IsNullOrWhiteSpace(values[index]) ? fallback : values[index];
         }
-        private static readonly string[] LabTopics = { "显微镜各部件的作用", "数值孔径与收集光锥", "光栅与空间频率", "THz s-SNOM 的探针与近场", "共聚焦显微镜的背景原理" };
-        private static readonly string[] NaTopics = { "数值孔径与收集光锥的关系", "NA 与倍率的区别", "画面亮度和清晰度的教学变化" };
-        private static readonly string[] SfTopics = { "光栅间距与衍射角的关系", "样本频谱与侧带的区别", "三个方向的频域支持范围" };
-        private static readonly string[] SnomTopics = { "探针敲击与近场耦合", "AFM 距离反馈", "近场信号与背景", "谐波解调的作用" };
+        private static readonly string[] LabTopics = { "the functions of microscope components", "numerical aperture and the collection cone", "gratings and spatial frequency", "THz s-SNOM probes and near fields", "the principles of confocal microscopy" };
+        private static readonly string[] NaTopics = { "the relationship between NA and the collection cone", "the difference between NA and magnification", "illustrative changes in brightness and clarity" };
+        private static readonly string[] SfTopics = { "the relationship between grating spacing and diffraction angle", "the difference between the specimen spectrum and sidebands", "frequency support in three orientations" };
+        private static readonly string[] SnomTopics = { "probe tapping and near-field coupling", "AFM distance feedback", "near-field signals and background", "the role of harmonic demodulation" };
         private static string[] Topics(string key) => key == "na" ? NaTopics : key == "sf" ? SfTopics : key == "snom" ? SnomTopics : LabTopics;
 
         private void BuildUI()
@@ -227,10 +227,13 @@ namespace VRMicroscope.Assistant
             topEdge.color=new Color(.62f,.61f,1,.22f); topEdge.raycastTarget=false;
             heading=Label("Heading",body,new Vector2(22,-12),new Vector2(540,25),17,new Color(.40f,.91f,.85f));
             message=Label("Message Text",body,new Vector2(22,-46),new Vector2(600,70),23,new Color(.91f,.96f,1));
+            message.resizeTextForBestFit=true;
+            message.resizeTextMinSize=18;
+            message.resizeTextMaxSize=23;
             SmallButton("Close",body,new Vector2(599,-9),new Vector2(38,30),"×",Dismiss);
-            SmallButton("Snooze",body,new Vector2(453,-124),new Vector2(174,30),"安静 5 分钟",Snooze);
-            SmallButton("Ask",body,new Vector2(297,-124),new Vector2(142,30),"问点什么",()=>chat.Open());
-            Label("Companion",body,new Vector2(22,-126),new Vector2(260,25),15,new Color(.54f,.67f,.77f)).text="微观世界 · 一起慢慢探索";
+            SmallButton("Snooze",body,new Vector2(453,-124),new Vector2(174,30),"Snooze 5 min",Snooze);
+            SmallButton("Ask",body,new Vector2(297,-124),new Vector2(142,30),"Ask a question",()=>chat.Open());
+            Label("Companion",body,new Vector2(22,-126),new Vector2(260,25),15,new Color(.54f,.67f,.77f)).text="Explore the microscopic world";
             chat=new GameObject("Knowledge Chat",typeof(RectTransform)).AddComponent<AssistantChatPanel>();
             chat.Build(safeRoot,this,settings);
             Navigation = gameObject.AddComponent<AssistantNavigation>();
@@ -293,7 +296,7 @@ namespace VRMicroscope.Assistant
                 }
             }
             xrMode=xr && camera != null; viewer=camera;
-            hint.text=xrMode ? "点击小球唤醒" : settings.activationKey + " · 唤醒助手";
+            hint.text=xrMode ? "Select the orb to wake me" : settings.activationKey + " - Wake assistant";
         }
         private void OnApplicationFocus(bool value) { focused=value; ReportActivity(); }
         private void OnDisable()
