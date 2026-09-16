@@ -377,6 +377,9 @@ namespace UnityEngine.XR.Interaction.Toolkit.Samples.DeviceSimulator
         /// </summary>
         protected void Start()
         {
+            // Start each Play session with the complete controls visible, even if a
+            // previous session saved the collapsed state in EditorPrefs.
+            isMenuOpen = true;
             var simulator = GetComponentInParent<XRDeviceSimulator>();
             if (simulator != null)
                 Initialize(simulator);

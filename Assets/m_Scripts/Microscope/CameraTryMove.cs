@@ -39,6 +39,8 @@ public class CameraTryMove : MonoBehaviour
     public KeyCode leftGripButtonKey = KeyCode.C;
     public KeyCode rightPrimaryButtonKey = KeyCode.R;
     public KeyCode rightSecondaryButtonKey = KeyCode.B;
+    public KeyCode rightTriggerButtonKey = KeyCode.F;
+    public KeyCode changeGlassKey = KeyCode.T;
     public KeyCode rightGripButtonKey = KeyCode.G;
     public KeyCode leftStickPressKey = KeyCode.V;
     public KeyCode rightStickPressKey = KeyCode.Tab;
@@ -313,7 +315,9 @@ public class CameraTryMove : MonoBehaviour
     {
         bool suppressGameplay = suppressGameplayFromEarlierInput;
 
-        if (IsMouseButtonDown(primaryClickMouseButton))
+        bool isTakeOrInteractKeyDown = (rightTriggerButtonKey != KeyCode.None && IsKeyDown(rightTriggerButtonKey));
+
+        if (IsMouseButtonDown(primaryClickMouseButton) || isTakeOrInteractKeyDown)
         {
             if (!suppressGameplay)
             {
@@ -321,32 +325,52 @@ public class CameraTryMove : MonoBehaviour
             }
         }
 
-        if (IsKeyDown(leftTriggerButtonKey))
+        // 观察模式下，按 E 键、Esc 键或 Z 键退出观察
+        if (cachedInteractor != null && cachedInteractor.CurrentState == Interactor.GameState.Observing)
         {
-            if (!suppressGameplay)
+            if (IsKeyDown(KeyCode.E) || IsKeyDown(quitObserveKey) || IsKeyDown(leftTriggerButtonKey))
             {
-                if (cachedInteractor != null && cachedInteractor.CurrentState == Interactor.GameState.Observing)
+                if (!suppressGameplay)
                 {
                     cachedInteractor.TriggerQuitObserve();
                 }
-                else
+            }
+        }
+        else
+        {
+            // 漫游模式下，按 Z 键或在靠近显微镜时按 E 键：放置标本并进入观察视角
+            if (IsKeyDown(leftTriggerButtonKey) ||
+                (IsKeyDown(KeyCode.E) && cachedInteractor != null && cachedInteractor.AssistantMicroscope != null && cachedInteractor.AssistantMicroscope.AssistantCanInteract))
+            {
+                if (!suppressGameplay)
                 {
                     cachedInteractor?.TriggerPutAndObserve();
                 }
             }
         }
 
-        if (IsKeyDown(rightPrimaryButtonKey))
+        if (IsKeyDown(rightPrimaryButtonKey) || (changeGlassKey != KeyCode.None && IsKeyDown(changeGlassKey)))
         {
             if (!suppressGameplay)
             {
-                cachedInteractor?.TriggerChangeGlass();
+                if ((changeGlassKey != KeyCode.None && IsKeyDown(changeGlassKey)) ||
+                    (cachedInteractor != null && cachedInteractor.CurrentState == Interactor.GameState.Observing) ||
+                    (cachedInteractor != null && cachedInteractor.AssistantMicroscope != null && cachedInteractor.AssistantMicroscope.HasPlacedSample()))
+                {
+                    cachedInteractor?.TriggerChangeGlass();
+                }
+                else if (IsKeyDown(rightPrimaryButtonKey))
+                {
+                    HandlePrimaryClick();
+                }
             }
         }
 
-        if (IsKeyDown(rightSecondaryButtonKey))
+        // 光源开关：Roaming 模式下支持 B 键或靠近显微镜时按 Q 键
+        if (IsKeyDown(rightSecondaryButtonKey) ||
+            (IsKeyDown(KeyCode.Q) && cachedInteractor != null && cachedInteractor.CurrentState == Interactor.GameState.Roaming && cachedInteractor.AssistantMicroscope != null && cachedInteractor.AssistantMicroscope.AssistantCanInteract))
         {
-            if (!suppressGameplay)
+            if (!suppressGameplay && cachedInteractor != null && cachedInteractor.CurrentState == Interactor.GameState.Roaming)
             {
                 cachedInteractor?.TriggerLightSwitch();
             }
@@ -360,18 +384,13 @@ public class CameraTryMove : MonoBehaviour
             }
         }
 
-        if (IsKeyDown(rightStickPressKey))
+        // 切换粗调/细调模式：支持 M 键或 Tab 键
+        if (IsKeyDown(KeyCode.M) || IsKeyDown(rightStickPressKey))
         {
             if (!suppressGameplay)
             {
                 cachedInteractor?.TriggerChangeFocusMode();
             }
-        }
-
-        if (IsKeyDown(quitObserveKey) && cachedInteractor != null &&
-            cachedInteractor.CurrentState == Interactor.GameState.Observing)
-        {
-            cachedInteractor.TriggerQuitObserve();
         }
     }
 
@@ -407,6 +426,24 @@ public class CameraTryMove : MonoBehaviour
 
     private void HandleContinuousFocusLightInput(StandaloneTutorialUI forceTutorial)
     {
+        if (cachedInteractor == null)
+        {
+            return;
+        }
+
+        // 显微镜内部观察模式下，直接响应 PC 键盘 B / N 键及上下方向键调节焦距
+        if (cachedInteractor.CurrentState == Interactor.GameState.Observing)
+        {
+            float pcFocal = 0f;
+            if (IsKeyHeld(KeyCode.B) || IsKeyHeld(rightStickDownKey)) pcFocal -= 1f;
+            if (IsKeyHeld(KeyCode.N) || IsKeyHeld(rightStickUpKey)) pcFocal += 1f;
+
+            if (pcFocal != 0f && cachedInteractor.AssistantMicroscope != null)
+            {
+                cachedInteractor.AssistantMicroscope.ChangeFocal(pcFocal);
+            }
+        }
+
         if (!IsKeyHeld(leftPrimaryButtonKey))
         {
             return;
@@ -419,11 +456,6 @@ public class CameraTryMove : MonoBehaviour
         }
 
         if (forceTutorial != null && !ForceTutorialAcceptsRightStickInput(forceTutorial, rightStick))
-        {
-            return;
-        }
-
-        if (cachedInteractor == null)
         {
             return;
         }
@@ -442,8 +474,9 @@ public class CameraTryMove : MonoBehaviour
     {
         Vector2 leftStick = GetLeftStickVectorHeld();
         float vertical = 0f;
-        if (IsKeyHeld(moveUpKey)) vertical += 1f;
-        if (IsKeyHeld(moveDownKey)) vertical -= 1f;
+        bool isNearMicroscope = cachedInteractor != null && cachedInteractor.AssistantMicroscope != null && cachedInteractor.AssistantMicroscope.AssistantCanInteract;
+        if (IsKeyHeld(moveUpKey) && !isNearMicroscope) vertical += 1f;
+        if (IsKeyHeld(moveDownKey) && !isNearMicroscope) vertical -= 1f;
 
         if (leftStick == Vector2.zero && Mathf.Approximately(vertical, 0f))
         {
@@ -591,7 +624,7 @@ public class CameraTryMove : MonoBehaviour
             suppressGameplay |= shouldSuppress;
         }
 
-        if (IsMouseButtonDown(primaryClickMouseButton))
+        if (IsMouseButtonDown(primaryClickMouseButton) || (rightTriggerButtonKey != KeyCode.None && IsKeyDown(rightTriggerButtonKey)))
         {
             TryHandleForceTutorialInput(
                 forceTutorial,
@@ -712,7 +745,7 @@ public class CameraTryMove : MonoBehaviour
             case TutorialStepInputButton.RightSecondaryButton:
                 return IsKeyHeld(rightSecondaryButtonKey);
             case TutorialStepInputButton.RightTriggerButton:
-                return IsMouseButtonHeld(primaryClickMouseButton);
+                return IsMouseButtonHeld(primaryClickMouseButton) || (rightTriggerButtonKey != KeyCode.None && IsKeyHeld(rightTriggerButtonKey));
             case TutorialStepInputButton.RightGripButton:
                 return IsKeyHeld(rightGripButtonKey);
             case TutorialStepInputButton.LeftStickPress:

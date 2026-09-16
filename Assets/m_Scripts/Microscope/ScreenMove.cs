@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -8,6 +8,12 @@ public class ScreenMove : MonoBehaviour
 
     void Update()
     {
+        // 仅在显微镜内部观察模式下响应 WASD 平移切片
+        if (Interactor.Instance != null && Interactor.Instance.CurrentState != Interactor.GameState.Observing)
+        {
+            return;
+        }
+
         if (gameObject.transform.childCount>0)
         {
             GameObject Object=gameObject.transform.GetChild(0).gameObject;

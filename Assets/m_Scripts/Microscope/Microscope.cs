@@ -49,6 +49,8 @@ public class Microscope : MonoBehaviour
     public Tutorial TutorialUI; //教程UI
 
     LookOperation lookOperation;
+    private Canvas observationCanvas;
+    private Camera originalObservationCanvasCamera;
 
     public GameObject knobChild0; // 用于显示粗调的子对象
     public GameObject knobChild1; // 用于显示细调的子对象
@@ -94,6 +96,11 @@ public class Microscope : MonoBehaviour
     float lastAdjustmentTimeN = 0f;
     Vector3 ObjectInitialScale = Vector3.zero;
 
+    [SerializeField] private float observationMoveSpeed = 100f;
+    [SerializeField] private float observationRotationSpeed = 60f;
+    [SerializeField] private float coarseSliderStep = 0.01f;
+    [SerializeField] private float fineSliderStep = 0.001f;
+
     #endregion
 
     // Start 在游戏开始时调用一次
@@ -102,6 +109,11 @@ public class Microscope : MonoBehaviour
         if (lookCameraCanvas != null)
         {
             lookOperation = lookCameraCanvas.GetComponent<LookOperation>();
+            observationCanvas = lookCameraCanvas.GetComponent<Canvas>();
+            if (observationCanvas != null)
+            {
+                originalObservationCanvasCamera = observationCanvas.worldCamera;
+            }
         }
         pointer = 0;
         lineRenderer = Line.GetComponent<LineRenderer>(); // 获取 LineRenderer 组件
@@ -111,6 +123,29 @@ public class Microscope : MonoBehaviour
         show.SetActive(false);
         Cam.SetActive(false);
         screen.SetActive(false);
+        if (slider == null && lookCameraCanvas != null)
+        {
+            slider = lookCameraCanvas.GetComponentInChildren<Slider>(true);
+        }
+        if (slider == null)
+        {
+            slider = FindObjectOfType<Slider>(true);
+        }
+        if (slider != null)
+        {
+            if (values != null && values.Length > glass4Choice)
+            {
+                slider.value = values[glass4Choice];
+            }
+            // The bar is a read-only focus indicator. Focus must be changed
+            // through the coarse/fine focus controls, not by dragging the UI.
+            slider.interactable = false;
+            ColorBlock sliderColors = slider.colors;
+            sliderColors.disabledColor = sliderColors.normalColor;
+            slider.colors = sliderColors;
+            slider.onValueChanged.RemoveListener(HandleFocusSliderChanged);
+            slider.onValueChanged.AddListener(HandleFocusSliderChanged);
+        }
         StartCoroutine(SwitchObjectiveLens());
         volume = lookCamera.GetComponent<Volume>();
         if (volume != null && volume.profile.TryGet(out depthOfField))
@@ -167,7 +202,18 @@ public class Microscope : MonoBehaviour
         {
             if (Object == null)
             {
-                if (player.transform.childCount > 0)
+                if (player == null)
+                {
+                    Camera mainCam = Camera.main;
+                    if (mainCam != null) player = mainCam.gameObject;
+                    else
+                    {
+                        var xrOrigin = FindObjectOfType<XROrigin>();
+                        if (xrOrigin != null && xrOrigin.Camera != null) player = xrOrigin.Camera.gameObject;
+                    }
+                }
+
+                if (player != null && player.transform.childCount > 0)
                 {
                     bool flag = false;
                     int i;
@@ -192,7 +238,7 @@ public class Microscope : MonoBehaviour
                             Vector3(ObjectInitialScale.x / gameObject.transform.localScale.x,
                                 ObjectInitialScale.y / gameObject.transform.localScale.x,
                                 ObjectInitialScale.z / gameObject.transform.localScale.x);
-                        // 样本被重新放上载物台时，先确保对象恢复激活，再由焦距逻辑决定最终可见性。
+                        // 样本被重新放上载物台时，先确保对象恢复激活
                         Object.SetActive(true);
                         show.SetActive(true);
                         ShowObject showObject = Object.GetComponent<ShowObject>();
@@ -200,7 +246,8 @@ public class Microscope : MonoBehaviour
                         {
                             showObject.microscope = this;
                         }
-                        // 无论是键盘还是手柄输入路径，放置后都统一执行一次焦距可见性评估。
+
+                        // 放置样本只完成载物台准备，不自动进入观察或开启光源。
                         SetcurrentFocal();
                     }
                     else
@@ -213,10 +260,16 @@ public class Microscope : MonoBehaviour
             {
                 if (pointer == 0)
                 {
+                    if (showCamera == null || player == null)
+                    {
+                        return;
+                    }
+
                     showCamera.SetActive(true);
-                    Cam.SetActive(true);
+                    if (Cam != null) Cam.SetActive(true);
                     showCamera.transform.position = player.transform.position;
                     showCamera.transform.rotation = player.transform.rotation;
+                    SetObservationCanvasCamera(true);
                     player.SetActive(false);
                     pointer++;
                 }
@@ -234,20 +287,28 @@ public class Microscope : MonoBehaviour
         {
             if (Object != null)
             {
-                // 防止在“失焦隐藏状态”下被取下后仍然保持 inactive，造成再次放置后看不到。
-                Object.SetActive(true);
-                Object.transform.localScale = new
-                    Vector3(ObjectInitialScale.x,
-                        ObjectInitialScale.y,
-                        ObjectInitialScale.z);
-                Object.transform.SetParent(player.transform);
-                ShowObject showObject = Object.GetComponent<ShowObject>();
-                if (showObject != null)
+                if (player == null)
                 {
-                    showObject.microscope = null;
+                    Camera mainCam = Camera.main;
+                    if (mainCam != null) player = mainCam.gameObject;
                 }
-                Object = null;
-                show.SetActive(false);
+                if (player != null)
+                {
+                    // 防止在“失焦隐藏状态”下被取下后仍然保持 inactive，造成再次放置后看不到。
+                    Object.SetActive(true);
+                    Object.transform.localScale = new
+                        Vector3(ObjectInitialScale.x,
+                            ObjectInitialScale.y,
+                            ObjectInitialScale.z);
+                    Object.transform.SetParent(player.transform);
+                    ShowObject showObject = Object.GetComponent<ShowObject>();
+                    if (showObject != null)
+                    {
+                        showObject.microscope = null;
+                    }
+                    Object = null;
+                    show.SetActive(false);
+                }
             }
         }
     }
@@ -322,14 +383,37 @@ public class Microscope : MonoBehaviour
     /// </summary>
     public void QuitObserve()
     {
-        
-        lookCamera.SetActive(false);
+        if (lookCamera != null) lookCamera.SetActive(false);
+        if (showCamera != null) showCamera.SetActive(false);
         pointer = 0;
+        p = 0;
         MicroUI.setTrue = true;
-        player.SetActive(true);
-        //player.GetComponent<Camera>().cullingMask = ~player.GetComponent<Camera>().cullingMask;
-        Cam.SetActive(false);
-        
+
+        if (player == null)
+        {
+            Camera mainCam = Camera.main;
+            if (mainCam != null) player = mainCam.gameObject;
+            else
+            {
+                var xrOrigin = FindObjectOfType<XROrigin>();
+                if (xrOrigin != null && xrOrigin.Camera != null) player = xrOrigin.Camera.gameObject;
+            }
+        }
+
+        if (player != null)
+        {
+            player.SetActive(true);
+            Camera pCam = player.GetComponent<Camera>();
+            if (pCam != null)
+            {
+                pCam.stereoTargetEye = StereoTargetEyeMask.None;
+                pCam.targetDisplay = 0;
+            }
+        }
+
+        SetObservationCanvasCamera(false);
+
+        if (Cam != null) Cam.SetActive(false);
     }
     
     /// <summary>
@@ -388,92 +472,53 @@ public class Microscope : MonoBehaviour
     
     void Update()
     {
-        
         AdjustLight(0);
-       
-        if (showCamera.activeSelf)
+
+        if (showCamera != null && showCamera.activeSelf)
         {
-            // ========== 注释掉原有协程平滑移动代码 ==========
-            // // 目标位置和旋转
-            // Vector3 targetPosition;
-            // Quaternion targetRotation;
-
-            // // 根据pointer的值决定目标位置和旋转
-            // if (pointer == 1)
-            // {
-            //     targetPosition = point1.transform.position;
-            //     targetRotation = point1.transform.rotation;
-            //     Camera camera = showCamera.GetComponent<Camera>();
-            //     Camera camera1 = player.GetComponent<Camera>();
-            //     camera.fieldOfView = camera1.fieldOfView;
-            // }
-            // else
-            // {
-            //     targetPosition = point2.transform.position;
-            //     targetRotation = point2.transform.rotation;
-            //     if (p == 0)
-            //     {
-            //         MicroBlack.ToBlack = true;
-            //         p++;
-            //     }
-
-            // }
-            // // 使用MoveTowards平滑过渡位置
-            // showCamera.transform.position = Vector3.MoveTowards(showCamera.transform.position, targetPosition,
-            //     10 * Time.deltaTime * transform.lossyScale.x);
-
-            // // 使用RotateTowards平滑过渡旋转
-            // showCamera.transform.rotation = Quaternion.RotateTowards(showCamera.transform.rotation, targetRotation, 30 * Time.deltaTime);
-            // if (Vector3.Distance(showCamera.transform.position, point2.transform.position) < 0.01f)
-            // ==============================================
-
-            // ========== 新增瞬间移动代码 ==========
             Vector3 targetPosition;
             Quaternion targetRotation;
 
-            // 根据pointer的值决定目标位置和旋转
             if (pointer == 1)
             {
                 targetPosition = point1.transform.position;
                 targetRotation = point1.transform.rotation;
-                Camera camera = showCamera.GetComponent<Camera>();
-                Camera camera1 = player.GetComponent<Camera>();
-                camera.fieldOfView = camera1.fieldOfView;
-                
-                // 瞬间移动到point1位置
-                showCamera.transform.position = targetPosition;
-                showCamera.transform.rotation = targetRotation;
+
             }
             else
             {
                 targetPosition = point2.transform.position;
                 targetRotation = point2.transform.rotation;
+
+                // 第二阶段：推向目镜位置，触发黑屏淡入动画过渡
                 if (p == 0)
                 {
                     MicroBlack.ToBlack = true;
                     p++;
                 }
-
-                // 瞬间移动到point2位置
-                showCamera.transform.position = targetPosition;
-                showCamera.transform.rotation = targetRotation;
             }
 
-            // 瞬间判断是否到达目标位置（直接触发后续逻辑）
-            if (pointer != 1) // 只有指向point2时才切换到观察相机
-            // ==============================================
+            showCamera.transform.position = Vector3.MoveTowards(
+                showCamera.transform.position, targetPosition,
+                observationMoveSpeed * Time.deltaTime * transform.lossyScale.x);
+
+            showCamera.transform.rotation = Quaternion.RotateTowards(
+                showCamera.transform.rotation,
+                targetRotation,
+                observationRotationSpeed * Time.deltaTime);
+
+            if (Vector3.Distance(showCamera.transform.position, point2.transform.position) < 0.01f)
             {
                 showCamera.SetActive(false);
-                lookCamera.SetActive(true);
+                if (lookCamera != null) lookCamera.SetActive(true);
                 MicroUI.setTrue = false;
                 p = 0;
-                Interactor.Instance.ChangeState(Interactor.GameState.Observing);
-                
-                //取反 只渲染Microscope的ui
-                //player.GetComponent<Camera>().cullingMask = ~player.GetComponent<Camera>().cullingMask;
+                if (Interactor.Instance != null)
+                {
+                    Interactor.Instance.ChangeState(Interactor.GameState.Observing);
+                }
             }
         }
-        
     }
 
     public bool AssistantCanInteract => MicroUI.setTrue && isNear;
@@ -491,20 +536,23 @@ public class Microscope : MonoBehaviour
     // 焦距调整方法
     private void AdjustFocal(int direction)
     {
+        if (slider == null) return;
+
         // 根据模式选择步长
         float step = isCoarseAdjust ? coarseStep : fineStep;
 
-        currentFocal = depthOfField.focalLength.value;
+        if (depthOfField != null)
+        {
+            currentFocal = depthOfField.focalLength.value;
+        }
         distance += direction * step;
 
-        if (isCoarseAdjust)
-        {
-            slider.value += direction * -0.1f*focalChangeInterval*10;
-        }
-        else
-        {
-            slider.value += direction * -0.04f * 0.1f*focalChangeInterval*10;
-        }
+        // Keep the visual focus scale and the knob controls on the same range.
+        float sliderStep = isCoarseAdjust ? coarseSliderStep : fineSliderStep;
+        slider.value = Mathf.Clamp(
+            slider.value - direction * sliderStep,
+            slider.minValue,
+            slider.maxValue);
 
         // Debug.Log("slider.value"+slider.value);
         // Debug.Log("glass4Choice"+glass4Choice);
@@ -519,22 +567,89 @@ public class Microscope : MonoBehaviour
         }
     }
 
+    private void HandleFocusSliderChanged(float value)
+    {
+        // The slider is display-only. Programmatic value changes from the focus
+        // controls still use this callback to refresh the optical result.
+        if (lookCamera == null || !lookCamera.activeSelf || isRotating)
+        {
+            return;
+        }
+
+        SetcurrentFocal();
+        if (depthOfField != null)
+        {
+            depthOfField.focalLength.value = currentFocal;
+        }
+    }
+
+    private void SetObservationCanvasCamera(bool observing)
+    {
+        if (observationCanvas == null || observationCanvas.renderMode != RenderMode.ScreenSpaceCamera)
+        {
+            return;
+        }
+
+        Camera targetCamera = null;
+        if (observing && lookCamera != null)
+        {
+            targetCamera = lookCamera.GetComponent<Camera>();
+        }
+        else if (!observing)
+        {
+            targetCamera = player != null ? player.GetComponent<Camera>() : null;
+            if (targetCamera == null)
+            {
+                targetCamera = originalObservationCanvasCamera;
+            }
+        }
+
+        if (targetCamera != null)
+        {
+            observationCanvas.worldCamera = targetCamera;
+        }
+    }
+
     void SetcurrentFocal()
     {
+        if (Object == null) return;
+        if (slider == null || values == null || values1 == null || glass4Choice >= values.Length || glass4Choice >= values1.Length)
+        {
+            Object.SetActive(true);
+            return;
+        }
+
+        // The slider is a normalized focus position. Keep the displayed
+        // distance consistent whether focus was changed by a knob or by drag.
+        distance = (values[glass4Choice] - slider.value) * 20f;
+        if (values1[glass4Choice] > 0.0001f)
+        {
+            currentFocal = math.abs(values[glass4Choice] - slider.value) /
+                           values1[glass4Choice] * 300;
+        }
+
         if (slider.value > values[glass4Choice] + values1[glass4Choice] ||
             slider.value < values[glass4Choice] - values1[glass4Choice])
         {
-            Object?.SetActive(false);
+            Object.SetActive(false);
         }
         else
         {
             Object.SetActive(true);
             ShowObject showObject = Object.GetComponent<ShowObject>();
+            if (showObject != null)
+            {
+                showObject.SetColor(SetTarget());
+            }
 
-            showObject.SetColor(SetTarget());
+        }
+    }
 
-            //调整清晰
-            currentFocal = math.abs(values[glass4Choice] - slider.value) / values1[glass4Choice] * 300;
+    private void OnDestroy()
+    {
+        if (slider != null)
+        {
+            slider.onValueChanged.RemoveListener(HandleFocusSliderChanged);
         }
     }
 
@@ -542,20 +657,30 @@ public class Microscope : MonoBehaviour
     {
         if (Object == null) return;
         ShowObject showObject = Object.GetComponent<ShowObject>();
-        showObject.SetLight(GetLight());
+        if (showObject != null)
+        {
+            showObject.SetLight(GetLight());
+        }
     }
 
     //设置透明度
     float SetTarget()
     {
+        if (slider == null || values == null || values1 == null || values2 == null ||
+            glass4Choice >= values.Length || glass4Choice >= values1.Length || glass4Choice >= values2.Length)
+        {
+            return 1f;
+        }
+
         if (math.abs(values[glass4Choice] - slider.value) < values2[glass4Choice])
         {
-            return 1;
+            return 1f;
         }
         else
         {
-            return 1 - (math.abs(slider.value - math.abs(values[glass4Choice])) - values2[glass4Choice]) /
-            (values1[glass4Choice] - values2[glass4Choice]);
+            float denominator = values1[glass4Choice] - values2[glass4Choice];
+            if (Mathf.Abs(denominator) < 0.0001f) return 1f;
+            return Mathf.Clamp01(1f - (math.abs(slider.value - math.abs(values[glass4Choice])) - values2[glass4Choice]) / denominator);
         }
     }
 

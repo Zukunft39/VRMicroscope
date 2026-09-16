@@ -82,15 +82,18 @@ namespace VRMicroscope.Assistant
                 "Ask about microscopes, NA, spatial frequency, confocal principles, or THz s-SNOM.\n\nFor hands-on learning, ask where to go. I can mark learning areas that are currently available.");
             transcript.gameObject.AddComponent<ContentSizeFitter>().verticalFit=ContentSizeFitter.FitMode.PreferredSize;
             scroll.content=transcript.rectTransform;
-            status=Label(root,"Status",new Vector2(22,-337),new Vector2(636,38),17,"Type or record a question. Review it, then select Send.");
-            voiceButton=ButtonAt(root,"Voice Input",new Vector2(674,-337),new Vector2(160,36),()=>
+            // Status messages can contain connection details and normally wrap to two lines.
+            // Keep enough vertical space so the second line is not clipped by the label.
+            status=Label(root,"Status",new Vector2(22,-337),new Vector2(636,48),15,"Type or record a question. Review it, then select Send.");
+            status.verticalOverflow=VerticalWrapMode.Overflow;
+            voiceButton=ButtonAt(root,"Voice Input",new Vector2(674,-343),new Vector2(160,36),()=>
             {
                 if(pending!=null || isTyping) return;
                 keyboard.SetActive(false); input.DeactivateInputField();
                 owner.ReportActivity(); voice.Toggle(settings); RefreshButtons();
             });
             voiceLabel=voiceButton.GetComponentInChildren<Text>();
-            var field=Rect(root,"Question Input",new Vector2(22,-380),new Vector2(812,82));
+            var field=Rect(root,"Question Input",new Vector2(22,-390),new Vector2(812,82));
             field.gameObject.AddComponent<Image>().color=new Color(.12f,.23f,.30f,.7f);
             input=field.gameObject.AddComponent<InputField>();
             input.textComponent=Label(field,"Input Text",new Vector2(12,-8),new Vector2(788,65),21,"");
@@ -98,15 +101,15 @@ namespace VRMicroscope.Assistant
             placeholder.color=new Color(.60f,.73f,.79f,.85f); input.placeholder=placeholder;
             input.lineType=InputField.LineType.MultiLineNewline; input.characterLimit=1000;
             input.onValueChanged.AddListener(_=>{ owner.ReportActivity(); RefreshButtons(); });
-            ButtonAt(root,"New Chat",new Vector2(22,-483),new Vector2(108,36),NewConversation);
-            ButtonAt(root,"Next Step",new Vector2(282,-483),new Vector2(118,36),()=>
+            ButtonAt(root,"New Chat",new Vector2(22,-490),new Vector2(108,36),NewConversation);
+            ButtonAt(root,"Next Step",new Vector2(282,-490),new Vector2(118,36),()=>
             { if(pending==null && !isTyping && !VoiceBusy) { input.text="What should I do next in the current experiment state?"; owner.ReportActivity(); } });
-            ButtonAt(root,"How to Exit",new Vector2(410,-483),new Vector2(142,36),()=>
+            ButtonAt(root,"How to Exit",new Vector2(410,-490),new Vector2(142,36),()=>
             { if(pending==null && !isTyping && !VoiceBusy) { input.text="How do I exit the current experiment?"; owner.ReportActivity(); } });
-            ButtonAt(root,"Keyboard",new Vector2(142,-483),new Vector2(126,36),()=>{ if(!VoiceBusy) keyboard.SetActive(!keyboard.activeSelf); });
-            cancel=ButtonAt(root,"Cancel",new Vector2(575,-483),new Vector2(126,36),CancelOrSkip);
+            ButtonAt(root,"Keyboard",new Vector2(142,-490),new Vector2(126,36),()=>{ if(!VoiceBusy) keyboard.SetActive(!keyboard.activeSelf); });
+            cancel=ButtonAt(root,"Cancel",new Vector2(575,-490),new Vector2(126,36),CancelOrSkip);
             cancelLabel=cancel.GetComponentInChildren<Text>();
-            send=ButtonAt(root,"Send",new Vector2(711,-483),new Vector2(123,36),Send);
+            send=ButtonAt(root,"Send",new Vector2(711,-490),new Vector2(123,36),Send);
             sendLabel=send.GetComponentInChildren<Text>();
             BuildKeyboard(root);
             RefreshButtons();
@@ -365,7 +368,7 @@ namespace VRMicroscope.Assistant
             text.font=TMPro.TMP_Settings.defaultFontAsset.sourceFontFile; text.fontSize=fontSize; text.text=value;
             text.color=new Color(.88f,.95f,1); text.raycastTarget=false; text.supportRichText=false;
             text.alignment=TextAnchor.UpperLeft; text.horizontalOverflow=HorizontalWrapMode.Wrap;
-            text.verticalOverflow=VerticalWrapMode.Truncate; return text;
+            text.verticalOverflow=VerticalWrapMode.Overflow; return text;
         }
         private Button ButtonAt(Transform parent,string title,Vector2 pos,Vector2 size,UnityEngine.Events.UnityAction action)
         {

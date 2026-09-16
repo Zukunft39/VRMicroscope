@@ -39,13 +39,59 @@ public class InteractableSamples : MonoBehaviour
 
     private void OnCollisionEnter(Collision other)
     {
-        if(!other.gameObject.CompareTag("MainCamera"))return;
-        other.transform.parent.GetComponent<InteractWithSamples>().EnablePickSample(this);
+        TryEnablePick(other.gameObject);
+    }
+
+    private void OnCollisionStay(Collision other)
+    {
+        TryEnablePick(other.gameObject);
     }
 
     private void OnCollisionExit(Collision other)
     {
-        if(!other.gameObject.CompareTag("MainCamera"))return;
-        other.transform.parent.GetComponent<InteractWithSamples>().DisablePickSample(this);
+        TryDisablePick(other.gameObject);
+    }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        TryEnablePick(other.gameObject);
+    }
+
+    private void OnTriggerStay(Collider other)
+    {
+        TryEnablePick(other.gameObject);
+    }
+
+    private void OnTriggerExit(Collider other)
+    {
+        TryDisablePick(other.gameObject);
+    }
+
+    private void TryEnablePick(GameObject obj)
+    {
+        if (obj == null) return;
+        InteractWithSamples handler = obj.GetComponentInParent<InteractWithSamples>();
+        if (handler == null && Camera.main != null)
+        {
+            handler = Camera.main.GetComponentInParent<InteractWithSamples>();
+        }
+        if (handler != null)
+        {
+            handler.EnablePickSample(this);
+        }
+    }
+
+    private void TryDisablePick(GameObject obj)
+    {
+        if (obj == null) return;
+        InteractWithSamples handler = obj.GetComponentInParent<InteractWithSamples>();
+        if (handler == null && Camera.main != null)
+        {
+            handler = Camera.main.GetComponentInParent<InteractWithSamples>();
+        }
+        if (handler != null)
+        {
+            handler.DisablePickSample(this);
+        }
     }
 }
