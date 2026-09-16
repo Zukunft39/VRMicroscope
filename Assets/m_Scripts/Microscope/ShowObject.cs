@@ -46,10 +46,10 @@ public class ShowObject : MonoBehaviour
         if (meshRenderer != null && material == null)
             material = meshRenderer.sharedMaterial;
         if (meshRenderer == null)
-            Debug.LogError("找不到MeshRenderer组件", this);
+            Debug.LogError("MeshRenderer component not found.", this);
         
         if (material == null)
-            Debug.LogError("找不到Material", this);
+            Debug.LogError("Material not found.", this);
 
         material.SetFloat(lightName, targetLight);
     }

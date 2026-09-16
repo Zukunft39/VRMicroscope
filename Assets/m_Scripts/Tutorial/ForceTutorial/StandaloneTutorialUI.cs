@@ -1,4 +1,4 @@
-﻿﻿using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -42,86 +42,86 @@ public class TutorialStep
     }
 
     [TextArea(2, 5)]
-    [Tooltip("当前步骤要显示的教程文本")]
+    [Tooltip("Tutorial text displayed for this step.")]
     public string stepText;
 
-    [Tooltip("是否为【强制交互】步骤？\n如果勾选：该步骤不会自动推进，必须由正确输入或外部交互后调用 CompleteAction()。\n如果不勾选：该步骤会在等待一段时间后自动进入下一步。")]
+    [Tooltip("Require interaction: advance only on accepted input or an external CompleteAction() call. Otherwise advance after the configured delay.")]
     public bool isMandatoryInteraction = false;
 
-    [Tooltip("当步骤为【强制交互】时，可在这里直接配置允许推进教程的输入。\n支持按钮与摇杆方向。\n留空表示该步骤仍由外部交互脚本手动调用 CompleteAction()。")]
+    [Tooltip("Inputs that advance a mandatory step, including buttons and stick directions. Leave empty for external CompleteAction() calls.")]
     public List<TutorialStepInputButton> acceptedButtons = new List<TutorialStepInputButton>();
 
-    [Header("组合输入")]
-    [Tooltip("勾选后，本步骤需要先按住下方按钮，再执行 acceptedButtons 中配置的输入。\n适合“按住 X + 右手摇杆方向”这类组合判定。")]
+    [Header("Combined Input")]
+    [Tooltip("Require the modifier below to be held while performing an acceptedButtons input.")]
     public bool requireHoldButtonCombo = false;
 
-    [Tooltip("组合输入模式下，需要保持按住的按钮。\nacceptedButtons 则填写真正要触发推进的方向或按钮。")]
+    [Tooltip("Held modifier for combined input; acceptedButtons contains the direction/button that advances the step.")]
     public TutorialStepInputButton requiredHeldButton = TutorialStepInputButton.None;
 
-    [Tooltip("该步骤需要开放到什么程度的玩家输入。\n推荐你为每一步明确指定状态。ButtonOnly 会只放开按钮与交互，不放开位姿移动。未手动更改的旧配置会自动按 FullyBlocked 处理。")]
+    [Tooltip("Allowed player input for this step. ButtonOnly enables buttons/interactions without pose movement. Unmodified legacy settings use FullyBlocked.")]
     public InputAccessMode inputAccessMode = InputAccessMode.FullyBlocked;
 
-    [Header("进入该步骤时触发的事件")]
-    [Tooltip("可用于：进入该步骤时执行特定操作。\n例如：如果这是强制交互步骤，在这里解开玩家的部分操作（如恢复手柄抓取或按键功能）。")]
+    [Header("Event invoked when entering this step.")]
+    [Tooltip("Bind step-entry behavior, such as restoring selected grabbing or button interactions for a mandatory step.")]
     public UnityEvent onStepStart;
 
-    [Header("UI 位置覆盖")]
-    [Tooltip("【可选】如果指定了 Transform，该步骤的 UI 将固定在此位置和朝向，不再跟随玩家相机。非常适合显微镜操作等需要固定视角的场景。")]
+    [Header("UI Pose Override")]
+    [Tooltip("Optional fixed UI position and orientation for this step, replacing camera following.")]
     public Transform customUIAnchor;
 }
 
 public class StandaloneTutorialUI : MonoBehaviour
 {
-    [Header("UI 引用")]
-    [Tooltip("用于显示教程文字的 TextMeshPro 组件")]
+    [Header("UI References")]
+    [Tooltip("TextMeshPro component displaying tutorial text.")]
     public TextMeshProUGUI tutorialTextDisplay;
     
-    [Tooltip("整个教程界面的根节点（通常就是当前Canvas的第一个子物体，用于自动显示/隐藏）")]
+    [Tooltip("Tutorial UI root, usually the Canvas first child, used for automatic visibility.")]
     public GameObject uiRoot;
 
-    [Header("UI 行为")]
-    [Tooltip("是否让 UI 始终跟随并朝向主摄像机？")]
+    [Header("UI Behavior")]
+    [Tooltip("Keep the UI following and facing the main camera.")]
     public bool alwaysFaceCamera = true;
     
-    [Tooltip("UI 距离玩家摄像机的保持距离（建议设为 1.0 ~ 1.5）")]
+    [Tooltip("Distance from the player camera; recommended 1.0-1.5.")]
     public float followDistance = 1.2f;
 
-    [Tooltip("UI 的高度偏移（建议稍微偏下一点，如 -0.1，避免完全挡住正前方视线）")]
+    [Tooltip("UI height offset; a slight downward offset such as -0.1 keeps the forward view clear.")]
     public float followHeightOffset = -0.1f;
     
-    [Tooltip("UI 旋转和位置跟随的平滑速度（值越小跟随越有延迟感，建议设为 5）\n如果设为 0 或者极大，则等同于瞬间硬切。")]
+    [Tooltip("UI pose-follow smoothing speed; lower values lag more (recommended 5). Zero or very large values snap immediately.")]
     public float faceCameraLerpSpeed = 5f;
 
-    [Tooltip("非强制交互步骤自动进入下一步的等待时间（秒）")]
+    [Tooltip("Automatic advance delay for presentation steps, in seconds.")]
     public float autoAdvanceDelay = 5f;
 
-    [Header("渲染层级")]
-    [Tooltip("播放强制教程时，临时将本教程相关 Canvas 提到更前面，避免被普通教程菜单遮住。")]
+    [Header("Render Order")]
+    [Tooltip("Temporarily raise tutorial canvases above ordinary tutorial menus during mandatory steps.")]
     public bool bringTutorialToFront = true;
 
-    [Tooltip("强制教程临时使用的排序层级。数值越大，渲染越靠前。")]
+    [Tooltip("Temporary mandatory tutorial sorting order; larger values render in front.")]
     public int frontSortingOrder = 500;
 
-    [Header("强制输入节奏")]
-    [Tooltip("进入带有教程输入配置的强制步骤后，等待多久才开始接受按键/摇杆判定。")]
+    [Header("Mandatory Input Timing")]
+    [Tooltip("Delay before accepting button/stick input after entering a configured mandatory step.")]
     public float mandatoryConfiguredInputAcceptDelay = 2f;
 
-    [Header("教程流程配置")]
+    [Header("Tutorial Sequence")]
     public List<TutorialStep> steps = new List<TutorialStep>();
     
 
-    [Header("全局生命周期事件")]
-    [Tooltip("教程开始时触发（在这里挂载：完全禁用玩家所有操作/移动）")]
+    [Header("Lifecycle Events")]
+    [Tooltip("Invoked on tutorial start; bind player input/movement restrictions here.")]
     public UnityEvent onTutorialStart;
 
-    [Tooltip("教程全部结束时触发（在这里挂载：恢复玩家所有操作、隐藏UI等）")]
+    [Tooltip("Invoked after all steps finish; restore player input and hide UI here.")]
     public UnityEvent onTutorialFinish;
 
-    [Tooltip("玩家在强制交互阶段执行了【错误操作】时触发（可配置播放错误提示音等）")]
+    [Tooltip("Invoked on incorrect input during mandatory interaction; can play an error sound.")]
     public UnityEvent onWrongAction;
 
-    [Header("错误提示")]
-    [Tooltip("错误提示文本默认显示时长。若玩家在此期间完成了正确操作，会立即中断并进入下一步。")]
+    [Header("Error Feedback")]
+    [Tooltip("Error-message duration. Correct input interrupts the message and advances immediately.")]
     public float errorDisplayDuration = 1.5f;
 
     private int currentStepIndex = 0;
@@ -229,7 +229,7 @@ public class StandaloneTutorialUI : MonoBehaviour
             bool pressedSpace = Input.GetKeyDown(KeyCode.Space);
             if (pressedSpace || autoAdvanceTimer >= autoAdvanceDelay)
             {
-                string reason = pressedSpace ? "键盘 Space" : $"自动倒计时 {autoAdvanceDelay:0.##} 秒";
+                string reason = pressedSpace ? "Keyboard Space" : $"Auto advance in {autoAdvanceDelay:0.##} seconds";
                 AdvanceStep(reason);
             }
         }
@@ -310,12 +310,12 @@ public class StandaloneTutorialUI : MonoBehaviour
 
     public void NextStep()
     {
-        AdvanceStep("外部调用 NextStep()");
+        AdvanceStep("External NextStep() call");
     }
 
     public void CompleteAction()
     {
-        CompleteAction("外部脚本调用 CompleteAction()");
+        CompleteAction("External CompleteAction() call");
     }
 
     public void CompleteAction(string reason)

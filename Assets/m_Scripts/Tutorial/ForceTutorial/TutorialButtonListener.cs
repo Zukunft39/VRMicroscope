@@ -25,42 +25,42 @@ namespace VRMicroscope.Tutorial
         private const string LeftStickActionName = "LeftStick";
         private const string RightStickActionName = "RightStick";
 
-        [Header("核心引用")]
-        [Tooltip("需要推进的教程 UI 界面实例")]
+        [Header("Core References")]
+        [Tooltip("Tutorial UI instance to advance.")]
         public StandaloneTutorialUI tutorialUI;
 
-        [Header("输入资源")]
-        [Tooltip("拖入 ForceTutorial.inputactions 资源，脚本会自动读取里面的按钮与摇杆 Action。")]
+        [Header("Input Asset")]
+        [Tooltip("Assign ForceTutorial.inputactions to load its button and stick actions.")]
         public InputActionAsset tutorialInputActions;
 
-        [Header("通用设置")]
-        [Tooltip("组件启用后，延迟多久再开始监听输入，避免刚启用时误触发")]
+        [Header("General Settings")]
+        [Tooltip("Delay input listening after enable to prevent accidental activation.")]
         public float initialInputDelay = 0.5f;
 
-        [Tooltip("每次成功处理一个教程输入后，等待多久再允许处理下一次输入")]
+        [Tooltip("Delay between successfully handled tutorial inputs.")]
         public float inputCooldown = 0.15f;
 
-        [Tooltip("摇杆方向判定阈值，超过这个值才视为一次有效拨动")]
+        [Tooltip("Stick direction threshold for a valid input.")]
         [Range(0.1f, 1f)]
         public float stickThreshold = 0.75f;
 
-        [Header("教程反馈增强")]
-        [Tooltip("当玩家在强制教程中输入正确的移动/转向操作时，自动追加一小段位移或转向，让反馈更明显。")]
+        [Header("Tutorial Feedback Enhancement")]
+        [Tooltip("Add a small movement or rotation after correct locomotion input to make feedback clearer.")]
         public bool enableLocomotionFeedbackAssist = true;
 
-        [Tooltip("移动教学步骤中，额外追加的位移距离。")]
+        [Tooltip("Additional displacement during movement tutorial steps.")]
         [Min(0f)]
         public float movementAssistDistance = 0.4f;
 
-        [Tooltip("移动教学反馈持续时长。值越小，额外位移越利落。")]
+        [Tooltip("Movement feedback duration; shorter values produce quicker displacement.")]
         [Min(0.01f)]
         public float movementAssistDuration = 0.18f;
 
-        [Tooltip("转向教学步骤中，额外追加的转向角度。")]
+        [Tooltip("Additional rotation angle during turning tutorial steps.")]
         [Min(0f)]
         public float turnAssistAngle = 25f;
 
-        [Tooltip("转向教学反馈持续时长。")]
+        [Tooltip("Turning feedback duration.")]
         [Min(0.01f)]
         public float turnAssistDuration = 0.12f;
 
@@ -349,7 +349,7 @@ namespace VRMicroscope.Tutorial
 
             if (tutorialInputActions == null)
             {
-                Debug.LogWarning("[ForceTutorial/Input] 未配置 tutorialInputActions，无法监听 VR 输入。");
+                Debug.LogWarning("[ForceTutorial/Input] tutorialInputActions is unassigned; cannot listen for VR input.");
                 return;
             }
 
@@ -369,7 +369,7 @@ namespace VRMicroscope.Tutorial
 
             if (leftStickAction == null)
             {
-                Debug.LogWarning($"[ForceTutorial/Input] 在输入资源中未找到 Action: {LeftStickActionName}");
+                Debug.LogWarning($"[ForceTutorial/Input] Action not found: {LeftStickActionName}");
             }
             else
             {
@@ -378,7 +378,7 @@ namespace VRMicroscope.Tutorial
 
             if (rightStickAction == null)
             {
-                Debug.LogWarning($"[ForceTutorial/Input] 在输入资源中未找到 Action: {RightStickActionName}");
+                Debug.LogWarning($"[ForceTutorial/Input] Action not found: {RightStickActionName}");
             }
             else
             {
@@ -425,7 +425,7 @@ namespace VRMicroscope.Tutorial
             InputAction action = tutorialInputActions.FindAction(actionName, false);
             if (action == null)
             {
-                Debug.LogWarning($"[ForceTutorial/Input] 在输入资源中未找到 Action: {actionName}");
+                Debug.LogWarning($"[ForceTutorial/Input] Action not found: {actionName}");
                 return;
             }
 

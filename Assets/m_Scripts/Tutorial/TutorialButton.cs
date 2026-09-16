@@ -6,37 +6,37 @@ using TMPro;
 [System.Serializable]
 public struct buttonsLevels
 {
-    [Header("当前按钮组内的按钮/视频容器集合")]
+    [Header("Button / Video Containers in This Group")]
     public GameObject[] buttons; // 容器：可包含Button、视频等组件
 }
 
 [System.Serializable]
 public struct UILevel
 {
-    [Header("当前一级层级下的所有按钮组")]
+    [Header("Button Groups in This Level")]
     public buttonsLevels[] theButtons;
 }
 
 public class TutorialButton : MonoBehaviour
 {
     #region 变量
-    [Header("按钮样式配置")]
+    [Header("Button Styles")]
     public Color highlightColor = new Color(1f, 0.92f, 0.016f); // 高亮黄色（仅背景）
     public Color normalColor = Color.white;                     // 默认背景色
 
     public float highlightScale = 1.35f;                        // 高亮缩放比例
     public float videoSelectScale = 2.5f;                  // 视频容器选中时的缩放比例
-    [Header("是否保留文字原始颜色（推荐开启）")]
+    [Header("Preserve Original Text Colors (Recommended)")]
     public bool keepTextOriginalColor = true; // 新增：控制是否保留文字颜色
 
-    [Header("层级数据配置")]
+    [Header("Level Configuration")]
     public List<UILevel> UILevels = new List<UILevel>();
 
-    [Header("默认焦点")]
+    [Header("Default Focus")]
     public bool preferNamedDefaultButton = true;
-    public List<string> preferredDefaultButtonKeywords = new List<string> { "Back", "关闭" };
+    public List<string> preferredDefaultButtonKeywords = new List<string> { "Back", "Close" };
 
-    [Header("当前选中状态")]
+    [Header("Current Selection")]
     public Button nowButton;          // 当前选中的按钮组件
     public GameObject nowSelectObj;   // 当前选中的GameObject（按钮/视频容器）
     public int levelIndex = 0;        // 一级层级索引（UILevel列表的索引）
@@ -95,7 +95,7 @@ public class TutorialButton : MonoBehaviour
     {
         if (UILevels.Count == 0)
         {
-            Debug.LogWarning("UILevels列表为空，请在Inspector中配置层级数据！");
+            Debug.LogWarning("UILevels is empty. Configure levels in the Inspector.");
             return;
         }
 
@@ -119,7 +119,7 @@ public class TutorialButton : MonoBehaviour
 
                     if (obj == null)
                     {
-                        Debug.LogWarning($"UILevel[{currentLevelIdx}] -> 按钮组[{currentBtnGroupIdx}] -> 对象[{currentObjIdx}] 为空！");
+                        Debug.LogWarning($"UILevel[{currentLevelIdx}] -> group[{currentBtnGroupIdx}] -> object[{currentObjIdx}] is null.");
                         continue;
                     }
 
@@ -156,7 +156,7 @@ public class TutorialButton : MonoBehaviour
                     }
                     else
                     {
-                        Debug.LogWarning($"GameObject[{obj.name}] 上未找到Button组件！");
+                        Debug.LogWarning($"Button component not found on GameObject[{obj.name}].");
                     }
                 }
             }
@@ -172,7 +172,7 @@ public class TutorialButton : MonoBehaviour
         // 边界检查
         if (levelIdx < 0 || levelIdx >= UILevels.Count)
         {
-            Debug.LogWarning($"指定层级索引[{levelIdx}]无效！");
+            Debug.LogWarning($"Requested level index [{levelIdx}] is invalid.");
             return;
         }
 
@@ -195,14 +195,14 @@ public class TutorialButton : MonoBehaviour
 
         if (defaultBtnGroupIdx >= targetLevel.theButtons.Length)
         {
-            Debug.LogWarning($"层级[{levelIdx}]下无第二组按钮！");
+            Debug.LogWarning($"Level [{levelIdx}] has no second button group.");
             return;
         }
 
         buttonsLevels targetBtnGroup = targetLevel.theButtons[defaultBtnGroupIdx];
         if (targetBtnGroup.buttons.Length == 0)
         {
-            Debug.LogWarning($"层级[{levelIdx}] -> 按钮组[{defaultBtnGroupIdx}] 下无对象！");
+            Debug.LogWarning($"Level[{levelIdx}] -> group[{defaultBtnGroupIdx}] has no objects.");
             return;
         }
 
@@ -224,7 +224,7 @@ public class TutorialButton : MonoBehaviour
         }
         else
         {
-            Debug.LogWarning($"默认对象[{defaultObj.name}] 上无Button组件！");
+            Debug.LogWarning($"Default object [{defaultObj.name}] has no Button component.");
         }
     }
 
@@ -333,7 +333,7 @@ public class TutorialButton : MonoBehaviour
         // 边界检查：当前一级层级和按钮组是否有效
         if (!IsCurrentLevelValid() || !IsCurrentBtnGroupValid())
         {
-            Debug.LogWarning("当前层级/按钮组无效，无法切换按钮！");
+            Debug.LogWarning("Current level/group is invalid; cannot switch buttons.");
             return;
         }
 
@@ -343,12 +343,12 @@ public class TutorialButton : MonoBehaviour
         // 边界检查：组内对象索引
         if (newIndex < 0)
         {
-            Debug.Log("已经是当前按钮组内的第一个对象");
+            Debug.Log("Already at the first object in this button group.");
             return;
         }
         if (newIndex >= currentBtnGroup.buttons.Length)
         {
-            Debug.Log("已经是当前按钮组内的最后一个对象");
+            Debug.Log("Already at the last object in this button group.");
             return;
         }
 
@@ -375,7 +375,7 @@ public class TutorialButton : MonoBehaviour
         else
         {
             nowButton = null;
-            Debug.LogWarning($"对象[{newObj.name}] 上无Button组件，无法高亮！");
+            Debug.LogWarning($"Object [{newObj.name}] has no Button component and cannot be highlighted.");
         }
     }
 
@@ -388,7 +388,7 @@ public class TutorialButton : MonoBehaviour
         // 边界检查：当前一级层级是否有效
         if (!IsCurrentLevelValid())
         {
-            Debug.LogWarning("当前一级层级无效，无法切换按钮组！");
+            Debug.LogWarning("Current level is invalid; cannot switch button groups.");
             return;
         }
 
@@ -398,12 +398,12 @@ public class TutorialButton : MonoBehaviour
         // 边界检查：按钮组索引
         if (newBtnGroupIndex < 0)
         {
-            Debug.Log("已经是当前层级下的第一组按钮");
+            Debug.Log("Already at the first button group in this level.");
             return;
         }
         if (newBtnGroupIndex >= currentLevel.theButtons.Length)
         {
-            Debug.Log("已经是当前层级下的最后一组按钮");
+            Debug.Log("Already at the last button group in this level.");
             return;
         }
 
@@ -421,7 +421,7 @@ public class TutorialButton : MonoBehaviour
         // 检查新按钮组内是否有对象
         if (newBtnGroup.buttons.Length == 0)
         {
-            Debug.LogWarning($"UILevel[{levelIndex}] -> 按钮组[{buttonIndex}] 下无对象！");
+            Debug.LogWarning($"UILevel[{levelIndex}] -> group[{buttonIndex}] has no objects.");
             nowButton = null;
             nowSelectObj = null;
             return;
@@ -442,7 +442,7 @@ public class TutorialButton : MonoBehaviour
         else
         {
             nowButton = null;
-            Debug.LogWarning($"对象[{newObj.name}] 上无Button组件！");
+            Debug.LogWarning($"Object [{newObj.name}] has no Button component.");
         }
     }
 
@@ -457,12 +457,12 @@ public class TutorialButton : MonoBehaviour
         // 边界检查：一级层级索引
         if (newLevelIndex < 0)
         {
-            Debug.Log("已经是第一个一级层级");
+            Debug.Log("Already at the first level.");
             return;
         }
         if (newLevelIndex >= UILevels.Count)
         {
-            Debug.Log("已经是最后一个一级层级");
+            Debug.Log("Already at the last level.");
             return;
         }
 
@@ -481,7 +481,7 @@ public class TutorialButton : MonoBehaviour
         // 检查新层级是否有按钮组
         if (newLevel.theButtons.Length == 0)
         {
-            Debug.LogWarning($"UILevel[{levelIndex}] 下无按钮组！");
+            Debug.LogWarning($"UILevel[{levelIndex}] has no button groups.");
             nowButton = null;
             nowSelectObj = null;
             return;
@@ -491,7 +491,7 @@ public class TutorialButton : MonoBehaviour
         // 检查新按钮组是否有对象
         if (newBtnGroup.buttons.Length == 0)
         {
-            Debug.LogWarning($"UILevel[{levelIndex}] -> 按钮组[{buttonIndex}] 下无对象！");
+            Debug.LogWarning($"UILevel[{levelIndex}] -> group[{buttonIndex}] has no objects.");
             nowButton = null;
             nowSelectObj = null;
             return;
@@ -512,7 +512,7 @@ public class TutorialButton : MonoBehaviour
         else
         {
             nowButton = null;
-            Debug.LogWarning($"对象[{newObj.name}] 上无Button组件！");
+            Debug.LogWarning($"Object [{newObj.name}] has no Button component.");
         }
     }
 
@@ -593,7 +593,7 @@ public class TutorialButton : MonoBehaviour
         }
         else
         {
-            Debug.LogWarning("当前无选中按钮或按钮不可交互！");
+            Debug.LogWarning("No selected or interactable button.");
         }
     }
 
@@ -627,7 +627,7 @@ public class TutorialButton : MonoBehaviour
         buttonsLevels targetGroup = UILevels[levelIdx].theButtons[btnGroupIdx];
         if (objIdx < 0 || objIdx >= targetGroup.buttons.Length)
         {
-            Debug.LogWarning($"组内对象索引[{objIdx}]无效！");
+            Debug.LogWarning($"Object index [{objIdx}] is invalid.");
             return;
         }
 
@@ -653,7 +653,7 @@ public class TutorialButton : MonoBehaviour
         else
         {
             nowButton = null;
-            Debug.LogWarning($"对象[{targetObj.name}] 上无Button组件！");
+            Debug.LogWarning($"Object [{targetObj.name}] has no Button component.");
         }
     }
 
@@ -664,13 +664,13 @@ public class TutorialButton : MonoBehaviour
     {
         if (levelIdx < 0 || levelIdx >= UILevels.Count)
         {
-            Debug.LogWarning($"层级索引[{levelIdx}]无效！");
+            Debug.LogWarning($"Level index [{levelIdx}] is invalid.");
             return false;
         }
 
         if (btnGroupIdx < 0 || btnGroupIdx >= UILevels[levelIdx].theButtons.Length)
         {
-            Debug.LogWarning($"按钮组索引[{btnGroupIdx}]无效！");
+            Debug.LogWarning($"Button group index [{btnGroupIdx}] is invalid.");
             return false;
         }
 
@@ -694,7 +694,7 @@ public class TutorialButton : MonoBehaviour
                 ResetAllButtonsToNormal();
                 nowButton = null;
                 nowSelectObj = null;
-                Debug.Log("切换到无输入层级，按钮选中状态重置");
+                Debug.Log("Input disabled; button selection reset.");
                 break;
             
             case 1:
@@ -702,7 +702,7 @@ public class TutorialButton : MonoBehaviour
                 ResetAllButtonsToNormal();
                 // 一级UI对应UILevels[0]（可根据你的配置调整）
                 SelectDefaultButton(0);
-                Debug.Log("切换到一级UI，已选中默认按钮");
+                Debug.Log("Switched to UI level 1; default button selected.");
                 break;
             
             case 2:
@@ -710,11 +710,11 @@ public class TutorialButton : MonoBehaviour
                 ResetAllButtonsToNormal();
                 // 二级UI对应UILevels[1]（可根据你的配置调整）
                 SelectDefaultButton(1);
-                Debug.Log("切换到二级UI，已选中默认按钮");
+                Debug.Log("Switched to UI level 2; default button selected.");
                 break;
             
             default:
-                Debug.LogWarning($"无效的UI级别：{newLevel}，默认切换到一级UI");
+                Debug.LogWarning($"Invalid UI level {newLevel}; falling back to level 1.");
                 currentUILevel = 1;
                 ResetAllButtonsToNormal();
                 SelectDefaultButton(0);

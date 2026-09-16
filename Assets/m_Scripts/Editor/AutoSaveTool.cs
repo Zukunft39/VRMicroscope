@@ -23,7 +23,7 @@ public class AutoSaveToolWindow : EditorWindow
     [MenuItem("Tools/Auto Save/Save Now")]
     private static void SaveNow()
     {
-        AutoSaveTool.SaveNow("手动立即保存");
+        AutoSaveTool.SaveNow("Manual save now");
     }
 
     [MenuItem("Tools/Auto Save/Toggle")]
@@ -34,17 +34,17 @@ public class AutoSaveToolWindow : EditorWindow
 
     private void OnGUI()
     {
-        GUILayout.Label("自动保存", EditorStyles.boldLabel);
-        EditorGUILayout.HelpBox("Unity 没有一个稳定通用的项目级自动保存。这个工具会在编辑器里定时保存打开的场景、Prefab Mode 和资源。", MessageType.Info);
+        GUILayout.Label("Auto Save", EditorStyles.boldLabel);
+        EditorGUILayout.HelpBox("This editor tool periodically saves open scenes, Prefab Mode, and project assets.", MessageType.Info);
 
         EditorGUI.BeginChangeCheck();
 
-        bool enabled = EditorGUILayout.Toggle("启用自动保存", AutoSaveTool.Enabled);
-        float intervalMinutes = EditorGUILayout.FloatField("保存间隔(分钟)", AutoSaveTool.IntervalMinutes);
-        bool saveScenes = EditorGUILayout.Toggle("保存打开场景", AutoSaveTool.SaveOpenScenes);
-        bool savePrefabStage = EditorGUILayout.Toggle("保存 Prefab Mode", AutoSaveTool.SavePrefabStage);
-        bool saveAssets = EditorGUILayout.Toggle("保存资源文件", AutoSaveTool.SaveAssets);
-        bool logSaves = EditorGUILayout.Toggle("输出保存日志", AutoSaveTool.LogSaves);
+        bool enabled = EditorGUILayout.Toggle("Enable Auto Save", AutoSaveTool.Enabled);
+        float intervalMinutes = EditorGUILayout.FloatField("Save interval (minutes)", AutoSaveTool.IntervalMinutes);
+        bool saveScenes = EditorGUILayout.Toggle("Save open scenes", AutoSaveTool.SaveOpenScenes);
+        bool savePrefabStage = EditorGUILayout.Toggle("Save Prefab Mode", AutoSaveTool.SavePrefabStage);
+        bool saveAssets = EditorGUILayout.Toggle("Save assets", AutoSaveTool.SaveAssets);
+        bool logSaves = EditorGUILayout.Toggle("Log saves", AutoSaveTool.LogSaves);
 
         if (EditorGUI.EndChangeCheck())
         {
@@ -57,18 +57,18 @@ public class AutoSaveToolWindow : EditorWindow
         }
 
         EditorGUILayout.Space();
-        EditorGUILayout.LabelField("当前状态", AutoSaveTool.Enabled ? "运行中" : "已关闭");
-        EditorGUILayout.LabelField("下次保存", AutoSaveTool.GetNextSaveDescription());
+        EditorGUILayout.LabelField("Current status", AutoSaveTool.Enabled ? "Running" : "Disabled");
+        EditorGUILayout.LabelField("Next save", AutoSaveTool.GetNextSaveDescription());
 
         EditorGUILayout.Space();
         using (new EditorGUILayout.HorizontalScope())
         {
-            if (GUILayout.Button("立即保存"))
+            if (GUILayout.Button("Save Now"))
             {
-                AutoSaveTool.SaveNow("窗口手动保存");
+                AutoSaveTool.SaveNow("Manual save from settings");
             }
 
-            if (GUILayout.Button(AutoSaveTool.Enabled ? "关闭自动保存" : "开启自动保存"))
+            if (GUILayout.Button(AutoSaveTool.Enabled ? "Disable Auto Save" : "Enable Auto Save"))
             {
                 AutoSaveTool.Enabled = !AutoSaveTool.Enabled;
             }
@@ -103,19 +103,19 @@ public class AutoSaveStatusWindow : EditorWindow
 
         using (new EditorGUILayout.VerticalScope(EditorStyles.helpBox))
         {
-            EditorGUILayout.LabelField("自动保存状态", EditorStyles.boldLabel);
-            EditorGUILayout.LabelField("状态", AutoSaveTool.Enabled ? "运行中" : "已关闭");
-            EditorGUILayout.LabelField("距离下次保存", AutoSaveTool.GetNextSaveDescription());
+            EditorGUILayout.LabelField("Auto Save Status", EditorStyles.boldLabel);
+            EditorGUILayout.LabelField("Status", AutoSaveTool.Enabled ? "Running" : "Disabled");
+            EditorGUILayout.LabelField("Time until next save", AutoSaveTool.GetNextSaveDescription());
 
             EditorGUILayout.Space(2f);
             using (new EditorGUILayout.HorizontalScope())
             {
-                if (GUILayout.Button("立即保存", GUILayout.Height(22f)))
+                if (GUILayout.Button("Save Now", GUILayout.Height(22f)))
                 {
-                    AutoSaveTool.SaveNow("监视窗口手动保存");
+                    AutoSaveTool.SaveNow("Manual save from monitor");
                 }
 
-                if (GUILayout.Button(AutoSaveTool.Enabled ? "关闭" : "开启", GUILayout.Height(22f)))
+                if (GUILayout.Button(AutoSaveTool.Enabled ? "Close" : "Enable", GUILayout.Height(22f)))
                 {
                     AutoSaveTool.Enabled = !AutoSaveTool.Enabled;
                     UpdateTitle();
@@ -222,7 +222,7 @@ public static class AutoSaveTool
 
         if (savedAnything && LogSaves)
         {
-            Debug.Log("[AutoSave] 已自动保存场景/资源。原因: " + reason);
+            Debug.Log("[AutoSave] Scenes/assets saved. Reason: " + reason);
         }
 
         ScheduleNextSave();
@@ -232,13 +232,13 @@ public static class AutoSaveTool
     {
         if (!Enabled)
         {
-            return "未启用";
+            return "Not enabled";
         }
 
         double remainingSeconds = nextSaveTime - EditorApplication.timeSinceStartup;
         if (remainingSeconds <= 0d)
         {
-            return "即将保存";
+            return "Saving shortly";
         }
 
         int totalSeconds = Mathf.CeilToInt((float)remainingSeconds);
@@ -261,7 +261,7 @@ public static class AutoSaveTool
 
         if (EditorApplication.timeSinceStartup >= nextSaveTime)
         {
-            SaveNow("定时自动保存");
+            SaveNow("Scheduled auto save");
         }
     }
 

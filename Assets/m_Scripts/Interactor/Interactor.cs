@@ -14,7 +14,7 @@ public class Interactor : MonoBehaviour
         Observing,  // 观察：显微镜操作
         Tutorial    // 教程：UI 操作 (暂停其他输入)
     }
-    [Header("输入配置文件")]
+    [Header("Input Configuration")]
     public InputActionAsset inputActionAsset;
     public LocomotionSystem xrLocomotionSys;
     

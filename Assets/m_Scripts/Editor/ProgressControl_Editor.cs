@@ -9,14 +9,14 @@ public class ProgressControl_Editor : Editor {
     public override void OnInspectorGUI() {
         base.OnInspectorGUI();
         ProgressControl myScript= (ProgressControl)target;
-        if(GUILayout.Button("切换自由视角")){
+        if(GUILayout.Button("Switch to Free View")){
             if(!myScript.isAutoMoving)
                 myScript.ChangeViewToFree();
         }
-        if(GUILayout.Button("切换预设视角")){
+        if(GUILayout.Button("Switch to Preset View")){
             myScript.ChangeViewToPreset();
         }
-        if(GUILayout.Button("当前对话结束")){
+        if(GUILayout.Button("End Current Dialog")){
             myScript.isCurrentChapterOver=true;
         }
     }

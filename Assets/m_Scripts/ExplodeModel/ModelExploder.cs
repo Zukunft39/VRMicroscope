@@ -41,63 +41,63 @@ public class ModelExploder : MonoBehaviour
         public float absoluteDistance = 0.2f;
     }
 
-    [Header("零件来源")]
-    [Tooltip("若列表有内容，则优先按该列表作为拆解零件；为空时自动收集。")]
+    [Header("Part Sources")]
+    [Tooltip("Use this list as the exploded parts when populated; otherwise collect automatically.")]
     public List<Transform> manualParts = new List<Transform>();
 
-    [Tooltip("自动收集模式下，是否递归收集全部子节点。")]
+    [Tooltip("Recursively collect all descendants in automatic mode.")]
     public bool includeAllDescendants = false;
 
-    [Tooltip("自动收集模式下，是否包含非激活节点。")]
+    [Tooltip("Include inactive nodes in automatic collection.")]
     public bool includeInactiveParts = false;
 
-    [Header("拆解参数")]
-    [Tooltip("每个零件沿质心方向外移的基础距离（米）。")]
+    [Header("Expansion Settings")]
+    [Tooltip("Base outward displacement of each part along its centroid direction (metres).")]
     [Min(0f)]
     public float explodeDistance = 0.18f;
 
-    [Tooltip("按零件半径增加的额外位移。开启归一化后，该值表示“最大额外位移（米）”。")]
+    [Tooltip("Additional displacement based on part radius. With normalization, this is the maximum extra displacement in metres.")]
     [Min(0f)]
     public float radialDistanceFactor = 0.06f;
 
-    [Tooltip("是否使用归一化半径计算额外位移。开启后，不会因模型尺寸变大而导致位移过大。")]
+    [Tooltip("Normalize radii when calculating extra displacement to avoid excessive movement for larger models.")]
     public bool normalizeRadialDistance = true;
 
-    [Tooltip("拆解位移最大值（米）。0 表示不限制。")]
+    [Tooltip("Maximum expansion displacement in metres; 0 means unlimited.")]
     [Min(0f)]
     public float maxExplodeDistance = 0.3f;
 
-    [Tooltip("每次切换前是否重新计算目标位姿。若模型结构会动态变化，建议开启。")]
+    [Tooltip("Recalculate target poses before every switch. Recommended for dynamically changing models.")]
     public bool rebuildCacheBeforeEachPlay = false;
 
-    [Header("定向拆解覆盖")]
-    [Tooltip("在此列表指定某些零件的拆解方向与距离规则。列表中的零件会优先使用这里配置的方向。")]
+    [Header("Expansion Direction Overrides")]
+    [Tooltip("Override expansion direction and distance rules for listed parts.")]
     public List<DirectionalExplodeOverride> directionalOverrides = new List<DirectionalExplodeOverride>();
 
-    [Header("动画参数")]
+    [Header("Animation Settings")]
     [Min(0.01f)]
     public float animationDuration = 0.8f;
 
-    [Tooltip("为每个零件增加启动延迟，形成分批拆解效果。0 表示同时运动。")]
+    [Tooltip("Delay each part for staggered expansion; 0 starts all parts together.")]
     [Min(0f)]
     public float staggerPerPart = 0.0f;
 
-    [Tooltip("强制所有零件同步开始/结束。开启后会忽略 staggerPerPart。")]
+    [Tooltip("Force all parts to start and finish together, ignoring staggerPerPart.")]
     public bool forceSynchronizedAnimation = true;
 
-    [Tooltip("移动缓动曲线。")]
+    [Tooltip("Movement easing curve.")]
     public AnimationCurve animationCurve = AnimationCurve.EaseInOut(0, 0, 1, 1);
 
-    [Tooltip("组装时是否恢复到初始局部旋转。")]
+    [Tooltip("Restore original local rotation when assembling.")]
     public bool restoreOriginalRotationOnAssemble = true;
 
-    [Tooltip("启用后以世界坐标进行位移（推荐）。可避免父级缩放导致位移过小。")]
+    [Tooltip("Move in world coordinates (recommended) to avoid reduced displacement from parent scaling.")]
     public bool moveInWorldSpace = true;
 
-    [Tooltip("是否使用不受 Time.timeScale 影响的更新。")]
+    [Tooltip("Use updates independent of Time.timeScale.")]
     public bool useUnscaledTime = false;
 
-    [Header("调试")]
+    [Header("Debug")]
     public bool enableDebugLogs = true;
 
     private List<PartData> partsList = new List<PartData>();
@@ -124,7 +124,7 @@ public class ModelExploder : MonoBehaviour
         List<Transform> targetParts = CollectTargetParts();
         if (targetParts.Count == 0)
         {
-            DebugLogWarning("InitializeParts: 未收集到任何零件。请检查 manualParts / includeAllDescendants / 挂载物体层级。");
+            DebugLogWarning("InitializeParts: No parts found. Check manualParts, includeAllDescendants, and the object hierarchy.");
             return;
         }
 
@@ -232,16 +232,16 @@ public class ModelExploder : MonoBehaviour
             }
         }
 
-        DebugLog($"InitializeParts: 收集零件={partsList.Count}, 静态零件={staticPartsCount}, 计划最大位移={maxPlannedDistance:F3}m, moveInWorldSpace={moveInWorldSpace}");
+        DebugLog($"InitializeParts: parts={partsList.Count}, staticParts={staticPartsCount}, maxDisplacement={maxPlannedDistance:F3}m, moveInWorldSpace={moveInWorldSpace}");
 
         if (staticPartsCount > 0)
         {
-            DebugLogWarning("检测到零件 isStatic=true。若开启了静态批处理，运行时位移可能看起来无效。建议在拆装对象上取消 Static。");
+            DebugLogWarning("Some parts have isStatic=true. Static batching may hide runtime displacement; disable Static for movable assembly parts.");
         }
 
         if (maxPlannedDistance <= 0.0001f)
         {
-            DebugLogWarning("所有零件计划位移接近 0。请检查 explodeDistance / radialDistanceFactor。");
+            DebugLogWarning("All planned displacements are near zero. Check explodeDistance / radialDistanceFactor.");
         }
     }
 
@@ -299,7 +299,7 @@ public class ModelExploder : MonoBehaviour
 
         if (partsList.Count == 0)
         {
-            DebugLogWarning("PlayExplodeAnimation: partsList 为空，动画未执行。");
+            DebugLogWarning("PlayExplodeAnimation: partsList is empty; animation skipped.");
             return;
         }
 
@@ -355,7 +355,7 @@ public class ModelExploder : MonoBehaviour
 
         if (validPartCount == 0)
         {
-            DebugLogWarning("PlayExplodeAnimation: 有效零件为 0（可能 manualParts 全为空引用）。");
+            DebugLogWarning("PlayExplodeAnimation: No valid parts; manualParts may contain only null references.");
             return;
         }
 
@@ -381,7 +381,7 @@ public class ModelExploder : MonoBehaviour
 
         if (partsList.Count == 0)
         {
-            DebugLogWarning("ApplyStateImmediate: partsList 为空，状态未更新。");
+            DebugLogWarning("ApplyStateImmediate: partsList is empty; state unchanged.");
             return;
         }
 

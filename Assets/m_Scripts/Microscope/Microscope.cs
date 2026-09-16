@@ -135,17 +135,17 @@ public class Microscope : MonoBehaviour
                 }
                 else
                 {
-                    Debug.LogError("'Knob' 对象需要至少2个子对象！");
+                    Debug.LogError("The Knob object requires at least two children.");
                 }
             }
             else
             {
-                Debug.LogError("在 lookCameraCanvas 下找不到 'Knob' 对象！");
+                Debug.LogError("Knob was not found under lookCameraCanvas.");
             }
         }
         else
         {
-            Debug.LogError("lookCameraCanvas 未被赋值！");
+            Debug.LogError("lookCameraCanvas is not assigned.");
         }
     }
     /// <summary>
@@ -205,7 +205,7 @@ public class Microscope : MonoBehaviour
                     }
                     else
                     {
-                        Debug.Log("没有可释放物体");
+                        Debug.Log("No object is available to release.");
                     }
                 }
             }

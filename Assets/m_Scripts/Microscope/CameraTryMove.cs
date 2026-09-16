@@ -4,6 +4,12 @@ using UnityEngine.EventSystems;
 
 public class CameraTryMove : MonoBehaviour
 {
+    [Header("VR Coexistence")]
+    [Tooltip("Disable desktop navigation automatically when a physical VR device is active.")]
+    public bool disableWhenXRDeviceActive = true;
+    [Tooltip("Disable desktop navigation when an active XR Device Simulator is present.")]
+    public bool disableWhenSimulatorActive = true;
+
     [Header("PC Movement")]
     public bool canMove = true;
     public float moveSpeed = 5f;
@@ -103,6 +109,20 @@ public class CameraTryMove : MonoBehaviour
 
     private void Start()
     {
+        if (disableWhenXRDeviceActive && UnityEngine.XR.XRSettings.isDeviceActive)
+        {
+            Debug.Log("[CameraTryMove] Physical VR device detected (XRSettings.isDeviceActive=true); desktop simulation disabled.");
+            enabled = false;
+            return;
+        }
+
+        if (disableWhenSimulatorActive && FindObjectOfType<UnityEngine.XR.Interaction.Toolkit.Inputs.Simulation.XRDeviceSimulator>() != null)
+        {
+            Debug.Log("[CameraTryMove] XR Device Simulator detected; desktop simulation disabled to avoid input/view conflicts.");
+            enabled = false;
+            return;
+        }
+
         CacheReferences();
         SyncEulerAnglesFromTransform();
         SetCursorLookMode(false);

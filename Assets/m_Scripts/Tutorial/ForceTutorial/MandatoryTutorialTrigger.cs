@@ -4,38 +4,38 @@ using UnityEngine.Events;
 [RequireComponent(typeof(Collider))]
 public class MandatoryTutorialTrigger : MonoBehaviour
 {
-    [Header("教程配置")]
-    [Tooltip("该强制教程的唯一标识符，必须全局唯一（例如：Tutorial_001）")]
+    [Header("Tutorial Configuration")]
+    [Tooltip("Globally unique mandatory tutorial identifier, for example Tutorial_001.")]
     public string tutorialKey;
 
-    [Tooltip("是否在游戏一开始就自动触发此教学？（勾选后无需玩家走入触发器即可触发）")]
+    [Tooltip("Start this tutorial automatically at game startup without entering its trigger.")]
     public bool triggerOnStart = false;
 
-    [Header("前置条件")]
-    [Tooltip("是否启用进入该强制教程的前置条件判断。启用后，只有当前置条件满足时才允许开始教程。")]
+    [Header("Prerequisites")]
+    [Tooltip("Require prerequisites to be met before starting this mandatory tutorial.")]
     public bool requirePrerequisite = false;
 
-    [Tooltip("当前前置条件是否已满足。可由外部事件调用下方方法动态修改。")]
+    [Tooltip("Whether prerequisites are met. External events can update this through the methods below.")]
     public bool prerequisiteSatisfied = false;
 
-    [Header("全局状态条件")]
-    [Tooltip("是否要求 Interactor 处于指定全局状态后，才允许开始该强制教程。适合 InsideTutorial 这类依赖观察模式的流程。")]
+    [Header("Global State Condition")]
+    [Tooltip("Require a specified Interactor state before starting, such as observation for InsideTutorial.")]
     public bool requireInteractorState = false;
 
-    [Tooltip("当启用全局状态条件时，只有 Interactor 进入该状态后才允许开始教程。")]
+    [Tooltip("Required Interactor state when the global state condition is enabled.")]
     public Interactor.GameState requiredInteractorState = Interactor.GameState.Observing;
 
-    [Tooltip("当全局状态条件满足时，是否允许该教程在队列中自动开始。")]
+    [Tooltip("Allow this queued tutorial to start automatically when its state condition is met.")]
     public bool autoStartWhenInteractorStateMatches = true;
 
-    [Header("流程事件控制 (限制/恢复操作)")]
-    [Tooltip("进入触发器时调用（在这里挂载禁用玩家移动、禁用其余交互的逻辑）")]
+    [Header("Workflow Events (Restrict / Restore Input)")]
+    [Tooltip("Invoked on trigger entry; bind movement and interaction restrictions here.")]
     public UnityEvent onTutorialStart;
 
-    [Tooltip("教程任务完成时调用（在这里挂载恢复玩家移动、关闭UI面板的逻辑）")]
+    [Tooltip("Invoked on completion; bind movement restoration and UI closing here.")]
     public UnityEvent onTutorialComplete;
 
-    [Tooltip("当玩家进入触发范围、或系统尝试自动启动，但前置条件尚未满足时调用。可用于提示 UI 或播放提醒。")]
+    [Tooltip("Invoked when entry or automatic start is attempted before prerequisites are met; use for UI or reminders.")]
     public UnityEvent onPrerequisiteBlocked;
 
     private Tutorial tutorialSystem;

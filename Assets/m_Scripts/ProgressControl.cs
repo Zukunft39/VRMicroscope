@@ -105,13 +105,13 @@ public class ProgressControl : TInstance<ProgressControl>
     }
 
     public void ChangeViewToFree(){
-        Debug.Log("切换至自由视角");
+        Debug.Log("Switched to free view");
         cinemachineBrain.enabled=false;
         cinemachineBrain.GetComponent<TrackedPoseDriver>().enabled=true;
         isFreeView=true;
     }
     public void ChangeViewToPreset(){
-        Debug.Log("切换至预设视角");
+        Debug.Log("Switched to preset view");
         cinemachineBrain.enabled=true;
         cinemachineBrain.GetComponent<TrackedPoseDriver>().enabled=false;
         isFreeView=false;

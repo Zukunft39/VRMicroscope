@@ -9,12 +9,12 @@ public class SquareLightSourceEditor : Editor
     {
         base.OnInspectorGUI();
         SquareLightSource myScript = (SquareLightSource)target;
-        if (GUILayout.Button("发射/更新光线"))
+        if (GUILayout.Button("Emit / Update Rays"))
         {
             myScript.RemoveLightLine();
             myScript.DrawLightLine();
         }
-        if (GUILayout.Button("清除当前光线"))
+        if (GUILayout.Button("Clear Current Rays"))
         {
             myScript.RemoveLightLine();
         }

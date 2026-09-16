@@ -5,7 +5,7 @@ using UnityEditor.SceneManagement;
 
 public class RemoveMissingScripts : Editor
 {
-    [MenuItem("Tools/Remove Missing Scripts/In Active Scene (清理当前场景)")]
+    [MenuItem("Tools/Remove Missing Scripts/In Active Scene")]
     private static void CleanActiveScene()
     {
         Scene currentScene = SceneManager.GetActiveScene();
@@ -36,16 +36,16 @@ public class RemoveMissingScripts : Editor
             EditorSceneManager.MarkSceneDirty(currentScene);
         }
 
-        Debug.Log($"[清理完成] 移除了 {totalRemovedCount} 个 Missing 脚本，共影响了 {totalAffectedGameObjects} 个游戏物体。");
+        Debug.Log($"[Cleanup] Removed {totalRemovedCount} missing scripts from {totalAffectedGameObjects} GameObjects.");
     }
 
-    [MenuItem("Tools/Remove Missing Scripts/In Selected GameObjects (清理选中物体)")]
+    [MenuItem("Tools/Remove Missing Scripts/In Selected GameObjects")]
     private static void CleanSelectedObjects()
     {
         GameObject[] selectedObjects = Selection.gameObjects;
         if (selectedObjects.Length == 0)
         {
-            Debug.LogWarning("请先在 Hierarchy 中选中至少一个游戏物体！");
+            Debug.LogWarning("Select at least one GameObject in the Hierarchy first.");
             return;
         }
 
@@ -66,10 +66,10 @@ public class RemoveMissingScripts : Editor
             }
         }
 
-        Debug.Log($"[清理完成] 在选中的物体中，移除了 {totalRemovedCount} 个 Missing 脚本，共影响了 {totalAffectedGameObjects} 个游戏物体。");
+        Debug.Log($"[Cleanup] Removed {totalRemovedCount} missing scripts from {totalAffectedGameObjects} selected GameObjects.");
     }
 
-    [MenuItem("Tools/Remove Missing Scripts/In All Prefabs (清理所有预制体)")]
+    [MenuItem("Tools/Remove Missing Scripts/In All Prefabs")]
     private static void CleanAllPrefabs()
     {
         string[] allPrefabGuids = AssetDatabase.FindAssets("t:Prefab");
@@ -81,7 +81,7 @@ public class RemoveMissingScripts : Editor
             for (int i = 0; i < allPrefabGuids.Length; i++)
             {
                 string path = AssetDatabase.GUIDToAssetPath(allPrefabGuids[i]);
-                EditorUtility.DisplayProgressBar("清理 Prefab 中", $"正在检查 {path}", (float)i / allPrefabGuids.Length);
+                EditorUtility.DisplayProgressBar("Cleaning Prefabs", $"Checking {path}", (float)i / allPrefabGuids.Length);
 
                 GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>(path);
                 if (prefab == null) continue;
@@ -102,7 +102,7 @@ public class RemoveMissingScripts : Editor
                 {
                     totalRemovedCount += removedCount;
                     totalAffectedPrefabs++;
-                    Debug.Log($"[Prefab清理] 移除了 {path} 上的 {removedCount} 个 Missing 脚本");
+                    Debug.Log($"[Prefab cleanup] Removed {removedCount} missing scripts from {path}");
                 }
             }
         }
@@ -112,6 +112,6 @@ public class RemoveMissingScripts : Editor
             AssetDatabase.SaveAssets();
         }
 
-        Debug.Log($"[全局清理完成] 在所有 Prefab 中，移除了 {totalRemovedCount} 个 Missing 脚本，共影响了 {totalAffectedPrefabs} 个 Prefab。");
+        Debug.Log($"[Cleanup] Removed {totalRemovedCount} missing scripts from {totalAffectedPrefabs} prefabs.");
     }
 }

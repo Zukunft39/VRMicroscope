@@ -26,7 +26,7 @@ public class VideoController : MonoBehaviour
         string videoPath = Path.Combine(Application.streamingAssetsPath, videoFileName);
 
         // Debug: 在安卓真机上可以通过 Logcat 查看这个路径是否正确
-        Debug.Log("Unity视频路径: " + videoPath);
+        Debug.Log("Unity video path: " + videoPath);
 
         // 2. 设置 VideoPlayer
         videoPlayer.source = VideoSource.Url;

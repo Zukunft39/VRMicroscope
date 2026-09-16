@@ -32,16 +32,16 @@ public class TutorialData
 
 public class Tutorial : MonoBehaviour
 {
-    [Header("UI 引用")]
+    [Header("UI References")]
     public GameObject firstLevelUI;          
     public GameObject secondLevelUITemplate; 
     public TextMeshProUGUI titleText;                   // 标题文本
     public TextMeshProUGUI contentText;                 // 内容文本              
     public RawImage videoDisplay;            
-    [Header("视频播放器")]
+    [Header("Video Player")]
     public VideoPlayer videoPlayer; // 直接引用挂在RawImage上的VideoPlayer组件
 
-    [Header("教程数据")]
+    [Header("Tutorial Data")]
     public List<TutorialData> tutorialDatas; 
 
     public Microscope microscope;  //显微镜脚本
@@ -67,7 +67,7 @@ public class Tutorial : MonoBehaviour
             tutorialButton = FindObjectOfType<TutorialButton>();
             if (tutorialButton == null)
             {
-                Debug.LogError("未找到TutorialButton组件，请确保场景中有该脚本！");
+                Debug.LogError("TutorialButton not found. Ensure it exists in the scene.");
             }
         }
 
@@ -77,7 +77,7 @@ public class Tutorial : MonoBehaviour
             videoPlayer = videoDisplay.GetComponent<VideoPlayer>();
             if (videoPlayer == null)
             {
-                Debug.LogError("RawImage上未找到VideoPlayer组件，请先挂载！");
+                Debug.LogError("Add a VideoPlayer component to the RawImage first.");
             }
             else
             {
@@ -128,7 +128,7 @@ public class Tutorial : MonoBehaviour
             }
             catch (System.Exception e)
             {
-                Debug.LogError("教程数据加载失败，重置为新数据: " + e.Message);
+                Debug.LogError("Tutorial data could not load; resetting: " + e.Message);
                 progressData = new TutorialProgressData();
             }
         }
@@ -184,7 +184,7 @@ public class Tutorial : MonoBehaviour
         {
             progressData.triggeredTutorialKeys.Add(key);
             SaveProgress();
-            Debug.Log($"强制性教程 [{key}] 已完成并存盘！");
+            Debug.Log($"Mandatory tutorial [{key}] completed and saved.");
         }
     }
 
@@ -202,14 +202,14 @@ public class Tutorial : MonoBehaviour
         
         progressData = new TutorialProgressData();
         
-        Debug.Log("所有教程进度已重置（JSON文件已删除）！");
+        Debug.Log("All tutorial progress reset (JSON file deleted).");
     }
 
     public void ShowTutorial(int tutorialIndex)
     {
         if (tutorialIndex < 0 || tutorialIndex >= tutorialDatas.Count)
         {
-            Debug.LogWarning("教程索引超出范围！");
+            Debug.LogWarning("Tutorial index out of range.");
             return;
         }
 
@@ -249,7 +249,7 @@ public class Tutorial : MonoBehaviour
         // 检查VideoPlayer是否有效
         if (videoPlayer == null)
         {
-            Debug.LogError("VideoPlayer组件未初始化，无法播放视频！");
+            Debug.LogError("VideoPlayer is not initialized; video cannot play.");
             return;
         }
 
@@ -284,7 +284,7 @@ public class Tutorial : MonoBehaviour
         
         // 准备完成后播放
         vp.Play();
-        Debug.Log($"视频开始播放: {vp.clip.name}");
+        Debug.Log($"Video playback started: {vp.clip.name}");
     }
 
     public void GoToNextNode(int level)

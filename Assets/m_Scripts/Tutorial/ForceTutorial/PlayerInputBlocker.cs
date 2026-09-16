@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections.Generic;
 using UnityEngine.XR.Interaction.Toolkit;
 using UnityEngine.XR.Interaction.Toolkit.Samples.StarterAssets;
@@ -20,14 +20,14 @@ namespace VRMicroscope.Tutorial
     /// </summary>
     public class PlayerInputBlocker : MonoBehaviour
     {
-        [Header("XR 交互组件")]
+        [Header("XR Interaction Components")]
         [SerializeField]
-        [Tooltip("【可选】指定 XRBaseInteractor（包含所有射线和直接抓取）。如果未设置，将自动查找全局。")]
+        [Tooltip("Optional XRBaseInteractors, including ray and direct interactions. Finds them globally if unassigned.")]
         private XRBaseInteractor[] _interactors;
 
-        [Header("物理位置锚定")]
+        [Header("Position Anchoring")]
         [SerializeField]
-        [Tooltip("【可选】玩家的根节点(XR Origin)。如果未设置，将自动通过 LocomotionSystem 寻找。")]
+        [Tooltip("Optional player root (XR Origin). Found through LocomotionSystem when unassigned.")]
         private Transform _playerRoot;
 
         private readonly Dictionary<XRRayInteractor, bool> _uiInteractionStates = new Dictionary<XRRayInteractor, bool>();
@@ -248,7 +248,7 @@ namespace VRMicroscope.Tutorial
                 }
                 else
                 {
-                    Debug.LogWarning("[PlayerInputBlocker] 未能找到玩家根节点(Player Root)，物理锚定可能失败！");
+                    Debug.LogWarning("[PlayerInputBlocker] Player root not found; position anchoring may fail.");
                 }
 
                 return;

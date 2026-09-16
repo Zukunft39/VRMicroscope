@@ -6,8 +6,8 @@ public class ForceTutorialSequenceController : MonoBehaviour
 {
     private static readonly Regex TutorialOrderRegex = new Regex(@"(\d+)$", RegexOptions.Compiled);
 
-    [Header("队列行为")]
-    [Tooltip("同一父物体下的子教程全部完成后，是否自动关闭整个 ForceTutorial 根物体。")]
+    [Header("Queue Behavior")]
+    [Tooltip("Disable the ForceTutorial root after all child tutorials under the same parent complete.")]
     [SerializeField] private bool deactivateRootWhenFinished = true;
 
     private readonly List<MandatoryTutorialTrigger> orderedTriggers = new List<MandatoryTutorialTrigger>();

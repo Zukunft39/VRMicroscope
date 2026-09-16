@@ -4,10 +4,10 @@ using System;
 [RequireComponent(typeof(TutorialButton))]
 public class TutorialButtonInput : MonoBehaviour
 {
-    [Header("依赖配置")]
+    [Header("Dependencies")]
     public Interactor interactor; 
 
-    [Header("输入间隔（防止连点，单位：秒）")]
+    [Header("Input Interval (Seconds)")]
     public float inputInterval = 0.2f;
 
     // 输入阈值，防止摇杆轻微漂移触发
@@ -21,7 +21,7 @@ public class TutorialButtonInput : MonoBehaviour
         tutorialButton = GetComponent<TutorialButton>();
         if (tutorialButton == null)
         {
-            Debug.LogError("未找到TutorialButton组件！");
+            Debug.LogError("TutorialButton component not found.");
             enabled = false;
         }
     }
@@ -44,7 +44,7 @@ public class TutorialButtonInput : MonoBehaviour
             tutorialButton.loverButtons(direction);
             
             lastInputTime = Time.time;
-            Debug.Log($"[{tutorialButton.currentUILevel}级UI] 切换按钮组: {direction}");
+            Debug.Log($"[UI level {tutorialButton.currentUILevel}] Switch button group: {direction}");
             return;
         }
 
@@ -58,7 +58,7 @@ public class TutorialButtonInput : MonoBehaviour
             tutorialButton.nextButtons(direction);
             
             lastInputTime = Time.time;
-            Debug.Log($"[{tutorialButton.currentUILevel}级UI] 切换组内按钮: {direction}");
+            Debug.Log($"[UI level {tutorialButton.currentUILevel}] Switch button: {direction}");
         }
     }
 
@@ -71,7 +71,7 @@ public class TutorialButtonInput : MonoBehaviour
 
         tutorialButton.clickNowButton();
         lastInputTime = Time.time;
-        Debug.Log($"[{tutorialButton.currentUILevel}级UI] 触发点击");
+        Debug.Log($"[UI level {tutorialButton.currentUILevel}] Trigger click");
     }
 
     /// <summary>
