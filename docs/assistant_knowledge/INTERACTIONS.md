@@ -1,812 +1,471 @@
-# VRMicroscope 交互目录（局外确认稿）
+# Project Interaction Guide
 
-2026-09-13 实现更新：当前操作说明使用 AssistantGuidanceActions.json 中的动作级白名单及实时状态，见 GUIDANCE_IMPLEMENTATION.md。下文的交互验证标记仍表示静态审计，不能推导实机测试通过；当前按键/状态限制以实时白名单为准。
+English edition. Static catalog evidence does not grant runtime permissions. Use the current GUIDANCE_CONTEXT allowlist for operating instructions and NAVIGATION_CONTEXT for markers. Player actions are never executed by the assistant.
 
-审阅日期：2026-09-12。范围：当前主场景与自定义运行时脚本。未运行 Unity/头显；所有条目待最终确认。
+## navigation - Free exploration and viewpoint
 
-本 Markdown 由 interaction_catalog.json 同步生成，JSON 为结构化主目录。不要把 static_confirmed 理解成实机已验证。
+**Location:** Main laboratory; fixed left/right routes from spawn are not established.
 
-## 总览
+**Prerequisites:** Free movement must be permitted and not locked by a tutorial or experiment.
 
-| ID | 内容 | 模块 | 审阅状态 |
-|---|---|---|---|
-| navigation | 漫游与视角 | navigation | static_confirmed |
-| teleport | 指向目标移动 | navigation | conditional |
-| sample_pick | 样本选择与拾取 | microscope | static_confirmed |
-| sample_place_observe | 放置样本并进入观察 | microscope | static_confirmed |
-| sample_remove | 取下载物台样本 | microscope | static_confirmed |
-| illumination | 显微镜照明与光圈 | microscope | static_confirmed |
-| objective_switch | 切换物镜 | microscope | static_confirmed |
-| focus | 粗细调焦 | microscope | static_confirmed |
-| assembly | 进入拆解、展开与复原 | structure | static_confirmed |
-| parts | 部件查看 | structure | static_confirmed |
-| na_experiment | 数值孔径交互实验 | numerical_aperture | static_confirmed |
-| spatial_frequency | 空间频率与衍射实验 | spatial_frequency | static_confirmed |
-| snom_entry | 进入 SNOM 操作演示 | snom | static_confirmed |
-| snom_probe | 探针选择与安装 | snom | static_confirmed |
-| snom_start | 启动 SNOM 并观察原理 | snom | static_confirmed |
-| snom_controls | SNOM 导航与部件说明 | snom | static_confirmed |
-| forced_tutorial | 强制交互教程 | tutorial | static_confirmed |
-| optional_tutorial | 旧自由教程入口 | tutorial | conditional |
-| stage_translation | 视野平移候选功能 | microscope | conditional |
-| filter_prototype | 滤光片与二色镜候选原型 | optics_prototype | unavailable |
-| confocal_background | 共聚焦原理说明 | confocal | knowledge_only |
-| legacy_tutor | 上一版固定题目 Tutor | legacy | deprecated |
-| aurora_assistant | 极光小球助手（规划） | assistant | planned |
+**Desktop Steps:** Move with W/A/S/D. Hold the right mouse button and move the mouse to look around. E/Q move up/down in the desktop controller; LeftShift accelerates.
 
-## navigation — 漫游与视角
+**Xr Steps:** Input assets include left-thumbstick locomotion; the enabled headset locomotion setup requires device verification.
 
-状态：static_confirmed；实机验证：否；批准用于自动指引：否。
+**Observation:** Player position and viewing direction change.
 
-位置：主实验室；未确认从出生点到各仪器的固定左右路线。
+**Completion Evidence:** Arrival requires runtime position evidence, not conversation alone.
 
-**前置条件**
+**Limitations:** CameraTryMove is enabled and Move is disabled in the audited main scene. Desktop debug vertical movement is not physical walking.
 
-- 处于允许自由移动的状态；未被强制教程或实验锁定。
+**Verification:** static_confirmed; runtime_verified=false
 
-**桌面操作**
+**Sources:** Assets/m_Scripts/Microscope/CameraTryMove.cs, Assets/m_Scripts/Move.cs, Assets/m_Scripts/ProgressControl.cs
 
-- W/A/S/D 移动；按住鼠标右键并移动鼠标调整视角。
-- E/Q 是该桌面控制器的上/下移动；LeftShift 加速。
+## teleport - Move toward a pointed target
 
-**XR 操作**
+**Location:** Accessible surfaces in the main laboratory.
 
-- 输入资源包含左摇杆移动；具体头显 locomotion 组件启用状态须实测。
+**Prerequisites:** Movement must be unlocked and the target must pass ray, slope, and reachability checks.
 
-**退出/恢复**：无已确认步骤。
+**Desktop Steps:** The controller maps G to movement toward the pointed reachable ground.
 
-**边界**
+**Xr Steps:** Roaming/AutoMove maps to gripButton, but Move is disabled in the main scene; this is not confirmed available XR guidance.
 
-- 当前主场景 CameraTryMove 启用；Move 组件禁用。不要把桌面调试上下移动解释成真实步行。
+**Observation:** Movement toward the target may be constrained by collision and reachability.
 
-观察目标：观察玩家位置与视角变化。
+**Completion Evidence:** Verify a change in runtime position.
 
-完成依据：需要新增当前区域/位置上报；不能根据对话认定已到达。
+**Limitations:** The XR route needs verification. Do not promise that every selected point is reachable or recommend an action absent from the live allowlist.
 
-证据：
+**Verification:** conditional; runtime_verified=false
 
-- [Assets/m_Scripts/Microscope/CameraTryMove.cs](../../Assets/m_Scripts/Microscope/CameraTryMove.cs)
-- [Assets/m_Scripts/Move.cs](../../Assets/m_Scripts/Move.cs)
-- [Assets/m_Scripts/ProgressControl.cs](../../Assets/m_Scripts/ProgressControl.cs)
+**Sources:** Assets/m_Scripts/Microscope/CameraTryMove.cs, Assets/m_Scripts/Move.cs
 
-## teleport — 指向目标移动
+## sample_pick - Specimen selection and pickup
 
-状态：conditional；实机验证：否；批准用于自动指引：否。
+**Location:** Four dishes: red beside the ultrasonic cleaner, green beside the centrifuge, blue/yellow on the workbench in front of the microscope.
 
-位置：主实验室允许通行的表面
+**Prerequisites:** Enter specimen range and register it as the current interactable. SNOM/assembly interactions take priority; removal takes priority if a specimen is already placed.
 
-**前置条件**
+**Desktop Steps:** Approach an interactable specimen and left-click to pick it up.
 
-- 自由移动未锁定；目标通过射线及坡度等检查。
+**Xr Steps:** Approach an interactable specimen and press the right-hand trigger.
 
-**桌面操作**
+**Observation:** The runtime specimen and inventory texture update.
 
-- 鼠标指向可到达地面后按 G。
+**Completion Evidence:** HasSampleOnHand, CurrentSampleTexture, and SampleChanged provide state evidence; use the current supplied snapshot.
 
-**XR 操作**
+**Exit Steps:** Another specimen can be selected. No generic discard key is confirmed.
 
-- Roaming/AutoMove 绑定左右 gripButton，但 Move 组件在主场景禁用，暂不作为确定可用指引。
+**Limitations:** A ray hit alone does not establish registration. The old R-to-pickup instruction is incorrect.
 
-**退出/恢复**：无已确认步骤。
+**Verification:** static_confirmed; runtime_verified=false
 
-**边界**
+**Sources:** Assets/m_Scripts/Interact/InteractWithSamples.cs, Assets/m_Scripts/Interact/InteractableSamples.cs, Assets/m_Scripts/Interactor/Interactor.cs, Assets/m_Scripts/Microscope/CameraTryMove.cs
 
-- XR 路径待验证；不可承诺任何点击位置都能到达。
+## sample_place_observe - Place a specimen and enter observation
 
-观察目标：到达目标位置；可能受碰撞/可达性限制。
+**Location:** The interactive microscope in the main laboratory, within its trigger range.
 
-完成依据：需运行时位置变化确认。
+**Prerequisites:** Hold an ObserveObjects specimen and satisfy isNear and MicroUI.setTrue.
 
-证据：
+**Desktop Steps:** Press Z to place the specimen. When already placed, press Z to advance observation viewpoints until Observing.
 
-- [Assets/m_Scripts/Microscope/CameraTryMove.cs](../../Assets/m_Scripts/Microscope/CameraTryMove.cs)
-- [Assets/m_Scripts/Move.cs](../../Assets/m_Scripts/Move.cs)
+**Xr Steps:** Press the left-hand trigger to place, then use the same input to advance observation viewpoints.
 
-## sample_pick — 样本选择与拾取
+**Observation:** The specimen appears on the stage and the viewpoint enters observation.
 
-状态：static_confirmed；实机验证：否；批准用于自动指引：否。
+**Completion Evidence:** Use HasPlacedSample and Interactor.CurrentState=Observing.
 
-位置：主场景带 InteractableSamples 的样本对象；样本桌相对方位未确认。
+**Exit Steps:** In Observing, Z or Esc exits on desktop; the left-hand trigger exits in XR.
 
-**前置条件**
+**Limitations:** Placement and pointer/viewpoint advancement are separate. A single press need not complete the entire sequence.
 
-- 进入样本交互范围并被注册为当前可交互样本。
-- 没有优先处理的 SNOM/拆解交互；若载物台已有样本，取下样本优先。
+**Verification:** static_confirmed; runtime_verified=false
 
-**桌面操作**
+**Sources:** Assets/m_Scripts/Microscope/Microscope.cs, Assets/m_Scripts/Interactor/Interactor.cs, Assets/m_Scripts/Microscope/CameraTryMove.cs
 
-- 靠近可交互样本，鼠标左键触发拾取。
+## sample_remove - Remove the stage specimen
 
-**XR 操作**
+**Location:** Within interaction range of the microscope.
 
-- 靠近可交互样本，按右手扳机。
+**Prerequisites:** Leave internal observation first; a specimen must be on the stage.
 
-**退出/恢复**
+**Desktop Steps:** Left-click within microscope interaction range to remove the specimen.
 
-- 可选择其他样本；不要声称存在通用丢弃键。
+**Xr Steps:** Press the right-hand trigger to remove the specimen.
 
-**边界**
+**Observation:** The specimen moves from the microscope back to the player.
 
-- 命中射线不等于样本已注册；不是旧说明中的 R 拾取。
+**Completion Evidence:** Check HasPlacedSample changes, not just the inventory icon.
 
-观察目标：样本实例与物品栏贴图更新。
+**Limitations:** The same input also handles component/SNOM selection; use the appropriate current mode.
 
-完成依据：HasSampleOnHand、CurrentSampleTexture、SampleChanged（已有代码接口，未来助手需接入）。
+**Verification:** static_confirmed; runtime_verified=false
 
-证据：
+**Sources:** Assets/m_Scripts/Microscope/Microscope.cs, Assets/m_Scripts/Interactor/Interactor.cs, Assets/m_Scripts/Microscope/CameraTryMove.cs
 
-- [Assets/m_Scripts/Interact/InteractWithSamples.cs](../../Assets/m_Scripts/Interact/InteractWithSamples.cs)
-- [Assets/m_Scripts/Interact/InteractableSamples.cs](../../Assets/m_Scripts/Interact/InteractableSamples.cs)
-- [Assets/m_Scripts/Interactor/Interactor.cs](../../Assets/m_Scripts/Interactor/Interactor.cs)
-- [Assets/m_Scripts/Microscope/CameraTryMove.cs](../../Assets/m_Scripts/Microscope/CameraTryMove.cs)
+## illumination - Microscope illumination and aperture display
 
-## sample_place_observe — 放置样本并进入观察
+**Location:** The interactive microscope and observation interface.
 
-状态：static_confirmed；实机验证：否；批准用于自动指引：否。
+**Prerequisites:** Light toggling requires proximity and available external interaction.
 
-位置：主实验室的可操作显微镜；进入其交互触发范围。
+**Desktop Steps:** Press B in external interaction mode to toggle the light. Hold X and use up/down arrows for illumination adjustment.
 
-**前置条件**
+**Xr Steps:** Use the right-hand secondaryButton to toggle the light externally. Hold the left-hand primaryButton and move the right thumbstick up/down to adjust illumination.
 
-- 已持有 ObserveObjects 样本；isNear 与 MicroUI.setTrue 条件满足。
+**Observation:** The illustrative light/aperture and observation display change.
 
-**桌面操作**
+**Completion Evidence:** Use reported light state such as GetLight; a key press alone does not establish the resulting state.
 
-- 按 Z 放置样本。
-- 样本已在载物台时继续按 Z 推进观察视点，直到进入 Observing。
+**Limitations:** Q is desktop downward movement, not the old light shortcut. LightSwitch is not bound inside Observing.
 
-**XR 操作**
+**Verification:** static_confirmed; runtime_verified=false
 
-- 按左手扳机放置样本；随后按相同按钮推进观察视点。
+**Sources:** Assets/m_Scripts/Microscope/Microscope.cs, Assets/m_Scripts/Interactor/Interactor.cs, Assets/m_Scripts/Microscope/CameraTryMove.cs
 
-**退出/恢复**
+## objective_switch - Switch objectives
 
-- Observing 中按 Z 或 Esc；XR 用左手扳机退出。
+**Location:** The interactive microscope or internal observation view.
 
-**边界**
+**Prerequisites:** Microscope interaction must be available; wait for turret rotation to finish.
 
-- PutAndObserve 的放置与 pointer 视点推进分开，不承诺一次按键完成全部过程。
+**Desktop Steps:** Press R to switch objectives.
 
-观察目标：样本放上载物台，视角进入观察相机。
+**Xr Steps:** Press the right-hand primaryButton to switch objectives.
 
-完成依据：HasPlacedSample 与 Interactor.CurrentState=Observing；需要助手采集。
+**Observation:** The objective turret or displayed magnification changes.
 
-证据：
+**Completion Evidence:** A current objective/camera state report is needed to identify the actual setting.
 
-- [Assets/m_Scripts/Microscope/Microscope.cs](../../Assets/m_Scripts/Microscope/Microscope.cs)
-- [Assets/m_Scripts/Interactor/Interactor.cs](../../Assets/m_Scripts/Interactor/Interactor.cs)
-- [Assets/m_Scripts/Microscope/CameraTryMove.cs](../../Assets/m_Scripts/Microscope/CameraTryMove.cs)
+**Limitations:** R means Replay in the SNOM tour. Magnification is not synonymous with NA.
 
-## sample_remove — 取下载物台样本
+**Verification:** static_confirmed; runtime_verified=false
 
-状态：static_confirmed；实机验证：否；批准用于自动指引：否。
+**Sources:** Assets/m_Scripts/Microscope/Microscope.cs, Assets/m_Scripts/Interactor/Interactor.cs, Assets/m_Scripts/Microscope/CameraTryMove.cs
 
-位置：可操作显微镜交互范围
+## focus - Coarse and fine focusing
 
-**前置条件**
+**Location:** Microscope observation view.
 
-- 先退出内部观察；载物台有样本。
+**Prerequisites:** Enter Observing first.
 
-**桌面操作**
+**Desktop Steps:** Press Tab to switch coarse/fine mode. Hold X and use left/right arrows to focus.
 
-- 在显微镜交互范围内鼠标左键触发取样。
+**Xr Steps:** Press the right thumbstick to switch coarse/fine mode. Hold the left-hand primaryButton and move the right thumbstick left/right to focus.
 
-**XR 操作**
+**Observation:** Compare clarity and coarse/fine adjustment feedback.
 
-- 按右手扳机触发取样。
+**Completion Evidence:** Actual focus parameters and mode require a corresponding runtime report.
 
-**退出/恢复**：无已确认步骤。
+**Exit Steps:** Use Z/Esc on desktop or the left-hand trigger in XR to leave observation.
 
-**边界**
+**Limitations:** Use the current input chain, not obsolete M/B/N shortcuts. Display feedback is not calibrated imaging.
 
-- 同一输入还处理部件/SNOM 选择，须确保处于正确模式。
+**Verification:** static_confirmed; runtime_verified=false
 
-观察目标：样本从显微镜移回玩家侧。
+**Sources:** Assets/m_Scripts/Microscope/Microscope.cs, Assets/m_Scripts/Interactor/Interactor.cs, Assets/m_Scripts/Microscope/CameraTryMove.cs
 
-完成依据：HasPlacedSample 变化；不要仅检查物品栏图标。
+## assembly - Enter, expand, and restore the assembly
 
-证据：
+**Location:** The whole microscope assembly model in the main scene.
 
-- [Assets/m_Scripts/Microscope/Microscope.cs](../../Assets/m_Scripts/Microscope/Microscope.cs)
-- [Assets/m_Scripts/Interactor/Interactor.cs](../../Assets/m_Scripts/Interactor/Interactor.cs)
-- [Assets/m_Scripts/Microscope/CameraTryMove.cs](../../Assets/m_Scripts/Microscope/CameraTryMove.cs)
+**Prerequisites:** No tutorial, experiment transition, or independent experiment may lock the mode.
 
-## illumination — 显微镜照明与光圈
+**Desktop Steps:** Left-click the whole assembly for PreAssembly, then click again for SuperAssembly and wait for expansion.
 
-状态：static_confirmed；实机验证：否；批准用于自动指引：否。
+**Xr Steps:** Point the right-hand ray at the assembly and press the trigger for PreAssembly; repeat for SuperAssembly.
 
-位置：可操作显微镜及观察界面
+**Observation:** The intact model becomes an exploded structure.
 
-**前置条件**
+**Completion Evidence:** CurrentMode and ModelExploder.IsExploded/IsAnimating describe this state.
 
-- 光源开关要求靠近仪器且外部交互可用。
+**Exit Steps:** Leave component selection first. Select outside the model to return SuperAssembly to PreAssembly, then outside again for Normal.
 
-**桌面操作**
+**Limitations:** Inputs are handled by stage. A single blank-area click does not exit every level.
 
-- 在外部交互状态按 B 切换光源。
-- 按住 X，使用上/下方向键提供照明调节输入。
+**Verification:** static_confirmed; runtime_verified=false
 
-**XR 操作**
+**Sources:** Assets/m_Scripts/ExplodeModel/MicroscopeExploderModeController.cs, Assets/m_Scripts/ExplodeModel/ModelExploder.cs, Assets/m_Scripts/Microscope/CameraTryMove.cs
 
-- 外部交互时按右手 secondaryButton 切换光源。
-- 按住左手 primaryButton 并上下推动右摇杆提供照明调节输入。
+## parts - Component inspection
 
-**退出/恢复**：无已确认步骤。
+**Location:** The expanded microscope components in SuperAssembly.
 
-**边界**
+**Prerequisites:** Expansion must finish and no other experiment may lock selection.
 
-- 不要沿用旧说明的 Q 开灯；Q 在当前桌面控制器中用于下降。内部 Observing 不绑定 LightSwitch 动作。
+**Desktop Steps:** Left-click a component and read its right-hand panel. Select outside the panel/component to leave the selection.
 
-观察目标：观察光源/光圈示意及观察画面变化。
+**Xr Steps:** Use the right-hand ray and trigger to select a component; select outside its UI/component to leave.
 
-完成依据：现有 GetLight 等状态可供后续采集；不能从按键直接推断光源状态。
+**Observation:** Configured names: Objective Lens, Upper Optical Assembly, Stage Position Control, Optical Breadboard, Focus Adjustment.
 
-证据：
+**Completion Evidence:** Use IsSelectionActive and current selectedPart/partDescription context.
 
-- [Assets/m_Scripts/Microscope/Microscope.cs](../../Assets/m_Scripts/Microscope/Microscope.cs)
-- [Assets/m_Scripts/Interactor/Interactor.cs](../../Assets/m_Scripts/Interactor/Interactor.cs)
-- [Assets/m_Scripts/Microscope/CameraTryMove.cs](../../Assets/m_Scripts/Microscope/CameraTryMove.cs)
+**Exit Steps:** After leaving selection, follow the assembly return sequence.
 
-## objective_switch — 切换物镜
+**Limitations:** Internal optics of Upper Optical Assembly are not individually confirmed. Do not call it a dichroic mirror or pinhole. The last three listed components have no independent experiment button.
 
-状态：static_confirmed；实机验证：否；批准用于自动指引：否。
+**Verification:** static_confirmed; runtime_verified=false
 
-位置：可操作显微镜或内部观察状态
+**Sources:** Assets/m_Scripts/ExplodeModel/SuperAssemblyPartSelectionController.cs
 
-**前置条件**
+## na_experiment - Numerical-aperture experiment
 
-- 进入显微镜可交互状态，等待旋转动画完成。
+**Location:** Upper Optical Assembly in the expanded model; internal node AboveMirror.
 
-**桌面操作**
+**Prerequisites:** Complete assembly expansion and select Upper Optical Assembly.
 
-- 按 R 触发物镜切换。
+**Desktop Steps:** Select Start Numerical Aperture Experiment, wait, then drag the NA slider and compare angles, cone, and approximate magnification.
 
-**XR 操作**
+**Xr Steps:** Use the UI ray for the same button and slider. A fallback reads the x axis of Roaming/ChangeFocusOrChangeLIght, usually with the left primary modifier; verify on the actual device.
 
-- 按右手 primaryButton 触发物镜切换。
+**Observation:** NA ranges from 0.03 to 0.95; theta, full angle, and cone change.
 
-**退出/恢复**：无已确认步骤。
+**Completion Evidence:** IsExperimentActive, IsTransitioning, CurrentNA, and CaptureTeachingState are implemented.
 
-**边界**
+**Exit Steps:** Select Exit to return to the component; then use the component/assembly exit sequence.
 
-- R 在 SNOM 原理演示中是 Replay，必须按模块区分；倍率不是 NA 的同义词。
+**Limitations:** NA=n sin(theta). Magnification interpolates reference settings; brightness, clarity, and depth feedback are teaching mappings.
 
-观察目标：观察物镜盘或对应观察倍率变化。
+**Verification:** static_confirmed; runtime_verified=false
 
-完成依据：物镜档位/相机状态需新增上报。
+**Sources:** Assets/m_Scripts/Experiment/NumericalApertureExperimentController.cs, Assets/m_Scripts/ExplodeModel/SuperAssemblyPartSelectionController.cs
 
-证据：
+## spatial_frequency - Spatial-frequency and diffraction experiment
 
-- [Assets/m_Scripts/Microscope/Microscope.cs](../../Assets/m_Scripts/Microscope/Microscope.cs)
-- [Assets/m_Scripts/Interactor/Interactor.cs](../../Assets/m_Scripts/Interactor/Interactor.cs)
-- [Assets/m_Scripts/Microscope/CameraTryMove.cs](../../Assets/m_Scripts/Microscope/CameraTryMove.cs)
+**Location:** Objective Lens in the expanded model; internal node ObjectLen.
 
-## focus — 粗细调焦
+**Prerequisites:** Expand and select Objective Lens. Select a specimen first to see specimen-derived spectra.
 
-状态：static_confirmed；实机验证：否；批准用于自动指引：否。
+**Desktop Steps:** Select Start Spatial Frequency Experiment and wait. High/Middle/Low are 250/125/62.5 lines/mm. Select White Light/Laser Excitation; hold specimen and illumination fixed for a carrier-only comparison.
 
-位置：显微镜观察界面
+**Xr Steps:** Use the right-hand UI ray for the same entry, frequency, and illumination controls.
 
-**前置条件**
+**Observation:** Compare grating, diffraction spacing, specimen spectrum, sidebands, and multi-orientation support.
 
-- 已进入 Observing。
+**Completion Evidence:** IsExperimentActive, CaptureTeachingState, and SampleChanged support state collection.
 
-**桌面操作**
+**Exit Steps:** Select Exit to return to the component view.
 
-- 按 Tab 切换粗/细调模式。
-- 按住 X，使用左/右方向键调焦。
+**Limitations:** Without a specimen, derived spectrum panels are empty. This is not confocal pinhole simulation or complete SIM image reconstruction.
 
-**XR 操作**
+**Verification:** static_confirmed; runtime_verified=false
 
-- 按右摇杆按压切换粗/细调。
-- 按住左手 primaryButton，左右推动右摇杆调焦。
+**Sources:** Assets/m_Scripts/Experiment/SpatialFrequencyExperimentController.cs, Assets/m_Scripts/Experiment/SpatialFrequencyExperimentDiagramView.cs, Assets/m_Scripts/Experiment/FourierOpticsCpuSimulator.cs, Assets/m_Scripts/ExplodeModel/SuperAssemblyPartSelectionController.cs
 
-**退出/恢复**
+## snom_entry - Enter the SNOM demonstration
 
-- Z 或 Esc 退出观察；XR 左手扳机退出。
+**Location:** Main-scene model TDs_edited_UnityVeryLowPoly; use runtime geometry for direction.
 
-**边界**
+**Prerequisites:** Approach SNOM; its runtime controller must find the model and create the entry.
 
-- 依据当前输入链路，不使用旧 M/B/N 调焦说明。视觉反馈不是标定成像。
+**Desktop Steps:** Click the SNOM target to show its entry, then select Begin Operation.
 
-观察目标：观察焦点清晰程度和粗细调状态的变化。
+**Xr Steps:** Use the right-hand ray and trigger for the SNOM target, then select Begin Operation.
 
-完成依据：调焦参数与模式需要后续助手采集。
+**Observation:** The probe-selection/installation interface appears.
 
-证据：
+**Completion Evidence:** Read the current workflow phase and stage from the controller snapshot.
 
-- [Assets/m_Scripts/Microscope/Microscope.cs](../../Assets/m_Scripts/Microscope/Microscope.cs)
-- [Assets/m_Scripts/Interactor/Interactor.cs](../../Assets/m_Scripts/Interactor/Interactor.cs)
-- [Assets/m_Scripts/Microscope/CameraTryMove.cs](../../Assets/m_Scripts/Microscope/CameraTryMove.cs)
+**Exit Steps:** Select Exit, or Esc on desktop when available.
 
-## assembly — 进入拆解、展开与复原
+**Limitations:** RuntimeBootstrap creates this module dynamically. Absence of a directly attached scene script does not mean the feature is absent.
 
-状态：static_confirmed；实机验证：否；批准用于自动指引：否。
+**Verification:** static_confirmed; runtime_verified=false
 
-位置：主场景显微镜装配模型；以整体模型为目标。
+**Sources:** Assets/m_Scripts/Experiment/SNOMDemonstrationController.cs
 
-**前置条件**
+## snom_probe - Probe selection and installation
 
-- 教程未锁定模式；没有实验转场或独立实验锁定。
+**Location:** SNOM ProbeSelection panel.
 
-**桌面操作**
+**Prerequisites:** Enter Begin Operation first.
 
-- 鼠标左键点击整体装配目标进入 PreAssembly。
-- 再次点击装配目标进入 SuperAssembly，等待展开动画结束。
+**Desktop Steps:** Select Fine/Standard/Robust or press 1/2/3. Select Install Selected Probe or press E, then wait.
 
-**XR 操作**
+**Xr Steps:** Use the UI ray to select a probe card and Install Selected Probe.
 
-- 右手射线指向装配目标，按右手扳机进入 PreAssembly。
-- 再次指向目标并按扳机进入 SuperAssembly。
+**Observation:** The preview moves to its mount; Start System appears after installation.
 
-**退出/恢复**
+**Completion Evidence:** ReadyToStart establishes completion of installation; the install click alone does not.
 
-- 先退出部件选择；在 SuperAssembly 点击/指向模型外区域退出到 PreAssembly；再在模型外操作返回 Normal。
+**Exit Steps:** Select Exit or use desktop Esc when available.
 
-**边界**
+**Limitations:** 3x/2x/1x are relative-detail teaching labels, not objective magnifications. The meshes are not three calibrated physical probes.
 
-- 输入按状态逐步处理，不能承诺一次点击空白区就完成所有返回。
+**Verification:** static_confirmed; runtime_verified=false
 
-观察目标：模型从整体展示变为展开结构。
+**Sources:** Assets/m_Scripts/Experiment/SNOMDemonstrationController.cs
 
-完成依据：CurrentMode 与 ModelExploder.IsExploded/IsAnimating。
+## snom_start - Start SNOM and observe its principles
 
-证据：
+**Location:** SNOM ReadyToStart panel.
 
-- [Assets/m_Scripts/ExplodeModel/MicroscopeExploderModeController.cs](../../Assets/m_Scripts/ExplodeModel/MicroscopeExploderModeController.cs)
-- [Assets/m_Scripts/ExplodeModel/ModelExploder.cs](../../Assets/m_Scripts/ExplodeModel/ModelExploder.cs)
-- [Assets/m_Scripts/Microscope/CameraTryMove.cs](../../Assets/m_Scripts/Microscope/CameraTryMove.cs)
+**Prerequisites:** Probe installation must finish and Start System must be available.
 
-## parts — 部件查看
+**Desktop Steps:** Select Start System or press Space.
 
-状态：static_confirmed；实机验证：否；批准用于自动指引：否。
+**Xr Steps:** Select Start System with the UI ray.
 
-位置：SuperAssembly 展开的显微镜部件
+**Observation:** Eight automatic stages cover THz generation, beam steering, AFM feedback, near-field coupling, scattering/background, demodulation, raster scan, and results/local spectrum.
 
-**前置条件**
+**Completion Evidence:** Use the current stage and supplied playback state; do not invent scan progress.
 
-- 展开结束；未被其他实验锁定。
+**Exit Steps:** Select Exit or use desktop Esc when available.
 
-**桌面操作**
+**Limitations:** Installing and starting are player actions; the eight subsequent stages explain internal processes rather than eight additional instrument operations.
 
-- 鼠标左键选择部件，阅读右侧名称与说明。
-- 在说明面板外点击，结束当前部件查看，再选其他部件。
+**Verification:** static_confirmed; runtime_verified=false
 
-**XR 操作**
+**Sources:** Assets/m_Scripts/Experiment/SNOMDemonstrationController.cs, Assets/m_Scripts/Experiment/SNOMDemonstrationGraphic.cs
 
-- 右手射线选择部件并按扳机；在选择 UI 外再次按扳机退出当前选择。
+## snom_controls - SNOM tour and component controls
 
-**退出/恢复**
+**Location:** SNOM PrincipleTour control bar.
 
-- 退出选择后按 assembly 条目返回。
+**Prerequisites:** Start the system to enter the principle tour.
 
-**边界**
+**Desktop Steps:** Previous/Next or left/right arrows change stage. Play/pause or Space controls playback; Replay or R repeats a stage. Components opens component explanations. Use Change Probe only when that button is displayed.
 
-- Upper Optical Assembly 的内部光学元件未逐个确认；不可随意叫作二色镜/针孔。后三项没有已配置独立实验按钮。
+**Xr Steps:** Use the UI ray for currently visible Previous, Next, play/pause, Replay, and Components controls.
 
-观察目标：已配置名称：Objective Lens、Upper Optical Assembly、Stage Position Control、Optical Breadboard、Focus Adjustment。
+**Observation:** Animations, diagrams, and text change with the selected stage/component.
 
-完成依据：IsSelectionActive、选中部件；需要完整上下文接口。
+**Completion Evidence:** Use current stage, selection, and playback state.
 
-证据：
+**Exit Steps:** Select Exit or use desktop Esc when available.
 
-- [Assets/m_Scripts/ExplodeModel/SuperAssemblyPartSelectionController.cs](../../Assets/m_Scripts/ExplodeModel/SuperAssemblyPartSelectionController.cs)
+**Limitations:** Separate Raw/2Omega/3Omega buttons are not confirmed despite earlier design proposals. Displayed results are synthetic.
 
-## na_experiment — 数值孔径交互实验
+**Verification:** static_confirmed; runtime_verified=false
 
-状态：static_confirmed；实机验证：否；批准用于自动指引：否。
+**Sources:** Assets/m_Scripts/Experiment/SNOMDemonstrationController.cs, Assets/m_Scripts/Experiment/SNOMDemonstrationGraphic.cs
 
-位置：展开模型中的 Upper Optical Assembly（内部节点 AboveMirror）
+## forced_tutorial - Mandatory interaction tutorial
 
-**前置条件**
+**Location:** MandatoryTutorialTrigger and StandaloneTutorialUI panels.
 
-- 完成 assembly 并选中 Upper Optical Assembly。
+**Prerequisites:** Meet the trigger, sequence, specimen, and state prerequisites.
 
-**桌面操作**
+**Desktop Steps:** Perform the input shown for the current step; not every step is a Space confirmation.
 
-- 点击 Start Numerical Aperture Experiment，等待转场。
-- 鼠标拖动 NA 滑块，比较角度、光锥与近似倍率显示。
+**Xr Steps:** Perform the requested controller action; combinations may require holding a modifier.
 
-**XR 操作**
+**Observation:** Matching input/events advance a step; some presentation steps advance automatically.
 
-- 用射线操作同名按钮与 NA 滑块。
-- 备用摇杆路径读取 Roaming/ChangeFocusOrChangeLIght 的 x 轴；通常需左 primary 修饰，实际设备须验证。
+**Completion Evidence:** Use tutorial completion events and trigger state, not dialog claims.
 
-**退出/恢复**
+**Exit Steps:** Complete the tutorial sequence; no universal skip control is confirmed.
 
-- 点击 Exit 返回部件查看；再按 parts/assembly 返回。
+**Limitations:** The tutorial may lock movement, assembly, or global input; suspend idle reminders while blocked.
 
-**边界**
+**Verification:** static_confirmed; runtime_verified=false
 
-- NA=n sin(theta)；倍率是参考档位插值，亮度/清晰度/景深反馈为教学映射。
+**Sources:** Assets/m_Scripts/Tutorial/ForceTutorial/MandatoryTutorialTrigger.cs, Assets/m_Scripts/Tutorial/ForceTutorial/StandaloneTutorialUI.cs, Assets/m_Scripts/Tutorial/ForceTutorial/ForceTutorialSequenceController.cs, Assets/m_Scripts/Tutorial/ForceTutorial/PlayerInputBlocker.cs, Assets/m_Scripts/Microscope/CameraTryMove.cs
 
-观察目标：NA 连续范围 0.03–0.95；观察 theta、全角和光锥变化。
+## optional_tutorial - Legacy optional tutorial entry
 
-完成依据：IsExperimentActive、IsTransitioning、CurrentNA、CaptureTeachingState 已有。
+**Location:** Panel registered as Interactor.currentTutorial; the audited main-scene direct reference is null.
 
-证据：
+**Prerequisites:** Confirm a runtime Tutorial instance registers currentTutorial.
 
-- [Assets/m_Scripts/Experiment/NumericalApertureExperimentController.cs](../../Assets/m_Scripts/Experiment/NumericalApertureExperimentController.cs)
-- [Assets/m_Scripts/ExplodeModel/SuperAssemblyPartSelectionController.cs](../../Assets/m_Scripts/ExplodeModel/SuperAssemblyPartSelectionController.cs)
+**Desktop Steps:** Code maps Y to open, arrows/WASD to navigation, and Space/Enter to confirm when the menu is active.
 
-## spatial_frequency — 空间频率与衍射实验
+**Xr Steps:** Global/OpenTutorial maps to left secondaryButton; right thumbstick navigates and right primaryButton confirms.
 
-状态：static_confirmed；实机验证：否；批准用于自动指引：否。
+**Observation:** A correctly registered instance displays tutorial lists or observation tutorials.
 
-位置：展开模型中的 Objective Lens（内部节点 ObjectLen）
+**Completion Evidence:** The direct main-scene attachment is not established; do not promise availability.
 
-**前置条件**
+**Limitations:** This is not the assistant wake control. Old H documentation is not the current mapping. Missing registration risks null references.
 
-- 完成 assembly 并选中 Objective Lens；若要看样本频谱，先选择样本。
+**Verification:** conditional; runtime_verified=false
 
-**桌面操作**
+**Sources:** Assets/m_Scripts/Tutorial/Tutorial.cs, Assets/m_Scripts/Tutorial/TutorialButtonInput.cs, Assets/m_Scripts/Interactor/Interactor.cs, Assets/m_Scripts/Microscope/CameraTryMove.cs
 
-- 点击 Start Spatial Frequency Experiment，等待转场。
-- 点击 High/Middle/Low，分别对应 250/125/62.5 lines/mm。
-- 点击 White Light / Laser Excitation 比较照明；做控制变量比较时保持照明与样本不变。
+## stage_translation - Candidate field-of-view translation
 
-**XR 操作**
+**Location:** ScreenMove needs an enabled instance on a target with a specimen child.
 
-- 右手 UI 射线操作相同按钮和频率选项。
+**Prerequisites:** Verify the actual component instance and enabled state.
 
-**退出/恢复**
+**Desktop Steps:** Code reads Horizontal/Vertical (WASD/arrows), but current scene availability is not confirmed.
 
-- 点击 Exit 返回部件查看。
+**Observation:** The specimen translates in its local XY plane.
 
-**边界**
+**Completion Evidence:** Runtime attachment is unconfirmed.
 
-- 无样本时三幅样本派生频谱为空；不等于共聚焦针孔仿真，也没有完整 SIM 图像重建。
+**Limitations:** No direct main-scene reference was established; a prefab instance may exist. A script alone does not authorize operating instructions.
 
-观察目标：观察光栅、衍射级次间距，以及样本频谱、侧带和多方向支持域。
+**Verification:** conditional; runtime_verified=false
 
-完成依据：IsExperimentActive、CaptureTeachingState、SampleChanged 可用于后续采集。
+**Sources:** Assets/m_Scripts/Microscope/ScreenMove.cs
 
-证据：
+## filter_prototype - Filter and dichroic-mirror prototype
 
-- [Assets/m_Scripts/Experiment/SpatialFrequencyExperimentController.cs](../../Assets/m_Scripts/Experiment/SpatialFrequencyExperimentController.cs)
-- [Assets/m_Scripts/Experiment/SpatialFrequencyExperimentDiagramView.cs](../../Assets/m_Scripts/Experiment/SpatialFrequencyExperimentDiagramView.cs)
-- [Assets/m_Scripts/Experiment/FourierOpticsCpuSimulator.cs](../../Assets/m_Scripts/Experiment/FourierOpticsCpuSimulator.cs)
-- [Assets/m_Scripts/ExplodeModel/SuperAssemblyPartSelectionController.cs](../../Assets/m_Scripts/ExplodeModel/SuperAssemblyPartSelectionController.cs)
+**Location:** PCDesktop scripts and light-path assets; no complete entry is confirmed.
 
-## snom_entry — 进入 SNOM 操作演示
+**Prerequisites:** Actual UI, drag/drop, and slot binding need verification.
 
-状态：static_confirmed；实机验证：否；批准用于自动指引：否。
+**Observation:** Filter, DichroicMirror, Slot, and light-line component code exists.
 
-位置：主场景模型 TDs_edited_UnityVeryLowPoly；空间方位须现场确认。
+**Completion Evidence:** No complete learning workflow is confirmed.
 
-**前置条件**
+**Limitations:** The corresponding PC_CanvasMgr.OpenApp branch is empty. Do not guide a learner to an unconfirmed application.
 
-- 靠近 SNOM 系统；运行时控制器已成功找到模型并创建入口。
+**Verification:** unavailable; runtime_verified=false
 
-**桌面操作**
+**Sources:** Assets/m_Scripts/PCDesktop/PC_CanvasMgr.cs, Assets/m_Scripts/PCDesktop/Slot.cs, Assets/m_Scripts/PCDesktop/Items/BaseItem.cs, Assets/m_Scripts/PCDesktop/Items/Filter.cs, Assets/m_Scripts/PCDesktop/Items/DichroicMirror.cs, Assets/m_Scripts/PCDesktop/LightLine/LightLineMgr.cs
 
-- 鼠标点击 SNOM 交互目标，显示入口。
-- 点击 Begin Operation。
+## confocal_background - Confocal principles
 
-**XR 操作**
+**Location:** Knowledge explanation, related to microscope structure, NA, and spatial frequency; no full confocal interaction workflow.
 
-- 右手射线指向 SNOM 入口目标并按扳机；点击 Begin Operation。
+**Observation:** Explain excitation, collection, rejection of defocus by a pinhole, and scanning as concepts.
 
-**退出/恢复**
+**Completion Evidence:** There is no executable completion condition.
 
-- 点击 Exit；桌面 Esc。
+**Limitations:** Do not instruct pinhole adjustment, Z-stack acquisition, detector control, or real scanning parameters. NA/spectrum activities are not confocal optical sectioning.
 
-**边界**
+**Verification:** knowledge_only; runtime_verified=false
 
-- 此模块由 RuntimeBootstrap 动态创建，不能只凭场景没有直接挂脚本判断不存在。
+**Sources:** Assets/m_Scripts/Microscope/Microscope.cs, Assets/m_Scripts/Experiment/FourierOpticsCpuSimulator.cs
 
-观察目标：出现探针选择及安装界面。
+## legacy_tutor - Removed fixed-question tutor
 
-完成依据：CurrentStage/工作流阶段存在于控制器，未来助手需扩展状态采集。
+**Location:** Removed from NA and spatial-frequency experiments.
 
-证据：
+**Observation:** Old panels and fixed questions are unavailable; the aurora assistant remains.
 
-- [Assets/m_Scripts/Experiment/SNOMDemonstrationController.cs](../../Assets/m_Scripts/Experiment/SNOMDemonstrationController.cs)
+**Completion Evidence:** Dedicated source, assets, editor menus, and the old /tutor route were removed.
 
-## snom_probe — 探针选择与安装
+**Limitations:** Historical entry retained only to prevent recommendations of the removed feature.
 
-状态：static_confirmed；实机验证：否；批准用于自动指引：否。
+**Verification:** deprecated; runtime_verified=false
 
-位置：SNOM 操作面板 ProbeSelection 阶段
+**Sources:** docs/assistant_knowledge/CHAT_IMPLEMENTATION.md
 
-**前置条件**
+## aurora_assistant - Aurora orb assistant
 
-- 已进入 Begin Operation。
+**Location:** Upper-left of the main laboratory; runtime Local Aurora Assistant uses a camera-following world-space Canvas in XR.
 
-**桌面操作**
+**Prerequisites:** The main scene must run with LocalAssistantSettings.assistantEnabled=true. Verify display and input on the target device.
 
-- 点击 Fine / Standard / Robust 探针选项，或按 1/2/3。
-- 点击 Install Probe，或按 E；等待安装结束。
+**Desktop Steps:** Press H or select the orb for a local greeting; H is ignored while editing input. Select Ask a question, enter a question or choose a topic, then Send. Voice Input records a draft for confirmation.
 
-**XR 操作**
+**Xr Steps:** Select the orb and controls with the existing XR UI ray; no additional experiment-controller shortcut is introduced.
 
-- 用 UI 射线选择探针卡片，再点击 Install Probe。
+**Observation:** Local greetings, idle reminders, English knowledge chat, confirmed speech drafts, current-state instructions, and location markers are implemented. Only submitted chat/transcription uses external services.
 
-**退出/恢复**
+**Completion Evidence:** Runtime message, idle, guidance, and navigation state provide implementation evidence; device testing must be reported separately.
 
-- 点击 Exit 或桌面 Esc。
+**Exit Steps:** Close the message, or select Snooze 5 min to pause idle reminders; manual activation remains available.
 
-**边界**
+**Limitations:** Backend configuration is required for real model/voice use. Actions guide the learner and do not execute instrument controls. Historical stage-two limitations have been superseded by current state/navigation/voice code.
 
-- 3x/2x/1x 是相对细节教学标签，不是物镜倍率；复用模型网格，不是三个已校准物理探针。
+**Verification:** static_confirmed; runtime_verified=false
 
-观察目标：运行时探针预览移动到安装位置，完成后显示 Start System。
-
-完成依据：ReadyToStart 工作流状态；不要把点击安装等同于动画已完成。
-
-证据：
-
-- [Assets/m_Scripts/Experiment/SNOMDemonstrationController.cs](../../Assets/m_Scripts/Experiment/SNOMDemonstrationController.cs)
-
-## snom_start — 启动 SNOM 并观察原理
-
-状态：static_confirmed；实机验证：否；批准用于自动指引：否。
-
-位置：SNOM ReadyToStart 面板
-
-**前置条件**
-
-- 探针安装结束；Start System 已可用。
-
-**桌面操作**
-
-- 点击 Start System 或按 Space。
-
-**XR 操作**
-
-- 点击 Start System。
-
-**退出/恢复**
-
-- Exit 或桌面 Esc。
-
-**边界**
-
-- 安装探针与启动是用户操作；后续八阶段是内部过程讲解，不是八项额外仪器操作。
-
-观察目标：八阶段自动演示：THz 产生、光束引导、AFM 反馈、近场耦合、散射背景、谐波解调、逐点扫描、结果与局部光谱。
-
-完成依据：CurrentStage；还需采集播放/暂停与扫描进度。
-
-证据：
-
-- [Assets/m_Scripts/Experiment/SNOMDemonstrationController.cs](../../Assets/m_Scripts/Experiment/SNOMDemonstrationController.cs)
-- [Assets/m_Scripts/Experiment/SNOMDemonstrationGraphic.cs](../../Assets/m_Scripts/Experiment/SNOMDemonstrationGraphic.cs)
-
-## snom_controls — SNOM 导航与部件说明
-
-状态：static_confirmed；实机验证：否；批准用于自动指引：否。
-
-位置：SNOM PrincipleTour 演示控制栏
-
-**前置条件**
-
-- 已启动系统进入原理讲解。
-
-**桌面操作**
-
-- Previous/Next 或左/右方向键切换讲解。
-- 播放/暂停按钮或 Space；Replay 或 R 重播当前阶段。
-- 点击 Components 进入部件说明，并选择高亮部件。
-- Change Probe 仅在该按钮实际显示的阶段使用。
-
-**XR 操作**
-
-- 使用 UI 射线操作 Previous、Next、播放/暂停、Replay、Components；按当前可见按钮操作。
-
-**退出/恢复**
-
-- Exit；桌面 Esc。
-
-**边界**
-
-- 不要承诺 Raw/2Ω/3Ω 独立按钮：设计说明曾提出，但本轮没有确认实际控制按钮。图谱为合成示意。
-
-观察目标：动画、图示和说明随阶段/部件变化。
-
-完成依据：CurrentStage 与当前选择/播放状态；需新增完整上报。
-
-证据：
-
-- [Assets/m_Scripts/Experiment/SNOMDemonstrationController.cs](../../Assets/m_Scripts/Experiment/SNOMDemonstrationController.cs)
-- [Assets/m_Scripts/Experiment/SNOMDemonstrationGraphic.cs](../../Assets/m_Scripts/Experiment/SNOMDemonstrationGraphic.cs)
-
-## forced_tutorial — 强制交互教程
-
-状态：static_confirmed；实机验证：否；批准用于自动指引：否。
-
-位置：场景中的 MandatoryTutorialTrigger 与 StandaloneTutorialUI 面板
-
-**前置条件**
-
-- 触发区域/顺序/样本等前置条件满足。
-
-**桌面操作**
-
-- 按当前教程显示的目标输入完成步骤；不要把所有步骤都理解为按空格。
-
-**XR 操作**
-
-- 按教程指定的手柄动作；组合动作可能需要持续按住修饰键。
-
-**退出/恢复**
-
-- 按教程自身流程完成；未确认存在通用跳过按钮。
-
-**边界**
-
-- 教程可能锁定移动、拆解或全局输入；闲置提醒应暂停。
-
-观察目标：步骤在匹配输入或事件后推进；某些展示步骤会自动推进。
-
-完成依据：教程完成事件与触发器状态；需接入助手上下文。
-
-证据：
-
-- [Assets/m_Scripts/Tutorial/ForceTutorial/MandatoryTutorialTrigger.cs](../../Assets/m_Scripts/Tutorial/ForceTutorial/MandatoryTutorialTrigger.cs)
-- [Assets/m_Scripts/Tutorial/ForceTutorial/StandaloneTutorialUI.cs](../../Assets/m_Scripts/Tutorial/ForceTutorial/StandaloneTutorialUI.cs)
-- [Assets/m_Scripts/Tutorial/ForceTutorial/ForceTutorialSequenceController.cs](../../Assets/m_Scripts/Tutorial/ForceTutorial/ForceTutorialSequenceController.cs)
-- [Assets/m_Scripts/Tutorial/ForceTutorial/PlayerInputBlocker.cs](../../Assets/m_Scripts/Tutorial/ForceTutorial/PlayerInputBlocker.cs)
-- [Assets/m_Scripts/Microscope/CameraTryMove.cs](../../Assets/m_Scripts/Microscope/CameraTryMove.cs)
-
-## optional_tutorial — 旧自由教程入口
-
-状态：conditional；实机验证：否；批准用于自动指引：否。
-
-位置：Interactor.currentTutorial 对应面板；当前主场景直接引用为 null。
-
-**前置条件**
-
-- 必须确认运行时存在 Tutorial 实例并注册 currentTutorial。
-
-**桌面操作**
-
-- 代码映射 Y 打开；已打开时方向/WASD 导航，Space/Enter 确认。
-
-**XR 操作**
-
-- Global/OpenTutorial 为左 secondaryButton；教程内右摇杆导航、右 primaryButton 确认。
-
-**退出/恢复**：无已确认步骤。
-
-**边界**
-
-- 不要作为助手唤醒键；旧 H 文档不等于当前绑定；注册失败存在空引用风险。
-
-观察目标：若正确注册，应显示教程列表或观察教程。
-
-完成依据：缺少主场景直接挂载证据，不能承诺。
-
-证据：
-
-- [Assets/m_Scripts/Tutorial/Tutorial.cs](../../Assets/m_Scripts/Tutorial/Tutorial.cs)
-- [Assets/m_Scripts/Tutorial/TutorialButtonInput.cs](../../Assets/m_Scripts/Tutorial/TutorialButtonInput.cs)
-- [Assets/m_Scripts/Interactor/Interactor.cs](../../Assets/m_Scripts/Interactor/Interactor.cs)
-- [Assets/m_Scripts/Microscope/CameraTryMove.cs](../../Assets/m_Scripts/Microscope/CameraTryMove.cs)
-
-## stage_translation — 视野平移候选功能
-
-状态：conditional；实机验证：否；批准用于自动指引：否。
-
-位置：ScreenMove 需要挂到有样本子对象的目标上。
-
-**前置条件**
-
-- 确认 ScreenMove 实际实例及启用状态。
-
-**桌面操作**
-
-- 代码读取 Horizontal/Vertical 即 WASD/方向轴；尚未确认当前场景可用。
-
-**XR 操作**：无已确认步骤。
-
-**退出/恢复**：无已确认步骤。
-
-**边界**
-
-- 主场景无直接引用；可能位于 Prefab，不能仅凭脚本存在给玩家操作指令。
-
-观察目标：样本在局部 XY 平面平移。
-
-完成依据：未确认运行时挂载。
-
-证据：
-
-- [Assets/m_Scripts/Microscope/ScreenMove.cs](../../Assets/m_Scripts/Microscope/ScreenMove.cs)
-
-## filter_prototype — 滤光片与二色镜候选原型
-
-状态：unavailable；实机验证：否；批准用于自动指引：否。
-
-位置：PCDesktop 脚本与光线示意资源；无完整入口证明。
-
-**前置条件**
-
-- 需验证实际 UI、拖放与槽位绑定。
-
-**桌面操作**：无已确认步骤。
-
-**XR 操作**：无已确认步骤。
-
-**退出/恢复**：无已确认步骤。
-
-**边界**
-
-- PC_CanvasMgr.OpenApp 对应分支为空；不能指引玩家打开一个未确认存在的应用。
-
-观察目标：存在 Filter/DichroicMirror、Slot 和光线组件代码。
-
-完成依据：未确认可完成的学习流程。
-
-证据：
-
-- [Assets/m_Scripts/PCDesktop/PC_CanvasMgr.cs](../../Assets/m_Scripts/PCDesktop/PC_CanvasMgr.cs)
-- [Assets/m_Scripts/PCDesktop/Slot.cs](../../Assets/m_Scripts/PCDesktop/Slot.cs)
-- [Assets/m_Scripts/PCDesktop/Items/BaseItem.cs](../../Assets/m_Scripts/PCDesktop/Items/BaseItem.cs)
-- [Assets/m_Scripts/PCDesktop/Items/Filter.cs](../../Assets/m_Scripts/PCDesktop/Items/Filter.cs)
-- [Assets/m_Scripts/PCDesktop/Items/DichroicMirror.cs](../../Assets/m_Scripts/PCDesktop/Items/DichroicMirror.cs)
-- [Assets/m_Scripts/PCDesktop/LightLine/LightLineMgr.cs](../../Assets/m_Scripts/PCDesktop/LightLine/LightLineMgr.cs)
-
-## confocal_background — 共聚焦原理说明
-
-状态：knowledge_only；实机验证：否；批准用于自动指引：否。
-
-位置：知识讲解；可关联已验证的显微镜结构、NA 与空间频率内容，但没有完整共聚焦交互流程。
-
-**前置条件**：无已确认步骤。
-
-**桌面操作**：无已确认步骤。
-
-**XR 操作**：无已确认步骤。
-
-**退出/恢复**：无已确认步骤。
-
-**边界**
-
-- 不指引调针孔、采集 Z-stack、控制探测器或真实扫描参数；不把 NA/频谱实验说成共聚焦切片。
-
-观察目标：仅说明激发、收集、针孔抑制离焦信号与扫描成像的概念。
-
-完成依据：无可执行完成判据。
-
-证据：
-
-- [Assets/m_Scripts/Microscope/Microscope.cs](../../Assets/m_Scripts/Microscope/Microscope.cs)
-- [Assets/m_Scripts/Experiment/FourierOpticsCpuSimulator.cs](../../Assets/m_Scripts/Experiment/FourierOpticsCpuSimulator.cs)
-
-## legacy_tutor — 上一版固定题目 Tutor（已删除）
-
-状态：deprecated；批准用于自动指引：否。
-
-旧面板、固定题目、配置资源、编辑器创建菜单、实验接入代码及 /tutor 路由均已删除。没有可用入口或操作步骤；普通教程保留，当前仅使用极光小助手。
-
-此 ID 仅作历史标记，防止模型继续推荐旧入口。参见 [当前问答说明](CHAT_IMPLEMENTATION.md)。
-
-## aurora_assistant — 极光小球助手（本地第一批）
-
-状态：static_confirmed；实机验证：否；批准用于自动指引：否。
-
-位置：主场景左上角，运行时自动创建 Local Aurora Assistant；XR 使用跟随相机的世界空间 Canvas。
-
-**前置条件**：主场景运行且 LocalAssistantSettings.assistantEnabled=true；实际显示与输入待实测。
-
-**桌面操作**：默认 H 或点击小球触发随机本地问候；输入框编辑时忽略 H。问候框的「问点什么」打开问答；输入问题或选择主题示例后点击「发送」。
-
-**XR 操作**：现有 XR UI 射线点击小球，不新增实验手柄按键绑定；头显显示与射线命中待实测。
-
-**退出/恢复**：点击 × 关闭；点击 安静 5 分钟 暂停自动提醒，主动唤醒仍可用。
-
-**边界**
-
-- 本地助手源码已实现，PC/XR 运行验证与批准仍未完成。
-- 第二批已实现自由知识问答，使用要求后端可用；第三批实时状态和操作导航尚未接入。
-
-观察目标：动态极光球体、本地随机问候、累计 30 秒有效闲置后的模块主题提醒，以及第二批提交问题后返回的项目知识解释。
-
-完成依据：消息显示/隐藏与闲置计时状态；已通过编译和纯计时检查，主场景运行检查被已有 Unity 实例占用阻止。
-
-证据：
-
-- [LocalAssistantController.cs](../../Assets/m_Scripts/Assistant/LocalAssistantController.cs)
-- [LocalAssistantSettings.cs](../../Assets/m_Scripts/Assistant/LocalAssistantSettings.cs)
-- [LocalAssistantSettings.asset](../../Assets/Resources/LocalAssistantSettings.asset)
+**Sources:** Assets/m_Scripts/Assistant/LocalAssistantController.cs, Assets/m_Scripts/Assistant/LocalAssistantSettings.cs, Assets/Resources/LocalAssistantSettings.asset, Assets/m_Scripts/Assistant/AssistantChatPanel.cs, Tools/ai_tutor/assistant_chat.py

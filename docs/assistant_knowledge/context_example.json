@@ -18,5 +18,5 @@
   "snom_workflow_phase": null,
   "allowed_actions": [],
   "completed_step_ids": [],
-  "note": "后续由 Unity 上报真实状态；不得把此模板作为玩家状态直接发送。"
+  "note": "Illustrative legacy template only. Unity supplies actual runtime snapshots; never send this template as the player's current state."
 }

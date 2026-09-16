@@ -1,6 +1,6 @@
 {
   "scene": "Assets/Scene/Scene_Laboratory/MainScene_Labortory.unity",
-  "scene_sha256": "c6ba9a780ce3bccacae67211432947638a40d391c930c70a91074024c4cdf9db",
+  "scene_sha256": "eff42ac11de6367ba743f6e312e156735bc34c59858deae8b8c35500b65c7082",
   "verification": "static_asset_audit_not_playmode",
   "units": "Unity world units; runtime assumes 1 unit/metre unless configured",
   "note": "These are transform origins, not renderer bounds centres or live player coordinates.",

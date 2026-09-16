@@ -3,14 +3,14 @@ import math
 import re
 
 TARGETS = {
-    "parts": ("显微镜学习区域", "显微镜结构和部件功能", "microscope_basics"),
-    "na_experiment": ("显微镜学习区域", "数值孔径，入口关联上部光学组件", "numerical_aperture"),
-    "spatial_frequency": ("显微镜学习区域", "空间频率，入口关联物镜", "spatial_frequency"),
-    "snom_entry": ("THz s-SNOM 装置", "探针敲击、近场耦合与扫描的教学演示", "snom"),
-    "sample_red": ("红色样本", "拾取红色荧光样本并在显微镜下观察", "microscope_basics"),
-    "sample_green": ("绿色样本", "拾取绿色荧光样本并在显微镜下观察", "microscope_basics"),
-    "sample_blue": ("蓝色样本", "拾取蓝色荧光样本并在显微镜下观察", "microscope_basics"),
-    "sample_yellow": ("黄色样本", "拾取黄色荧光样本并在显微镜下观察", "microscope_basics"),
+    "parts": ("the microscope learning area", "microscope structure and component functions", "microscope_basics"),
+    "na_experiment": ("the microscope learning area", "numerical aperture, with entry linked to Upper Optical Assembly", "numerical_aperture"),
+    "spatial_frequency": ("the microscope learning area", "spatial frequency, with entry linked to Objective Lens", "spatial_frequency"),
+    "snom_entry": ("the THz s-SNOM instrument", "the demonstration of probe tapping, near-field coupling, and scanning", "snom"),
+    "sample_red": ("the red specimen", "picking up the red fluorescence specimen for microscope observation", "microscope_basics"),
+    "sample_green": ("the green specimen", "picking up the green fluorescence specimen for microscope observation", "microscope_basics"),
+    "sample_blue": ("the blue specimen", "picking up the blue fluorescence specimen for microscope observation", "microscope_basics"),
+    "sample_yellow": ("the yellow specimen", "picking up the yellow fluorescence specimen for microscope observation", "microscope_basics"),
 }
 
 
@@ -47,7 +47,7 @@ def context(snapshot):
         dx, dz = point[0] - player[0], point[2] - player[2]
         require(math.hypot(forward[0], forward[2]) > .0001)
         angle = math.degrees(math.atan2(forward[2] * dx - forward[0] * dz, forward[0] * dx + forward[2] * dz))
-        direction = "前方" if abs(angle) <= 45 else "后方" if abs(angle) >= 135 else "右侧" if angle > 0 else "左侧"
+        direction = "ahead" if abs(angle) <= 45 else "behind you" if abs(angle) >= 135 else "to your right" if angle > 0 else "to your left"
         name, knowledge, topic = TARGETS[target_id]
         targets.append({**item, "name": name, "learning": knowledge, "knowledge_topic": topic,
                         "direction": direction, "distanceMeters": round(math.hypot(dx, dz) / units, 1),
@@ -64,35 +64,31 @@ def validate_guide(answer, snapshot):
 
 
 RULES = """
-【学习区域定位规则】
-NAVIGATION_CONTEXT 仅决定可定位目标；操作说明另由 GUIDANCE_CONTEXT.allowed_actions 决定。
-用户寻找某区域或样本时选择匹配的 targets；想学习且当前有匹配操作时优先操作说明，否则定位。
-包含实验仪器目标（parts、na_experiment、spatial_frequency、snom_entry）以及实验室桌面上的荧光样本目标：
-- sample_red（红色样本，位于超声清洗仪旁实验台）
-- sample_green（绿色样本，位于离心机旁实验台）
-- sample_blue（蓝色样本，位于显微镜正前方操作台）
-- sample_yellow（黄色样本，位于显微镜正前方操作台）
-用户询问获取或寻找特定颜色样本（如“我应该在哪获取到红色样本”、“绿色样本在哪里”）时，匹配对应 sample_* target 进行定位。
-只解释原理/区别时仍 explain，不无故添加标记。不明确想学哪个主题或寻找哪种样本时 clarify。
-定位类型 guide 仅选择一个当前 target：interaction_ids=[target.id]，suggested_action_ids=[target.action_id]，
-knowledge_topics=[target.knowledge_topic]。不得创造 ID、按钮、设备路径、控制命令或额外步骤。
-answer 用“你可以通过 A 学习 B。它位于你某方向约 C 米处”描述拟定位对象。
-坐标为 Unity 世界坐标，Y 向上；playerForward 是玩家视线方向，不是世界固定北向。
-请依据坐标理解相对关系，direction/distanceMeters 是程序校验值，应优先采用；距离为水平直线距离，非可行走路线。
-不能说标记已成功、到达、学会或完成实验。返回目标只是申请标记。
-客户端真正创建标记后，才会把 guide 替换为固定的“通过 A 学习 B；方位距离；已经添加效果”句式。
-标记失败或已在附近时客户端另行说明，不得在其他回答类型承诺已标记。
-NA、空间频率、部件认识是同一显微镜区域的不同入口；不可描述为三个房间。
-NA 入口关联 Upper Optical Assembly；空间频率入口关联 Objective Lens。可以说明关系，不能编造此刻可点击按钮。
-没有共聚焦针孔、Z-stack 的可操作学习目标；不得用 NA 或 SNOM 冒充共聚焦实验。
-targets 为空或没有匹配目标时，解释已知知识并说明暂不能定位；不照搬历史坐标，不要求玩家批准。
-混入独立无关任务仍整条固定拒答。只输出原五字段 JSON。
+[Learning location guidance]
+Respond in English. NAVIGATION_CONTEXT controls target availability; GUIDANCE_CONTEXT.allowed_actions controls operations.
+For a location or specimen request choose a matching current target; prefer a current operation for hands-on study at its interface.
+The targets are parts, na_experiment, spatial_frequency, snom_entry, and sample_red/green/blue/yellow.
+Red is configured beside the ultrasonic cleaner, green beside the centrifuge, blue/yellow in front of the microscope.
+Use live coordinates and availability, not fixed initial positions, for direction and distance.
+Conceptual questions use explain without markers; ambiguous learning/specimen goals may need one clarification.
+A guide selects one target: interaction_ids=[target.id], suggested_action_ids=[target.action_id], knowledge_topics=[target.knowledge_topic].
+Use 'You can use A to learn about B. It is approximately C metres [direction].'
+Coordinates use Unity world Y up; playerForward is the viewing direction, not world north.
+Prefer validated direction/distanceMeters. Distance is horizontal straight-line distance, not a walking route.
+Do not invent identifiers, paths, controls, extra steps, or completion/arrival/marker-success claims.
+Only the client can report successful marking after creating the effect, or explain nearby/unavailable targets.
+Parts, NA, and spatial frequency share one microscope. NA links to Upper Optical Assembly; spatial frequency to Objective Lens.
+These links do not establish that their buttons are currently clickable.
+Pinhole and Z-stack have no hands-on target; NA/SNOM are not replacement confocal experiments.
+When targets are empty or unmatched, explain supported knowledge and unavailable location guidance without inventing coordinates.
+Do not ask the player to grant missing permissions. Mixed unrelated tasks still require fixed refusal.
+Output only the original five-field JSON contract.
 """
 
 
 def mock_guide(question, snapshot):
     q = question.lower()
-    if not any(w in q for w in ("哪里", "在哪", "想学", "学习", "带我", "体验", "where", "learn", "获取", "拿", "找", "取", "样本", "标本", "切片", "载玻片")):
+    if not any(w in q for w in ("哪里", "在哪", "想学", "学习", "带我", "体验", "where", "learn", "find", "take", "get", "sample", "specimen", "slide", "获取", "拿", "找", "取", "样本", "标本", "切片", "载玻片")):
         return None
     # Deliberately narrow fixtures, not an AI or a production intent classifier.
     if any(w in q for w in ("共聚焦", "confocal", "针孔", "z-stack")):
@@ -103,14 +99,14 @@ def mock_guide(question, snapshot):
         "sample_blue": ("蓝色样本", "蓝样本", "蓝色标本", "蓝色切片", "蓝色载玻片", "蓝载玻片", "蓝色", "blue sample", "blue"),
         "sample_yellow": ("黄色样本", "黄样本", "黄色标本", "黄色切片", "黄色载玻片", "黄载玻片", "黄色", "yellow sample", "yellow"),
         "na_experiment": ("数值孔径", "na"),
-        "spatial_frequency": ("空间频率", "频谱"),
-        "snom_entry": ("snom", "近场", "探针"),
-        "parts": ("显微镜", "部件", "物镜"),
+        "spatial_frequency": ("spatial frequency", "spectrum", "空间频率", "频谱"),
+        "snom_entry": ("snom", "near field", "probe", "近场", "探针"),
+        "parts": ("microscope", "component", "objective", "显微镜", "部件", "物镜"),
     }
     available = {t["id"] for t in context(snapshot)["targets"]}
     for target_id, keywords in words.items():
         if target_id in available and any(w in q for w in keywords):
-            msg = "可以前往对应样本位置拾取并观察该样本。" if target_id.startswith("sample_") else "可以前往对应学习区域了解这一主题。"
+            msg = "You can visit this specimen location to pick it up and observe it." if target_id.startswith("sample_") else "You can visit the matching learning area to explore this topic."
             return {"kind": "guide", "answer": msg,
                     "interaction_ids": [target_id], "suggested_action_ids": ["highlight:" + target_id],
                     "knowledge_topics": [TARGETS[target_id][2]]}

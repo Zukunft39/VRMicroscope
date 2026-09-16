@@ -21,17 +21,17 @@ class NavigationContracts(unittest.TestCase):
         s = snapshot(); s["targets"][0]["worldPosition"]["y"] = 100
         result = nav.context(s)["targets"][0]
         self.assertEqual(result["distanceMeters"], 5)
-        self.assertEqual(result["direction"], "前方")
+        self.assertEqual(result["direction"], "ahead")
 
     def test_directions_from_view_and_translated_origin(self):
-        for x, z, expected in ((10, 25, "前方"), (15, 20, "右侧"), (10, 15, "后方"), (5, 20, "左侧")):
+        for x, z, expected in ((10, 25, "ahead"), (15, 20, "to your right"), (10, 15, "behind you"), (5, 20, "to your left")):
             s = snapshot(); s["targets"][0]["worldPosition"].update(x=x, z=z)
             self.assertEqual(nav.context(s)["targets"][0]["direction"], expected)
         s = snapshot(); s["playerForward"].update(x=1, z=0)
         s["targets"][0]["worldPosition"].update(x=10, z=25)
-        self.assertEqual(nav.context(s)["targets"][0]["direction"], "左侧")
+        self.assertEqual(nav.context(s)["targets"][0]["direction"], "to your left")
         s["playerForward"].update(x=0, z=-1)
-        self.assertEqual(nav.context(s)["targets"][0]["direction"], "后方")
+        self.assertEqual(nav.context(s)["targets"][0]["direction"], "behind you")
 
     def test_units_and_coincident_position(self):
         s = snapshot(); s["worldUnitsPerMeter"] = 2

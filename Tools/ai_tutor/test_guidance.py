@@ -158,7 +158,7 @@ class GuidanceContracts(unittest.TestCase):
     def test_xr_uses_xr_instructions(self):
         s = state("Observing", ["learn:focus"]); s["device"] = "xr"
         text = g.render(answer("learn:focus"), s)
-        self.assertIn("右摇杆", text)
+        self.assertIn("right thumbstick", text)
         self.assertNotIn("Tab", text)
 
     def test_model_cannot_inject_extra_steps_into_rendered_guide(self):
@@ -213,7 +213,7 @@ class GuidanceContracts(unittest.TestCase):
         generated = chat.model_messages(p, chat.KnowledgeBundle())[0]["content"]
         self.assertIn(chat.runtime_context(p), review)
         self.assertIn(chat.runtime_context(p), generated)
-        self.assertIn("本次仅做审核", review)
+        self.assertIn("REVIEW ONLY", review)
 
     def test_runtime_rule_revision_changes_knowledge_hash(self):
         previous = chat.KnowledgeBundle().version

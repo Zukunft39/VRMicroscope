@@ -55,7 +55,7 @@ def multipart(data):
 def transcribe(data, mock=False):
     validate_audio(data)
     if mock:
-        return {"text": "数值孔径与分辨率有什么关系？", "source": "mock", "model": MODEL}
+        return {"text": "How does numerical aperture relate to resolution?", "source": "mock", "model": MODEL}
     key = os.environ.get("GROQ_API_KEY", "").strip()
     if not key:
         raise SpeechError(503, "speech_not_configured")
