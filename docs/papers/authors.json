@@ -1,0 +1,16 @@
+{
+  "authors": [
+    {"name": "Tang Shaoyan", "affiliation": 1, "email": "tangshaoyan@u.nus.edu", "corresponding": true},
+    {"name": "Pu Yunpin", "affiliation": 2, "email": "2023091204002@std.uestc.edu.cn"},
+    {"name": "Sui Si‘ao", "affiliation": 2, "email": "2023120901021@std.uestc.edu.cn"},
+    {"name": "Qammer Abbasi", "affiliation": 3, "email": "Qammer.Abbasi@glasgow.ac.uk"},
+    {"name": "Sajjad Hussain", "affiliation": 3, "email": "Sajjad.Hussain@glasgow.ac.uk"},
+    {"name": "Hu Min", "affiliation": 2, "email": "hu_m@uestc.edu.cn"},
+    {"name": "Hasan Abbas", "affiliation": 3, "email": "Hasan.abbas@glasgow.ac.uk", "corresponding": true}
+  ],
+  "affiliations": [
+    {"id": 1, "institution": "National University of Singapore", "country": "Singapore"},
+    {"id": 2, "institution": "University of Electronic Science and Technology of China", "country": "China"},
+    {"id": 3, "institution": "University of Glasgow", "country": "United Kingdom"}
+  ]
+}

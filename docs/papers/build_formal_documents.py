@@ -6,22 +6,73 @@ Run from the project root: python docs/papers/build_formal_documents.py
 from pathlib import Path
 import re
 import sys
-from copy import deepcopy
+import json
+import argparse
+import html
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / '.paper_tools'))
 import pypandoc
 from docx import Document
-from docx.shared import Inches, Pt
-from docx.oxml import OxmlElement
-from docx.oxml.ns import qn
-from docx.enum.text import WD_ALIGN_PARAGRAPH
 
-OUT = ROOT / 'docs/papers/formatted'
-OUT.mkdir(exist_ok=True)
+OUT = ROOT / 'docs/papers'
+AUTHORS = json.loads((OUT / 'authors.json').read_text(encoding='utf-8'))
+
+
+def plain_html(value):
+    return html.unescape(re.sub(r'<[^>]+>', '', value)).strip()
+
+
+def extract_figures(source, english):
+    figures = {}
+
+    def replace(match):
+        block = match.group()
+        caption = plain_html(re.search(r'<figcaption>(.*?)</figcaption>', block, re.S).group(1))
+        number = int(re.search(r'(?:Fig\.|图)\s*(\d+)', caption).group(1))
+        panels = []
+        for cell in re.findall(r'<td[^>]*>(.*?)</td>', block, re.S):
+            img = re.search(r'<img\s+src="([^"]+)"[^>]*>', cell)
+            if img:
+                panels.append((img.group(1), plain_html(cell[img.end():])))
+        figures[number] = {'caption': caption, 'panels': panels}
+        return f'\nFIGUREGROUP{number}\n'
+
+    source = re.sub(r'<figure\b[^>]*>.*?</figure>', replace, source, flags=re.S)
+    # Place the compact activity table before the environment figure. This
+    # allows the remaining space after Section III-A to be used by the table
+    # rather than leaving half a page empty in front of an indivisible figure.
+    if 'FIGUREGROUP1' in source:
+        source = source.replace('FIGUREGROUP1', '')
+        source = re.sub(r'(^\|[^\n]+\n(?:\|[^\n]+\n)+)',
+                        lambda m: m.group(1) + '\nFIGUREGROUP1\n\n',
+                        source, count=1, flags=re.M)
+    # The wide overview already identifies the microscope. Remove the
+    # redundant close-up so the environment figure fits a compact 2x2 panel.
+    if 1 in figures:
+        figures[1]['panels'].pop(1)
+        figures[1]['panels'] = [(path, re.sub(r'^\([a-z]\)', '(' + chr(97+i) + ')', label))
+                                 for i, (path, label) in enumerate(figures[1]['panels'])]
+    # Integrate the speech screenshot into the interaction figure instead of
+    # leaving an unnumbered, full-size screenshot in the architecture section.
+    source = re.sub(r'\*\*(?:Runtime speech-input evidence|语音输入运行时证据).*?\n\n!\[.*?\]\(<.*?>\)', '', source, flags=re.S)
+    if 4 in figures:
+        figures[4]['panels'][-1] = (
+            'Pic/3.5 语音转文字.png',
+            '(d) Speech-input interface.' if english else '(d) 语音输入界面。')
+        figures[4]['caption'] = (
+            'Fig. 4. Representative assistant interfaces: (a) component description and experiment entry; '
+            '(b) contextual explanation; (c) spatial target guidance; and (d) speech input. '
+            'These views illustrate interface states, not one uninterrupted session. '
+            'The associated NA experiment feedback is shown in Fig. 2(c).'
+            if english else
+            '图 4. 助手的代表性交互界面：(a) 部件说明与实验入口；(b) 上下文解释；'
+            '(c) 空间目标引导；(d) 语音输入。各图表示界面状态，不代表一次连续会话。关联 NA 实验的反馈见图 2(c)。')
+    return source, figures
 
 
 def clean(source, english):
+    source, figures = extract_figures(source, english)
     notes = '\n'.join(line for line in source.splitlines() if line.startswith('>'))
     protocol = re.search(r'### 6\.6[\s\S]*?(?=## 7\.)', source).group()
     source = source.replace(protocol, '')
@@ -32,7 +83,7 @@ def clean(source, english):
             if caption:
                 lines.extend(['', caption.group(1), ''])
             else:
-                figure = re.search(r'(?:FIGURE |插图 )([1-4]) ', line)
+                figure = re.search(r'(?:FIGURE |插图 )([1-4])(?:\s|｜)', line)
                 if figure:
                     n = figure.group(1)
                     lines.extend(['', f'FIGURE_SLOT_{n}', ''])
@@ -49,160 +100,58 @@ def clean(source, english):
                  'with out-of-scope requests analyzed separately. This evaluation has not yet been conducted.\n\n')
         marker = '## Research Ethics and Generative AI Disclosure'
         text = text.replace(marker, extra + marker)
-        text = text.replace(marker, marker + '\n\n[Ethics review and participant-consent statement to be completed from the study records.]')
     else:
         extra = ('后续将以固定状态情境开展真实模型指引评价，区分动作可用性与学习目标匹配性，'
                  '报告包含修复和审核的最终结果及端到端延迟，并单独分析范围外问题。该评价尚未实施。\n\n')
         marker = '## 研究伦理与生成式 AI 使用说明'
         text = text.replace(marker, extra + marker)
-        text = text.replace(marker, marker + '\n\n[伦理审查与参与者知情同意说明：待依据原始研究记录补齐。]')
         text = re.sub(r'请?根据实际使用情况.*?。', '', text)
         text = text.replace('若还使用其他生成式工具制作正文、图像或代码，应补充工具和用途；最终声明应按实际使用情况确认。', '')
-    return text, notes + '\n\n' + protocol
+    # IEEE uses an inline abstract lead-in rather than a section heading.
+    text = re.sub(r'## (Abstract|摘要)\s*\n\s*\n', lambda m: '**' + m.group(1) + '—**', text)
+    text = text.replace('**Keywords:**', '**Index Terms—**').replace('**关键词：**', '**关键词—**')
+    return text, notes + '\n\n' + protocol, figures
 
 
-def section_props(base, columns):
-    sect = deepcopy(base)
-    kind = sect.find(qn('w:type'))
-    if kind is None:
-        kind = OxmlElement('w:type')
-        sect.insert(0, kind)
-    kind.set(qn('w:val'), 'continuous')
-    cols = sect.find(qn('w:cols'))
-    if cols is None:
-        cols = OxmlElement('w:cols')
-        sect.append(cols)
-    cols.set(qn('w:num'), str(columns))
-    cols.set(qn('w:space'), '360')
-    return sect
-
-
-def break_after(element, base, columns):
-    p = OxmlElement('w:p')
-    pr = OxmlElement('w:pPr')
-    pr.append(section_props(base, columns))
-    spacing = OxmlElement('w:spacing')
-    spacing.set(qn('w:after'), '0')
-    spacing.set(qn('w:before'), '0')
-    pr.append(spacing)
-    p.append(pr)
-    element.addnext(p)
-
-
-def style_document(path, english):
-    doc = Document(path)
-    sec = doc.sections[0]
-    sec.page_width, sec.page_height = Inches(8.5), Inches(11)
-    sec.top_margin, sec.bottom_margin = Inches(.75), Inches(1)
-    sec.left_margin = sec.right_margin = Inches(.625)
-    for name in ['Normal', 'Body Text', 'First Paragraph', 'Compact']:
-        style = doc.styles[name] if name in doc.styles else doc.styles['Normal']
-        style.font.name = 'Times New Roman'
-        style.font.size = Pt(10)
-        style.element.get_or_add_rPr().get_or_add_rFonts().set(qn('w:eastAsia'), '宋体')
-        style.paragraph_format.space_after = Pt(3)
-        style.paragraph_format.line_spacing = 1
-        style.paragraph_format.widow_control = True
-    for name, size in [('Heading 1', 10), ('Heading 2', 10), ('Heading 3', 10)]:
-        st = doc.styles[name]
-        st.font.name = 'Times New Roman'
-        st.font.size = Pt(size)
-        st.font.color.rgb = __import__('docx').shared.RGBColor(0, 0, 0)
-        st.paragraph_format.keep_with_next = True
-        st.paragraph_format.space_before = Pt(8)
-        st.paragraph_format.space_after = Pt(4)
-    paragraphs = doc.paragraphs
-    paragraphs[0].style = doc.styles['Title']
-    paragraphs[0].alignment = WD_ALIGN_PARAGRAPH.CENTER
-    for r in paragraphs[0].runs:
-        r.font.name = 'Times New Roman'
-        r.font.size = Pt(22 if english else 20)
-    paragraphs[1].alignment = WD_ALIGN_PARAGRAPH.CENTER
-    base = deepcopy(sec._sectPr)
-    old_cols = sec._sectPr.find(qn('w:cols'))
-    if old_cols is not None:
-        sec._sectPr.remove(old_cols)
-    sec._sectPr.append(section_props(base, 2).find(qn('w:cols')))
-    break_after(paragraphs[1]._p, base, 1)
-    romans = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII']
-    for p in paragraphs[2:]:
-        t = p.text
-        if p.style.name == 'Heading 2':
-            match = re.match(r'(\d+)\. (.*)', t)
-            if match:
-                p.text = romans[int(match.group(1))-1] + '. ' + match.group(2)
-            p.alignment = WD_ALIGN_PARAGRAPH.CENTER
-        elif p.style.name == 'Heading 3':
-            match = re.match(r'\d+\.(\d+) (.*)', t)
-            if match:
-                p.text = chr(64+int(match.group(1))) + '. ' + match.group(2)
-        elif t.startswith('FIGURE_SLOT_'):
-            n = t.rsplit('_', 1)[1]
-            p.text = f'[Figure {n}: artwork to be inserted]' if english else f'[图 {n}：待插入图片]'
-            p.alignment = WD_ALIGN_PARAGRAPH.CENTER
-            p.paragraph_format.space_before = Pt(10)
-            p.paragraph_format.space_after = Pt(10)
-            p.paragraph_format.keep_with_next = True
-            for r in p.runs:
-                r.italic = True
-                r.font.size = Pt(9)
-        elif re.match(r'(Fig\. \d|图 \d|Table \d|表 \d)', t):
-            p.paragraph_format.space_after = Pt(6)
-            for r in p.runs:
-                r.font.size = Pt(8)
-            if t.startswith(('Table', '表')):
-                p.paragraph_format.keep_with_next = True
-        elif re.match(r'^\[\d+\]', t):
-            p.paragraph_format.left_indent = Inches(.2)
-            p.paragraph_format.first_line_indent = Inches(-.2)
-            for r in p.runs:
-                r.font.size = Pt(8)
-        elif p._p.xpath('.//m:oMathPara'):
-            p.paragraph_format.space_before = Pt(4)
-            p.paragraph_format.space_after = Pt(4)
-        else:
-            p.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
-    for table in doc.tables:
-        wide = len(table.columns) >= 3
-        width = 7.25 if wide else 3.5
-        table.autofit = False
-        for col in table.columns:
-            col.width = Inches(width/len(table.columns))
-        for row in table.rows:
-            for cell in row.cells:
-                cell.width = Inches(width/len(table.columns))
-                for p in cell.paragraphs:
-                    p.paragraph_format.space_after = Pt(3)
-                    for r in p.runs:
-                        r.font.size = Pt(8)
-            # Permit long rows to flow; do not force a full table onto a fresh page.
-        for cell in table.rows[0].cells:
-            for p in cell.paragraphs:
-                for r in p.runs:
-                    r.bold = True
-        if wide:
-            caption = table._tbl.getprevious()
-            previous = caption.getprevious()
-            if previous is not None:
-                break_after(previous, base, 2)
-            break_after(table._tbl, base, 1)
-    doc.core_properties.title = paragraphs[0].text
-    doc.core_properties.author = 'Anonymous'
-    doc.core_properties.comments = 'Formatted working manuscript; figures and author study declarations remain pending.'
-    doc.save(path)
+def anonymize(text, english):
+    """Remove identity-bearing front matter and institutional wording for review."""
+    if english:
+        front = r'^\*\*Authors:\*\*.*\n\*\*Affiliations:\*\*.*\n\*\*Corresponding Authors:\*\*.*$'
+        text, count = re.subn(front, 'Anonymous authors', text, count=1, flags=re.M)
+        text = text.replace(
+            'In accordance with institutional research ethics guidelines at UESTC,',
+            "In accordance with the research ethics guidelines of the authors' institution,")
+    else:
+        front = r'^\*\*作者：\*\*.*\n\*\*单位：\*\*.*\n\*\*通讯作者：\*\*.*$'
+        text, count = re.subn(front, '匿名作者', text, count=1, flags=re.M)
+        text = text.replace(
+            '根据电子科技大学（UESTC）机构研究伦理指南，',
+            '根据作者所在机构的研究伦理指南，')
+    if count != 1:
+        raise ValueError('Could not locate the author block for anonymous export.')
+    return text
 
 
 def main():
+    from ieee_layout import style_document
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--anonymous', action='store_true', help='Generate a review copy without author identities.')
+    args = parser.parse_args()
     checklist = ['# 论文排版与待补材料\n',
-        '已生成中英文双栏 Word 排版稿，公式为可编辑 Word 数学对象。原始 Formal.md 未改动。',
-        '当前文件是正式版式的工作稿：图像、伦理说明及研究记录核对仍需完成；最终页数应在 Word/PDF 中检查，未宣称已经满足投稿页限。',
-        '完整的未实施 AI 评价协议移到本清单，正文后续工作仅保留计划摘要。插图 1–4 保留简短占位和图注，图 5 暂不进入论文。\n']
+        '已生成中英文双栏 Word 排版稿，公式为可编辑 Word 数学对象；图 3 已同步至 Formal.md。',
+        '图 1、图 2 和图 4 为运行时截图；图 3 已由 draw.io 绘制并嵌入 SVG（附 PNG 兼容图）。伦理声明沿用作者提供的文本，研究记录仍由作者核对；最终页数另见 FINAL_REVIEW.md。',
+        '完整的未实施 AI 评价协议移到本清单，正文后续工作仅保留计划摘要。图 5 暂不进入论文，除非取得真实模型测试数据。\n']
     for name, english in [('AIxVR2027_VRMicroscope_Draft_Formal', False), ('AIxVR2027_VRMicroscope_Paper_EN_Formal', True)]:
-        source = (OUT.parent / (name+'.md')).read_text(encoding='utf-8-sig')
-        content, notes = clean(source, english)
-        target = OUT / (name+'.docx')
+        source = (OUT / (name+'.md')).read_text(encoding='utf-8-sig')
+        content, notes, figures = clean(source, english)
+        if args.anonymous:
+            content = anonymize(content, english)
+        for figure in figures.values():
+            figure['root'] = OUT
+        suffix = '_Anonymous' if args.anonymous else ''
+        target = OUT / (name+suffix+'.docx')
         pypandoc.convert_text(content, 'docx', format='markdown+tex_math_dollars', outputfile=str(target))
-        style_document(target, english)
+        style_document(target, english, figures, AUTHORS, anonymous=args.anonymous)
         checklist.extend(['\n## '+name+'\n', notes])
         d = Document(target)
         print(f'{target.name}: paragraphs={len(d.paragraphs)}, tables={len(d.tables)}, display_equations={len(d.element.xpath(".//m:oMathPara"))}')
