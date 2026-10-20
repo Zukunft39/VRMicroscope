@@ -317,6 +317,13 @@ def style_document(path, english, figures, metadata, anonymous=False):
     for table in tables:
         wide = len(table.columns) >= 3
         borderless(table, WIDTH if wide else COLUMN)
+        if len(table.columns) == 2:
+            # Descriptive metric labels need more room than short numeric results.
+            for col, fraction in zip(table.columns, (.67, .33)):
+                col.width = Inches(COLUMN * fraction)
+            for row in table.rows:
+                for cell, fraction in zip(row.cells, (.67, .33)):
+                    cell.width = Inches(COLUMN * fraction)
         borders = table._tbl.tblPr.find(qn('w:tblBorders'))
         for edge in ['top', 'bottom']:
             item = borders.find(qn('w:' + edge))
@@ -348,8 +355,8 @@ def style_document(path, english, figures, metadata, anonymous=False):
     # Keep table numbering in prose consistent with Roman table captions.
     for p in doc.paragraphs:
         for r in p.runs:
-            updated = re.sub(r'\bTable ([1-4])\b', lambda m: 'Table ' + ROMAN[int(m.group(1)) - 1], r.text)
-            updated = re.sub(r'表 ([1-4])(?=[，、。 中及和之]|$)', lambda m: '表 ' + ROMAN[int(m.group(1)) - 1], updated)
+            updated = re.sub(r'\bTable ([1-8])\b', lambda m: 'Table ' + ROMAN[int(m.group(1)) - 1], r.text)
+            updated = re.sub(r'表 ([1-8])(?=[，、。 中及和之]|$)', lambda m: '表 ' + ROMAN[int(m.group(1)) - 1], updated)
             if updated != r.text:
                 r.text = updated
     doc.core_properties.title = title.text

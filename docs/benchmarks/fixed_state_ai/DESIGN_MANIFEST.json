@@ -1,0 +1,39 @@
+{
+  "status": "design_schema_validated_only",
+  "benchmark_version": "fixed-state-design-v1",
+  "case_count": 26,
+  "categories": {
+    "availability": 8,
+    "goal": 8,
+    "boundary": 6,
+    "navigation": 4
+  },
+  "request_count": 78,
+  "stale_specs": 10,
+  "positive_control_specs": 2,
+  "prompt_version": "assistant-chat-v4.1-clarify",
+  "knowledge_version": "6a14baabd663a50d",
+  "hashes": {
+    "Assets/Resources/AssistantGuidanceActions.json": "e658b183fb65ed09dc9a29d25be610c022ab6cf02ffa0dcd9d4eaaeb41bec76f",
+    "Assets/m_Scripts/Assistant/AssistantGuidance.cs": "4e91b3efab9404635a5e6a7a3d402ad61e1985ca4d8f8111ee170a1c638a507f",
+    "Assets/m_Scripts/Assistant/AssistantNavigation.cs": "df592a02d9dabfa0ba8007a9f8a92911a3479f9c8e34ec931f1b8c2df54a02ec",
+    "Assets/m_Scripts/Assistant/AssistantChatClient.cs": "c9f28489242d8e936eebc6c09f85c1ea278725c02b9a6d0c68ff27294c57b201",
+    "Assets/m_Scripts/Assistant/AssistantChatPanel.cs": "d83f6837aa431008a19d2dfd13d21b425cee3f037358fd000edac608de87908b",
+    "Assets/m_Scripts/Experiment/SNOMDemonstrationController.cs": "4984dd2fb0719490ac93d6e15c1289e4b9cd9f973486e98c425b620f0ee53222",
+    "Assets/m_Scripts/Experiment/SpatialFrequencyExperimentController.cs": "1dacfe8c0303dfce13548a5fd3443cf86011bb056265ef853a35bfd710929083",
+    "Assets/m_Scripts/ExplodeModel/SuperAssemblyPartSelectionController.cs": "5cd0d80682bce821fe94214c7015c19b1c7c44eba589921bae4646b12b77e327",
+    "Assets/Scene/Scene_Laboratory/MainScene_Labortory.unity": "13ca8bd743bbd7fd35e52a0ba7589aae2032763dfdaba7ce88080ccedcbe789c",
+    "Tools/ai_tutor/assistant_chat.py": "674cc90882ff9a8ad9f9e2c5148c78b499c59f349e61ab2de0c10a9c864d66dc",
+    "Tools/ai_tutor/guidance.py": "3ace2364a742ec27727ac6e3cd5463b51ad1d1f2c7b9f8034b2b70c595820022",
+    "Tools/ai_tutor/navigation.py": "814898ff9a872faac6c0923d4efc9291a3f29d407723a2b2618ce6025b4a7696",
+    "docs/assistant_knowledge/SYSTEM_PROMPT.md": "a4f2b57915209070717ce67dcb9f7eec2a249e936ab416f061e6f0c2da9dadf0",
+    "docs/assistant_knowledge/PROJECT_KNOWLEDGE.md": "e4d78a6189de226c96c915e5ca8f475ea4554afd6ae3a9fc36f6ecf80cd037ab",
+    "docs/assistant_knowledge/interaction_catalog.json": "2f65e1ee644edca67687a1941527c595ebc79d552d61fab694798f3d104e3d7c",
+    "docs/benchmarks/fixed_state_ai/cases.json": "d911324ed5a4be7a408f4414e2ed88e02f3d850307fdae94ae7d89190187bc66",
+    "docs/benchmarks/fixed_state_ai/PROTOCOL.md": "27955e213520d33af03cc2b6df649e06400f90e327f9b7ca093fb97b19a08f22",
+    "Tools/ai_tutor/prepare_fixed_state_benchmark.py": "a3a5cd83535986762e1fd87360b24b1abd299126c8d42ba01ed43cc69806e359",
+    "Assets/m_Scripts/Editor/AssistantBenchmarkWindow.cs": "b393e241bc840bb69bf1e7077cd25073f0a2d00cfd086cfad6c311e9657b91cd",
+    "Tools/ai_tutor/server.py": "996a5d91c2f174c59fe086f73e9fb9c2b80b1fc91cfd532fd109f4f361bb5578",
+    "Tools/ai_tutor/benchmark_trace.py": "67b5e6efdd9abe367816c54a4f5cd640dfc9558906af3b5402704e767c2a5b18"
+  }
+}

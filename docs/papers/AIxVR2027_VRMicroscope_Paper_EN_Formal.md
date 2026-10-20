@@ -5,11 +5,11 @@
 **Corresponding Authors:** Tang Shaoyan (tangshaoyan@u.nus.edu), Hasan Abbas (Hasan.abbas@glasgow.ac.uk)
 
 
-> **[EDITORIAL NOTE — REMOVE BEFORE SUBMISSION]** Figures 1, 2, and 4 below use runtime captures supplied in `Pic/`. Figure 3 now includes the original draw.io vector architecture diagram, and the optional evaluation figure remains conditional on real model-test data. The [figure plan](AIxVR2027_Figure_Plan.md) records the selection and remaining editorial checks.
+> **[EDITORIAL NOTE — REMOVE BEFORE SUBMISSION]** Figures 1, 2, and 4 below use runtime captures supplied in `Pic/`. Figure 3 now includes the original draw.io vector architecture diagram, and Table 5 reports the completed fixed-state gateway regression. The [figure plan](AIxVR2027_Figure_Plan.md) records the selection and remaining editorial checks.
 
 ## Abstract
 
-VRMicroscope integrates interactive microscopy simulation with task-state-aware AI guidance for operational and conceptual learning. Its VR laboratory supports specimen handling, observation, coarse/fine focus, illumination and objective adjustment, exploded component inspection, and modules for numerical aperture (NA), spatial frequency, structured illumination, and THz s-SNOM. Authored visual mappings and simplified numerical models are explicitly distinguished from calibrated measurement. The assistant grounds responses in project knowledge, interface state, and available actions; application code validates identifiers, rejects stale guidance, creates spatial markers from scene geometry, and accepts user-confirmed Chinese/English speech transcripts. In an exploratory study, 18 of 19 participants completed the core workflow (94.7%); mean SUS was 82.4/100 and unweighted NASA-TLX was 32.4/100. Effort (44.7) and Mental Demand (42.9) were the largest workload dimensions. These single-group results support workflow feasibility and perceived usability, not causal learning gains from AI. The contribution is a shared state representation connecting physical interaction, bounded instructional simulation, and conversational guidance.
+VRMicroscope integrates interactive microscopy simulation with task-state-aware AI guidance. Its VR laboratory supports specimen handling, observation, focus, illumination and objective adjustment, component inspection, and instructional modules for numerical aperture, spatial frequency, structured illumination, and THz s-SNOM. Authored visual mappings and simplified models are distinguished from calibrated measurement. The assistant combines project knowledge, interface state, and available actions; application code validates guidance and supports spatial markers and user-confirmed Chinese/English speech input. In an exploratory study, 18 of 19 participants completed the core workflow (94.7%); mean SUS was 82.4/100 and unweighted NASA-TLX was 32.4/100. A fixed-state gateway regression used 26 cases repeated three times. All 42 operating recommendations were available and 12/12 navigation targets matched; subsequent author review accepted 75/78 final answers (96.2%), with three GC01 responses judged to require clarification under a revised interpretation. Median gateway latency was 1.82 s. These reused-case and single-group results support feasibility and expose a distinction between available actions and accepted guidance; they do not establish general AI accuracy or causal learning gains. The contribution is a shared state representation connecting interaction, bounded simulation, and conversational guidance.
 
 **Keywords:** virtual reality; microscopy education; interactive simulation; task-state awareness; large language models; speech input.
 
@@ -23,7 +23,7 @@ The main contributions of this work are:
 
 1. We build a microscopy experimental environment that connects specimen manipulation, focus and illumination feedback, structural understanding, and three advanced instructional modules, while explicitly stating the inputs, outputs, and modeling boundaries of each activity.
 2. We design an AI guidance architecture that combines project knowledge, current component descriptions, an available-action catalog, response validation, spatial markers, and confirmation-based speech input.
-3. We evaluate the system through implementation-level conformance checks and an exploratory study with 19 participants, reporting task completion, perceived usability, and subjective workload without interpreting these measures as untested causal learning gains.
+3. We evaluate availability and author-reviewed guidance over 78 real-model requests and report an exploratory study with 19 participants, distinguishing gateway regression results from perceived usability, workload, and untested causal learning gains.
 
 The system supports familiarization and conceptual exploration; real-instrument transfer, quantitative imaging, and incremental learning benefits from AI remain outside the present evidence.
 
@@ -113,11 +113,11 @@ A specimen texture becomes a scalar field; a separable Hann window reduces bound
 Let $O(\mathbf{k})$ be the specimen spectrum, $\mathbf{k}_0$ the illumination carrier, $\mu$ the modulation depth, and $\varphi$ the illumination phase. The standard SIM background is summarized by [12], [13]
 
 $$
-\begin{aligned}
-G_{\varphi}(\mathbf{k}) &= H_{\mathrm{opt}}(\mathbf{k})\bigl[O(\mathbf{k}) \\
-&\quad + \frac{\mu}{2}e^{i\varphi}O(\mathbf{k}-\mathbf{k}_0) \\
-&\quad + \frac{\mu}{2}e^{-i\varphi}O(\mathbf{k}+\mathbf{k}_0)\bigr].
-\end{aligned}
+\begin{gathered}
+G_{\varphi}(\mathbf{k})=H_{\mathrm{opt}}(\mathbf{k})\bigl[O(\mathbf{k}) \\
++\frac{\mu}{2}e^{i\varphi}O(\mathbf{k}-\mathbf{k}_0) \\
++\frac{\mu}{2}e^{-i\varphi}O(\mathbf{k}+\mathbf{k}_0)\bigr].
+\end{gathered}
 $$
 
 Here $H_{\mathrm{opt}}$ is the theoretical optical transfer function. The current mixed-spectrum panel illustrates only one shifted sideband pair. Its magnitude before display mapping is
@@ -178,7 +178,7 @@ A corner assistant provides local greetings and sends explicit questions through
 
 The snapshot excludes focus values, focus error, objective index, and image quality. Guidance can therefore name a control and observation goal but cannot infer a guaranteed adjustment direction; inactive default fields are not treated as measurements.
 
-### 4.3 Constrained Generation and Bounded Format Repair
+### 4.3 Constrained Generation and Bounded Repair
 
 For shared catalog $\mathcal{C}$ and action-availability predicate $P(a,s)$ in state $s$,
 
@@ -190,11 +190,11 @@ Unity constructs $\mathcal{A}(s)$ from controls, controller state, proximity, an
 
 For valid operations, canonical catalog instructions replace generated prose. Structural failure permits one regeneration from the original question and snapshot with unchanged permissions; timeouts and upstream failures are not treated as format errors.
 
-Non-refusal candidates receive a semantic review for scope, factual support, and goal correspondence. Because generation and review use the same model configuration, this is an additional check rather than an independent correctness guarantee. Refusals, format errors, access failures, and timeouts remain distinct outcomes.
+Non-refusal candidates receive a semantic review for scope, factual support, and goal correspondence. An otherwise supported non-guide answer containing direct control instructions may receive one further regeneration to remove those steps or select a permitted action; the replacement is validated and reviewed again. Generation and review use the same model configuration, so review is an additional check rather than an independent correctness guarantee. Refusals, format errors, access failures, and timeouts remain distinct outcomes.
 
 ### 4.4 Learning Continuity and Response Freshness
 
-Component references resolve from the selected name and description; hands-on requests prioritize its available experiment, while generic next-step requests prioritize progression. Each request stores serialized state and an identifier. Before displaying guidance, the client rechecks identity, state, and permissions; stale recommendations are rejected. Reminders can persist after the dialog closes but never execute or mark an operation complete.
+Component references resolve from the selected name and description; hands-on requests prioritize its available experiment, while next-step requests use recent goals and available prerequisites. Post-run review identified ambiguity in a generic next-step question; Section 6.6 distinguishes the tested policy from the subsequent clarification revision. Each request stores serialized state and an identifier. Before displaying guidance, the client rechecks identity, state, and permissions; stale recommendations are rejected. Reminders can persist after the dialog closes but never execute or mark an operation complete.
 
 ### 4.5 Instrument and Specimen Localization
 
@@ -247,7 +247,7 @@ For reporting, we organize the user study around two evaluation questions:
 - **RQ1 (workflow feasibility):** Can participants complete the core VR activities involving specimen handling, microscope observation, focus/illumination adjustment, and structural exploration?
 - **RQ2 (perceived experience):** How do participants rate the system's overall usability and subjective workload?
 
-Implementation checks verify action-set construction, rejection of absent or unavailable identifiers, stale-response rejection, and spatial relations from live geometry. These deterministic properties are not reported as AI accuracy; frame rate and speech/model latency are outside the present outcomes.
+Implementation checks concern action-set construction, rejection of absent or unavailable identifiers, stale-response guards, and geometric calculations. Section 6.6 additionally measures model/gateway responses and latency under fixed snapshots; that replay does not execute live-client freshness or marker behavior. Deterministic conformance is not reported as AI accuracy, and rendering and speech performance remain outside the present measurements.
 
 ### 6.2 Participants and Procedure
 
@@ -291,37 +291,51 @@ Completion is the proportion finishing the required sequence. SUS measures perce
 
 *Note: NASA-TLX Performance is scored on a workload-oriented scale (0 = Good/high success, 100 = Poor/failure) consistent with Hart & Staveland [20]; lower values reflect higher self-rated success. Overall Workload is the unweighted Raw TLX (R-TLX) composite score across all six subscales.
 
-Eighteen participants completed the sequence, supporting workflow feasibility rather than optics mastery. Mean SUS was 82.4, consistent with high perceived usability [22]. R-TLX was 32.4/100; Effort (44.7) and Mental Demand (42.9) were highest, while Temporal Demand (30.8), Physical Demand (27.9), Frustration (24.2), and Performance (23.7) were lower. Without a control condition or prespecified subscale hypotheses, these differences remain descriptive.
+Eighteen participants completed the sequence; SUS of 82.4 indicates high perceived usability [22]. Effort and Mental Demand were the largest workload dimensions. Without a control condition, these differences remain descriptive.
 
 ### 6.5 Interpretation and Validity Boundaries
 
-This single-group study supports workflow feasibility and perceived usability, not claims that AI improved learning, reduced workload, or substitutes for real-instrument training. SUS and NASA-TLX do not replace pre/post knowledge tests, real-equipment transfer, or expert procedural ratings. Uneven academic categories are not compared statistically; speech accuracy, latency, frame rate, and abnormal-request robustness require separate benchmarks.
+This single-group study supports feasibility and perceived usability, not causal AI learning gains or real-instrument transfer. Uneven academic categories are not compared statistically. Speech, frame rate, and adversarial robustness need separate tests; Section 6.6 evaluates model/gateway responses.
 
-### 6.6 Supplementary Protocol for AI Guidance Quality
+### 6.6 Fixed-State AI Guidance Benchmark
 
-> **[PROPOSED EVALUATION — NOT AN EXISTING RESULT]** This section specifies a recommended live-model protocol. Replace it with the actual configuration, counts, and results after execution. If it is not run before submission, move the protocol to future work and remove the Figure 5 placeholder; do not claim evaluated AI quality in the abstract or conclusion.
+We replayed 26 implementation-derived cases three times through the gateway (78 requests): eight availability, eight goal, six boundary, and four navigation cases. Desktop snapshots and synthetic geometry were supplied, without live Unity capture. Goal-relevant actions satisfy $\mathcal{G}(s,q)\subseteq\mathcal{A}(s)$. The original rubric required operations in 14 cases (42 requests) and navigation in four (12 requests).
 
-A proposed suite contains 30 in-scope question/history/state cases: five each for generic next steps, component-experiment entry, cross-module exit, SNOM waiting, instrument/specimen localization, and necessary clarification. Ten additional cases cover out-of-scope requests or unavailable capabilities. Run each case independently three times with fixed snapshots. Record model identity, prompt/knowledge versions, sampling parameters, candidates, regeneration, review, and client outcomes. These are proposed sample counts, not completed trials.
+The 19 September 2026 run used DeepSeek `deepseek-flash`, protocol `assistant-chat-v4-guidance`, knowledge `0a594b7b56cbda74`, temperature 0.2, 1,500 output tokens, disabled thinking, non-streaming JSON, and an 18-s timeout. Seed 2027 controlled request order only; the model alias is not an immutable revision.
 
-Before running the suite, evaluators familiar with the workflow should define acceptable actions or response categories for each in-scope case, allowing multiple valid next steps. Assess independently before resolving disagreements and report the actual number of evaluators and procedure. Judge both availability and correspondence to the learning goal: suggesting exit from an expanded model may be legal but unhelpful. A format repair remains part of the original user request.
+All 42 raw/final operating actions were available and matched the original goal labels; all 12 navigation targets matched. Subsequent author review of Chinese-translated question–answer pairs accepted 75/78 final responses (96.2%). This single binary review had no independent raters; operating answers used canonical catalog prose.
 
-Report first-candidate structural acceptance, final goal matching, refusal of normal questions, and service-error rates, with counts and explicit denominators: initial candidates for the first metric and in-scope requests for the others. Repair success uses repaired requests as its denominator and must state whether semantic and client checks also passed. Boundary cases are reported separately. Measure end-to-end time from user submission to a displayable result or terminal error, including repair and review, and distinguish success, failure, and timeout outcomes.
+**Table 5. Gateway replay and subsequent manual review. Operation decisions retain the original 42-request cohort.**
 
-> **[FIGURE 5 PLACEHOLDER — OPTIONAL; REAL DATA REQUIRED]** Prefer a single-column plot of final outcomes for the six in-scope categories: goal-matched, legal but goal-mismatched, refusal, format/review error, and connection/timeout error. Use mutually exclusive categories and label request counts. If space permits, add an end-to-end timing distribution or individual points. Do not use mock results, hypothetical gains, or invented error bars. Do not duplicate the existing SUS/TLX table with an equivalent bar chart.
->
-> **Proposed caption, after data collection:** Fig. 5. Final guidance outcomes for the live model across predefined state scenarios. Distributions use user requests as the unit and include outcomes after format repair and review; timing covers the complete question-answering pipeline.
+| Metric | Result |
+|---|---:|
+| Completed / initial contract valid | 78/78 each |
+| Available actions, raw / final | 42/42 each |
+| Operation decisions, manual | 39/42 (92.9%) |
+| Navigation targets, raw / final | 12/12 each |
+| Accepted answers, manual | 75/78 (96.2%) |
+| GC01 clarification failures | 3/3 |
+| Internal review accepted | 66/66 |
+| Structural / semantic repairs | 0/78 / 0/78 |
+| Latency, median / P95 | 1.82 s / 2.30 s |
+
+All three failures were GC01: “What should I do next?” elicited expansion instructions in PreAssembly. The request included a prior NA-learning goal and its upper-optical-assembly link, but the review sheet omitted this history. The original rubric rewarded expansion; the reviewer required clarification. This is a post-run interpretation and rubric revision, not an availability violation. Retaining GC01 in the original operation cohort gives 39/42 accepted decisions. All three replies passed internal semantic review, demonstrating that acceptance by this gate does not establish human agreement.
+
+Refusals skipped review: 78 generations and 66 reviews produced 144 provider calls, with no timeout or repair. Latency includes dispatch, generation, review, network, and editor processing, excluding speech and visible rendering; P95 uses nearest rank.
+
+The prompt and GC01 expectation were subsequently revised to clarify; no revised-model result is reported. These 78 requests repeat 26 development cases, with post-hoc author judgments. Translation and omitted review context warrant independent full-context review. Held-out generalization, live-client display/markers, stale-response rejection, and state-ablated comparison remain untested.
 
 ## 7. Discussion and Limitations
 
-VRMicroscope explicitly relates the current component, available controls, and observable consequences. The AI explains and guides over VR state rather than controlling the microscope. Snapshots, an action catalog, and client revalidation reduce nonexistent or stale instructions but cannot guarantee every natural-language explanation.
+Shared state connects components, controls, feedback, and guidance. GC01 illustrates that an available action may still be considered premature. Neither deterministic validation nor same-model review establishes semantic correctness.
 
-Authored focus and brightness mappings, simplified parameters, synthetic imagery, and support visualizations make the system an instructional simulation rather than a digital twin. Scientific-fidelity evaluation should add domain-expert content review and calibration against real instruments.
+The authored mappings and synthetic imagery support instruction, not a calibrated digital twin. Scientific fidelity needs domain-expert review and comparison with real instruments.
 
-The single-group study is suited to feasibility, unlike controlled designs that isolate tutoring effects [1], [21]. Future work should add AI-on/off or alternative-tutor conditions, pre/post concepts, expert-scored transfer, and logs of AI use, speech errors, and latency.
+The single-group study cannot isolate tutoring effects [1], [21]. Controlled AI-on/off comparisons, knowledge pre/post tests, and expert-scored transfer tasks remain necessary.
 
 ## 8. Conclusion and Future Work
 
-VRMicroscope combines interactive microscopy activities, bounded optics modules, and task-state-aware AI guidance that validates available actions and rejects stale recommendations. Eighteen of 19 participants completed the core workflow and mean SUS was 82.4/100, supporting feasibility and perceived usability rather than causal AI learning gains. Future work will isolate AI effects, measure knowledge and real-instrument transfer, and instrument speech, model, and rendering performance.
+VRMicroscope connects microscopy interaction, bounded simulation, and state-aware guidance. The 19-participant study supports feasibility and perceived usability. Author review accepted 75/78 benchmark answers (96.2%), despite all 42 operating actions being available; GC01 exposed disagreement over clarification. Median latency was 1.82 s. Future work will evaluate the revised policy using held-out cases, independent full-context ratings, live-client tests, and controlled learning/transfer studies.
 
 ## Research Ethics and Generative AI Disclosure
 

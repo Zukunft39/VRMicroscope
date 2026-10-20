@@ -23,7 +23,7 @@ The shared catalog and runtime state decide which individual action can be recom
 1. The backend loads and versions trusted knowledge at startup.
 2. Unity submits a question, recent conversation, and available current snapshots.
 3. The backend provides project facts, valid current actions, and navigation targets to generation.
-4. It checks response structure and identifiers, renders canonical operating prose, and performs semantic review. A failed structural response may receive one bounded repair using the same permissions.
+4. It checks response structure and identifiers, renders canonical operating prose, and performs semantic review. A failed structural response may receive one bounded repair using the same permissions. A supported explanation that accidentally includes direct control steps may receive one separate semantic repair; the repaired answer is reviewed again.
 5. Unity rechecks freshness and availability before showing an operating reminder or creating a marker. The learner performs the action.
 6. Voice recording uses Groq transcription to create an editable draft. Only confirmation sends the question to chat.
 

@@ -14,6 +14,8 @@
 /.paper_tools/
 **/__pycache__/
 *.py[cod]
+# Local assistant benchmark runs and recorded state snapshots (export deliberately for publication).
+/BenchmarkRuns/
 ~$*.docx
 
 # MemoryCaptures can get excessive in size.

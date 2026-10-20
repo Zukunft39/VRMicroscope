@@ -5,17 +5,17 @@
 **通讯作者：**Tang Shaoyan (tangshaoyan@u.nus.edu)，Hasan Abbas (Hasan.abbas@glasgow.ac.uk)
 
 
-> **【编辑标注说明｜提交前移除】** 图 1、图 2 和图 4 已嵌入 `Pic/` 中提供的运行时截图。图 3 已补齐 draw.io 原创矢量架构图，图 5 只有在获得真实模型测试数据后才制作。图片选择和剩余检查项见 [插图制作说明](AIxVR2027_Figure_Plan.md)。
+> **【编辑标注说明｜提交前移除】** 图 1、图 2 和图 4 已嵌入 `Pic/` 中提供的运行时截图。图 3 已补齐 draw.io 原创矢量架构图，固定状态后端回归结果以表 5 呈现。图片选择和剩余检查项见 [插图制作说明](AIxVR2027_Figure_Plan.md)。
 
 ## 摘要
 
-显微镜教学要求学习者将仪器结构、操作过程与观察结果联系起来，但真实高端仪器的使用时间、操作风险与教学资源通常受到限制。本文提出 VRMicroscope，一个将交互式虚拟显微实验与任务状态感知 AI 指引结合的虚拟现实教学系统。VR 环境支持样本拾取与放置、观察视点切换、粗细调焦、照明与物镜调整、部件展开查看，并通过关联模块展示数值孔径、空间频率与结构光以及太赫兹散射型近场光学显微镜（THz s-SNOM）的核心概念。系统明确区分教学视觉映射、简化数值计算与经过标定的光学测量。AI 助手结合项目知识、当前界面状态和可用动作目录，由大语言模型生成解释或候选指引，再由程序校验动作标识并检查响应是否仍适用于当前状态；空间导航基于实时场景几何生成目标标记，中英文语音输入则先形成可编辑文本后再提交。评价采用实现级一致性检查与探索性用户研究两部分。19 名参与者中有 18 名完成核心任务流程（94.7%），整体系统可用性量表（SUS）均值为 82.4/100；NASA-TLX 未加权总体工作负荷（R-TLX）均值为 32.4/100，其中付出努力（44.7）和心理需求（42.9）是相对较高的工作负荷维度，而挫败感（24.2）与负荷导向的表现评分（23.7，表明较高自我认可度）均较低。由于研究采用单组探索性设计，本文将这些结果解释为工作流可行性与感知可用性的证据，而不据此推断 AI 带来的因果学习增益。本文的主要贡献是将显微实验操作、具有明确科学边界的教学仿真与受当前任务状态约束的对话指引连接到同一套可操作学习活动中。
+本文提出 VRMicroscope，将交互式显微仿真与任务状态感知 AI 指引结合。虚拟实验室支持样本操作、观察、调焦、照明与物镜调整、部件查看，以及数值孔径、空间频率、结构光和 THz s-SNOM 教学模块，明确区分教学视觉映射、简化模型与标定测量。助手结合项目知识、界面状态和可用动作，由程序校验指引，并支持空间标记及经用户确认的中英文语音输入。探索性研究中，19 人有 18 人完成核心流程（94.7%），SUS 均值为 82.4/100，未加权 NASA-TLX 为 32.4/100。固定状态后端回归包含 26 例、每例三次：42 条操作建议均可用，导航目标匹配为 12/12；后续作者复核认可 75/78 条最终回答（96.2%），三条 GC01 回答在修订后的解释标准下被判定应先澄清。后端延迟中位数为 1.82 秒。复用案例与单组研究支持可行性，并揭示动作可用性与指引获认可之间的区别，不据此推断普遍 AI 准确率或因果学习增益。本文贡献是以共享任务状态连接显微交互、有科学边界的仿真和对话指引。
 
 **关键词：**虚拟现实；显微镜教学；交互式仿真；任务状态感知；大语言模型；语音输入。
 
 ## Abstract
 
-Microscopy education requires learners to connect instrument structure and operating procedures with changes in observable results, yet access to advanced instruments is often constrained by limited training time, operational risk, and teaching resources. This paper presents VRMicroscope, a virtual-reality learning system that integrates interactive microscopy simulation with task-state-aware AI guidance. The VR environment supports specimen pickup and placement, observation viewpoints, coarse and fine focusing, illumination and objective adjustment, and exploded component inspection. Linked modules illustrate numerical aperture, spatial frequency and structured illumination, and the basic workflow of terahertz scattering-type scanning near-field optical microscopy (THz s-SNOM). The system explicitly distinguishes instructional visual mappings and simplified numerical models from calibrated optical measurement. The AI assistant combines project knowledge, current interface state, and a catalog of available actions: a large language model generates explanations or candidate guidance, while application code validates action identifiers and rejects recommendations that no longer match the current state. Spatial navigation creates target markers from live scene geometry, and Chinese/English speech input produces editable text before submission. Evaluation combines implementation-level conformance checks with an exploratory user study. Eighteen of 19 participants completed the core task sequence (94.7%), and the whole-sample mean System Usability Scale (SUS) score was 82.4/100. Descriptive NASA-TLX results showed an unweighted composite workload of 32.4/100, where Effort (44.7) and Mental Demand (42.9) were the largest reported dimensions, while Frustration (24.2) and workload-oriented Performance rating (23.7, indicating high perceived success) were low. Because the study used a single-group exploratory design, these outcomes are interpreted as evidence of workflow feasibility and perceived usability rather than as causal evidence of learning gains attributable to AI. The main contribution is an integrated microscopy-learning environment in which physical interaction, scientifically bounded instructional simulation, and conversational guidance share an explicit representation of what the learner can currently do.
+VRMicroscope integrates interactive microscopy simulation with task-state-aware AI guidance. Its VR laboratory supports specimen handling, observation, focus, illumination and objective adjustment, component inspection, and instructional modules for numerical aperture, spatial frequency, structured illumination, and THz s-SNOM. Authored visual mappings and simplified models are distinguished from calibrated measurement. The assistant combines project knowledge, interface state, and available actions; application code validates guidance and supports spatial markers and user-confirmed Chinese/English speech input. In an exploratory study, 18 of 19 participants completed the core workflow (94.7%); mean SUS was 82.4/100 and unweighted NASA-TLX was 32.4/100. A fixed-state gateway regression used 26 cases repeated three times. All 42 operating recommendations were available and 12/12 navigation targets matched; subsequent author review accepted 75/78 final answers (96.2%), with three GC01 responses judged to require clarification under a revised interpretation. Median gateway latency was 1.82 s. These reused-case and single-group results support feasibility and expose a distinction between available actions and accepted guidance; they do not establish general AI accuracy or causal learning gains. The contribution is a shared state representation connecting interaction, bounded simulation, and conversational guidance.
 
 ## 1. 引言
 
@@ -27,7 +27,7 @@ VRMicroscope 将物件、控制、视觉反馈和实验界面与 AI 助手结合
 
 1. 构建连接样本操作、调焦与照明反馈、结构认知及三类进阶教学模块的显微实验环境，明确各项输入、输出和建模边界。
 2. 设计结合项目知识、当前部件说明、可用动作目录、响应校验、空间标记与确认式语音输入的 AI 指引架构。
-3. 通过实现级一致性检查与一项包含 19 名参与者的探索性用户研究评价系统，分别报告任务完成、感知可用性和主观工作负荷，并避免将这些指标解释为未经对照验证的学习增益。
+3. 通过 78 次真实模型请求评价动作可用性及人工复核的指引质量，并报告 19 名参与者的探索性用户研究，区分后端回归结果、感知可用性、工作负荷及未经对照验证的学习增益。
 
 系统面向操作熟悉与概念探索；真实仪器迁移、定量成像及 AI 的额外学习收益不在现有证据范围内。
 
@@ -117,11 +117,11 @@ $$
 记样本频谱为 $O(\mathbf{k})$，照明载波为 $\mathbf{k}_0$，调制度为 $\mu$，照明相位为 $\varphi$。标准 SIM 的理论背景可概括为 [12], [13]：
 
 $$
-\begin{aligned}
-G_{\varphi}(\mathbf{k}) &= H_{\mathrm{opt}}(\mathbf{k})\bigl[O(\mathbf{k}) \\
-&\quad + \frac{\mu}{2}e^{i\varphi}O(\mathbf{k}-\mathbf{k}_0) \\
-&\quad + \frac{\mu}{2}e^{-i\varphi}O(\mathbf{k}+\mathbf{k}_0)\bigr].
-\end{aligned}
+\begin{gathered}
+G_{\varphi}(\mathbf{k})=H_{\mathrm{opt}}(\mathbf{k})\bigl[O(\mathbf{k}) \\
++\frac{\mu}{2}e^{i\varphi}O(\mathbf{k}-\mathbf{k}_0) \\
++\frac{\mu}{2}e^{-i\varphi}O(\mathbf{k}+\mathbf{k}_0)\bigr].
+\end{gathered}
 $$
 
 $H_{\mathrm{opt}}$ 为理论光学传递函数。当前混合面板仅演示一对移位侧带，其显示前幅值为：
@@ -194,11 +194,11 @@ Unity 根据界面、控制器、距离和绑定生成 $\mathcal{A}(s)$。DeepSe
 
 合法操作使用目录中的标准步骤。候选 JSON、字段或动作未通过结构检查时，系统按原问题和快照最多重生成一次，权限保持不变；超时和上游异常不按格式错误重试。
 
-非拒答候选再接受范围、事实支持和目标一致性审核。生成与审核使用同一模型，故这只是附加检查而非独立正确性保证；拒答、格式错误、访问异常和超时分别报告。
+非拒答候选再接受范围、事实支持和目标一致性审核。若范围及事实均通过，但非指引回答夹带直接操作步骤，则允许一次额外重生成，删除步骤或选择合法动作，再次校验和审核。生成与审核使用同一模型，故这只是附加检查而非独立正确性保证；拒答、格式错误、访问异常和超时分别报告。
 
 ### 4.4 连续学习与响应时效
 
-部件指代由当前名称和说明解析；体验请求优先关联实验，通用“下一步”优先推进当前路径。每次请求保存状态与快照标识，客户端显示前复查内容和权限并拒绝过期建议。提示卡可在对话框关闭后保留，但不会执行或标记操作完成。
+部件指代由当前名称和说明解析；体验请求优先关联实验，下一步请求结合近期目标与可用前置动作。事后复核发现通用下一步问题存在歧义，第 6.6 节区分受测策略与后续澄清修订。每次请求保存状态与快照标识，客户端显示前复查内容和权限并拒绝过期建议。提示卡可在对话框关闭后保留，但不会执行或标记操作完成。
 
 ### 4.5 仪器与样本空间定位
 
@@ -251,7 +251,7 @@ SNOM 助手只建议当前允许的探针选择、安装、等待、退出或启
 - **RQ1（流程可行性）：**参与者能否在 VR 环境中完成样本操作、显微观察、调焦/照明调整和结构探索等核心任务？
 - **RQ2（感知体验）：**参与者如何评价系统的整体可用性与任务工作负荷？
 
-实现检查覆盖动作集合生成、目录外或不可用标识拒绝、过期响应拒绝及实时空间关系计算。这些确定性属性不作为“AI 准确率”；帧率及语音/模型延迟也不属于本次结果。
+实现检查涉及动作集合生成、目录外或不可用标识拒绝、过期响应保护及空间几何计算。第 6.6 节另报告固定快照下的模型／后端响应及延迟，未执行实时客户端的时效检查或标记行为。确定性一致性不作为“AI 准确率”，帧率与语音性能仍不属于本次测量。
 
 ### 6.2 参与者与实验流程
 
@@ -299,25 +299,40 @@ SNOM 助手只建议当前允许的探针选择、安装、等待、退出或启
 
 ### 6.5 结果解释与效度边界
 
-单组评价支持流程可行性和感知可用性，不支持 AI 改善学习、降低负荷或替代真实仪器训练的因果结论。SUS 和 NASA-TLX 不能替代知识前后测、真实设备迁移或专家评分。专业类别样本不均，不作组间比较；语音准确率、延迟、帧率和异常请求鲁棒性需单独测试。
+单组评价支持可行性与感知可用性，不证明 AI 的因果学习增益或真实仪器迁移效果。专业样本不均，不作组间比较。语音、帧率和对抗鲁棒性需单独测试；第 6.6 节评价模型／后端回答。
 
-### 6.6 AI 指引质量的补充评价方案
+### 6.6 固定状态 AI 指引基准测试
 
-> **【待执行的补充评价｜不是已有结果】** 本节给出建议的真实模型测试协议。完成测试后用实际配置、数量和结果改写；若投稿前未执行，应将本节移到后续工作，并移除图 5 占位，不在摘要或结论中声称已评价 AI 质量。
+本实验通过实际后端回放 26 个从实现推导的固定“问题—状态”案例，每例三次，共 78 次请求：动作可用性 8 例、目标对应性 8 例、能力与范围边界 6 例、空间导航 4 例。快照采用桌面绑定和人工设定的几何，并非实时 Unity 采集。对于状态 $s$ 和问题 $q$，$\mathcal{G}(s,q)\subseteq\mathcal{A}(s)$ 表示可用动作中符合目标的子集。原评分规则要求 14 例给出操作，共 42 次请求；导航以另外 12 次请求计分。
 
-建议建立 30 个范围内的“问题—历史—状态”样例，覆盖一般下一步、部件实验入口、跨模块退出、SNOM 等待、仪器/样本定位和必要澄清六类，每类五例；另设十个范围外或无可用功能的边界样例。每例使用固定快照独立运行三次，记录模型标识、提示词/知识版本、采样参数、每轮候选、重生成、审核和客户端结果。数量是拟定方案，不能写成已完成样本量。
+2026 年 9 月 19 日的运行使用 DeepSeek `deepseek-flash`，协议 `assistant-chat-v4-guidance`，知识版本 `0a594b7b56cbda74`。配置为 temperature=0.2、输出上限 1,500 tokens、关闭 thinking、非流式 JSON 和 18 秒服务商超时。种子 2027 仅打乱串行请求顺序，不控制模型采样；模型别名不代表不可变修订版本。
 
-每个范围内样例由熟悉实验流程的评定者事先定义可接受动作或回答类别，允许同一目标存在多个有效下一步。先独立判断再处理分歧，并报告实际评定人数和流程。评定同时检查“动作此刻可用”与“动作符合学习目的”；例如展开界面中机械地推荐退出，可能合法但不合目的。原始问题固定，格式修复不算新用户请求。
+自动检查显示，42 条原始及最终操作均可用且匹配原目标标签，12 次导航均选中预期目标。随后，作者对中文翻译的问答对进行一次二元人工复核，75/78 条被标为正确（96.2%）。该复核未设置独立评分者或评分者间一致性分析，评价对象为最终后端回答，其中操作指引使用动作目录中的标准说明。
 
-建议报告首次结构通过率、最终目标匹配率、正常问题拒答率及服务错误率；分别以首次候选数、范围内请求数为分母，并保留每项计数。格式修复成功率以发生修复的请求为分母，同时说明修复后是否仍通过语义与客户端检查。边界样例单独报告，不混入正常请求的拒答率。端到端时间从用户提交至客户端得到可显示结果或终止错误计算，包含修复和审核；成功、失败及超时分别汇总。
+**表 5：后端回放与后续人工复核。操作决策保留原 42 次请求作为分母。**
 
-> **【插图 5 占位｜可选，必须有真实数据】** 优先用一张单栏图展示范围内六类场景的最终结果分布：目标匹配、合法但不合目标、拒答、格式/审核错误、连接/超时错误，采用互斥分类并标注每类请求数。如页数允许，用第二面板显示端到端时间散点或分布。不要用 mock 数据、推测的提升比例、只有均值却虚构的误差条。现有 SUS/TLX 表无需再画一张重复的柱状图。
->
-> **拟图注（数据补齐后使用）：** 图 5. 真实模型在预定义状态场景中的最终指引结果。分布以用户请求为单位，包含格式修复与审核后的结果；延迟包含完整问答处理链路。
+| 指标 | 结果 |
+|---|---:|
+| 请求完成／首次候选契约检查通过 | 各 78/78 |
+| 原始／最终操作动作可用 | 各 42/42 |
+| 原始／最终目标标签匹配（原规则） | 各 42/42 |
+| 最终操作决策获人工认可 | 39/42（92.9%） |
+| 原始／最终导航目标匹配 | 各 12/12 |
+| 最终回答获人工认可 | 75/78（96.2%） |
+| GC01 未先澄清（人工判定） | 3/3 |
+| 内部语义审核通过 | 66/66 |
+| 结构／语义修复次数 | 0/78／0/78 |
+| 后端延迟，中位数／P95 | 1.82 秒／2.30 秒 |
+
+三条人工判错均来自 GC01：“下一步该做什么？”，助手在 PreAssembly 状态下给出了展开模型的指引。原请求还包含学习 NA 的前文目标，以及助手关于上部光学组件关联 NA 的说明；问答复核表未呈现这些历史。原规则将展开模型视为符合目标的前置步骤，复核者则要求先澄清用户所指的下一步。因此，这属于事后解释与评分规则修订，不能写成三个不可用动作或违反原标签的错误。保留 GC01 在原操作请求集合中，人工认可决策为 39/42；剔除它会掩盖这一分歧。三条回答也均通过了内部语义审核，说明该审核不能替代人工判断。
+
+本轮返回 42 条操作指引、12 条位置指引、12 条解释和 12 条拒答。拒答跳过审核，共调用服务商 144 次（78 次生成、66 次审核），未出现超时或修复。延迟从请求发出计至编辑器处理后端结果，包含生成、审核与网络开销，不含语音和可见渲染；P95 采用最近秩法。
+
+复核后已修改提示词及 GC01 预期，要求先澄清，但本文不报告修改后的新一轮真实模型结果。这是复用开发案例上的回归和事后作者判断，不能视为留出集准确率；78 次请求仅对应 26 个情境。翻译与复核上下文缺失限制了结论，后续需基于完整状态和历史开展独立复核。实时客户端显示、标记、过期响应拒绝及去除状态信息的对照尚未评价。
 
 ## 7. 讨论与局限性
 
-VRMicroscope 显式关联当前部件、可用控制和可观察结果；AI 在 VR 状态之上解释和指引，而不控制显微镜。状态快照、动作目录和客户端复核降低不存在或过期指令的风险，但不能保证每条自然语言解释均正确。
+VRMicroscope 显式关联当前部件、可用控制和可观察结果；AI 在 VR 状态之上解释和指引，而不控制显微镜。GC01 复核显示，合法动作在意图含糊时仍可能被认为推荐过早。状态快照、动作目录和客户端复核降低不存在或过期指令的风险，但不能保证每条自然语言解释均正确。
 
 人工调焦与亮度映射、简化参数、合成图像及支持范围可视化使本系统属于教学仿真，而非数字孪生。科学真实性需由领域专家审查，并将可比较变量与真实仪器数据标定。
 
@@ -325,7 +340,7 @@ VRMicroscope 显式关联当前部件、可用控制和可观察结果；AI 在 
 
 ## 8. 结论与后续工作
 
-VRMicroscope 整合可交互显微实验、具有科学边界的光学模块和任务状态感知 AI，并校验可用动作及过期建议。19 人中 18 人完成核心流程，SUS 均值为 82.4/100，支持流程可行性和感知可用性，而非 AI 的因果学习增益。后续将评价 AI 增量价值、知识与真实仪器迁移，并记录语音、模型和渲染性能。
+VRMicroscope 连接交互式显微实验、有科学边界的光学演示和任务状态感知指引。19 人研究支持流程可行性与感知可用性。78 次固定状态请求中，42 条操作建议均可用，导航目标匹配为 12/12；作者复核认可 75/78 条回答（96.2%），三条 GC01 回答暴露了何时需要澄清的判定分歧。后端延迟中位数为 1.82 秒。动作可用性和内部审核不能单独证明指引质量。后续将以留出案例验证修订策略，基于完整上下文开展独立评分，并评价实时客户端可靠性及受控学习与迁移效果。
 
 ## 研究伦理与生成式 AI 使用说明
 

@@ -25,7 +25,7 @@ def compile_project():
             normalized = line.replace('\\', '/')
             if line.startswith(('-out:', '-refout:')):
                 continue
-            if 'm_Scripts/Assistant/' in normalized or 'LocalAssistantSmokeCheck.cs' in normalized:
+            if 'm_Scripts/Assistant/' in normalized or 'LocalAssistantSmokeCheck.cs' in normalized or 'AssistantBenchmarkWindow.cs' in normalized:
                 continue
             # The open editor may still have pre-removal source paths in its cached response file.
             if 'm_Scripts/AITutor/' in normalized or 'Editor/AITutorSetup.cs' in normalized:
@@ -33,7 +33,7 @@ def compile_project():
             if editor and line.startswith('-r:') and normalized.endswith('/Assembly-CSharp.ref.dll"'):
                 line = '-r:"%s"' % (OUT / 'Assembly-CSharp.dll')
             lines.append(line)
-        sources = [ROOT / 'Assets/m_Scripts/Editor/LocalAssistantSmokeCheck.cs'] if editor else sorted((ROOT / 'Assets/m_Scripts/Assistant').glob('*.cs'))
+        sources = [ROOT / 'Assets/m_Scripts/Editor' / name for name in ('LocalAssistantSmokeCheck.cs', 'AssistantBenchmarkWindow.cs')] if editor else sorted((ROOT / 'Assets/m_Scripts/Assistant').glob('*.cs'))
         lines += ['-out:"%s"' % (OUT / (name + '.dll'))] + ['"%s"' % p for p in sources]
         target = OUT / (name + '.rsp')
         target.write_text('\n'.join(lines), encoding='utf-8')

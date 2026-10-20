@@ -424,18 +424,32 @@ Testing on PC VR (Intel i7-13700K, NVIDIA RTX 4080, Meta Quest 3 via AirLink) yi
    * 100 high-frequency concurrent Right Trigger presses verified that the Tutorial Lock achieves a **100% false-trigger suppression rate**;
    * Deferring Action Map transitions to `WaitForEndOfFrame` completely resolved mid-frame Input System null-reference exceptions.
 
-### 6.2 AI State Awareness & Constraint Benchmark
+### 6.2 Fixed-State AI Guidance Benchmark
 
-Automated regression suites covering 38 atomic actions and 8 composite states were evaluated (Table 2):
+We evaluated whether the assistant selects currently available actions that correspond to a specified learning goal. The evaluation used 26 fixed question–state cases derived from the implementation, with three independent requests per case (78 requests): eight availability cases, eight goal-correspondence cases, six boundary cases, and four spatial-target cases. The snapshots encoded desktop bindings and synthetic navigation geometry; they were replayed through the production gateway rather than captured from live Unity sessions. Recent dialogue was included only where predefined by the case. Fourteen cases required an operation (42 requests); the remaining cases tested waiting, explanation, capability boundaries, or navigation.
 
-**Table 2: Benchmark results of the state-aware AI tutoring gateway.**
+For state $s$ and query $q$, the predefined acceptable action set satisfies $\mathcal{G}(s,q)\subseteq\mathcal{A}(s)$. Availability asks whether a candidate action belongs to $\mathcal{A}(s)$; goal correspondence asks whether it also belongs to $\mathcal{G}(s,q)$. Neither metric alone establishes factual accuracy of the prose. We evaluated the first model candidate separately from the final gateway response. All 42 required-operation requests remain in the denominator, so withholding a difficult response cannot inflate the goal-match rate. Navigation was scored separately over 12 requests. For non-action cases, expected response type was checked without treating an empty action as a successful operation.
 
-| Evaluation Metric | Test Scenarios | Verification Target | Result |
-|---|---|---|---|
-| **Action-Space Pruning** | 24 boundary cases | High-risk actions excluded from $\mathcal{A}(s_t)$ | **100% filtered** (no focusing without slide; no scanning without probe) |
-| **Freshness Interception** | 16 latency injections | Stale action cards intercepted upon state drift | **100% intercepted**, prompting clean reset notices |
-| **Speech-to-Text Precision** | 50 bilingual queries | Scientific term recognition ("numerical aperture", "s-SNOM") | **98% effective query rate** via viewport confirmation |
-| **Latency Decomposition** | 30 end-to-end runs | Latency breakdown | STT: $380\pm 45\text{ ms}$; LLM: $1120\pm 180\text{ ms}$; total $< 1.8\text{ s}$ |
+The run on 19 September 2026 used DeepSeek, with both requested and returned model identifier `deepseek-flash`, protocol `assistant-chat-v4-guidance`, and knowledge version `0a594b7b56cbda74`. The implementation configured temperature 0.2, a 1,500-token output limit, disabled thinking, non-streaming JSON, and an 18-second timeout per provider call. Requests were sequential; seed 2027 controlled case order, not model sampling. The returned alias does not establish an immutable provider model revision. The gateway permitted one structural repair and one restricted semantic repair, with another review after semantic repair.
+
+**Table 2. Fixed-state gateway replay results. Fractions use applicable scheduled requests unless stated otherwise.**
+
+| Metric | Result |
+|---|---:|
+| Requests completed without service error | 78/78 (100%) |
+| First-candidate structural/context acceptance | 78/78 (100%) |
+| Raw operational action availability | 42/42 (100%) |
+| Raw operational goal-set match | 42/42 (100%) |
+| Final operational goal-set match | 42/42 (100%) |
+| Raw/final navigation target match | 12/12 each (100%) |
+| Final expected response-type match | 78/78 (100%) |
+| Structural / semantic repair attempted | 0/78 / 0/78 |
+| Semantic-review acceptance | 66/66 reviewed candidates |
+| Request-to-gateway-result latency, median / P95 | 1.82 s / 2.30 s |
+
+The gateway returned 54 guides (42 operations and 12 locations), 12 explanations, and 12 refusals. All refusals belonged to the predefined unavailable-capability, unsupported-measurement, or unrelated-request cases. The missing-focus-information case produced explanations in all three repetitions without prescribing a clockwise/counterclockwise correction; the component-without-experiment case likewise produced explanations rather than exit guidance. Refusals skipped semantic review, yielding 144 provider calls: 78 generations and 66 reviews. No format failure, timeout, or repair was recorded. Latency was measured by the editor from request dispatch to gateway-result processing, including generation, review, network and editor overhead but excluding speech, deliberate inter-request spacing, and learner-visible rendering. The median averages the two central values; P95 uses the nearest-rank method. The observed range was 0.63–3.23 s.
+
+These results establish conformance on the tested fixtures, not universal AI accuracy. The cases were also used during development: an earlier run exposed four explanation-to-refusal conversions, prompting stricter response-type instructions and a bounded repair path. This rerun is therefore regression evidence on a reused suite, not held-out generalization evidence. No candidate was blocked or repaired in the final run, so it does not directly measure the effectiveness of those fallback paths. Independent human prose ratings, a state-ablated baseline, and live-client tests were not part of this run. In particular, displayed guidance, marker creation, and stale-response rejection were not exercised; same-model review acceptance is not an independent semantic correctness score.
 
 ### 6.3 Empirical User Experience & Usability Study
 
@@ -578,4 +592,3 @@ Engineering benchmarks confirmed 90 FPS rendering performance and robust input a
 ### Appendix B: Generative AI Disclosure Statement
 
 > Generative AI tools (including Claude and DeepSeek) were utilized to assist in drafting, grammatical polishing, and translation synthesis of this manuscript. All underlying system architectures, mathematical formulations, Unity XR implementations, Python gateway logic, and reported empirical study findings were designed, authored, conducted, and verified by the human authors.
-

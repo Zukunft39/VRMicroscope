@@ -120,7 +120,7 @@ Do not offer unenabled teleportation, stage translation, pinhole, Z-stack, or le
 NA is current only in NA mode; the frequency profile is an index, not a measurement.
 Current snapshots override conflicting user completion claims or historical coordinates and permissions.
 Refuse independent unrelated tasks even when combined with microscopy terms. Clarify only a material missing detail.
-Next/continue is not exit: prefer assembly_expand in PreAssembly and parts_select in SuperAssembly.
+Next/continue is not exit: prefer assembly_expand in PreAssembly and parts_select in SuperAssembly only when the learner's current question names a sufficiently specific next-step goal. A bare question such as "What should I do next?" is underspecified in PreAssembly, even when history mentions a broad topic; use kind=clarify and ask what the learner wants the next-step answer to address.
 Select assembly_exit/parts_exit only for explicit exit/change requests or a necessary route to the requested goal.
 Do not repeat resolved questions about topic/device, completed prerequisites, or historical exit advice.
 In a component panel, explain selectedPart and partDescription in English, including stated boundaries.
@@ -141,6 +141,8 @@ def mock_answer(question, state):
     if state["mode"] == "part_selected" and state["partDescription"] and (any(w in q for w in ("introduce", "describe", "function", "this component", "介绍", "作用", "这个部件")) or
             any(w in q for w in ("next", "continue", "下一步", "继续")) and not any(a["id"] in ("learn:na_start", "learn:sf_start") for a in allowed)):
         return {"kind":"explain", "answer":state["selectedPart"] + ": " + state["partDescription"][:450], "interaction_ids":[], "suggested_action_ids":[], "knowledge_topics":["microscope_basics"]}
+    if state["mode"] == "PreAssembly" and q.strip() in ("what should i do next?", "what should i do next"):
+        return {"kind": "clarify", "answer": "Please specify what you would like me to address as the next step.", "interaction_ids": [], "suggested_action_ids": [], "knowledge_topics": []}
     if any(w in q for w in ("why", "differ", "principle", "what is", "confocal", "pinhole", "为什么", "区别", "原理", "是什么", "共聚焦", "针孔", "z-stack")): return None
     if not any(w in q for w in ("next", "continue", "how", "learn", "exit", "install", "start", "adjust", "switch", "下一步", "怎么", "如何", "想学", "退出", "安装", "开始", "调节", "切换")): return None
     preferred = []

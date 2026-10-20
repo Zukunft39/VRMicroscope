@@ -6,11 +6,14 @@ import collections
 import getpass
 import json
 import os
+from pathlib import Path
+import re
 import sys
 import threading
 import time
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 import assistant_chat
+import benchmark_trace
 import speech
 from assistant_chat import model_config, require
 
@@ -18,9 +21,12 @@ from assistant_chat import model_config, require
 class AssistantServer(ThreadingHTTPServer):
     daemon_threads = True
 
-    def __init__(self, address, mock=False):
+    def __init__(self, address, mock=False, benchmark_traces=None):
         super().__init__(address, Handler)
         self.mock = mock
+        self.benchmark_traces = Path(benchmark_traces).resolve() if benchmark_traces else None
+        if self.benchmark_traces:
+            self.benchmark_traces.mkdir(parents=True, exist_ok=True)
         self.slots = threading.BoundedSemaphore(2)
         self.rate_lock = threading.Lock()
         self.requests = collections.deque()
@@ -61,6 +67,7 @@ class Handler(BaseHTTPRequestHandler):
         self.send_json(200, {"mode": "mock" if self.server.mock else "model", "configured": bool(key),
                              "provider": "deepseek", "model": model,
                              "assistantModel": assistant_chat.model_config()[0],
+                             "benchmarkTracing": self.server.benchmark_traces is not None,
                              "speechConfigured": bool(os.environ.get("GROQ_API_KEY", "").strip()),
                              "speechModel": speech.MODEL,
                              "assistantKnowledgeVersion": self.server.assistant_knowledge.version})
@@ -79,12 +86,17 @@ class Handler(BaseHTTPRequestHandler):
             payload = assistant_chat.validate_request(json.loads(self.rfile.read(length)))
         except (ValueError, TypeError, KeyError, OverflowError):
             self.send_json(400, {"error": "invalid_request"}); return
+        run_id = self.headers.get("X-Assistant-Benchmark", "")
+        if run_id and not re.fullmatch(r"[a-f0-9]{32}", run_id):
+            self.send_json(400, {"error": "invalid_benchmark_id"}); return
         if not self.server.allow_request():
             self.send_json(429, {"error": "rate_limit"}); return
         if not self.server.slots.acquire(blocking=False):
             self.send_json(429, {"error": "busy"}); return
+        trace = (benchmark_trace.Trace(self.server.benchmark_traces, run_id, payload["requestId"])
+                 if run_id and self.server.benchmark_traces else None)
         try:
-            result = assistant_chat.generate(payload, self.server.mock, self.server.assistant_knowledge)
+            result = assistant_chat.generate(payload, self.server.mock, self.server.assistant_knowledge, trace=trace)
         except assistant_chat.ChatError as error:
             print("Assistant failure: " + error.code, file=sys.stderr)
             self.send_json(error.status, {"error": error.code})
@@ -94,6 +106,11 @@ class Handler(BaseHTTPRequestHandler):
         else:
             self.send_json(200, result)
         finally:
+            if trace is not None:
+                try:
+                    trace.save()
+                except OSError:
+                    print("Benchmark trace could not be saved; this run has incomplete traces.", file=sys.stderr)
             self.server.slots.release()
 
     def transcribe(self):
@@ -126,6 +143,8 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--port", type=int, default=8765)
     parser.add_argument("--mock", action="store_true")
+    parser.add_argument("--benchmark-traces", type=Path,
+                        help="Save local traces only for requests carrying a valid benchmark run header")
     parser.add_argument("--prompt-groq-key", action="store_true", help="Read the optional speech key without echo")
     parser.add_argument("--prompt-key", action="store_true", help="Read a key without echo; keep it only in this process")
     args = parser.parse_args()
@@ -140,5 +159,5 @@ if __name__ == "__main__":
     if not args.mock and not model_config()[1]:
         parser.error("Set DEEPSEEK_API_KEY or use --prompt-key. Use --mock for integration testing.")
     print("Microscope gateway on 127.0.0.1:%d: /assistant + /speech (%s)" % (args.port, "mock" if args.mock else "model"))
-    with AssistantServer(("127.0.0.1", args.port), args.mock) as server:
+    with AssistantServer(("127.0.0.1", args.port), args.mock, args.benchmark_traces) as server:
         server.serve_forever()

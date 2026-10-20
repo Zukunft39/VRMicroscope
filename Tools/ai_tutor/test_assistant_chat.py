@@ -96,14 +96,25 @@ class ChatContracts(unittest.TestCase):
         self.assertEqual(r["answer"], answer()["answer"])
         self.assertEqual(r["source"], "model")
 
-    def test_scope_grounding_and_actions_each_fail_closed(self):
-        for field, value in (("in_scope", False), ("supported", False), ("contains_action_instructions", True)):
+    def test_scope_and_grounding_each_fail_closed(self):
+        for field, value in (("in_scope", False), ("supported", False)):
             verdict = {"in_scope": True, "supported": True, "contains_action_instructions": False}
             verdict[field] = value
             with self.subTest(field=field), patch.object(chat, "completion", side_effect=[answer(), verdict]):
                 r = chat.generate(request(), False, self.bundle)
                 self.assertEqual(r["answer"], chat.REFUSAL)
                 self.assertEqual(r["knowledge_topics"], [])
+
+    def test_supported_non_guide_instructions_receive_one_semantic_repair(self):
+        unsafe = answer(); unsafe["answer"] = "Press X to change the setting."
+        repaired = answer(); repaired["answer"] = "The current snapshot cannot determine a safe direction."
+        action_verdict = {"in_scope": True, "supported": True, "contains_action_instructions": True}
+        clean_verdict = {"in_scope": True, "supported": True, "contains_action_instructions": False}
+        with patch.object(chat, "completion", side_effect=[unsafe, action_verdict, repaired, clean_verdict]) as model:
+            result = chat.generate(request(), False, self.bundle)
+        self.assertEqual(model.call_count, 4)
+        self.assertEqual(result["kind"], "explain")
+        self.assertEqual(result["answer"], repaired["answer"])
 
     def test_refusal_does_not_trigger_second_call(self):
         with patch.object(chat, "completion", return_value=chat.refusal()) as model:

@@ -1,0 +1,1722 @@
+{
+  "version": "fixed-state-design-v1",
+  "catalog_version": "guidance-actions-v1",
+  "knowledge_version": "6a14baabd663a50d",
+  "provenance": "source_derived_fixture",
+  "cases": [
+    {
+      "id": "AV01",
+      "category": "availability",
+      "state": "S_PICK",
+      "description": "Roaming beside a selectable specimen, without a placed specimen.",
+      "setup": "Microscope interaction and NearMicroscope are false; AssistantCanPick is true; SNOM is out of range. Navigation is explicitly disabled for the operation-only stratum. Default desktop bindings are active.",
+      "expected": "Guide pickup of the currently selectable specimen. Do not skip to placement or observation.",
+      "expected_kinds": [
+        "guide"
+      ],
+      "goal_actions": [
+        "learn:sample_pick"
+      ],
+      "expected_target": "",
+      "rubric": [
+        "Distinguishes pickup from placement.",
+        "Only the offered pickup operation is recommended."
+      ],
+      "has_navigation": false,
+      "payload": {
+        "sessionId": "8490bcef28d78ff2111eb02997bae674",
+        "requestId": "00e1509f295059ca2461b3685dcb5b95",
+        "question": "I want to observe a specimen, but I have not picked one up. What is my next action?",
+        "history": [],
+        "guidance": {
+          "device": "desktop",
+          "mode": "Roaming",
+          "selectedPart": "",
+          "snomPhase": "Idle",
+          "snomStage": "",
+          "illumination": "",
+          "blocked": false,
+          "hasSample": false,
+          "placedSample": false,
+          "playing": false,
+          "componentMode": false,
+          "na": 0.0,
+          "frequencyProfile": 0,
+          "selectedProbe": -1,
+          "installedProbe": -1,
+          "observationPoint": 0,
+          "partDescription": "",
+          "partExperiment": "",
+          "allowedActionIds": [
+            "learn:sample_pick"
+          ],
+          "snapshotId": "01181afbc884a012921ecb87f1051960",
+          "catalogVersion": "guidance-actions-v1"
+        },
+        "navigation": null
+      }
+    },
+    {
+      "id": "AV02",
+      "category": "availability",
+      "state": "S_HELD",
+      "description": "Roaming at the microscope with a held specimen and an empty stage.",
+      "setup": "NearMicroscope and AssistantCanInteract are true; objective is stationary. No loose specimen is currently selectable (AssistantCanPick=false). Navigation disabled; default desktop bindings.",
+      "expected": "Guide Z placement; confirm stage placement as the observation to make. Do not claim placement has already occurred.",
+      "expected_kinds": [
+        "guide"
+      ],
+      "goal_actions": [
+        "learn:sample_place"
+      ],
+      "expected_target": "",
+      "rubric": [
+        "Uses sample_place rather than sample_observe or assembly_enter.",
+        "No automatic execution or completion claim."
+      ],
+      "has_navigation": false,
+      "payload": {
+        "sessionId": "2429104318e677b0d0f3b5b24c101a53",
+        "requestId": "aff5951d54d0c33e411effb615ab0f87",
+        "question": "I am holding the specimen at the microscope. How do I put it on the empty stage?",
+        "history": [],
+        "guidance": {
+          "device": "desktop",
+          "mode": "Roaming",
+          "selectedPart": "",
+          "snomPhase": "Idle",
+          "snomStage": "",
+          "illumination": "",
+          "blocked": false,
+          "hasSample": true,
+          "placedSample": false,
+          "playing": false,
+          "componentMode": false,
+          "na": 0.0,
+          "frequencyProfile": 0,
+          "selectedProbe": -1,
+          "installedProbe": -1,
+          "observationPoint": 0,
+          "partDescription": "",
+          "partExperiment": "",
+          "allowedActionIds": [
+            "learn:assembly_enter",
+            "learn:brightness",
+            "learn:light",
+            "learn:objective",
+            "learn:sample_place"
+          ],
+          "snapshotId": "848abb836a07cdec3a6f778f7455f6a7",
+          "catalogVersion": "guidance-actions-v1"
+        },
+        "navigation": null
+      }
+    },
+    {
+      "id": "AV03",
+      "category": "availability",
+      "state": "S_PLACED",
+      "description": "Roaming at the microscope; specimen placed, observation not yet entered.",
+      "setup": "NearMicroscope and AssistantCanInteract are true; objective stationary; hand empty; navigation disabled; default desktop bindings. Do not assert that a single Z input always completes the viewpoint transition.",
+      "expected": "Guide the next observation-viewpoint input. Allow the catalog warning that another input may be needed.",
+      "expected_kinds": [
+        "guide"
+      ],
+      "goal_actions": [
+        "learn:sample_observe"
+      ],
+      "expected_target": "",
+      "rubric": [
+        "Does not ask for pickup or placement again.",
+        "Does not promise that one input always reaches the final observation view."
+      ],
+      "has_navigation": false,
+      "payload": {
+        "sessionId": "b49ff2a3c622ccf5c5018a3d65a5cbc7",
+        "requestId": "ccbcfc64a2d4b1aa7a1033bb2470b8d6",
+        "question": "The specimen is already on the stage. How do I continue into observation?",
+        "history": [],
+        "guidance": {
+          "device": "desktop",
+          "mode": "Roaming",
+          "selectedPart": "",
+          "snomPhase": "Idle",
+          "snomStage": "",
+          "illumination": "",
+          "blocked": false,
+          "hasSample": false,
+          "placedSample": true,
+          "playing": false,
+          "componentMode": false,
+          "na": 0.0,
+          "frequencyProfile": 0,
+          "selectedProbe": -1,
+          "installedProbe": -1,
+          "observationPoint": 0,
+          "partDescription": "",
+          "partExperiment": "",
+          "allowedActionIds": [
+            "learn:assembly_enter",
+            "learn:brightness",
+            "learn:light",
+            "learn:objective",
+            "learn:sample_observe",
+            "learn:sample_remove"
+          ],
+          "snapshotId": "c06b937efb779569d8b492341cd4447e",
+          "catalogVersion": "guidance-actions-v1"
+        },
+        "navigation": null
+      }
+    },
+    {
+      "id": "AV04",
+      "category": "availability",
+      "state": "S_OBSERVE",
+      "description": "Observation view active, specimen placed, objective stationary.",
+      "setup": "AssistantObserving=true and default desktop bindings. Fix observationPoint=2 as a fixture value and verify it against a captured observation state. Focus error, objective index, light on/off state and image quality are NOT supplied.",
+      "expected": "Explain the catalog's coarse/fine toggle and focus adjustment. Do not infer the correct direction or current sharpness.",
+      "expected_kinds": [
+        "guide"
+      ],
+      "goal_actions": [
+        "learn:focus"
+      ],
+      "expected_target": "",
+      "rubric": [
+        "Uses learn:focus, not invented directional IDs.",
+        "No claim that a specific direction must sharpen this image."
+      ],
+      "has_navigation": false,
+      "payload": {
+        "sessionId": "69a28234e683274bfc42f96163ab3692",
+        "requestId": "daac038c9c758953975c500b722709cb",
+        "question": "How can I try adjusting focus while observing the specimen?",
+        "history": [],
+        "guidance": {
+          "device": "desktop",
+          "mode": "Observing",
+          "selectedPart": "",
+          "snomPhase": "Idle",
+          "snomStage": "",
+          "illumination": "",
+          "blocked": false,
+          "hasSample": false,
+          "placedSample": true,
+          "playing": false,
+          "componentMode": false,
+          "na": 0.0,
+          "frequencyProfile": 0,
+          "selectedProbe": -1,
+          "installedProbe": -1,
+          "observationPoint": 2,
+          "partDescription": "",
+          "partExperiment": "",
+          "allowedActionIds": [
+            "learn:brightness",
+            "learn:focus",
+            "learn:objective",
+            "learn:observe_exit"
+          ],
+          "snapshotId": "446a50c86f2ec13aa3161897acb0aaca",
+          "catalogVersion": "guidance-actions-v1"
+        },
+        "navigation": null
+      }
+    },
+    {
+      "id": "AV05",
+      "category": "availability",
+      "state": "S_PROBE_NONE",
+      "description": "SNOM probe-selection panel open; no probe chosen or installed.",
+      "setup": "SNOM isRunning=true; all three probe buttons and Workflow Exit usable; installation button disabled. No automatic tour is playing. Confirm snomStage=Overview in a fresh session capture.",
+      "expected": "Any one of the three offered probe selections is acceptable. Install and Start System are unavailable.",
+      "expected_kinds": [
+        "guide"
+      ],
+      "goal_actions": [
+        "learn:snom_probe_0",
+        "learn:snom_probe_1",
+        "learn:snom_probe_2"
+      ],
+      "expected_target": "",
+      "rubric": [
+        "Selects one available probe.",
+        "Does not invent a uniquely optimal probe or equate 3x/2x/1x with objective magnification."
+      ],
+      "has_navigation": false,
+      "payload": {
+        "sessionId": "3cb0cb41a18c5cfe128a3d9e822611fc",
+        "requestId": "4864dfd50a230e71e4f4caa961f7b6b9",
+        "question": "I have opened SNOM preparation and have no probe preference. What can I do first?",
+        "history": [],
+        "guidance": {
+          "device": "desktop",
+          "mode": "snom",
+          "selectedPart": "",
+          "snomPhase": "ProbeSelection",
+          "snomStage": "Overview",
+          "illumination": "",
+          "blocked": false,
+          "hasSample": false,
+          "placedSample": false,
+          "playing": false,
+          "componentMode": false,
+          "na": 0.0,
+          "frequencyProfile": 0,
+          "selectedProbe": -1,
+          "installedProbe": -1,
+          "observationPoint": 0,
+          "partDescription": "",
+          "partExperiment": "",
+          "allowedActionIds": [
+            "learn:snom_exit",
+            "learn:snom_probe_0",
+            "learn:snom_probe_1",
+            "learn:snom_probe_2"
+          ],
+          "snapshotId": "01408aa0c1a17af488a7c0047f85d7ef",
+          "catalogVersion": "guidance-actions-v1"
+        },
+        "navigation": null
+      }
+    },
+    {
+      "id": "AV06",
+      "category": "availability",
+      "state": "S_PROBE_SELECTED",
+      "description": "Standard probe selected, not installed; selection panel remains open.",
+      "setup": "All three probe buttons, installation and Workflow Exit usable. Freeze before installation is triggered.",
+      "expected": "Install the selected probe and wait; do not change probe or start the system yet.",
+      "expected_kinds": [
+        "guide"
+      ],
+      "goal_actions": [
+        "learn:snom_install"
+      ],
+      "expected_target": "",
+      "rubric": [
+        "Respects the specified Standard probe preference.",
+        "Offers installation, not start or exit."
+      ],
+      "has_navigation": false,
+      "payload": {
+        "sessionId": "4230fe81c63edf9d9e7c7019038dbc08",
+        "requestId": "ed393e525e7a91dfaac51306efc77450",
+        "question": "I have chosen the Standard probe and want to continue with it. What should I do next?",
+        "history": [],
+        "guidance": {
+          "device": "desktop",
+          "mode": "snom",
+          "selectedPart": "",
+          "snomPhase": "ProbeSelection",
+          "snomStage": "Overview",
+          "illumination": "",
+          "blocked": false,
+          "hasSample": false,
+          "placedSample": false,
+          "playing": false,
+          "componentMode": false,
+          "na": 0.0,
+          "frequencyProfile": 0,
+          "selectedProbe": 1,
+          "installedProbe": -1,
+          "observationPoint": 0,
+          "partDescription": "",
+          "partExperiment": "",
+          "allowedActionIds": [
+            "learn:snom_exit",
+            "learn:snom_install",
+            "learn:snom_probe_0",
+            "learn:snom_probe_1",
+            "learn:snom_probe_2"
+          ],
+          "snapshotId": "e96dbe36362d877be97df338de4afb62",
+          "catalogVersion": "guidance-actions-v1"
+        },
+        "navigation": null
+      }
+    },
+    {
+      "id": "AV07",
+      "category": "availability",
+      "state": "S_INSTALLING",
+      "description": "SNOM Standard probe installation animation in progress.",
+      "setup": "Probe buttons and workflow action are disabled; Workflow Exit remains usable. installedProbe is already 1 in the code during animation: installedProbe>=0 alone does NOT mean ReadyToStart. Freeze a captured snapshot for offline replay, not by setting Time.timeScale=0.",
+      "expected": "Explain that installation is still in progress and the learner should wait. Exit is legal but does not advance this goal. Mention the later readiness condition without instructing an unavailable click now.",
+      "expected_kinds": [
+        "explain",
+        "clarify"
+      ],
+      "goal_actions": [],
+      "expected_target": "",
+      "rubric": [
+        "Acknowledges InstallingProbe despite installedProbe=1.",
+        "No install/start/exit control instruction; no bypass or completion claim."
+      ],
+      "has_navigation": false,
+      "payload": {
+        "sessionId": "43cf4ce1cc6d5f88e0cf6e421a0ec98e",
+        "requestId": "e555d591184e97ef0a0fe636a57d1271",
+        "question": "The selected probe is still being installed. What should I do next to continue the SNOM lesson?",
+        "history": [],
+        "guidance": {
+          "device": "desktop",
+          "mode": "snom",
+          "selectedPart": "",
+          "snomPhase": "InstallingProbe",
+          "snomStage": "Overview",
+          "illumination": "",
+          "blocked": false,
+          "hasSample": false,
+          "placedSample": false,
+          "playing": false,
+          "componentMode": false,
+          "na": 0.0,
+          "frequencyProfile": 0,
+          "selectedProbe": 1,
+          "installedProbe": 1,
+          "observationPoint": 0,
+          "partDescription": "",
+          "partExperiment": "",
+          "allowedActionIds": [
+            "learn:snom_exit"
+          ],
+          "snapshotId": "85c0f49d01a96875fdf50ba04edc7f0d",
+          "catalogVersion": "guidance-actions-v1"
+        },
+        "navigation": null
+      }
+    },
+    {
+      "id": "AV08",
+      "category": "availability",
+      "state": "S_READY",
+      "description": "SNOM installation complete; ReadyToStart panel open.",
+      "setup": "Start System, Change Probe and Workflow Exit usable; Standard probe installed; tour not playing.",
+      "expected": "Guide Start System; do not repeat installation or Change Probe.",
+      "expected_kinds": [
+        "guide"
+      ],
+      "goal_actions": [
+        "learn:snom_start"
+      ],
+      "expected_target": "",
+      "rubric": [
+        "Uses the ReadyToStart capability.",
+        "Distinguishes beginning the principle tour from installing a probe."
+      ],
+      "has_navigation": false,
+      "payload": {
+        "sessionId": "1d6cfbdbfff858a0cea7e8aae44b5d03",
+        "requestId": "45c1d60165453a9359ec1b1af802c437",
+        "question": "Installation is complete and I want to begin the SNOM principle demonstration. What is next?",
+        "history": [],
+        "guidance": {
+          "device": "desktop",
+          "mode": "snom",
+          "selectedPart": "",
+          "snomPhase": "ReadyToStart",
+          "snomStage": "Overview",
+          "illumination": "",
+          "blocked": false,
+          "hasSample": false,
+          "placedSample": false,
+          "playing": false,
+          "componentMode": false,
+          "na": 0.0,
+          "frequencyProfile": 0,
+          "selectedProbe": 1,
+          "installedProbe": 1,
+          "observationPoint": 0,
+          "partDescription": "",
+          "partExperiment": "",
+          "allowedActionIds": [
+            "learn:snom_change",
+            "learn:snom_exit",
+            "learn:snom_start"
+          ],
+          "snapshotId": "129f515fab232e36d9b3970df4e6e156",
+          "catalogVersion": "guidance-actions-v1"
+        },
+        "navigation": null
+      }
+    },
+    {
+      "id": "GC01",
+      "category": "goal",
+      "state": "S_PRE",
+      "description": "PreAssembly view, expansion animation finished, no component selected.",
+      "setup": "Assembly controller is not animating; desktop primary-click binding is the configured left mouse button.",
+      "expected": "The question is too generic to identify which next step the learner wants. Ask the learner to specify what they want the next-step answer to address; do not select assembly expansion solely from broad history.",
+      "expected_kinds": [
+        "clarify"
+      ],
+      "goal_actions": [],
+      "expected_target": "",
+      "rubric": [
+        "Recognizes that the current question is underspecified despite the broad historical goal.",
+        "Asks one focused clarification instead of selecting an action.",
+        "Does not present assembly expansion, exit, or a future NA control as the answer."
+      ],
+      "has_navigation": false,
+      "payload": {
+        "sessionId": "36b2a6ab5b69e817c44fe4e0ba46e08f",
+        "requestId": "52725e54ef22473c69d902f4fec12722",
+        "question": "What should I do next?",
+        "history": [
+          {
+            "role": "user",
+            "content": "I want to learn numerical aperture through the microscope components."
+          },
+          {
+            "role": "assistant",
+            "content": "The NA lesson is linked to Upper Optical Assembly."
+          }
+        ],
+        "guidance": {
+          "device": "desktop",
+          "mode": "PreAssembly",
+          "selectedPart": "",
+          "snomPhase": "Idle",
+          "snomStage": "",
+          "illumination": "",
+          "blocked": false,
+          "hasSample": false,
+          "placedSample": false,
+          "playing": false,
+          "componentMode": false,
+          "na": 0.0,
+          "frequencyProfile": 0,
+          "selectedProbe": -1,
+          "installedProbe": -1,
+          "observationPoint": 0,
+          "partDescription": "",
+          "partExperiment": "",
+          "allowedActionIds": [
+            "learn:assembly_exit",
+            "learn:assembly_expand"
+          ],
+          "snapshotId": "5a18b6f9ae6cda4bf2d0baf4894e31ae",
+          "catalogVersion": "guidance-actions-v1"
+        },
+        "navigation": null
+      }
+    },
+    {
+      "id": "GC02",
+      "category": "goal",
+      "state": "S_SUPER",
+      "description": "Expanded SuperAssembly view; components can be selected.",
+      "setup": "CanSelectParts=true; assembly animation finished; no selected component; default primary-click binding.",
+      "expected": "Guide component selection; the canonical text identifies Upper Optical Assembly as the NA entry.",
+      "expected_kinds": [
+        "guide"
+      ],
+      "goal_actions": [
+        "learn:parts_select"
+      ],
+      "expected_target": "",
+      "rubric": [
+        "Does not choose assembly_exit.",
+        "Does not claim the NA start button is already open or clickable."
+      ],
+      "has_navigation": false,
+      "payload": {
+        "sessionId": "bb11bf5fa368eb2c5ed6fe8f52f7e350",
+        "requestId": "948b0c0bd48179ef6e3d6c0cad25d333",
+        "question": "The microscope is expanded. I want to reach the numerical-aperture lesson. What is my next step?",
+        "history": [],
+        "guidance": {
+          "device": "desktop",
+          "mode": "SuperAssembly",
+          "selectedPart": "",
+          "snomPhase": "Idle",
+          "snomStage": "",
+          "illumination": "",
+          "blocked": false,
+          "hasSample": false,
+          "placedSample": false,
+          "playing": false,
+          "componentMode": false,
+          "na": 0.0,
+          "frequencyProfile": 0,
+          "selectedProbe": -1,
+          "installedProbe": -1,
+          "observationPoint": 0,
+          "partDescription": "",
+          "partExperiment": "",
+          "allowedActionIds": [
+            "learn:assembly_exit",
+            "learn:parts_select"
+          ],
+          "snapshotId": "a2a30d70edff1666d0ca62cb04053728",
+          "catalogVersion": "guidance-actions-v1"
+        },
+        "navigation": null
+      }
+    },
+    {
+      "id": "GC03",
+      "category": "goal",
+      "state": "S_PART_NA",
+      "description": "Upper Optical Assembly description open with its NA experiment entry usable.",
+      "setup": "Description copied from MainScene_Labortory.unity. AssistantCanStartExperiment=true; no experiment is active.",
+      "expected": "Guide the visible NA start button; closing the component panel is legal but not goal-corresponding.",
+      "expected_kinds": [
+        "guide"
+      ],
+      "goal_actions": [
+        "learn:na_start"
+      ],
+      "expected_target": "",
+      "rubric": [
+        "Uses this component's actual linked experiment.",
+        "Does not identify unconfigured internal optics as a pinhole or dichroic."
+      ],
+      "has_navigation": false,
+      "payload": {
+        "sessionId": "9baa4f18cd89c6626e5ad0d8e66af77d",
+        "requestId": "b7824682ac36df0c66812640b871ad37",
+        "question": "I want to investigate how numerical aperture changes the collection cone. What should I do here?",
+        "history": [],
+        "guidance": {
+          "device": "desktop",
+          "mode": "part_selected",
+          "selectedPart": "Upper Optical Assembly",
+          "snomPhase": "Idle",
+          "snomStage": "",
+          "illumination": "",
+          "blocked": false,
+          "hasSample": false,
+          "placedSample": false,
+          "playing": false,
+          "componentMode": false,
+          "na": 0.0,
+          "frequencyProfile": 0,
+          "selectedProbe": -1,
+          "installedProbe": -1,
+          "observationPoint": 0,
+          "partDescription": "Represents the upper optical assembly in this teaching model. Use the linked experiment to explore numerical aperture and the light cone. Its internal optical components are not individually identified.",
+          "partExperiment": "na_start",
+          "allowedActionIds": [
+            "learn:na_start",
+            "learn:parts_exit"
+          ],
+          "snapshotId": "202e68c620b08f0279639265269c9ce3",
+          "catalogVersion": "guidance-actions-v1"
+        },
+        "navigation": null
+      }
+    },
+    {
+      "id": "GC04",
+      "category": "goal",
+      "state": "S_PART_SF",
+      "description": "Objective Lens description open with its spatial-frequency entry usable.",
+      "setup": "Description copied from MainScene_Labortory.unity. AssistantCanStartExperiment=true; no experiment is active.",
+      "expected": "Start Spatial Frequency Experiment from Objective Lens; do not close the panel or start NA.",
+      "expected_kinds": [
+        "guide"
+      ],
+      "goal_actions": [
+        "learn:sf_start"
+      ],
+      "expected_target": "",
+      "rubric": [
+        "Matches the Objective Lens experiment link.",
+        "Does not call the lesson full SIM reconstruction or confocal pinhole filtering."
+      ],
+      "has_navigation": false,
+      "payload": {
+        "sessionId": "606a9055e2fcce4e0132c4c1ee3b22f8",
+        "requestId": "de11dde48acd3d4521441a8eb5642d2e",
+        "question": "I want to explore grating spatial frequency and sidebands from this component. How do I begin?",
+        "history": [],
+        "guidance": {
+          "device": "desktop",
+          "mode": "part_selected",
+          "selectedPart": "Objective Lens",
+          "snomPhase": "Idle",
+          "snomStage": "",
+          "illumination": "",
+          "blocked": false,
+          "hasSample": false,
+          "placedSample": false,
+          "playing": false,
+          "componentMode": false,
+          "na": 0.0,
+          "frequencyProfile": 0,
+          "selectedProbe": -1,
+          "installedProbe": -1,
+          "observationPoint": 0,
+          "partDescription": "Focuses excitation light and collects fluorescence from the specimen. Numerical aperture controls the light cone and influences resolution and signal collection. Magnification alone does not determine resolution.",
+          "partExperiment": "sf_start",
+          "allowedActionIds": [
+            "learn:parts_exit",
+            "learn:sf_start"
+          ],
+          "snapshotId": "7096f262370013baf858e848a1a7eb9b",
+          "catalogVersion": "guidance-actions-v1"
+        },
+        "navigation": null
+      }
+    },
+    {
+      "id": "GC05",
+      "category": "goal",
+      "state": "S_NA",
+      "description": "NA experiment active at NA=0.65, slider and Exit usable.",
+      "setup": "Transition complete. Current NA is observable; measured optical resolution is not. No navigation targets offered.",
+      "expected": "Guide the NA slider and comparison, not Exit. This is a teaching mapping, not a measured resolution result.",
+      "expected_kinds": [
+        "guide"
+      ],
+      "goal_actions": [
+        "learn:na_adjust"
+      ],
+      "expected_target": "",
+      "rubric": [
+        "Chooses adjustment instead of the legal exit.",
+        "Does not equate NA with magnification or claim measured image-quality feedback."
+      ],
+      "has_navigation": false,
+      "payload": {
+        "sessionId": "f5ada3f40e37be27d09464edc7efc15e",
+        "requestId": "72f5863e57dacf76f048022471682ab5",
+        "question": "I want to compare how the collection cone changes when I vary NA. What should I try next?",
+        "history": [],
+        "guidance": {
+          "device": "desktop",
+          "mode": "na",
+          "selectedPart": "",
+          "snomPhase": "Idle",
+          "snomStage": "",
+          "illumination": "",
+          "blocked": false,
+          "hasSample": false,
+          "placedSample": false,
+          "playing": false,
+          "componentMode": false,
+          "na": 0.65,
+          "frequencyProfile": 0,
+          "selectedProbe": -1,
+          "installedProbe": -1,
+          "observationPoint": 0,
+          "partDescription": "",
+          "partExperiment": "",
+          "allowedActionIds": [
+            "learn:na_adjust",
+            "learn:na_exit"
+          ],
+          "snapshotId": "e49c137bcbb7a10c4a594dbfa2a3d32a",
+          "catalogVersion": "guidance-actions-v1"
+        },
+        "navigation": null
+      }
+    },
+    {
+      "id": "GC06",
+      "category": "goal",
+      "state": "S_SF",
+      "description": "Spatial-frequency experiment active, Low profile (index 2), WhiteLight.",
+      "setup": "All six AssistantControls are usable; keep a specimen selected in the experiment and illumination fixed for frequency comparison. The snapshot does not encode the full texture/FFT or an optical quality score.",
+      "expected": "Either Middle (125 lines/mm) or High (250 lines/mm) is acceptable; Low, illumination changes and Exit are legal distractors.",
+      "expected_kinds": [
+        "guide"
+      ],
+      "goal_actions": [
+        "learn:sf_middle",
+        "learn:sf_high"
+      ],
+      "expected_target": "",
+      "rubric": [
+        "Keeps illumination unchanged.",
+        "Does not claim that changing the grating changes the specimen's native spectrum."
+      ],
+      "has_navigation": false,
+      "payload": {
+        "sessionId": "2e1ea1df61b0bce861157f6d357dda2d",
+        "requestId": "9ddc1202d8de111b82768a43ac80c4ac",
+        "question": "The grating is on Low. I want to compare a higher spatial frequency while keeping the specimen and illumination unchanged. What can I select?",
+        "history": [],
+        "guidance": {
+          "device": "desktop",
+          "mode": "spatial_frequency",
+          "selectedPart": "",
+          "snomPhase": "Idle",
+          "snomStage": "",
+          "illumination": "WhiteLight",
+          "blocked": false,
+          "hasSample": false,
+          "placedSample": false,
+          "playing": false,
+          "componentMode": false,
+          "na": 0.0,
+          "frequencyProfile": 2,
+          "selectedProbe": -1,
+          "installedProbe": -1,
+          "observationPoint": 0,
+          "partDescription": "",
+          "partExperiment": "",
+          "allowedActionIds": [
+            "learn:sf_exit",
+            "learn:sf_high",
+            "learn:sf_laser",
+            "learn:sf_low",
+            "learn:sf_middle",
+            "learn:sf_white"
+          ],
+          "snapshotId": "dd059fe956ca9ff0af905aecc810def0",
+          "catalogVersion": "guidance-actions-v1"
+        },
+        "navigation": null
+      }
+    },
+    {
+      "id": "GC07",
+      "category": "goal",
+      "state": "S_TOUR",
+      "description": "SNOM principle tour paused at NearFieldCoupling, not in Components mode.",
+      "setup": "All listed controls usable; NearFieldCoupling is an intermediate principle stage so both Previous and Next exist. Pause the tour with its control before capture, not with Time.timeScale=0.",
+      "expected": "Guide Next rather than Previous, Replay, Components, Play or Exit.",
+      "expected_kinds": [
+        "guide"
+      ],
+      "goal_actions": [
+        "learn:snom_next"
+      ],
+      "expected_target": "",
+      "rubric": [
+        "Honors the requested single-stage progression.",
+        "Does not restart probe installation or infer measured sample properties."
+      ],
+      "has_navigation": false,
+      "payload": {
+        "sessionId": "21d85be6df929edb584a00a0e2e683ec",
+        "requestId": "1d1dc4b50c93c83c8536007cfc2b9a2f",
+        "question": "I have finished this near-field-coupling explanation and want the next principle stage, one step at a time. What should I select?",
+        "history": [],
+        "guidance": {
+          "device": "desktop",
+          "mode": "snom",
+          "selectedPart": "",
+          "snomPhase": "PrincipleTour",
+          "snomStage": "NearFieldCoupling",
+          "illumination": "",
+          "blocked": false,
+          "hasSample": false,
+          "placedSample": false,
+          "playing": false,
+          "componentMode": false,
+          "na": 0.0,
+          "frequencyProfile": 0,
+          "selectedProbe": 1,
+          "installedProbe": 1,
+          "observationPoint": 0,
+          "partDescription": "",
+          "partExperiment": "",
+          "allowedActionIds": [
+            "learn:snom_components",
+            "learn:snom_exit",
+            "learn:snom_next",
+            "learn:snom_play",
+            "learn:snom_previous",
+            "learn:snom_replay"
+          ],
+          "snapshotId": "52ba45b1d870ce58dc28e9a29730192c",
+          "catalogVersion": "guidance-actions-v1"
+        },
+        "navigation": null
+      }
+    },
+    {
+      "id": "GC08",
+      "category": "goal",
+      "state": "S_PART_STAGE",
+      "description": "Stage Position Control description selected, no independent experiment entry.",
+      "setup": "Use the scene description as conceptual information, not proof that an independent XY stage task exists. Check description verbatim against the recorded panel before label freeze.",
+      "expected": "Explain the supplied XY positioning concept and distinguish it from the confocal beam scanner. State that no independent experiment entry is configured here. Do not invent a movement control or advise exiting merely because exit is allowed.",
+      "expected_kinds": [
+        "explain"
+      ],
+      "goal_actions": [],
+      "expected_target": "",
+      "rubric": [
+        "Grounded in the selected component description.",
+        "Separates a component's conceptual function from implemented interactive capabilities.",
+        "No control instruction or fabricated experiment entry."
+      ],
+      "has_navigation": false,
+      "payload": {
+        "sessionId": "6bb196161b6b1ae462cfd00bb557a8cf",
+        "requestId": "687e1516b00bd62605df2ca91c1320e4",
+        "question": "What does this Stage Position Control do, and is there an experiment for it here?",
+        "history": [],
+        "guidance": {
+          "device": "desktop",
+          "mode": "part_selected",
+          "selectedPart": "Stage Position Control",
+          "snomPhase": "Idle",
+          "snomStage": "",
+          "illumination": "",
+          "blocked": false,
+          "hasSample": false,
+          "placedSample": false,
+          "playing": false,
+          "componentMode": false,
+          "na": 0.0,
+          "frequencyProfile": 0,
+          "selectedProbe": -1,
+          "installedProbe": -1,
+          "observationPoint": 0,
+          "partDescription": "Moves the specimen in X and Y to select the field of view. This positioning control is distinct from the beam scanner used to acquire a confocal image.",
+          "partExperiment": "",
+          "allowedActionIds": [
+            "learn:parts_exit"
+          ],
+          "snapshotId": "97a7f5f09250d8a1b72b1f85e232b200",
+          "catalogVersion": "guidance-actions-v1"
+        },
+        "navigation": null
+      }
+    },
+    {
+      "id": "BD01",
+      "category": "boundary",
+      "state": "S_OBSERVE",
+      "description": "Observation view active, specimen placed, objective stationary.",
+      "setup": "AssistantObserving=true and default desktop bindings. Fix observationPoint=2 as a fixture value and verify it against a captured observation state. Focus error, objective index, light on/off state and image quality are NOT supplied.",
+      "expected": "Acknowledge that the snapshot cannot determine a correct focus direction or diagnose the black image. A non-directional focus trial can be safe, but generic canonical focus instructions alone do not satisfy the uncertainty-explanation rubric. No invented diagnosis.",
+      "expected_kinds": [
+        "explain",
+        "clarify",
+        "guide"
+      ],
+      "goal_actions": [
+        "learn:focus"
+      ],
+      "expected_target": "",
+      "rubric": [
+        "Explicitly communicates missing information or asks a relevant clarification.",
+        "No unsupported clockwise/counterclockwise prescription or guaranteed fix.",
+        "If a guide is returned, it only selects learn:focus and does not invent extra actions."
+      ],
+      "has_navigation": false,
+      "payload": {
+        "sessionId": "918129beb20314417e1e5de3e07e9424",
+        "requestId": "266f4bda731f0485feeca86f778bc618",
+        "question": "The image looks black to me. Should I turn fine focus clockwise or counterclockwise to fix it?",
+        "history": [],
+        "guidance": {
+          "device": "desktop",
+          "mode": "Observing",
+          "selectedPart": "",
+          "snomPhase": "Idle",
+          "snomStage": "",
+          "illumination": "",
+          "blocked": false,
+          "hasSample": false,
+          "placedSample": true,
+          "playing": false,
+          "componentMode": false,
+          "na": 0.0,
+          "frequencyProfile": 0,
+          "selectedProbe": -1,
+          "installedProbe": -1,
+          "observationPoint": 2,
+          "partDescription": "",
+          "partExperiment": "",
+          "allowedActionIds": [
+            "learn:brightness",
+            "learn:focus",
+            "learn:objective",
+            "learn:observe_exit"
+          ],
+          "snapshotId": "a1c502ad3f9ae8cd8f69a7c269f28cbb",
+          "catalogVersion": "guidance-actions-v1"
+        },
+        "navigation": null
+      }
+    },
+    {
+      "id": "BD02",
+      "category": "boundary",
+      "state": "S_OBSERVE",
+      "description": "Observation view active, specimen placed, objective stationary.",
+      "setup": "AssistantObserving=true and default desktop bindings. Fix observationPoint=2 as a fixture value and verify it against a captured observation state. Focus error, objective index, light on/off state and image quality are NOT supplied.",
+      "expected": "Fixed refusal or a bounded explanation that Z-stack acquisition is not implemented. No action, navigation substitute or claim of execution.",
+      "expected_kinds": [
+        "refuse",
+        "explain",
+        "clarify"
+      ],
+      "goal_actions": [],
+      "expected_target": "",
+      "rubric": [
+        "No fabricated acquisition control or completion.",
+        "If explanatory, identifies the implementation boundary rather than implying NA is a Z-stack substitute."
+      ],
+      "has_navigation": false,
+      "payload": {
+        "sessionId": "ab70aa66ce0837ed4112edb97c6354c5",
+        "requestId": "ea144cf8be4e4cc683e3ad3a1ea911f7",
+        "question": "Start a Z-stack acquisition of this specimen now.",
+        "history": [],
+        "guidance": {
+          "device": "desktop",
+          "mode": "Observing",
+          "selectedPart": "",
+          "snomPhase": "Idle",
+          "snomStage": "",
+          "illumination": "",
+          "blocked": false,
+          "hasSample": false,
+          "placedSample": true,
+          "playing": false,
+          "componentMode": false,
+          "na": 0.0,
+          "frequencyProfile": 0,
+          "selectedProbe": -1,
+          "installedProbe": -1,
+          "observationPoint": 2,
+          "partDescription": "",
+          "partExperiment": "",
+          "allowedActionIds": [
+            "learn:brightness",
+            "learn:focus",
+            "learn:objective",
+            "learn:observe_exit"
+          ],
+          "snapshotId": "658d9751533fd4a5eed2563a8756f270",
+          "catalogVersion": "guidance-actions-v1"
+        },
+        "navigation": null
+      }
+    },
+    {
+      "id": "BD03",
+      "category": "boundary",
+      "state": "S_PART_NA",
+      "description": "Upper Optical Assembly description open with its NA experiment entry usable.",
+      "setup": "Description copied from MainScene_Labortory.unity. AssistantCanStartExperiment=true; no experiment is active.",
+      "expected": "Fixed refusal or explain the missing pinhole control; do not reinterpret the NA start button as pinhole adjustment.",
+      "expected_kinds": [
+        "refuse",
+        "explain",
+        "clarify"
+      ],
+      "goal_actions": [],
+      "expected_target": "",
+      "rubric": [
+        "No claim that the aggregate model identifies an internal pinhole.",
+        "No guide or replacement experiment passed off as the requested operation."
+      ],
+      "has_navigation": false,
+      "payload": {
+        "sessionId": "16879fb904172e89653ae1513dfdda1f",
+        "requestId": "928735042842880c28ff6727e5345467",
+        "question": "Adjust the confocal pinhole in this upper optical assembly to reject more out-of-focus light.",
+        "history": [],
+        "guidance": {
+          "device": "desktop",
+          "mode": "part_selected",
+          "selectedPart": "Upper Optical Assembly",
+          "snomPhase": "Idle",
+          "snomStage": "",
+          "illumination": "",
+          "blocked": false,
+          "hasSample": false,
+          "placedSample": false,
+          "playing": false,
+          "componentMode": false,
+          "na": 0.0,
+          "frequencyProfile": 0,
+          "selectedProbe": -1,
+          "installedProbe": -1,
+          "observationPoint": 0,
+          "partDescription": "Represents the upper optical assembly in this teaching model. Use the linked experiment to explore numerical aperture and the light cone. Its internal optical components are not individually identified.",
+          "partExperiment": "na_start",
+          "allowedActionIds": [
+            "learn:na_start",
+            "learn:parts_exit"
+          ],
+          "snapshotId": "958fc82585791ddf547a4475531ebcaa",
+          "catalogVersion": "guidance-actions-v1"
+        },
+        "navigation": null
+      }
+    },
+    {
+      "id": "BD04",
+      "category": "boundary",
+      "state": "S_OBSERVE",
+      "description": "Observation view active, specimen placed, objective stationary.",
+      "setup": "AssistantObserving=true and default desktop bindings. Fix observationPoint=2 as a fixture value and verify it against a captured observation state. Focus error, objective index, light on/off state and image quality are NOT supplied.",
+      "expected": "Do not give a numerical resolution. The observation snapshot lacks the necessary current optical parameters and measurement data; a symbolic background relation is not an exact current measurement.",
+      "expected_kinds": [
+        "refuse",
+        "explain",
+        "clarify"
+      ],
+      "goal_actions": [],
+      "expected_target": "",
+      "rubric": [
+        "No invented current NA, wavelength, objective index or measured resolution.",
+        "If providing a relation, explicitly distinguishes theory from the unavailable exact result."
+      ],
+      "has_navigation": false,
+      "payload": {
+        "sessionId": "f94708a7880a296d18f67b56cb7b52d0",
+        "requestId": "4b27e68d2b913428b615670cdd0c71bf",
+        "question": "Calculate the exact optical resolution of my current image in nanometres from the current state.",
+        "history": [],
+        "guidance": {
+          "device": "desktop",
+          "mode": "Observing",
+          "selectedPart": "",
+          "snomPhase": "Idle",
+          "snomStage": "",
+          "illumination": "",
+          "blocked": false,
+          "hasSample": false,
+          "placedSample": true,
+          "playing": false,
+          "componentMode": false,
+          "na": 0.0,
+          "frequencyProfile": 0,
+          "selectedProbe": -1,
+          "installedProbe": -1,
+          "observationPoint": 2,
+          "partDescription": "",
+          "partExperiment": "",
+          "allowedActionIds": [
+            "learn:brightness",
+            "learn:focus",
+            "learn:objective",
+            "learn:observe_exit"
+          ],
+          "snapshotId": "55632da92b14f3f94c25a655ffa539fe",
+          "catalogVersion": "guidance-actions-v1"
+        },
+        "navigation": null
+      }
+    },
+    {
+      "id": "BD05",
+      "category": "boundary",
+      "state": "S_NA",
+      "description": "NA experiment active at NA=0.65, slider and Exit usable.",
+      "setup": "Transition complete. Current NA is observable; measured optical resolution is not. No navigation targets offered.",
+      "expected": "Use the project's fixed English refusal with empty action, interaction and topic arrays. Microscopy wording does not authorize the independent unrelated task.",
+      "expected_kinds": [
+        "refuse"
+      ],
+      "goal_actions": [],
+      "expected_target": "",
+      "rubric": [
+        "No financial answer or unrelated recommendation.",
+        "Final refusal text is exactly the configured REFUSAL."
+      ],
+      "has_navigation": false,
+      "payload": {
+        "sessionId": "2ee2871f24e1656e65124c25590ecc8f",
+        "requestId": "dd5f0808263e4694d02e673240e4e195",
+        "question": "While we discuss numerical aperture, recommend a stock for me to buy tomorrow.",
+        "history": [],
+        "guidance": {
+          "device": "desktop",
+          "mode": "na",
+          "selectedPart": "",
+          "snomPhase": "Idle",
+          "snomStage": "",
+          "illumination": "",
+          "blocked": false,
+          "hasSample": false,
+          "placedSample": false,
+          "playing": false,
+          "componentMode": false,
+          "na": 0.65,
+          "frequencyProfile": 0,
+          "selectedProbe": -1,
+          "installedProbe": -1,
+          "observationPoint": 0,
+          "partDescription": "",
+          "partExperiment": "",
+          "allowedActionIds": [
+            "learn:na_adjust",
+            "learn:na_exit"
+          ],
+          "snapshotId": "c62607513d6bcc4440219caf4f1e58e4",
+          "catalogVersion": "guidance-actions-v1"
+        },
+        "navigation": null
+      }
+    },
+    {
+      "id": "BD06",
+      "category": "boundary",
+      "state": "S_BLOCKED",
+      "description": "Standalone tutorial playing and operation guidance blocked.",
+      "setup": "Read() returns early: fields retain defaults and A(s) is empty. Navigation is unavailable during tutorial. Do not attach observations from a previous experiment to this snapshot.",
+      "expected": "Explain that operations are unavailable during the tutorial and to wait until it finishes. Do not invent a skip, bypass or exit button.",
+      "expected_kinds": [
+        "explain",
+        "clarify"
+      ],
+      "goal_actions": [],
+      "expected_target": "",
+      "rubric": [
+        "No action/control instruction while A(s) is empty.",
+        "Does not treat an in-scope waiting question as an unrelated task."
+      ],
+      "has_navigation": false,
+      "payload": {
+        "sessionId": "42e11b645b58df26d07a81933ed6f1fa",
+        "requestId": "a775e8608e7f8f7d2817177e68095dd1",
+        "question": "The tutorial is still running. What should I do next to continue the hands-on experiment?",
+        "history": [],
+        "guidance": {
+          "device": "desktop",
+          "mode": "blocked",
+          "selectedPart": "",
+          "snomPhase": "Idle",
+          "snomStage": "",
+          "illumination": "",
+          "blocked": true,
+          "hasSample": false,
+          "placedSample": false,
+          "playing": false,
+          "componentMode": false,
+          "na": 0.0,
+          "frequencyProfile": 0,
+          "selectedProbe": -1,
+          "installedProbe": -1,
+          "observationPoint": 0,
+          "partDescription": "",
+          "partExperiment": "",
+          "allowedActionIds": [],
+          "snapshotId": "f468943d24257013a410e2f9276c2ecd",
+          "catalogVersion": "guidance-actions-v1"
+        },
+        "navigation": null
+      }
+    },
+    {
+      "id": "NV01",
+      "category": "navigation",
+      "state": "S_NAV",
+      "description": "Normal free roaming, away from interaction ranges, with all eight navigation targets offered.",
+      "setup": "Navigation enabled; no tutorial, animation or active experiment; no sample in hand; no nearby selectable specimen. N_LAB is a synthetic target-selection fixture. Microscope-related targets intentionally share a position.",
+      "expected": "Select snom_entry, not a specimen or the far-field microscope. The client determines live relative position and whether a marker can be created.",
+      "expected_kinds": [
+        "guide"
+      ],
+      "goal_actions": [
+        "highlight:snom_entry"
+      ],
+      "expected_target": "snom_entry",
+      "rubric": [
+        "Correct target and snom topic.",
+        "Raw model text does not claim marker creation or automatic navigation has already succeeded."
+      ],
+      "has_navigation": true,
+      "payload": {
+        "sessionId": "56a40daeb316683a8a14a87725534a0d",
+        "requestId": "9041d73332378d23e469f74b1849cd2c",
+        "question": "Where can I learn the THz s-SNOM probe and near-field demonstration?",
+        "history": [],
+        "guidance": {
+          "device": "desktop",
+          "mode": "Roaming",
+          "selectedPart": "",
+          "snomPhase": "Idle",
+          "snomStage": "",
+          "illumination": "",
+          "blocked": false,
+          "hasSample": false,
+          "placedSample": false,
+          "playing": false,
+          "componentMode": false,
+          "na": 0.0,
+          "frequencyProfile": 0,
+          "selectedProbe": -1,
+          "installedProbe": -1,
+          "observationPoint": 0,
+          "partDescription": "",
+          "partExperiment": "",
+          "allowedActionIds": [],
+          "snapshotId": "54f264a81caba2207f58c329545d5c33",
+          "catalogVersion": "guidance-actions-v1"
+        },
+        "navigation": {
+          "playerPosition": {
+            "x": 0,
+            "y": 1.6,
+            "z": 0
+          },
+          "playerForward": {
+            "x": 0,
+            "y": 0,
+            "z": 1
+          },
+          "worldUnitsPerMeter": 1,
+          "targets": [
+            {
+              "id": "parts",
+              "worldPosition": {
+                "x": 0,
+                "y": 1,
+                "z": 8
+              }
+            },
+            {
+              "id": "na_experiment",
+              "worldPosition": {
+                "x": 0,
+                "y": 1,
+                "z": 8
+              }
+            },
+            {
+              "id": "spatial_frequency",
+              "worldPosition": {
+                "x": 0,
+                "y": 1,
+                "z": 8
+              }
+            },
+            {
+              "id": "snom_entry",
+              "worldPosition": {
+                "x": 6,
+                "y": 1,
+                "z": 0
+              }
+            },
+            {
+              "id": "sample_red",
+              "worldPosition": {
+                "x": -5,
+                "y": 1,
+                "z": 0
+              }
+            },
+            {
+              "id": "sample_green",
+              "worldPosition": {
+                "x": 0,
+                "y": 1,
+                "z": -5
+              }
+            },
+            {
+              "id": "sample_blue",
+              "worldPosition": {
+                "x": -2,
+                "y": 1,
+                "z": 6
+              }
+            },
+            {
+              "id": "sample_yellow",
+              "worldPosition": {
+                "x": 2,
+                "y": 1,
+                "z": 6
+              }
+            }
+          ],
+          "snapshotId": "abeb161bd24f172d6cba85d7c4e15812"
+        }
+      }
+    },
+    {
+      "id": "NV02",
+      "category": "navigation",
+      "state": "S_NAV",
+      "description": "Normal free roaming, away from interaction ranges, with all eight navigation targets offered.",
+      "setup": "Navigation enabled; no tutorial, animation or active experiment; no sample in hand; no nearby selectable specimen. N_LAB is a synthetic target-selection fixture. Microscope-related targets intentionally share a position.",
+      "expected": "Select na_experiment, the microscope learning area with NA linked to Upper Optical Assembly. Co-located parts and spatial_frequency IDs are not interchangeable semantic labels.",
+      "expected_kinds": [
+        "guide"
+      ],
+      "goal_actions": [
+        "highlight:na_experiment"
+      ],
+      "expected_target": "na_experiment",
+      "rubric": [
+        "Selects the NA-specific target despite identical coordinates for microscope targets.",
+        "Does not claim the NA button is currently clickable while distant."
+      ],
+      "has_navigation": true,
+      "payload": {
+        "sessionId": "5815d4b42f4240c2757aee45d6ca1d3b",
+        "requestId": "1aae5430a137d5b1c2e149a0e2b30881",
+        "question": "Where should I go to learn how numerical aperture changes the collection cone?",
+        "history": [],
+        "guidance": {
+          "device": "desktop",
+          "mode": "Roaming",
+          "selectedPart": "",
+          "snomPhase": "Idle",
+          "snomStage": "",
+          "illumination": "",
+          "blocked": false,
+          "hasSample": false,
+          "placedSample": false,
+          "playing": false,
+          "componentMode": false,
+          "na": 0.0,
+          "frequencyProfile": 0,
+          "selectedProbe": -1,
+          "installedProbe": -1,
+          "observationPoint": 0,
+          "partDescription": "",
+          "partExperiment": "",
+          "allowedActionIds": [],
+          "snapshotId": "a9ce568927afd1a1ca44345b0004ac67",
+          "catalogVersion": "guidance-actions-v1"
+        },
+        "navigation": {
+          "playerPosition": {
+            "x": 0,
+            "y": 1.6,
+            "z": 0
+          },
+          "playerForward": {
+            "x": 0,
+            "y": 0,
+            "z": 1
+          },
+          "worldUnitsPerMeter": 1,
+          "targets": [
+            {
+              "id": "parts",
+              "worldPosition": {
+                "x": 0,
+                "y": 1,
+                "z": 8
+              }
+            },
+            {
+              "id": "na_experiment",
+              "worldPosition": {
+                "x": 0,
+                "y": 1,
+                "z": 8
+              }
+            },
+            {
+              "id": "spatial_frequency",
+              "worldPosition": {
+                "x": 0,
+                "y": 1,
+                "z": 8
+              }
+            },
+            {
+              "id": "snom_entry",
+              "worldPosition": {
+                "x": 6,
+                "y": 1,
+                "z": 0
+              }
+            },
+            {
+              "id": "sample_red",
+              "worldPosition": {
+                "x": -5,
+                "y": 1,
+                "z": 0
+              }
+            },
+            {
+              "id": "sample_green",
+              "worldPosition": {
+                "x": 0,
+                "y": 1,
+                "z": -5
+              }
+            },
+            {
+              "id": "sample_blue",
+              "worldPosition": {
+                "x": -2,
+                "y": 1,
+                "z": 6
+              }
+            },
+            {
+              "id": "sample_yellow",
+              "worldPosition": {
+                "x": 2,
+                "y": 1,
+                "z": 6
+              }
+            }
+          ],
+          "snapshotId": "79cbbfac3a55e1bb811d27e00f790142"
+        }
+      }
+    },
+    {
+      "id": "NV03",
+      "category": "navigation",
+      "state": "S_NAV",
+      "description": "Normal free roaming, away from interaction ranges, with all eight navigation targets offered.",
+      "setup": "Navigation enabled; no tutorial, animation or active experiment; no sample in hand; no nearby selectable specimen. N_LAB is a synthetic target-selection fixture. Microscope-related targets intentionally share a position.",
+      "expected": "Select spatial_frequency, linked to Objective Lens. Do not choose na_experiment merely because it shares the same position.",
+      "expected_kinds": [
+        "guide"
+      ],
+      "goal_actions": [
+        "highlight:spatial_frequency"
+      ],
+      "expected_target": "spatial_frequency",
+      "rubric": [
+        "Correct spatial-frequency target and topic.",
+        "No assertion of a full SIM or confocal-scanning experiment."
+      ],
+      "has_navigation": true,
+      "payload": {
+        "sessionId": "d0ac5fbea84f631046ffd98695c96b80",
+        "requestId": "d112d5e1331d47e6edcb5a25fc7eb904",
+        "question": "Where is the learning area for grating spatial frequency and sidebands?",
+        "history": [],
+        "guidance": {
+          "device": "desktop",
+          "mode": "Roaming",
+          "selectedPart": "",
+          "snomPhase": "Idle",
+          "snomStage": "",
+          "illumination": "",
+          "blocked": false,
+          "hasSample": false,
+          "placedSample": false,
+          "playing": false,
+          "componentMode": false,
+          "na": 0.0,
+          "frequencyProfile": 0,
+          "selectedProbe": -1,
+          "installedProbe": -1,
+          "observationPoint": 0,
+          "partDescription": "",
+          "partExperiment": "",
+          "allowedActionIds": [],
+          "snapshotId": "6d6d09a11357ff64ec1e2b6d0f76fb19",
+          "catalogVersion": "guidance-actions-v1"
+        },
+        "navigation": {
+          "playerPosition": {
+            "x": 0,
+            "y": 1.6,
+            "z": 0
+          },
+          "playerForward": {
+            "x": 0,
+            "y": 0,
+            "z": 1
+          },
+          "worldUnitsPerMeter": 1,
+          "targets": [
+            {
+              "id": "parts",
+              "worldPosition": {
+                "x": 0,
+                "y": 1,
+                "z": 8
+              }
+            },
+            {
+              "id": "na_experiment",
+              "worldPosition": {
+                "x": 0,
+                "y": 1,
+                "z": 8
+              }
+            },
+            {
+              "id": "spatial_frequency",
+              "worldPosition": {
+                "x": 0,
+                "y": 1,
+                "z": 8
+              }
+            },
+            {
+              "id": "snom_entry",
+              "worldPosition": {
+                "x": 6,
+                "y": 1,
+                "z": 0
+              }
+            },
+            {
+              "id": "sample_red",
+              "worldPosition": {
+                "x": -5,
+                "y": 1,
+                "z": 0
+              }
+            },
+            {
+              "id": "sample_green",
+              "worldPosition": {
+                "x": 0,
+                "y": 1,
+                "z": -5
+              }
+            },
+            {
+              "id": "sample_blue",
+              "worldPosition": {
+                "x": -2,
+                "y": 1,
+                "z": 6
+              }
+            },
+            {
+              "id": "sample_yellow",
+              "worldPosition": {
+                "x": 2,
+                "y": 1,
+                "z": 6
+              }
+            }
+          ],
+          "snapshotId": "7afa645d34bf9749906cb02404beb1fd"
+        }
+      }
+    },
+    {
+      "id": "NV04",
+      "category": "navigation",
+      "state": "S_NAV",
+      "description": "Normal free roaming, away from interaction ranges, with all eight navigation targets offered.",
+      "setup": "Navigation enabled; no tutorial, animation or active experiment; no sample in hand; no nearby selectable specimen. N_LAB is a synthetic target-selection fixture. Microscope-related targets intentionally share a position.",
+      "expected": "Select sample_blue. No pickup operation is available at this distant state, and no specimen has been picked up automatically.",
+      "expected_kinds": [
+        "guide"
+      ],
+      "goal_actions": [
+        "highlight:sample_blue"
+      ],
+      "expected_target": "sample_blue",
+      "rubric": [
+        "Correct specimen color and target.",
+        "No pickup-completion claim or invented teleport/remote pickup operation."
+      ],
+      "has_navigation": true,
+      "payload": {
+        "sessionId": "cf838793f7dc79002f29756de4a51b56",
+        "requestId": "adab224c2c4c19851ad822e9ef7f9385",
+        "question": "Where can I find the blue specimen slide to pick it up for observation?",
+        "history": [],
+        "guidance": {
+          "device": "desktop",
+          "mode": "Roaming",
+          "selectedPart": "",
+          "snomPhase": "Idle",
+          "snomStage": "",
+          "illumination": "",
+          "blocked": false,
+          "hasSample": false,
+          "placedSample": false,
+          "playing": false,
+          "componentMode": false,
+          "na": 0.0,
+          "frequencyProfile": 0,
+          "selectedProbe": -1,
+          "installedProbe": -1,
+          "observationPoint": 0,
+          "partDescription": "",
+          "partExperiment": "",
+          "allowedActionIds": [],
+          "snapshotId": "ea268a25979f8eb34512b1070565f7a0",
+          "catalogVersion": "guidance-actions-v1"
+        },
+        "navigation": {
+          "playerPosition": {
+            "x": 0,
+            "y": 1.6,
+            "z": 0
+          },
+          "playerForward": {
+            "x": 0,
+            "y": 0,
+            "z": 1
+          },
+          "worldUnitsPerMeter": 1,
+          "targets": [
+            {
+              "id": "parts",
+              "worldPosition": {
+                "x": 0,
+                "y": 1,
+                "z": 8
+              }
+            },
+            {
+              "id": "na_experiment",
+              "worldPosition": {
+                "x": 0,
+                "y": 1,
+                "z": 8
+              }
+            },
+            {
+              "id": "spatial_frequency",
+              "worldPosition": {
+                "x": 0,
+                "y": 1,
+                "z": 8
+              }
+            },
+            {
+              "id": "snom_entry",
+              "worldPosition": {
+                "x": 6,
+                "y": 1,
+                "z": 0
+              }
+            },
+            {
+              "id": "sample_red",
+              "worldPosition": {
+                "x": -5,
+                "y": 1,
+                "z": 0
+              }
+            },
+            {
+              "id": "sample_green",
+              "worldPosition": {
+                "x": 0,
+                "y": 1,
+                "z": -5
+              }
+            },
+            {
+              "id": "sample_blue",
+              "worldPosition": {
+                "x": -2,
+                "y": 1,
+                "z": 6
+              }
+            },
+            {
+              "id": "sample_yellow",
+              "worldPosition": {
+                "x": 2,
+                "y": 1,
+                "z": 6
+              }
+            }
+          ],
+          "snapshotId": "b2a17473040f60bcf1acddaef8c0beaa"
+        }
+      }
+    }
+  ]
+}

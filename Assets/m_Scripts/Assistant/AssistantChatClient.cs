@@ -94,7 +94,7 @@ namespace VRMicroscope.Assistant
                 r.interaction_ids==null ||
                 r.suggested_action_ids==null || r.knowledge_topics==null ||
                 !(r.source=="mock" || r.source=="model") || string.IsNullOrEmpty(r.knowledgeVersion) ||
-                r.promptVersion!="assistant-chat-v3-guidance" ||
+                r.promptVersion!="assistant-chat-v4.1-clarify" ||
                 !(r.kind=="guide" || r.kind=="explain" || r.kind=="clarify" || r.kind=="refuse")) return false;
             if (r.kind=="guide")
             {

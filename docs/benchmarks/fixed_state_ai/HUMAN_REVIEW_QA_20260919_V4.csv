@@ -1,0 +1,121 @@
+﻿case_id,repetition,question,answer
+BD06,1,The tutorial is still running. What should I do next to continue the hands-on experiment?,"The current state shows the tutorial is blocking interaction, so no hands-on step can be confirmed right now. While it is running, follow its on-screen prompts; once it releases control, the microscope activities become available again. I cannot see a skip control or verify what comes next from here."
+AV04,1,How can I try adjusting focus while observing the specimen?,"After closing the chat window, press Tab to switch coarse/fine adjustment. Hold X and use the left/right arrow keys to focus.
+Observe: Compare clarity changes. Focusing does not change the objective intrinsic focal length."
+AV08,1,Installation is complete and I want to begin the SNOM principle demonstration. What is next?,"After closing the chat window, click Start System.
+Observe: The automatic principle tour begins after probe installation."
+BD05,1,"While we discuss numerical aperture, recommend a stock for me to buy tomorrow.",I do not know the answer to that yet. Please ask me something else.
+AV06,1,I have chosen the Standard probe and want to continue with it. What should I do next?,"After closing the chat window, click Install Selected Probe and wait for installation to finish.
+Observe: The probe moves to its mount. Start System becomes available after installation."
+BD01,1,The image looks black to me. Should I turn fine focus clockwise or counterclockwise to fix it?,"I can't confirm a specific focus direction from the current state, and focusing is relative axial positioning rather than a fixed clockwise/counterclockwise rule. A black view can have several causes, so I can't diagnose it as a focus problem without more evidence. If you'd like, I can explain what focusing changes and how clarity feedback is meant to behave."
+NV04,1,Where can I find the blue specimen slide to pick it up for observation?,You can use the blue specimen location to pick up the blue fluorescence slide for microscope observation. It is approximately 6.3 metres ahead.
+NV01,1,Where can I learn the THz s-SNOM probe and near-field demonstration?,"You can use the THz s-SNOM instrument to learn about probe tapping, near-field coupling, and scanning. It is approximately 6 metres to your right."
+BD03,1,Adjust the confocal pinhole in this upper optical assembly to reject more out-of-focus light.,I do not know the answer to that yet. Please ask me something else.
+GC04,1,I want to explore grating spatial frequency and sidebands from this component. How do I begin?,"After closing the chat window, click Start Spatial Frequency Experiment and wait for the transition.
+Observe: The spatial-frequency panel opens."
+GC08,1,"What does this Stage Position Control do, and is there an experiment for it here?","Stage Position Control moves the specimen in X and Y to select the field of view. It is a positioning control, distinct from the beam scanner used to acquire a confocal image. This component has no configured independent experiment entry here, so there is no linked hands-on activity for it."
+GC02,1,The microscope is expanded. I want to reach the numerical-aperture lesson. What is my next step?,"After closing the chat window, click a component and read its description on the right. Upper Optical Assembly links to NA; Objective Lens links to spatial frequency.
+Observe: Compare the component name, function, and experiment entry."
+AV01,1,"I want to observe a specimen, but I have not picked one up. What is my next action?","After closing the chat window, left-click to pick up the specimen currently in interaction range.
+Observe: The specimen preview changes. Picking up is distinct from placing it."
+AV02,1,I am holding the specimen at the microscope. How do I put it on the empty stage?,"After closing the chat window, press Z to place the held specimen.
+Observe: Confirm that the specimen appears on the stage."
+NV02,1,Where should I go to learn how numerical aperture changes the collection cone?,"You can use the microscope learning area to learn about numerical aperture, with entry linked to Upper Optical Assembly. It is approximately 8 metres ahead."
+GC03,1,I want to investigate how numerical aperture changes the collection cone. What should I do here?,"After closing the chat window, click Start Numerical Aperture Experiment and wait for the transition.
+Observe: The NA panel appears before you adjust the slider."
+GC05,1,I want to compare how the collection cone changes when I vary NA. What should I try next?,"After closing the chat window, drag the NA slider, changing only NA at a time.
+Observe: Compare the half-angle, collection cone, and display changes. Approximate magnification and image changes are teaching mappings; NA is not magnification."
+GC06,1,The grating is on Low. I want to compare a higher spatial frequency while keeping the specimen and illumination unchanged. What can I select?,"After closing the chat window, select High.
+Observe: This setting is 250 lines/mm. Keep the specimen and illumination fixed; compare the grating, spectrum, and sidebands."
+AV07,1,The selected probe is still being installed. What should I do next to continue the SNOM lesson?,"The selected probe is still installing, so the next SNOM step cannot be confirmed yet. Installation is a waiting stage; once it finishes, the sequence continues with Start System and then the principle tour. I cannot offer a skip or start action while installation is in progress."
+AV03,1,The specimen is already on the stage. How do I continue into observation?,"After closing the chat window, press Z to advance the current observation viewpoint.
+Observe: Wait for the viewpoint change. Another input may be needed to enter observation."
+BD04,1,Calculate the exact optical resolution of my current image in nanometres from the current state.,I do not know the answer to that yet. Please ask me something else.
+GC01,1,What should I do next?,"After closing the chat window, click the whole model again and wait for the expansion animation.
+Observe: The structure of the separated components."
+AV05,1,I have opened SNOM preparation and have no probe preference. What can I do first?,"After closing the chat window, select the Standard probe option.
+Observe: The probe description and preview change. The 2x label indicates illustrative relative detail, not objective magnification."
+NV03,1,Where is the learning area for grating spatial frequency and sidebands?,"You can use the microscope learning area to learn about spatial frequency, with entry linked to Objective Lens. It is approximately 8 metres ahead."
+GC07,1,"I have finished this near-field-coupling explanation and want the next principle stage, one step at a time. What should I select?","After closing the chat window, click Next.
+Observe: The next tour stage appears, or the next component in Components mode."
+BD02,1,Start a Z-stack acquisition of this specimen now.,I do not know the answer to that yet. Please ask me something else.
+BD02,2,Start a Z-stack acquisition of this specimen now.,I do not know the answer to that yet. Please ask me something else.
+AV03,2,The specimen is already on the stage. How do I continue into observation?,"After closing the chat window, press Z to advance the current observation viewpoint.
+Observe: Wait for the viewpoint change. Another input may be needed to enter observation."
+AV04,2,How can I try adjusting focus while observing the specimen?,"After closing the chat window, press Tab to switch coarse/fine adjustment. Hold X and use the left/right arrow keys to focus.
+Observe: Compare clarity changes. Focusing does not change the objective intrinsic focal length."
+AV01,2,"I want to observe a specimen, but I have not picked one up. What is my next action?","After closing the chat window, left-click to pick up the specimen currently in interaction range.
+Observe: The specimen preview changes. Picking up is distinct from placing it."
+BD06,2,The tutorial is still running. What should I do next to continue the hands-on experiment?,"The current state shows the tutorial is blocking interaction, so hands-on experiment steps cannot be confirmed or guided right now. Please wait for the tutorial to finish or release the lock; once it does, I can help you continue with the relevant experiment."
+NV02,2,Where should I go to learn how numerical aperture changes the collection cone?,"You can use the microscope learning area to learn about numerical aperture, with entry linked to Upper Optical Assembly. It is approximately 8 metres ahead."
+AV05,2,I have opened SNOM preparation and have no probe preference. What can I do first?,"After closing the chat window, select the Standard probe option.
+Observe: The probe description and preview change. The 2x label indicates illustrative relative detail, not objective magnification."
+AV06,2,I have chosen the Standard probe and want to continue with it. What should I do next?,"After closing the chat window, click Install Selected Probe and wait for installation to finish.
+Observe: The probe moves to its mount. Start System becomes available after installation."
+NV03,2,Where is the learning area for grating spatial frequency and sidebands?,"You can use the microscope learning area to learn about spatial frequency, with entry linked to Objective Lens. It is approximately 8 metres ahead."
+GC01,2,What should I do next?,"After closing the chat window, click the whole model again and wait for the expansion animation.
+Observe: The structure of the separated components."
+GC05,2,I want to compare how the collection cone changes when I vary NA. What should I try next?,"After closing the chat window, drag the NA slider, changing only NA at a time.
+Observe: Compare the half-angle, collection cone, and display changes. Approximate magnification and image changes are teaching mappings; NA is not magnification."
+GC06,2,The grating is on Low. I want to compare a higher spatial frequency while keeping the specimen and illumination unchanged. What can I select?,"After closing the chat window, select Middle.
+Observe: This setting is 125 lines/mm. Keep the specimen and illumination fixed; compare the grating, spectrum, and sidebands."
+NV04,2,Where can I find the blue specimen slide to pick it up for observation?,You can use the blue specimen location to pick up the blue fluorescence slide for microscope observation. It is approximately 6.3 metres ahead of you.
+BD05,2,"While we discuss numerical aperture, recommend a stock for me to buy tomorrow.",I do not know the answer to that yet. Please ask me something else.
+AV02,2,I am holding the specimen at the microscope. How do I put it on the empty stage?,"After closing the chat window, press Z to place the held specimen.
+Observe: Confirm that the specimen appears on the stage."
+NV01,2,Where can I learn the THz s-SNOM probe and near-field demonstration?,"You can use the THz s-SNOM instrument to learn about probe tapping, near-field coupling, and scanning. It is approximately 6 metres to your right."
+BD03,2,Adjust the confocal pinhole in this upper optical assembly to reject more out-of-focus light.,I do not know the answer to that yet. Please ask me something else.
+GC07,2,"I have finished this near-field-coupling explanation and want the next principle stage, one step at a time. What should I select?","After closing the chat window, click Next.
+Observe: The next tour stage appears, or the next component in Components mode."
+BD04,2,Calculate the exact optical resolution of my current image in nanometres from the current state.,I do not know the answer to that yet. Please ask me something else.
+AV08,2,Installation is complete and I want to begin the SNOM principle demonstration. What is next?,"After closing the chat window, click Start System.
+Observe: The automatic principle tour begins after probe installation."
+GC03,2,I want to investigate how numerical aperture changes the collection cone. What should I do here?,"After closing the chat window, click Start Numerical Aperture Experiment and wait for the transition.
+Observe: The NA panel appears before you adjust the slider."
+GC04,2,I want to explore grating spatial frequency and sidebands from this component. How do I begin?,"After closing the chat window, click Start Spatial Frequency Experiment and wait for the transition.
+Observe: The spatial-frequency panel opens."
+GC02,2,The microscope is expanded. I want to reach the numerical-aperture lesson. What is my next step?,"After closing the chat window, click a component and read its description on the right. Upper Optical Assembly links to NA; Objective Lens links to spatial frequency.
+Observe: Compare the component name, function, and experiment entry."
+GC08,2,"What does this Stage Position Control do, and is there an experiment for it here?","Stage Position Control moves the specimen in X and Y to select the field of view. It is a positioning control, distinct from the beam scanner used to acquire a confocal image. This component has no configured independent experiment entry here, so there is no linked hands-on activity for it."
+BD01,2,The image looks black to me. Should I turn fine focus clockwise or counterclockwise to fix it?,"A black view can have several causes, and the current state does not confirm which one applies, so I cannot say whether clockwise or counterclockwise fine focus would correct it. Focusing changes relative axial position, not the objective's intrinsic focal length, and it only helps if the specimen is simply out of focus. Illumination level is a separate factor worth considering."
+AV07,2,The selected probe is still being installed. What should I do next to continue the SNOM lesson?,"The probe is still installing, so the SNOM lesson cannot advance yet. Installation is a timed step, and the next stage becomes available only after it finishes. There is no skip control during this phase, so waiting is the correct action; once installation completes, the Start System step becomes available."
+GC07,3,"I have finished this near-field-coupling explanation and want the next principle stage, one step at a time. What should I select?","After closing the chat window, click Next.
+Observe: The next tour stage appears, or the next component in Components mode."
+NV04,3,Where can I find the blue specimen slide to pick it up for observation?,You can use the blue specimen location to pick up the blue fluorescence slide for microscope observation. It is approximately 6.3 metres ahead.
+AV04,3,How can I try adjusting focus while observing the specimen?,"After closing the chat window, press Tab to switch coarse/fine adjustment. Hold X and use the left/right arrow keys to focus.
+Observe: Compare clarity changes. Focusing does not change the objective intrinsic focal length."
+AV07,3,The selected probe is still being installed. What should I do next to continue the SNOM lesson?,"The probe is still installing, so the SNOM lesson cannot advance yet. Installation is a timed step the player performs, and the tour stages begin only after installation finishes and the system is started. Please wait for the installation to complete; I cannot confirm a skip control or exact remaining time from the current state."
+BD04,3,Calculate the exact optical resolution of my current image in nanometres from the current state.,I do not know the answer to that yet. Please ask me something else.
+GC02,3,The microscope is expanded. I want to reach the numerical-aperture lesson. What is my next step?,"After closing the chat window, click a component and read its description on the right. Upper Optical Assembly links to NA; Objective Lens links to spatial frequency.
+Observe: Compare the component name, function, and experiment entry."
+BD01,3,The image looks black to me. Should I turn fine focus clockwise or counterclockwise to fix it?,"I can't confirm a specific focus direction from the current state, and focusing is relative axial positioning rather than a fixed clockwise/counterclockwise fix. A black view can also come from illumination or viewpoint rather than focus alone. If you'd like, I can guide the currently available focusing step so you can compare clarity changes."
+BD02,3,Start a Z-stack acquisition of this specimen now.,I do not know the answer to that yet. Please ask me something else.
+NV01,3,Where can I learn the THz s-SNOM probe and near-field demonstration?,"You can use the THz s-SNOM instrument to learn about the demonstration of probe tapping, near-field coupling, and scanning. It is approximately 6 metres to your right."
+AV06,3,I have chosen the Standard probe and want to continue with it. What should I do next?,"After closing the chat window, click Install Selected Probe and wait for installation to finish.
+Observe: The probe moves to its mount. Start System becomes available after installation."
+BD05,3,"While we discuss numerical aperture, recommend a stock for me to buy tomorrow.",I do not know the answer to that yet. Please ask me something else.
+GC06,3,The grating is on Low. I want to compare a higher spatial frequency while keeping the specimen and illumination unchanged. What can I select?,"After closing the chat window, select Middle.
+Observe: This setting is 125 lines/mm. Keep the specimen and illumination fixed; compare the grating, spectrum, and sidebands."
+AV03,3,The specimen is already on the stage. How do I continue into observation?,"After closing the chat window, press Z to advance the current observation viewpoint.
+Observe: Wait for the viewpoint change. Another input may be needed to enter observation."
+GC05,3,I want to compare how the collection cone changes when I vary NA. What should I try next?,"After closing the chat window, drag the NA slider, changing only NA at a time.
+Observe: Compare the half-angle, collection cone, and display changes. Approximate magnification and image changes are teaching mappings; NA is not magnification."
+NV03,3,Where is the learning area for grating spatial frequency and sidebands?,"You can use the microscope learning area to learn about spatial frequency, with entry linked to Objective Lens. It is approximately 8 metres ahead."
+AV05,3,I have opened SNOM preparation and have no probe preference. What can I do first?,"After closing the chat window, select the Standard probe option.
+Observe: The probe description and preview change. The 2x label indicates illustrative relative detail, not objective magnification."
+BD06,3,The tutorial is still running. What should I do next to continue the hands-on experiment?,"The current state shows the tutorial is blocking interaction, so hands-on experiment steps cannot be confirmed or guided right now. Please wait for the tutorial to finish or release the lock; once it does, I can help you continue with the relevant experiment."
+GC08,3,"What does this Stage Position Control do, and is there an experiment for it here?","Stage Position Control moves the specimen in X and Y to select the field of view. It is a positioning control, distinct from the beam scanner used to acquire a confocal image. This component has no configured independent experiment entry, so there is no linked hands-on activity for it here."
+GC01,3,What should I do next?,"After closing the chat window, click the whole model again and wait for the expansion animation.
+Observe: The structure of the separated components."
+AV01,3,"I want to observe a specimen, but I have not picked one up. What is my next action?","After closing the chat window, left-click to pick up the specimen currently in interaction range.
+Observe: The specimen preview changes. Picking up is distinct from placing it."
+GC04,3,I want to explore grating spatial frequency and sidebands from this component. How do I begin?,"After closing the chat window, click Start Spatial Frequency Experiment and wait for the transition.
+Observe: The spatial-frequency panel opens."
+AV02,3,I am holding the specimen at the microscope. How do I put it on the empty stage?,"After closing the chat window, press Z to place the held specimen.
+Observe: Confirm that the specimen appears on the stage."
+GC03,3,I want to investigate how numerical aperture changes the collection cone. What should I do here?,"After closing the chat window, click Start Numerical Aperture Experiment and wait for the transition.
+Observe: The NA panel appears before you adjust the slider."
+BD03,3,Adjust the confocal pinhole in this upper optical assembly to reject more out-of-focus light.,I do not know the answer to that yet. Please ask me something else.
+AV08,3,Installation is complete and I want to begin the SNOM principle demonstration. What is next?,"After closing the chat window, click Start System.
+Observe: The automatic principle tour begins after probe installation."
+NV02,3,Where should I go to learn how numerical aperture changes the collection cone?,"You can use the microscope learning area to learn about numerical aperture, with entry linked to Upper Optical Assembly. It is approximately 8 metres ahead."

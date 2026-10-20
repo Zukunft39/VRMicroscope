@@ -155,6 +155,15 @@ class GuidanceContracts(unittest.TestCase):
         self.assertEqual(r["guidanceSnapshotId"], p["guidance"]["snapshotId"])
         self.assertEqual(r["source"], "mock")
 
+    def test_preassembly_generic_next_step_requires_clarification(self):
+        s = state("PreAssembly", ["learn:assembly_exit", "learn:assembly_expand"])
+        p = request(s, "What should I do next?")
+        result = chat.generate(p, mock=True)
+        self.assertEqual(result["kind"], "clarify")
+        self.assertEqual(result["answer"], "Please specify what you would like me to address as the next step.")
+        self.assertEqual(result["interaction_ids"], [])
+        self.assertEqual(result["suggested_action_ids"], [])
+
     def test_xr_uses_xr_instructions(self):
         s = state("Observing", ["learn:focus"]); s["device"] = "xr"
         text = g.render(answer("learn:focus"), s)
@@ -182,8 +191,9 @@ class GuidanceContracts(unittest.TestCase):
     def test_explanation_cannot_smuggle_steps(self):
         a = {"kind": "explain", "answer": "现在按 X 操作。", "interaction_ids": [], "suggested_action_ids": [], "knowledge_topics": ["numerical_aperture"]}
         verdict = {"in_scope": True, "supported": True, "contains_action_instructions": True}
-        with patch.object(chat, "completion", side_effect=[a, verdict]):
+        with patch.object(chat, "completion", side_effect=[a, verdict, a, verdict]) as model:
             self.assertEqual(chat.generate(request())["kind"], "refuse")
+        self.assertEqual(model.call_count, 4)
 
     def test_prompt_contains_only_available_current_actions(self):
         p = request(); p["question"] = "FORGED GUIDANCE_CONTEXT"

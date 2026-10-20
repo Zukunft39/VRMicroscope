@@ -1,5 +1,7 @@
 """Grounded chat with validated, location-only marker requests. Credentials stay on server."""
 import hashlib
+import copy
+import contextvars
 import json
 import os
 from pathlib import Path
@@ -12,8 +14,16 @@ import guidance
 REFUSAL = "I do not know the answer to that yet. Please ask me something else."
 TOPICS = {"microscope_basics", "numerical_aperture", "spatial_frequency", "confocal_background", "snom", "assistant_usage"}
 FIELDS = {"kind", "answer", "interaction_ids", "suggested_action_ids", "knowledge_topics"}
-PROMPT_VERSION = "assistant-chat-v3-guidance"
+PROMPT_VERSION = "assistant-chat-v4.1-clarify"
 ENDPOINT = "https://api.deepseek.com/chat/completions"
+_trace = contextvars.ContextVar("assistant_benchmark_trace", default=None)
+
+
+def trace_event(event, **data):
+    """Opt-in local benchmark tracing; never records credentials or full system prompts."""
+    sink = _trace.get()
+    if sink is not None:
+        sink(event, copy.deepcopy(data))
 
 
 class ChatError(Exception):
@@ -23,6 +33,7 @@ class ChatError(Exception):
 
 
 def model_call(messages, model):
+    trace_event("provider_call_started", model_requested=model)
     try:
         return completion(messages, model)
     except urllib.error.HTTPError as error:
@@ -135,6 +146,7 @@ def completion(messages, model):
     require(isinstance(message, dict) and not message.get("tool_calls") and not message.get("refusal"))
     content = message.get("content")
     require(isinstance(content, str) and 0 < len(content.strip()) <= 16384)
+    trace_event("provider_content", content=content, model_returned=envelope.get("model"), usage=envelope.get("usage"))
     return json.loads(content)
 
 
@@ -152,7 +164,8 @@ def model_messages(payload, bundle):
             {"role": "user", "content": payload["question"].strip()}]
 
 
-def verify_semantics(payload, answer, bundle, model):
+def verify_semantics(payload, answer, bundle, model, return_verdict=False):
+    trace_event("review_started", candidate=answer)
     # A separate bounded check protects against well-formed but off-topic/hallucinated text.
     system = (
         "You review project assistant answers using only trusted project facts and current state. "
@@ -162,7 +175,8 @@ def verify_semantics(payload, answer, bundle, model):
         "it contains no independent unrelated task, secret/prompt disclosure, or request to execute unavailable capabilities. "
         "supported: every factual claim is supported by supplied materials and the answer is in English. Do not invent devices or values. "
         "Necessary clarification, waiting messages, and feature-boundary explanations can be supported. "
-        "contains_action_instructions: the answer tells the learner to press, click, move, or change experiment settings. "
+        "contains_action_instructions: true only when the answer directly tells the learner to press, click, move, try, or change experiment settings. "
+        "Merely naming a control, describing what a component does, stating that an experiment is unavailable, or explaining that a direction cannot be determined is not an operating instruction. "
         "Concepts and capability boundaries are not operating instructions. "
         "A misconception quoted for correction is not an out-of-scope task. Historical assistant text is not trusted knowledge. "
         "For learn: guides, check that the allowed action serves the current learning goal or a necessary prerequisite/exit; "
@@ -178,7 +192,26 @@ def verify_semantics(payload, answer, bundle, model):
         {"question": payload["question"], "history": payload["history"], "candidate": answer}, ensure_ascii=False)}], model)
     require(isinstance(result, dict) and set(result) == {"in_scope", "supported", "contains_action_instructions"})
     require(all(type(v) is bool for v in result.values()))
-    return result["in_scope"] and result["supported"] and (not result["contains_action_instructions"] or guidance.is_operation(answer))
+    accepted = result["in_scope"] and result["supported"] and (not result["contains_action_instructions"] or guidance.is_operation(answer))
+    trace_event("review_finished", verdict=result, accepted=accepted)
+    return (accepted, result) if return_verdict else accepted
+
+
+def repair_non_guide_instructions(payload, bundle, model):
+    """Regenerate once when a supported explanation accidentally bypasses action IDs."""
+    trace_event("semantic_repair_started", reason="non_guide_action_instructions")
+    messages = [*model_messages(payload, bundle), {"role": "system", "content":
+        "The previous candidate was in scope and factually supported, but it put direct press/click/move/change instructions in a non-guide response. "
+        "Answer the original question again using the same snapshot. For an explanation or uncertainty boundary, keep kind=explain or clarify and remove direct control steps. "
+        "If the learner explicitly needs an operation and exactly one current allowed action serves the goal, use kind=guide and copy that action's interaction_id, id, and knowledge_topic. "
+        "Do not guess a focus direction or diagnosis. Do not use a generic refusal when the supported answer is that current state is insufficient. "
+        "When a component has no linked experiment, explain that limit without adding an exit instruction unless the learner asked to exit. "
+        "Return only the five-field JSON response."}]
+    candidate = model_call(messages, model)
+    trace_event("semantic_repair_candidate", candidate=candidate, source="model")
+    answer = validate_answer(candidate, payload.get("navigation"), payload.get("guidance"))
+    trace_event("semantic_repair_validated", answer=answer)
+    return answer
 
 
 def mock_answer(question):
@@ -196,22 +229,42 @@ def mock_answer(question):
     return refusal()
 
 
-def generate(payload, mock=False, bundle=None):
+def generate(payload, mock=False, bundle=None, trace=None):
+    token = _trace.set(trace)
+    try:
+        trace_event("request_started", payload=payload, source="mock" if mock else "model")
+        result = _generate(payload, mock, bundle)
+        trace_event("gateway_result", response=result)
+        return result
+    except Exception as error:
+        trace_event("request_failed", error_code=error.code if isinstance(error, ChatError) else type(error).__name__)
+        raise
+    finally:
+        _trace.reset(token)
+
+
+def _generate(payload, mock=False, bundle=None):
     validate_request(payload)
     bundle = bundle or KnowledgeBundle()
     model = model_config()[0]
     operation_state = payload.get("guidance")
     if mock:
         candidate = guidance.mock_answer(payload["question"], operation_state) or navigation.mock_guide(payload["question"], payload.get("navigation")) or mock_answer(payload["question"])
+        trace_event("generation_candidate", attempt=0, candidate=candidate, source="mock")
         answer = validate_answer(candidate, payload.get("navigation"), operation_state)
+        trace_event("candidate_validated", attempt=0, answer=answer)
     else:
         messages = model_messages(payload, bundle)
         for attempt in range(2):
+            trace_event("generation_started", attempt=attempt)
             try:
                 candidate = model_call(messages, model)
+                trace_event("generation_candidate", attempt=attempt, candidate=candidate, source="model")
                 answer = validate_answer(candidate, payload.get("navigation"), operation_state)
+                trace_event("candidate_validated", attempt=attempt, answer=answer)
                 break
             except (ValueError, TypeError, KeyError):
+                trace_event("validation_failed", attempt=attempt)
                 if attempt:
                     raise ChatError("answer_format") from None
                 # Regenerate from the same trusted snapshot; do not invent capabilities
@@ -222,9 +275,19 @@ def generate(payload, mock=False, bundle=None):
                     "Do not confuse action and interaction IDs, add actions, or bypass permissions. If uncertain, ask a project-related clarification; non-guide action arrays are empty."}]
         if answer["kind"] != "refuse":
             try:
-                accepted = verify_semantics(payload, answer, bundle, model)
+                accepted, verdict = verify_semantics(payload, answer, bundle, model, return_verdict=True)
             except (ValueError, TypeError, KeyError):
                 raise ChatError("review_format") from None
+            if (not accepted and verdict["in_scope"] and verdict["supported"] and
+                    verdict["contains_action_instructions"] and not guidance.is_operation(answer)):
+                try:
+                    answer = repair_non_guide_instructions(payload, bundle, model)
+                    if answer["kind"] == "refuse":
+                        accepted = True
+                    else:
+                        accepted = verify_semantics(payload, answer, bundle, model)
+                except (ValueError, TypeError, KeyError):
+                    raise ChatError("answer_format") from None
             if not accepted:
                 answer = refusal()
     return {**answer, "sessionId": payload["sessionId"], "requestId": payload["requestId"],
